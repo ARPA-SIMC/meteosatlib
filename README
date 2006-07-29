@@ -1,0 +1,26 @@
+        Comments and feedback to:
+                giuliani@lamma.rete.toscana.it
+
+ C++ source code to read Meteosat Images in various formats.
+
+ This libraries are used to read Meteosat files on a PDUS
+ receiving station. No decryption is performed. Files are expected
+ to be already decrypted by using the EUMETSAT key unit, or to be
+ transitted already in clear form.
+ For MSG data decompression, You need the EUMETSAT source code for
+ the decompression library for Wavelet, JPEG and T4 images.
+ Please fill the form at
+
+   http://www.eumetsat.de/en/dps/helpdesk/tools.html
+
+ to obtain the source code and put the PublicDecompWT.zip file under
+ the directory src/decompress.
+
+ Some example program need NetCDF library and ImageMagick.
+
+ Use at Your own risk and for any purposes.
+ Feel free to contact me for any help-bug found.
+
+                                    Graziano Giuliani
+                                 giuliani@lamma.rete.toscana.it
+

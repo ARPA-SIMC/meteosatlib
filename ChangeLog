@@ -1,0 +1,184 @@
+Tue Jan  3 12:25:30 2006 Graziano Giuliani <giuliani@lamma.rete.toscana.it>
+
+	* Version 0.4.1
+
+Small bugs corrected.
+
+Mon Aug 22 18:32:06 2005  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
+
+	* Version 0.4.0
+
+Added support for MSG Native images retrieved from U-MARF.
+Added support for Tyco ThornSDS DB1 PDUS station RAW file format.
+Corrected small size bugs in HRIT interface.
+
+Wed Aug 10 10:25:03 2005  Deneys S. Maartens
+
+	* Version 0.3.6
+
+The following changes have been made to meteosatlib-0.3.5:
+
+- Change of directory structure layout
+- Implementation of non-recursive make
+- Minor changes to source files to get everything to compile
+- Rewrite of configure.ac, Makefile.am and meteosatlib.spec
+- Minor changes to PublicDecompWT.sh
+
+
+Change of directory structure layout:
+-------------------------------------
+
+In meteosatlib-0.3.5 the directory structure is as follows:
+
+	meteosatlib-0.3.5/
+	|-- config
+	|-- examples
+	|-- specs
+	`-- src
+	    |-- decompress
+	    |-- hri
+	    |-- hrit
+	    |-- msg-native
+	    |-- omtp-ids
+	    `-- openmtp
+
+The source directories have moved from the src/ directory to the top
+level directory, and (almost) every source directory have an examples/
+subdirectory, where examples pertaining to the particular library lives.
+The structure now looks like:
+
+	meteosatlib-0.3.6/
+	|-- config
+	|-- decompress
+	|-- examples
+	|-- grib
+	|-- hri
+	|   `-- examples
+	|-- hrit
+	|   `-- examples
+	|-- msg-native
+	|-- omtp-ids
+	|   `-- examples
+	`-- openmtp
+	    `-- examples
+
+While was reordering the directories I noticed that some examples do not
+pertain to a particular library, and that some files are required for
+more than one library's examples.  The non-library specific files were
+left in the examples directory, while the source files needed for more
+than one library's examples were moved to the grib directory.
+
+I would assume, as the msg-native library is developed, it would get an
+examples/ subdirectory too.
+
+
+Implementation of non-recursive make:
+-------------------------------------
+
+In the article "Recursive Make Considered Harmful"
+(http://www.pcug.org.au/~millerp/rmch/recu-make-cons-harm.html) various
+reasons are explored why recursive make is not desirable.  I have
+re-implemented the make rules to be non-recursive.  This makes use of an
+Automake.rules file in each subdirectory, which is included in the top
+level Makefile.am file.
+
+Each of the Automake.rules file in each of the subdirectories contain
+information on the rules required to make the various files in the
+relevant subdirectory.
+
+A number of command line options were added to the configure script:
+
+	--disable-hri           disable hri support
+	--disable-hrit          disable hrit support
+	--disable-msg-native    disable msg-native support
+	--disable-omtp-ids      disable omtp-ids support
+	--disable-openmtp       disable openmtp support
+
+These options can disable the building of a particular library.  During
+the tests performed in the configure script the availability of various
+header files and libraries are checked.  These libraries are required to
+build one or more of the components of the meteosatlib library.  If a
+required header or library is not found, the building of that specific
+library is disabled.
+
+When the configure script ends a summary is displayed, showing which
+support is build in, and which not.  The example below shows that all
+libraries will be built:
+
+	===================================================
+	meteosatlib-0.3.6 configuration:
+	hri:                    yes
+	hrit:                   yes
+	msg-native:             yes
+	omtp-ids:               yes
+	openmtp:                yes
+	===================================================
+
+The specific libraries that will be build dictates which Automake.rules
+files in the various sub-directories will be included in the top level
+Makefile.am.
+
+
+Minor changes to source files to get everything to compile:
+-----------------------------------------------------------
+
+In order to get everything to compile cleanly, minor changes were
+required to various source files.  These changes were the inclusion of
+the library header directory, as found under the include directory.  The
+file include.patch contains these modifications.
+
+
+Rewrite of configure.ac, Makefile.am and meteosatlib.spec:
+----------------------------------------------------------
+
+The configure.ac file, the meteosatlib.spec file and various Makefile.am
+and Automake.rules files were created or rewritten to enable
+non-recursive make, and the enable/disable of building some components
+of the meteosatlib libraries.
+
+The following RPM are built:
+
+	meteosatlib-0.3.6-1.nosrc.rpm
+	meteosatlib-0.3.6-1.i386.rpm
+	meteosatlib-hri-devel-0.3.6-1.i386.rpm
+	meteosatlib-hrit-devel-0.3.6-1.i386.rpm
+	meteosatlib-msg-native-devel-0.3.6-1.i386.rpm
+	meteosatlib-omtp-ids-devel-0.3.6-1.i386.rpm
+	meteosatlib-openmtp-devel-0.3.6-1.i386.rpm
+
+The source RPM is .nosrc.rpm because the PublicDecompWT.zip file is
+listed as a source file, but is not included in the source RPM.
+
+
+Minor changes to PublicDecompWT.sh:
+-----------------------------------
+
+Two changes to PublicDecompWT.sh were made.  The invoking of unzip was
+changed to add the -a flag, as the dos2unix utilities on my local
+machine seems to have some bugs.  The -a flag does CR/LF translation on
+ASCII files as the files are unpacked.
+
+The other change was to create a pdwt.patched file when the source is
+patched.  This avoids the attempts to apply the patch to the EUMETSAT
+source after it has already been applied.
+
+Mon Dec 29 11:51:33 2004  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
+
+	* Version 0.3.3
+
+Mon Dec 13 11:19:24 2004  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
+
+	* Version 0.3.2
+
+Fri Dec 10 11:23:01 2004  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
+
+	* Version 0.3.1
+
+Fri Jul 16 10:44:23 2004  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
+
+	* Version 0.3
+
+Tue Apr 27 14:25:18 2004  Deneys S. Maartens  <dsm@tlabs.ac.za>
+
+	* ChangeLog: initial version
+

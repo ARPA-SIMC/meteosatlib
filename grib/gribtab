@@ -1,0 +1,13 @@
+-1:128:128:128
+129:sev_vis_0_6:MSG seviri visible channel 0.6
+130:sev_vis_0_8:MSG seviri visible channel 0.8
+131:sev_ir_1_6:MSG seviri infrared channel 1.6
+132:sev_ir_3_9:MSG seviri infrared channel 3.9
+133:sev_wv_6_2:MSG seviri water vapour channel 6.2
+134:sev_wv_7_3:MSG seviri water vapour channel 7.3
+135:sev_ir_8_7:MSG seviri infrared channel 8.7
+136:sev_ir_9_7:MSG seviri infrared channel 9.7
+137:sev_ir_10_8:MSG seviri infrared channel 10.8
+138:sev_ir_12_0:MSG seviri infrared channel 12.0
+139:sev_ir_13_4:MSG seviri infrared channel 13.4
+140:sev_hrv:MSG seviri HRV channel

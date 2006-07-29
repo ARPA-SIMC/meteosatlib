@@ -1,0 +1,74 @@
+## Subdir -- Include this file in the toplevel Makefile with an include
+## directive
+## $Id$
+## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software Foundation,
+## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+hri_lib = \
+    hri/libhri.la
+
+hri_bin = \
+    hri/examples/HRI2NetCDF
+
+hri/all: \
+    $(hri_lib) \
+    $(hri_bin)
+
+lib_LTLIBRARIES += \
+    $(hri_lib)
+
+bin_PROGRAMS += \
+    $(hri_bin)
+
+nobase_include_HEADERS += \
+    hri/HRI.h \
+    hri/HRI_geolocation.h \
+    hri/HRI_image.h \
+    hri/HRI_machine.h \
+    hri/HRI_subframe_identification.h \
+    hri/HRI_subframe_interpretation.h \
+    hri/HRI_subframe_keyslot.h \
+    hri/HRI_subframe_label.h
+
+# have libhri depend on netcdf*.so, if available
+hri_libhri_la_LIBADD = \
+    -lnetcdf_c++ \
+    -lnetcdf
+# CURRENT:REVISION:AGE
+# - library source changed -> inc REVISION
+# - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
+# - interfaces added -> inc AGE
+# - interfaces removed -> AGE = 0
+hri_libhri_la_SOURCES = \
+    hri/HRI.cpp \
+    hri/HRI_image.cpp \
+    hri/HRI_machine.cpp \
+    hri/HRI_subframe_identification.cpp \
+    hri/HRI_subframe_interpretation.cpp \
+    hri/HRI_subframe_keyslot.cpp \
+    hri/HRI_subframe_label.cpp
+
+# in case only netcdf*.a is available
+hri_examples_HRI2NetCDF_LDFLAGS = \
+    -lnetcdf_c++ \
+    -lnetcdf
+hri_examples_HRI2NetCDF_LDADD = \
+    hri/libhri.la
+hri_examples_HRI2NetCDF_SOURCES = \
+    hri/examples/HRI2NetCDF.cpp
+
+## -fin-
+## vim:syn=automake:

@@ -1,0 +1,210 @@
+Release 0.4.1  : (03/01/2006)
+
+  * Graziano Giuliani, Tue Jan  3 2006
+
+  - Small bugs corrected. Compiles with g++ 4.0
+
+Release 0.4.0  : (23/08/2005)
+
+  * Graziano Giuliani, Tue Aug 23 2005
+
+  - New interface added for MSG Native format from U-MARF
+  - New interface added for Tyco ThornSDS DB1 RAW file format
+  - Corrected small bugs in HRIT interface
+
+Release 0.3.6  : (10/08/2005)
+
+  * Deneys S. Maartens, Mon Aug  8 2005
+
+  The following changes have been made to meteosatlib-0.3.5:
+
+  - Change of directory structure layout
+  - Implementation of non-recursive make
+  - Minor changes to source files to get everything to compile
+  - Rewrite of configure.ac, Makefile.am and meteosatlib.spec
+  - Minor changes to PublicDecompWT.sh
+
+
+  Change of directory structure layout:
+  -------------------------------------
+
+  In meteosatlib-0.3.5 the directory structure is as follows:
+
+      meteosatlib-0.3.5/
+      |-- config
+      |-- examples
+      |-- specs
+      `-- src
+          |-- decompress
+          |-- hri
+          |-- hrit
+          |-- msg-native
+          |-- omtp-ids
+          `-- openmtp
+
+  The source directories have moved from the src/ directory to the top
+  level directory, and (almost) every source directory have an examples/
+  subdirectory, where examples pertaining to the particular library lives.
+  The structure now looks like:
+
+      meteosatlib-0.3.6/
+      |-- config
+      |-- decompress
+      |-- examples
+      |-- grib
+      |-- hri
+      |   `-- examples
+      |-- hrit
+      |   `-- examples
+      |-- msg-native
+      |-- omtp-ids
+      |   `-- examples
+      `-- openmtp
+          `-- examples
+
+  While was reordering the directories I noticed that some examples do not
+  pertain to a particular library, and that some files are required for
+  more than one library's examples.  The non-library specific files were
+  left in the examples directory, while the source files needed for more
+  than one library's examples were moved to the grib directory.
+
+  I would assume, as the msg-native library is developed, it would get an
+  examples/ subdirectory too.
+
+
+  Implementation of non-recursive make:
+  -------------------------------------
+
+  In the article "Recursive Make Considered Harmful"
+  (http://www.pcug.org.au/~millerp/rmch/recu-make-cons-harm.html) various
+  reasons are explored why recursive make is not desirable.  I have
+  re-implemented the make rules to be non-recursive.  This makes use of an
+  Automake.rules file in each subdirectory, which is included in the top
+  level Makefile.am file.
+
+  Each of the Automake.rules file in each of the subdirectories contain
+  information on the rules required to make the various files in the
+  relevant subdirectory.
+
+  A number of command line options were added to the configure script:
+
+      --disable-hri           disable hri support
+      --disable-hrit          disable hrit support
+      --disable-msg-native    disable msg-native support
+      --disable-omtp-ids      disable omtp-ids support
+      --disable-openmtp       disable openmtp support
+
+  These options can disable the building of a particular library.  During
+  the tests performed in the configure script the availability of various
+  header files and libraries are checked.  These libraries are required to
+  build one or more of the components of the meteosatlib library.  If a
+  required header or library is not found, the building of that specific
+  library is disabled.
+
+  When the configure script ends a summary is displayed, showing which
+  support is build in, and which not.  The example below shows that all
+  libraries will be built:
+
+      ===================================================
+      meteosatlib-0.3.6 configuration:
+        hri:                    yes
+        hrit:                   yes
+        msg-native:             yes
+        omtp-ids:               yes
+        openmtp:                yes
+      ===================================================
+
+  The specific libraries that will be build dictates which Automake.rules
+  files in the various sub-directories will be included in the top level
+  Makefile.am.
+
+
+  Minor changes to source files to get everything to compile:
+  -----------------------------------------------------------
+
+  In order to get everything to compile cleanly, minor changes were
+  required to various source files.  These changes were the inclusion of
+  the library header directory, as found under the include directory.  The
+  file include.patch contains these modifications.
+
+
+  Rewrite of configure.ac, Makefile.am and meteosatlib.spec:
+  ----------------------------------------------------------
+
+  The configure.ac file, the meteosatlib.spec file and various Makefile.am
+  and Automake.rules files were created or rewritten to enable
+  non-recursive make, and the enable/disable of building some components
+  of the meteosatlib libraries.
+
+  The following RPM are built:
+
+      meteosatlib-0.3.6-1.nosrc.rpm
+      meteosatlib-0.3.6-1.i386.rpm
+      meteosatlib-hri-devel-0.3.6-1.i386.rpm
+      meteosatlib-hrit-devel-0.3.6-1.i386.rpm
+      meteosatlib-msg-native-devel-0.3.6-1.i386.rpm
+      meteosatlib-omtp-ids-devel-0.3.6-1.i386.rpm
+      meteosatlib-openmtp-devel-0.3.6-1.i386.rpm
+
+  The source RPM is .nosrc.rpm because the PublicDecompWT.zip file is
+  listed as a source file, but is not included in the source RPM.
+
+
+  Minor changes to PublicDecompWT.sh:
+  -----------------------------------
+
+  Two changes to PublicDecompWT.sh were made.  The invoking of unzip was
+  changed to add the -a flag, as the dos2unix utilities on my local
+  machine seems to have some bugs.  The -a flag does CR/LF translation on
+  ASCII files as the files are unpacked.
+
+  The other change was to create a pdwt.patched file when the source is
+  patched.  This avoids the attempts to apply the patch to the EUMETSAT
+  source after it has already been applied.
+
+Release 0.3.3  : (29/12/2004)
+
+  * Added Met_Reproj to example programs. Added GRIB output.
+  * Added XRIT2Grib (GRIB 1 encoded).
+  * Added overlay to XRIT2Image for channels 1-11 of MSG.
+
+Release 0.3.2  : (13/12/2004)
+
+  * Bug corrected in MSG calibration!!
+
+Release 0.3.1  : (10/12/2004)
+
+  * Added example program XRIT2NetCDF to convert LRIT/HRIT to NetCDF
+    format. Need NetCDF library.
+    Reproj utility updated for the files generated from XRIT2NetCDF.
+    New patch for Eumetsat Decompression Library for Fedora Core 3.
+    Used make dist for distribution.
+
+Release 0.3  : (05/07/2004)
+
+  * Added support for OpenMTP-IDS and OpenMTP-IDS_to_pgm program.
+    Added first example program XRIT2Image to convert LRIT/HRIT to
+    iamge format. Needs ImageMagick.
+    Upgraded to the new EUMETSAT Decompression Library (support for
+    wavelet, jpeg and t4 encoded images).
+    Tested library with MSG images (LRIT/HRIT), foreign satellite images,
+    dumps binary grib2 for MPEF product. Still work to be done on MPEF
+    products. No hints about MET5 prologue format.
+    ESA help does not answer!!!
+
+Release 0.2.1  :  (03/05/2004)
+
+  * Added some more on HRIT files, (sorry, not much time to work at),
+    Added gnu autoconf/utoheader/automake stuff (thanks Deneys !)
+    Corrected a bug in using non-standard jinclude.h file
+    Added time as dimension in NetCDF output examples.
+    Added very preliminary reprojection utility.
+
+Release 0.2  :  (03/03/2004)
+
+  * Partial LRIT/HRIT images support. Rely on Wavelet and JPEG libraries.
+
+Release 0.1  :  (02/02/2004)
+
+  * Initial release.
+

@@ -1,0 +1,70 @@
+## Subdir -- Include this file in the toplevel Makefile with an include
+## directive
+## $Id$
+## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software Foundation,
+## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+thornsds_db1_lib = \
+    thornsds_db1/libthornsds_db1.la
+
+thornsds_db1_bin = \
+    thornsds_db1/examples/db1_to_image \
+    thornsds_db1/examples/db1_to_netcdf
+
+thornsds_db1/all: \
+    $(thornsds_db1_lib) \
+    $(thornsds_db1_bin)
+
+lib_LTLIBRARIES += \
+    $(thornsds_db1_lib)
+
+bin_PROGRAMS += \
+    $(thornsds_db1_bin)
+
+nobase_include_HEADERS += \
+    thornsds_db1/thornsds_db1.h
+
+# CURRENT:REVISION:AGE
+# - library source changed -> inc REVISION
+# - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
+# - interfaces added -> inc AGE
+# - interfaces removed -> AGE = 0
+thornsds_db1_libthornsds_db1_la_SOURCES = \
+    thornsds_db1/thornsds_db1.cpp
+
+thornsds_db1_examples_db1_to_image_CPPFLAGS = \
+    -I$(top_srcdir)/iniparser
+
+thornsds_db1_examples_db1_to_netcdf_CPPFLAGS = \
+    -I$(top_srcdir)/iniparser
+
+thornsds_db1_examples_db1_to_image_LDADD = \
+    thornsds_db1/libthornsds_db1.la \
+    -lMagick++
+thornsds_db1_examples_db1_to_image_SOURCES = \
+    thornsds_db1/examples/db1_to_image.cpp \
+    iniparser/iniparser.c
+
+thornsds_db1_examples_db1_to_netcdf_LDADD = \
+    thornsds_db1/libthornsds_db1.la \
+    -lnetcdf_c++ \
+    -lnetcdf
+thornsds_db1_examples_db1_to_netcdf_SOURCES = \
+    thornsds_db1/examples/db1_to_netcdf.cpp \
+    iniparser/iniparser.c
+
+## -fin-
+## vim:syn=automake:

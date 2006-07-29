@@ -1,0 +1,87 @@
+## Subdir -- Include this file in the toplevel Makefile with an include
+## directive
+## $Id$
+## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software Foundation,
+## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+omtp_ids_lib = \
+    omtp-ids/libomtp-ids.la
+
+omtp_ids_bin = \
+    omtp-ids/examples/OpenMTP-IDS_debug \
+    omtp-ids/examples/OpenMTP-IDS_sector \
+    omtp-ids/examples/OpenMTP-IDS_to_pgm \
+    omtp-ids/examples/OpenMTP-IDS_write
+
+omtp-ids/all : \
+    $(omtp_ids_lib) \
+    $(omtp_ids_bin)
+
+lib_LTLIBRARIES += \
+    $(omtp_ids_lib)
+
+bin_PROGRAMS += \
+    $(omtp_ids_bin)
+
+nobase_include_HEADERS += \
+    omtp-ids/ByteSex.hh \
+    omtp-ids/FileHeader.hh \
+    omtp-ids/LineHeader.hh \
+    omtp-ids/OpenMTP-IDS.hh \
+    omtp-ids/RecordHeader.hh \
+    omtp-ids/Record.hh \
+    omtp-ids/ScanLine.hh
+
+noinst_HEADERS += \
+    omtp-ids/Constants.hh \
+    omtp-ids/sysdep.h
+
+# CURRENT:REVISION:AGE
+# - library source changed -> inc REVISION
+# - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
+# - interfaces added -> inc AGE
+# - interfaces removed -> AGE = 0
+omtp_ids_libomtp_ids_la_SOURCES = \
+    omtp-ids/ByteSex.cc \
+    omtp-ids/FileHeader.cc \
+    omtp-ids/LineHeader.cc \
+    omtp-ids/OpenMTP-IDS.cc \
+    omtp-ids/Record.cc \
+    omtp-ids/RecordHeader.cc \
+    omtp-ids/ScanLine.cc
+
+omtp_ids_examples_OpenMTP_IDS_debug_LDADD = \
+    omtp-ids/libomtp-ids.la
+omtp_ids_examples_OpenMTP_IDS_debug_SOURCES = \
+    omtp-ids/examples/OpenMTP-IDS_debug.cc
+
+omtp_ids_examples_OpenMTP_IDS_sector_LDFLAGS = \
+    omtp-ids/libomtp-ids.la
+omtp_ids_examples_OpenMTP_IDS_sector_SOURCES = \
+    omtp-ids/examples/OpenMTP-IDS_sector.cc
+
+omtp_ids_examples_OpenMTP_IDS_to_pgm_LDFLAGS = \
+    omtp-ids/libomtp-ids.la
+omtp_ids_examples_OpenMTP_IDS_to_pgm_SOURCES = \
+    omtp-ids/examples/OpenMTP-IDS_to_pgm.cc
+
+omtp_ids_examples_OpenMTP_IDS_write_LDFLAGS = \
+    omtp-ids/libomtp-ids.la
+omtp_ids_examples_OpenMTP_IDS_write_SOURCES = \
+    omtp-ids/examples/OpenMTP-IDS_write.cc
+
+## -fin-
+## vim:syn=automake:

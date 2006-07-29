@@ -1,0 +1,83 @@
+Please fill the form on:
+
+         -------------------------------------------------
+         http://www.eumetsat.de/en/dps/helpdesk/tools.html
+         -------------------------------------------------
+
+to obtain the PublicDecomp source code.
+
+#############################################################################
+
+Licence Agreement for Public WaveLet Transform Decompression Library Software
+
+CONDITIONS FOR USE OF THE 
+ PUBLIC WAVELET TRANSFORM DECOMPRESSION LIBRARY SOFTWARE
+
+The XXXXXX  ("the Licensee"), represented by YYYYYY, ZZZZZ, undertakes to
+comply with the following conditions for use of the Public WaveLet Transform
+Decompression Library ("the Software"):
+
+
+
+1.
+The Licensee shall use the Software only for the purpose of decompression of
+SEVIRI HRIT files and shall not, directly or indirectly, use the Software for
+any other purpose without EUMETSAT's prior written consent.
+
+2.
+The Licensee shall have the right to make copies of the Software for back-up
+purposes but only within the context of the use defined in paragraph 1 above.
+Any and all copies shall include EUMETSAT's copyright notice referred to in
+paragraph 4 below.
+
+3.
+The Licensee acknowledges and shall at all times respect EUMETSAT's
+intellectual property rights in the Software. EUMETSAT shall at all times
+retain such intellectual property rights in the Software and in all and any
+copies thereof regardless of form.
+
+4.
+The Licensee agrees when using the software in any recognisable form to name
+EUMETSAT as the source by including "© (year) EUMETSAT".
+
+5.
+The Licensee shall not transfer, assign, sub-licence, reproduce or copy
+the Software to any third party or part with possession of the Software
+or any part thereof in any way whatsoever.
+
+6.
+It is noted that the algorithm of the Public WaveLet Transform Decompression
+Library Software is under patent owned by PRIMACOMP.
+
+7.
+Except as provided for in paragraph 6 above, the Software is not subject to
+any rights or claims of any third parties to the best of EUMETSAT's knowledge.
+However, EUMETSAT does not accept liability in this respect, nor for any
+consequences whether direct or indirect, of any use of the Software by the
+Licensee.
+
+8.
+Nothing in this letter shall be construed as implying any fitness of the
+Software for any use whatsoever and EUMETSAT can therefore not accept any
+responsibility or liability for any such use nor for any maintenance of the
+Software.
+
+9.
+The Licensee shall inform EUMETSAT in advance if any results of the use of the
+Software (as is) are to be used for publication and a draft of such publication
+shall be provided to EUMETSAT in a timely manner for its prior approval.
+
+10.
+The Licensee shall not assign this Licence in whole or in part to any third
+party.
+
+11.
+Any default on the part of the Licensee of any of its obligations under this
+Licence shall entitle EUMETSAT to cancel this Licence without notice, without
+prejudice to its right to full damages.
+
+12.
+The laws of the Federal Republic of Germany shall apply to this Licence
+Agreement.
+
+#############################################################################
