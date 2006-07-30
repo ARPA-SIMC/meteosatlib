@@ -70,7 +70,7 @@ static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
 //
 // Creates NetCDF product
 //
-void ExportNetCDF(ImageData& img, const std::string& fileName)
+void ExportNetCDF(const ImageData& img, const std::string& fileName)
 {
   // Get the channel name
   string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id);
@@ -153,7 +153,7 @@ void ExportNetCDF(ImageData& img, const std::string& fileName)
 
   NcVar *ivar = ncf.add_var(channelstring.c_str(), ncFloat, tdim, ldim, cdim);
   if (!ivar->is_valid()) throw std::runtime_error("adding " + channelstring + " variable failed");
-	ncfAddAttr(*ivar, "add_offset", 1.0);
+	ncfAddAttr(*ivar, "add_offset", 0.0);
   ncfAddAttr(*ivar, "scale_factor", 1.0);
   ncfAddAttr(*ivar, "chnum", img.channel_id);
 

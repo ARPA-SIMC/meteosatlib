@@ -20,7 +20,9 @@
 noinst_HEADERS += \
     conv/ImageData.h \
     conv/ExportGRIB.h \
-    conv/ImportSAFH5.h
+    conv/ExportNetCDF.h \
+    conv/ImportSAFH5.h \
+    conv/ImportNetCDF.h
 
 ## -fin-
 ## vim:syn=automake:

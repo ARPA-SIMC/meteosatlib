@@ -49,7 +49,7 @@ int ImageData::decimalScale() const
 		return res + 1;
 }
 
-std::string ImageData::datetime()
+std::string ImageData::datetime() const
 {
 	stringstream res;
 	res << setfill('0') << setw(4) << year << "-" << setw(2) << month << "-" << setw(2) << day
@@ -57,7 +57,7 @@ std::string ImageData::datetime()
 	return res.str();
 }
 
-time_t ImageData::forecastSeconds2000()
+time_t ImageData::forecastSeconds2000() const
 {
 	const time_t s_epoch_2000 = 946684800;
 	struct tm itm;

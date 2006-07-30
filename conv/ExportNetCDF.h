@@ -33,7 +33,7 @@
 class ImageData;
 
 /// Export data from an ImageData to a NetCDF file
-void ExportNetCDF(ImageData& img, const std::string& fileName);
+void ExportNetCDF(const ImageData& img, const std::string& fileName);
 
 #endif
 

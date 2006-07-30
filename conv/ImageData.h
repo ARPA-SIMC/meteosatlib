@@ -70,10 +70,10 @@ struct ImageData
 	int decimalScale() const;
 
   // Get the datetime as a string
-  std::string datetime();
+  std::string datetime() const;
 
   // Get the image time as number of seconds since 1/1/2000 UTC
-  time_t forecastSeconds2000();
+  time_t forecastSeconds2000() const;
 };
 
 // vim:set ts=2 sw=2:

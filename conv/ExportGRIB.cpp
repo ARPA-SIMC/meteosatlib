@@ -66,7 +66,7 @@ static char rcs_id_string[] = "$Id$";
 //
 // Export data from an ImageData into a GRIB_FILE
 //
-void ExportGRIB(ImageData& img, GRIB_FILE& gf)
+void ExportGRIB(const ImageData& img, GRIB_FILE& gf)
 {
   //
   // Extract data out of HDF5_source
