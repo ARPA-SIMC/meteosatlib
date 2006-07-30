@@ -19,9 +19,11 @@
 DIST_SUBDIRS = \
     decompress \
     examples \
+    conv \
     grib \
     iniparser \
     images \
+    hdf5 \
     hri \
     hrit \
     msg-native \
@@ -62,6 +64,10 @@ endif
 
 if HAVE_NETCDF
 include $(srcdir)/examples/Automake.rules
+endif
+
+if HDF5
+include $(srcdir)/hdf5/Automake.rules
 endif
 
 include $(srcdir)/grib/Automake.rules

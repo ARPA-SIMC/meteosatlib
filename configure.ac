@@ -70,6 +70,12 @@ AC_ARG_ENABLE([openmtp],
         [disable openmtp support])],
     [],
     [enable_openmtp="yes"])
+AC_ARG_ENABLE([hdf5],
+    [AS_HELP_STRING(
+        [--disable-hdf5],
+        [disable hdf5 support])],
+    [],
+    [enable_hdf5="yes"])
 
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
@@ -105,6 +111,9 @@ LIBS="$savedLIBS"
 
 AC_CHECK_LIB([Magick++], [ReadImage], [have_libmagick=yes])
 
+AC_CHECK_LIB([hdf5], [H5_init_library], [have_libhdf5=yes])
+dnl AC_CHECK_LIB([hdf5_cpp], [Exception], [have_libhdf5cpp=yes])
+
 dnl --------------------------------------------------------------------
 dnl Checks for header files.
 
@@ -135,6 +144,15 @@ AC_CHECK_HEADER([netcdfcpp.h],
     if test "$enable_thornsds_db1" == "yes"; then
         enable_thornsds_db1="no"
         AC_MSG_WARN("*** thornsds_db1 support disabled")
+    fi
+])
+
+AC_CHECK_HEADER([H5Cpp.h],
+    [],
+    [
+    if test "$enable_hdf5" == "yes"; then
+        enable_hdf5="no"
+        AC_MSG_WARN("*** hdf5 support disabled")
     fi
 ])
 
@@ -191,6 +209,13 @@ if test x"$enable_thornsds_db1" == x"yes"; then
     fi
 fi
 
+if test x"$enable_hdf5" == x"yes"; then
+    if ! test x"$have_libhdf5" = x"yes"; then
+        enable_hdf5="no"
+        AC_MSG_WARN("*** hdf5 support disabled")
+    fi
+fi
+
 AM_CONDITIONAL([HRI], [test x"$enable_hri" = x"yes"])
 AM_CONDITIONAL([HRIT], [test x"$enable_hrit" = x"yes"])
 AM_CONDITIONAL([MSG_NATIVE], [test x"$enable_msg_native" = x"yes"])
@@ -199,6 +224,7 @@ AM_CONDITIONAL([OPENMTP], [test x"$enable_openmtp" = x"yes"])
 AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
+AM_CONDITIONAL([HDF5], [test x"$enable_hdf5" = x"yes"])
 
 dnl --------------------------------------------------------------------
 dnl Create output files.
@@ -207,9 +233,11 @@ AC_CONFIG_FILES([
     Makefile
     decompress/Makefile
     examples/Makefile
+    conv/Makefile
     grib/Makefile
     iniparser/Makefile
     images/Makefile
+    hdf5/Makefile
     hri/Makefile
     hri/examples/Makefile
     hrit/Makefile
@@ -229,6 +257,7 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 ===================================================
 $PACKAGE_NAME-$PACKAGE_VERSION configuration:
+AS_HELP_STRING([hdf5:], [$enable_hdf5])
 AS_HELP_STRING([hri:], [$enable_hri])
 AS_HELP_STRING([hrit:], [$enable_hrit])
 AS_HELP_STRING([msg-native:], [$enable_msg_native])
