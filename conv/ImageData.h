@@ -76,5 +76,15 @@ struct ImageData
   time_t forecastSeconds2000() const;
 };
 
+struct ImageConsumer
+{
+	virtual void processImage(const ImageData& image) = 0;
+};
+
+struct Importer
+{
+	virtual void readFile(const std::string& name, ImageConsumer& output) = 0;
+};
+
 // vim:set ts=2 sw=2:
 #endif

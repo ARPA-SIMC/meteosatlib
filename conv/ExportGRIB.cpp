@@ -30,6 +30,7 @@
 #include <conv/ImageData.h>
 #include <grib/GRIB.h>
 #include <cmath>
+#include <stdexcept>
 #include "parameters.h"
 
 static char rcs_id_string[] = "$Id$";
@@ -248,6 +249,49 @@ void ExportGRIB(const ImageData& img, GRIB_FILE& gf)
   gf.WriteMessage(m);
 
   delete [ ] fvals;
+}
+
+
+class GRIBExporter : public ImageConsumer
+{
+	GRIB_FILE gf;
+	bool first;
+
+public:
+	GRIBExporter() : first(true) {}
+	~GRIBExporter()
+	{
+		int ret = gf.Close( );
+		if (ret != 0)
+			throw std::runtime_error("closing grib file");
+	}
+
+	virtual void processImage(const ImageData& img)
+	{
+		if (first)
+		{
+			char GribName[1024];
+			GribName[0] = 0;
+
+			// Build up output Grib file name and open it
+			sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb",
+					img.name.c_str(),
+					img.year, img.month, img.day, img.hour, img.minute);
+
+			int ret = gf.OpenWrite(GribName);
+			if (ret != 0)
+				throw std::runtime_error(std::string("error writing grib file ") + GribName);
+			first = false;
+		}
+
+		//cout << "Converting " << *i << "..." << endl;
+		ExportGRIB(img, gf);
+  }
+};
+
+std::auto_ptr<ImageConsumer> createGribExporter()
+{
+	return std::auto_ptr<ImageConsumer>(new GRIBExporter());
 }
 
 // vim:set ts=2 sw=2:
