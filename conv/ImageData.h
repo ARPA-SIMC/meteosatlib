@@ -81,7 +81,7 @@ struct ImageConsumer
 	virtual void processImage(const ImageData& image) = 0;
 };
 
-struct Importer
+struct ImageImporter
 {
 	virtual void readFile(const std::string& name, ImageConsumer& output) = 0;
 };

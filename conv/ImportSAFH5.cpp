@@ -158,4 +158,35 @@ auto_ptr<ImageData> ImportSAFH5(const H5::Group& group, const std::string& name)
   return data;
 }
 
+class SAFH5ImageImporter : public ImageImporter
+{
+public:
+	virtual void readFile(const std::string& name, ImageConsumer& output)
+	{
+		// Don't print the exceptions: let the caller take care of them
+		Exception::dontPrint();
+
+		// Open the file
+		H5File HDF5_source(name, H5F_ACC_RDONLY);
+		Group group = HDF5_source.openGroup("/");
+
+		// Iterate on all the images within
+		for (hsize_t i = 0; i < group.getNumObjs(); ++i)
+		{
+			string name = group.getObjnameByIdx(i);
+			DataSet dataset = group.openDataSet(name);
+			string c = readStringAttribute(dataset, "CLASS");
+			if (c != "IMAGE")
+				continue;
+			std::auto_ptr<ImageData> img = ImportSAFH5(group, name);
+			output.processImage(*img);
+		}
+	}
+};
+
+std::auto_ptr<ImageImporter> createSAFH5Importer()
+{
+	return std::auto_ptr<ImageImporter>(new SAFH5ImageImporter());
+}
+
 // vim:set ts=2 sw=2:

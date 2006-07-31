@@ -11,5 +11,7 @@ class DataSet;
 
 std::auto_ptr<ImageData> ImportSAFH5(const H5::Group& group, const std::string& name);
 
+std::auto_ptr<ImageImporter> createSAFH5Importer();
+
 // vim:set sw=2:
 #endif
