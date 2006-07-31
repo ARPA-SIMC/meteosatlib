@@ -19,7 +19,8 @@
 
 examples_bin = \
     examples/Met_Reproj \
-    examples/NetCDF2Grib
+    examples/NetCDF2Grib \
+    examples/msatconv
 
 examples/all: \
     $(examples_bin)
@@ -63,6 +64,24 @@ examples_NetCDF2Grib_CPPFLAGS = \
     -I$(top_srcdir)/grib
 examples_NetCDF2Grib_LDADD = \
     hrit/libhrit.la \
+    -lnetcdf_c++ \
+    -lnetcdf
+
+examples_msatconv_SOURCES = \
+    grib/Ebisuzaki.cpp \
+    grib/GRIB.cpp \
+    conv/ImageData.cpp \
+    conv/ImportNetCDF.cpp \
+    conv/ImportSAFH5.cpp \
+    conv/ExportGRIB.cpp \
+    conv/ExportNetCDF.cpp \
+    hdf5/Utils.cpp \
+    examples/msatconv.cpp
+examples_msatconv_CPPFLAGS = \
+    -I$(top_srcdir)/grib
+examples_msatconv_LDADD = \
+    hrit/libhrit.la \
+    -lhdf5_cpp \
     -lnetcdf_c++ \
     -lnetcdf
 
