@@ -86,5 +86,7 @@ struct Importer
 	virtual void readFile(const std::string& name, ImageConsumer& output) = 0;
 };
 
+std::auto_ptr<ImageConsumer> createImageDumper(bool withContents);
+
 // vim:set ts=2 sw=2:
 #endif

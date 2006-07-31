@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 #include <math.h>
 #include "parameters.h"
 
@@ -84,6 +85,47 @@ time_t ImageData::forecastSeconds2000() const
 	// Also add timezone (and declare it as extern, see timezone(3) manpage) to
 	// get the seconds in local time
 	return res - s_epoch_2000;
+}
+
+
+class ImageDumper : public ImageConsumer
+{
+	bool withContents;
+
+public:
+	ImageDumper(bool withContents) : withContents(withContents) {}
+
+	virtual void processImage(const ImageData& img)
+	{
+		cout << img.name << " " << img.datetime() << endl;
+		cout << " proj: " << img.projection << " ch.id: " << img.channel_id << " sp.id: " << img.spacecraft_id << endl;
+		cout << " size: " << img.columns << "x" << img.lines << " factor: " << img.column_factor << "x" << img.line_factor
+				 << " offset: " << img.column_offset << "x" << img.line_offset << endl;
+
+		cout << " Images: " << endl;
+
+		cout << "  " //<< *i
+				 << "\t" << img.columns << "x" << img.lines << " " << img.bpp << "bpp"
+						" *" << img.slope << "+" << img.offset << " decscale: " << img.decimalScale()
+				 << " PSIZE " << img.pixelSize()
+				 << " DX " << img.seviriDX()
+				 << " DXY " << img.seviriDY()
+				 << " CHID " << img.channel_id
+				 << endl;
+
+		if (withContents)
+		{
+			cout << "Coord\tUnscaled\tScaled" << endl;
+			for (int l = 0; l < img.lines; ++l)
+				for (int c = 0; c < img.lines; ++c)
+					cout << c << "x" << l << '\t' << img.unscaled(c, l) << '\t' << img.scaled(c, l) << endl;
+		}
+  }
+};
+
+std::auto_ptr<ImageConsumer> createImageDumper(bool withContents)
+{
+	return std::auto_ptr<ImageConsumer>(new ImageDumper(withContents));
 }
 
 // vim:set ts=2 sw=2:
