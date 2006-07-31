@@ -6,6 +6,7 @@
 
 std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename);
 
+bool isNetCDF(const std::string& filename);
 std::auto_ptr<ImageImporter> createNetCDFImporter();
 
 // vim:set sw=2:

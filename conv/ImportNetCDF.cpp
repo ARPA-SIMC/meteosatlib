@@ -276,20 +276,28 @@ std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename)
 #endif
 }
 
+bool isNetCDF(const std::string& filename)
+{
+	return filename.substr(filename.size() - 3) == ".nc";
+}
 
 class NetCDFImageImporter : public ImageImporter
 {
+	std::string filename;
+
 public:
-	virtual void readFile(const std::string& name, ImageConsumer& output)
+	NetCDFImageImporter(const std::string& filename) : filename(filename) {}
+
+	virtual void read(ImageConsumer& output)
 	{
-		std::auto_ptr<ImageData> img = ImportNetCDF(name);
+		std::auto_ptr<ImageData> img = ImportNetCDF(filename);
 		output.processImage(*img);
 	}
 };
 
-std::auto_ptr<ImageImporter> createNetCDFImporter()
+std::auto_ptr<ImageImporter> createNetCDFImporter(const std::string& filename)
 {
-	return std::auto_ptr<ImageImporter>(new NetCDFImageImporter());
+	return std::auto_ptr<ImageImporter>(new NetCDFImageImporter(filename));
 }
 
 // vim:set ts=2 sw=2:

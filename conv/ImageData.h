@@ -83,7 +83,7 @@ struct ImageConsumer
 
 struct ImageImporter
 {
-	virtual void readFile(const std::string& name, ImageConsumer& output) = 0;
+	virtual void read(ImageConsumer& output) = 0;
 };
 
 std::auto_ptr<ImageConsumer> createImageDumper(bool withContents);
