@@ -11,38 +11,23 @@
 using namespace H5;
 using namespace std;
 
-struct H5Image : public ImageData
+struct H5Image
 {
   virtual void acquire(DataSet& dataset) = 0;
 };
 
 // Container for image data, which can be used with different sample sizes
-template<typename EL>
-struct H5ImageData : public H5Image
+template<typename Item>
+struct H5ImageData : public ImageDataWithPixels<Item>, public H5Image
 {
 public:
-  typedef EL Item;
-  Item* pixels;
-
-  H5ImageData() : pixels(0) { bpp = sizeof(Item) * 8; }
-  ~H5ImageData()
-  {
-    if (pixels)
-      delete[] pixels;
-  }
-
-  virtual int unscaled(int column, int line) const
-  {
-      return pixels[line * columns + column];
-  }
-
 	// This is not const, but it's used for once-only initialization of mutable
 	// m_pixels, and needed to allow floats() to be const
   void acquire(DataSet& dataset)
   {
-		if (pixels)
-			delete[] pixels;
-    pixels = new Item[columns * lines];
+		if (this->pixels)
+			delete[] this->pixels;
+    this->pixels = new Item[this->columns * this->lines];
 
     DataSpace space = dataset.getSpace();
     int ndims = space.getSimpleExtentNdims();
@@ -52,14 +37,14 @@ public:
     for (int i=0; i<ndims; ++i)
 			size = size * dims[i];
     delete[] dims;
-    if (size != columns * lines)
+    if (size != this->columns * this->lines)
     {
 			stringstream err;
-			err << "Image declares " << columns * lines << " samples "
+			err << "Image declares " << this->columns * this->lines << " samples "
 									 "but has " << size << " instead" << endl;
       throw std::runtime_error(err.str());
     }
-    dataset.read(pixels, dataset.getDataType());
+    dataset.read(this->pixels, dataset.getDataType());
   }
 };
 

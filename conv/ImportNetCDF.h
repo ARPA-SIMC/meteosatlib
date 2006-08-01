@@ -4,8 +4,6 @@
 #include <conv/ImageData.h>
 #include <memory>
 
-std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename);
-
 bool isNetCDF(const std::string& filename);
 std::auto_ptr<ImageImporter> createNetCDFImporter(const std::string& filename);
 

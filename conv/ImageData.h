@@ -76,6 +76,27 @@ struct ImageData
   time_t forecastSeconds2000() const;
 };
 
+// Container for image data, which can be used with different sample sizes
+template<typename EL>
+struct ImageDataWithPixels : public ImageData
+{
+public:
+  typedef EL Item;
+  Item* pixels;
+
+  ImageDataWithPixels() : pixels(0) { bpp = sizeof(Item) * 8; }
+  ~ImageDataWithPixels()
+  {
+    if (pixels)
+      delete[] pixels;
+  }
+
+  virtual int unscaled(int column, int line) const
+  {
+      return static_cast<int>(pixels[line * columns + column]);
+  }
+};
+
 struct ImageConsumer
 {
 	virtual void processImage(const ImageData& image) = 0;

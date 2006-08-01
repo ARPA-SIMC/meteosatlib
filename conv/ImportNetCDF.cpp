@@ -58,109 +58,47 @@ void usage(char *pname);
 char *chname(char *chdesc, int len);
 bool GribProduct(char *ncfname);
 
-struct NetCDFImageData : public ImageData
+struct NetCDFImage
 {
-public:
-  float* pixels;
+	virtual void acquire(const NcVar& var) = 0;
+};
 
-	// FIXME: this amount of bpp is meaningless, since we read floats
-  NetCDFImageData() : pixels(0) { bpp = 16; }
-  ~NetCDFImageData()
-  {
-    if (pixels)
-      delete[] pixels;
-  }
+template<typename Item>
+struct NetCDFImageData : public ImageDataWithPixels<Item>, public NetCDFImage
+{
+	virtual void acquire(const NcVar& var)
+	{
+		if (var.num_dims() != 3)
+		{
+			stringstream msg;
+			msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << "instead";
+			throw std::runtime_error(msg.str());
+		}
+		int tsize = var.get_dim(0)->size();
+		if (tsize != 1)
+		{
+			stringstream msg;
+			msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << "instead";
+			throw std::runtime_error(msg.str());
+		}
 
-  virtual int unscaled(int column, int line) const
-  {
-      return (int)pixels[line * columns + column];
-  }
+		this->lines = var.get_dim(1)->size();
+		this->columns = var.get_dim(2)->size();
+
+		if (this->pixels)
+			delete[] this->pixels;
+		this->pixels = new Item[this->columns * this->lines];
+
+		if (!var.get(this->pixels, 1, this->lines, this->columns))
+			throw std::runtime_error("reading image pixels failed");
+	}
 };
 
 
+#if 0
 std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename)
 {
-	auto_ptr<ImageData> data(new NetCDFImageData());
 
-  NcFile ncf(filename.c_str(), NcFile::ReadOnly);
-  if (! ncf.is_valid())
-		throw std::runtime_error("Failed to open file " + filename);
-	NcAtt* a;
-
-	int tmp;
-	float ftmp;
-	std::string stmp;
-
-#define GET(var, type, name) \
-	if ((a = ncf.get_att(name))) \
-		var = a->as_##type(0); \
-	else \
-		throw std::runtime_error(#type " value " name " not found in file " + filename)
-
-	GET(data->columns, int, "Columns");
-	GET(data->lines, int, "Lines");
-	GET(tmp, int, "AreaStartPix");
-  data->column_offset = 1 + 3712/2 - tmp;
-	GET(tmp, int, "AreaStartLin");
-	data->line_offset = 1 + 3712/2 - tmp;
-
-	GET(ftmp, float, "SampleX");
-	if (ftmp != 1.0)
-	{
-    stringstream msg;
-    msg << "SampleX should have been 1.0 but is " << ftmp << " instead.";
-    throw std::runtime_error(msg.str());
-	}
-
-	GET(ftmp, float, "SampleY");
-	if (ftmp != 1.0)
-	{
-    stringstream msg;
-    msg << "SampleY should have been 1.0 but is " << ftmp << " instead.";
-    throw std::runtime_error(msg.str());
-	}
-
-	GET(data->column_factor, int, "Column_Scale_Factor");
-	GET(data->line_factor, int, "Line_Scale_Factor");
-	GET(data->column_offset, int, "Column_Offset");
-	GET(data->line_offset, int, "Line_Offset");
-
-	GET(ftmp, float, "Orbit_Radius");
-	if (ftmp != 1.0)
-    cerr << "Orbit_Radius should have been 6610684 " << ftmp << " instead: ignoring it." << endl;
-
-	GET(ftmp, float, "Longitude");
-	if (ftmp != 0)
-	{
-    stringstream msg;
-    msg << "Longitude should have been 0 but is " << ftmp << " instead.";
-    throw std::runtime_error(msg.str());
-	}
-
-
-	GET(stmp, string, "Time");
-	if (sscanf(stmp.c_str(), "%04d-%02d-%02d %02d:%02d:00 UTC",
-				&data->year, &data->month, &data->day, &data->hour, &data->minute) != 5)
-		throw std::runtime_error("could not parse Time attribute " + stmp);
-		
-	//NcVar* ivar = ncf.get_var
-
-	// TODO from here
-	cout << ncf.num_vars() << " variables found in the file." << endl;
-	cout << "Names:" << endl;
-	for (int i = 0; i < ncf.num_vars(); ++i)
-		cout << ncf.get_var(i)->name() << endl;
-
-	// Missing: channel_id, spacecraft_id, 
-
-	// TODO: unknown: slope, offset, bpp
-	// TODO: for now I use hardcoded placeholders
-	data->slope = 1;
-	data->offset = 0;
-
-	return data;
-
-#if 0
   if (! ncf.add_att("Satellite",
             MSG_spacecraft_name((t_enum_MSG_spacecraft) pds.spc).c_str()))
     return false;
@@ -273,8 +211,8 @@ std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename)
   delete [ ] pixels;
 
   return( true );
-#endif
 }
+#endif
 
 bool isNetCDF(const std::string& filename)
 {
@@ -284,14 +222,117 @@ bool isNetCDF(const std::string& filename)
 class NetCDFImageImporter : public ImageImporter
 {
 	std::string filename;
+  NcFile ncf;
+
+	void readHeader(ImageData& img)
+	{
+		NcAtt* a;
+		int tmp;
+		float ftmp;
+		std::string stmp;
+
+#define GET(type, name) \
+		((a = ncf.get_att(name)) != NULL ? a->as_##type(0) : \
+			throw std::runtime_error(#type " value " name " not found in file " + filename))
+#define GETDEF(type, name, def) \
+		((a = ncf.get_att(name)) != NULL ? a->as_##type(0) : def)
+
+		// FIXME: come la parso questa??
+		stmp = GET(string, "Satellite");
+
+		if (GETDEF(int, "Columns", 3712) != 3712)
+			cerr << "Columns should have been 3712 but is " << GETDEF(int, "Columns", 3712) << " instead: ignoring it" << endl;
+		if (GETDEF(int, "Lines", 3712) != 3712)
+			cerr << "Lines should have been 3712 but is " << GETDEF(int, "Lines", 3712) << " instead: ignoring it" << endl;
+
+		img.column_offset = 1 + 3712/2 - GET(int, "AreaStartPix");
+		img.line_offset = 1 + 3712/2 - GET(int, "AreaStartLin");
+
+		ftmp = GETDEF(float, "SampleX", 1.0);
+		if (ftmp != 1.0)
+		{
+			stringstream msg;
+			msg << "SampleX should have been 1.0 but is " << ftmp << " instead.";
+			throw std::runtime_error(msg.str());
+		}
+
+		ftmp = GETDEF(float, "SampleY", 1.0);
+		if (ftmp != 1.0)
+		{
+			stringstream msg;
+			msg << "SampleY should have been 1.0 but is " << ftmp << " instead.";
+			throw std::runtime_error(msg.str());
+		}
+
+		img.column_factor = GET(int, "Column_Scale_Factor");
+		img.line_factor = GET(int, "Line_Scale_Factor");
+		img.column_offset = GET(int, "Column_Offset");
+		img.line_offset = GET(int, "Line_Offset");
+
+		ftmp = GETDEF(float, "Orbit_Radius", 6610684);
+		if (ftmp != 6610684)
+		{
+			cerr << "Orbit_Radius should have been 6610684 but is " << ftmp << " instead: ignoring it." << endl;
+			ftmp = 6610684;
+		}
+
+		ftmp = GETDEF(float, "Longitude", 0);
+		if (ftmp != 0)
+		{
+			stringstream msg;
+			msg << "Longitude should have been 0 but is " << ftmp << " instead.";
+			throw std::runtime_error(msg.str());
+		}
+
+		stmp = GET(string, "Time");
+		if (sscanf(stmp.c_str(), "%04d-%02d-%02d %02d:%02d:00 UTC",
+					&img.year, &img.month, &img.day, &img.hour, &img.minute) != 5)
+			throw std::runtime_error("could not parse Time attribute " + stmp);
+#undef GET
+#undef GETDEF
+	}
+
+	void readData(const NcVar& var, ImageData& img)
+	{
+		NcAtt* a;
+
+		img.offset = ((a = var.get_att("add_offset")) != NULL ? a->as_float(0) : 0);
+		img.slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
+		img.channel_id = ((a = var.get_att("chnum")) != NULL ? a->as_int(0) :
+			throw std::runtime_error(string("could not find the 'chnum' attribute in image ") + var.name()));
+
+		dynamic_cast<NetCDFImage*>(&img)->acquire(var);
+	}
 
 public:
-	NetCDFImageImporter(const std::string& filename) : filename(filename) {}
+	NetCDFImageImporter(const std::string& filename)
+		: filename(filename), ncf(filename.c_str(), NcFile::ReadOnly)
+	{
+		if (! ncf.is_valid())
+			throw std::runtime_error("Failed to open file " + filename);
+	}
 
 	virtual void read(ImageConsumer& output)
 	{
-		std::auto_ptr<ImageData> img = ImportNetCDF(filename);
-		output.processImage(*img);
+		auto_ptr<ImageData> data;
+		for (int i = 0; i < ncf.num_vars(); ++i)
+		{
+			NcVar* var = ncf.get_var(i);
+			if (string(var->name()) == "time")
+				continue;
+			switch (var->type())
+			{
+				case ncByte: data.reset(new NetCDFImageData<unsigned char>()); break;
+				case ncChar: data.reset(new NetCDFImageData<char>()); break;
+				case ncShort: data.reset(new NetCDFImageData<int16_t>()); break;
+				case ncLong: data.reset(new NetCDFImageData<int32_t>()); break;
+				case ncFloat: data.reset(new NetCDFImageData<float>()); break;
+				case ncDouble: data.reset(new NetCDFImageData<double>()); break;
+			}
+			readHeader(*data);
+			readData(*var, *data);
+			output.processImage(*data);
+		}
 	}
 };
 
