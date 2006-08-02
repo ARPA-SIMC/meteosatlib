@@ -1,4 +1,24 @@
-// $Id$
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * File Header
+ */
 #ifndef DSM_FILEHEADER_HH
 #define DSM_FILEHEADER_HH
 
@@ -9,183 +29,151 @@
 
 // PROJECT INCLUDES
 //
+#include <omtp-ids/Constants.hh>
 
 // LOCAL INCLUDES
 //
-#include <omtp-ids/Constants.hh>
 
 // FORWARD REFERENCES
 //
 
 // *********************************************************************
-//
-// NAME:
-//   FileHeader -
-//
-// TYPE:          C++-CLASS
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         FileHeader.hh, FileHeader.cc
-// SEE ALSO:
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
 
 class FileHeader
 {
-	private:
+private:
 
-	protected:
+protected:
 
-		char m_fortran[omtp_ids::FORTRAN_LEN];
-		int m_no_records;
+	char m_fortran[omtp_ids::FORTRAN_LEN];
+	int m_no_records;
 
-		int m_year;
-		int m_julian_day;
-		int m_hour;
-		int m_minute;
+	int m_year;
+	int m_julian_day;
+	int m_hour;
+	int m_minute;
 
-		int m_process_year;
-		int m_process_julian_day;
-		int m_process_hour;
-		int m_process_minute;
+	int m_process_year;
+	int m_process_julian_day;
+	int m_process_hour;
+	int m_process_minute;
 
-		int m_no_channels;
-		int m_vis_id;
-		int m_wv_id;
-		int m_ir_id;
+	int m_no_channels;
+	int m_vis_id;
+	int m_wv_id;
+	int m_ir_id;
 
-		char m_satellite[omtp_ids::SATELLITE_LEN + 1];
-		int m_satellite_id;
-		int m_record_length;
+	char m_satellite[omtp_ids::SATELLITE_LEN + 1];
+	int m_satellite_id;
+	int m_record_length;
 
-		int m_no_vis_average;
-		int m_no_wv_average;
-		int m_no_ir_average;
-		int m_averaging_type;
+	int m_no_vis_average;
+	int m_no_wv_average;
+	int m_no_ir_average;
+	int m_averaging_type;
 
-		int m_sample_interval;
-		int m_ir_calibration;
-		int m_wv_calibration;
-		int m_fine_adjustment;
-		int m_ir_space_count;
-		int m_wv_space_count;
+	int m_sample_interval;
+	int m_ir_calibration;
+	int m_wv_calibration;
+	int m_fine_adjustment;
+	int m_ir_space_count;
+	int m_wv_space_count;
 
-	public:
+public:
 
-		// LIFECYCLE
+	// LIFECYCLE
 
-		FileHeader();
+	FileHeader();
 
-		// OPERATORS
+	// OPERATORS
 
-		friend std::ostream& operator<<(std::ostream& os,
-						const FileHeader& fileheader);
-		friend std::istream& operator>>(std::istream& is,
-						FileHeader& fileheader);
+	friend std::ostream& operator<<(std::ostream& os,
+					const FileHeader& fileheader);
+	friend std::istream& operator>>(std::istream& is,
+					FileHeader& fileheader);
 
-		// OPERATIONS
+	// OPERATIONS
 
-		std::ostream& debug(std::ostream& os) const;
+	std::ostream& debug(std::ostream& os) const;
 
-		// INQUIRY
+	// INQUIRY
 
-		// ACCESS
+	// ACCESS
 
-		// get
-		const char* fortran() const;
-		int no_records() const;
+	// get
+	const char* fortran() const;
+	int no_records() const;
 
-		int year() const;
-		int julian_day() const;
-		int hour() const;
-		int minute() const;
+	int year() const;
+	int julian_day() const;
+	int hour() const;
+	int minute() const;
 
-		int process_year() const;
-		int process_julian_day() const;
-		int process_hour() const;
-		int process_minute() const;
+	int process_year() const;
+	int process_julian_day() const;
+	int process_hour() const;
+	int process_minute() const;
 
-		int no_channels() const;
-		int vis_id() const;
-		int wv_id() const;
-		int ir_id() const;
+	int no_channels() const;
+	int vis_id() const;
+	int wv_id() const;
+	int ir_id() const;
 
-		const char* satellite() const;
-		int satellite_id() const;
-		int record_length() const;
+	const char* satellite() const;
+	int satellite_id() const;
+	int record_length() const;
 
-		int no_vis_average() const;
-		int no_wv_average() const;
-		int no_ir_average() const;
-		int averaging_type() const;
+	int no_vis_average() const;
+	int no_wv_average() const;
+	int no_ir_average() const;
+	int averaging_type() const;
 
-		int sample_interval() const;
-		int ir_calibration() const;
-		int wv_calibration() const;
-		int fine_adjustment() const;
-		int ir_space_count() const;
-		int wv_space_count() const;
+	int sample_interval() const;
+	int ir_calibration() const;
+	int wv_calibration() const;
+	int fine_adjustment() const;
+	int ir_space_count() const;
+	int wv_space_count() const;
 
-		// set
-		void fortran(const char* fortran);
-		void no_records(const int no_records);
+	// set
+	void fortran(const char* fortran);
+	void no_records(const int no_records);
 
-		void year(const int year);
-		void julian_day(const int julian);
-		void hour(const int hour);
-		void minute(const int minute);
+	void year(const int year);
+	void julian_day(const int julian);
+	void hour(const int hour);
+	void minute(const int minute);
 
-		void process_year(const int process_year);
-		void process_julian_day(const int process_julian_day);
-		void process_hour(const int process_hour);
-		void process_minute(const int process_minute);
+	void process_year(const int process_year);
+	void process_julian_day(const int process_julian_day);
+	void process_hour(const int process_hour);
+	void process_minute(const int process_minute);
 
-		void no_channels(const int no_channels);
-		void vis_id(const int vis_id);
-		void wv_id(const int wv_id);
-		void ir_id(const int ir_id);
+	void no_channels(const int no_channels);
+	void vis_id(const int vis_id);
+	void wv_id(const int wv_id);
+	void ir_id(const int ir_id);
 
-		void satellite(const char* satellite);
-		void satellite_id(const int satellite_id);
-		void record_length(const int record_length);
+	void satellite(const char* satellite);
+	void satellite_id(const int satellite_id);
+	void record_length(const int record_length);
 
-		void no_vis_average(const int no_vis_average);
-		void no_wv_average(const int no_wv_average);
-		void no_ir_average(const int no_ir_average);
-		void averaging_type(const int averaging_type);
+	void no_vis_average(const int no_vis_average);
+	void no_wv_average(const int no_wv_average);
+	void no_ir_average(const int no_ir_average);
+	void averaging_type(const int averaging_type);
 
-		void sample_interval(const int sample_interval);
-		void ir_calibration(const int ir_calibration);
-		void wv_calibration(const int wv_calibration);
-		void fine_adjustment(const int fine_adjustment);
-		void ir_space_count(const int ir_space_count);
-		void wv_space_count(const int wv_spage_count);
+	void sample_interval(const int sample_interval);
+	void ir_calibration(const int ir_calibration);
+	void wv_calibration(const int wv_calibration);
+	void fine_adjustment(const int fine_adjustment);
+	void ir_space_count(const int ir_space_count);
+	void wv_space_count(const int wv_spage_count);
 };
 
 // EXTERNAL REFERENCES
 //
+
 inline
 const char*
 FileHeader::fortran() const

@@ -1,4 +1,24 @@
-// $Id$
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * Scan Line
+ */
 #ifndef DSM_SCANLINE_HH
 #define DSM_SCANLINE_HH
 
@@ -9,93 +29,61 @@
 
 // PROJECT INCLUDES
 //
+#include <omtp-ids/LineHeader.hh>
 
 // LOCAL INCLUDES
 //
-#include <omtp-ids/LineHeader.hh>
 
 // FORWARD REFERENCES
 //
 
 // *********************************************************************
-//
-// NAME:
-//   ScanLine -
-//
-// TYPE:          C++-CLASS
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         ScanLine.hh, ScanLine.cc
-// SEE ALSO:
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
 
 class ScanLine
 {
-	private:
+private:
 
-	protected:
+protected:
 
-		LineHeader m_lineheader;
-                std::vector<unsigned char> m_linepixel;
+	LineHeader m_lineheader;
+	std::vector<unsigned char> m_linepixel;
 
-	public:
+public:
 
-		// LIFECYCLE
+	// LIFECYCLE
 
-		// OPERATORS
+	// OPERATORS
 
-		int operator[](const unsigned index) const;
-		int operator[](const unsigned index);
+	int operator[](const unsigned index) const;
+	int operator[](const unsigned index);
 
-		friend std::ostream& operator<<(std::ostream& os,
-						const ScanLine& scanline);
-		friend std::istream& operator>>(std::istream& is,
-						ScanLine& scanline);
+	friend std::ostream& operator<<(std::ostream& os,
+					const ScanLine& scanline);
+	friend std::istream& operator>>(std::istream& is,
+					ScanLine& scanline);
 
-		// OPERATIONS
+	// OPERATIONS
 
-		std::ostream& debug(std::ostream& os) const;
+	std::ostream& debug(std::ostream& os) const;
 
-		// INQUIRY
+	// INQUIRY
 
-		// ACCESS
+	// ACCESS
 
-		// get
-		const LineHeader& lineheader() const;
-		LineHeader& lineheader();
-		const std::vector<unsigned char>& linepixel() const;
-		std::vector<unsigned char>& linepixel();
+	// get
+	const LineHeader& lineheader() const;
+	LineHeader& lineheader();
+	const std::vector<unsigned char>& linepixel() const;
+	std::vector<unsigned char>& linepixel();
 
-		// set
-		void lineheader(const LineHeader& lineheader);
-		void linepixel(const std::vector<unsigned char>& linepixel);
+	// set
+	void lineheader(const LineHeader& lineheader);
+	void linepixel(const std::vector<unsigned char>& linepixel);
 };
 
 // EXTERNAL REFERENCES
 //
+
 inline
 int
 ScanLine::operator[](const unsigned index) const

@@ -1,6 +1,24 @@
-// $Id$
-
-#include <config.h>
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * OpenMTP-IDS_sector - OpenMTP-IDS sector extraction
+ */
 
 // SYSTEM INCLUDES
 //
@@ -11,10 +29,9 @@
 #include <vector>
 #include <cmath>
 
-#include <libgen.h>
-
 // PROJECT INCLUDES
 //
+#include <config.h>
 
 // LOCAL INCLUDES
 //
@@ -24,39 +41,6 @@
 //
 using namespace omtp_ids;
 
-// *********************************************************************
-//
-// NAME:
-//   OpenMTP-IDS_sector - OpenMTP-IDS sector extraction
-//
-// TYPE:          C++-PROGRAMME
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         OpenMTP-IDS_sector.cc
-// SEE ALSO:      OpenMTP-IDS library
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/12/10 09:54:32 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
 // *********************************************************************
 
 // LOCAL CONSTANTS
@@ -75,7 +59,6 @@ record_lines(const int lines, const int pixels)
 			   / static_cast<double>(pixels))));
 }
 
-
 int
 no_records(const int scanlines, const int lines_per_record)
 {
@@ -83,7 +66,6 @@ no_records(const int scanlines, const int lines_per_record)
 		(ceil(scanlines
 		      / static_cast<double>(lines_per_record)));
 }
-
 
 std::vector<Record>
 repack(std::vector<ScanLine> scanline)
@@ -120,7 +102,6 @@ repack(std::vector<ScanLine> scanline)
 	return record;
 }
 
-
 void
 sector_line(ScanLine& line)
 {
@@ -140,7 +121,6 @@ sector_line(ScanLine& line)
 	line.linepixel(pixels);
 }
 
-
 std::vector<Record>
 sector(const OpenMTP_IDS& omtp_ids)
 {
@@ -149,7 +129,6 @@ sector(const OpenMTP_IDS& omtp_ids)
 	for_each(lines.begin(), lines.end(), sector_line);
 	return repack(lines);
 }
-
 
 bool
 openmtp_ids_sector(const OpenMTP_IDS& omtp_ids)
@@ -164,45 +143,42 @@ openmtp_ids_sector(const OpenMTP_IDS& omtp_ids)
 	return ids.write("omtp-ids-sector.ids");
 }
 
-
 // EXTERNAL REFERENCES
 //
 
 // reads an openmtp-ids file, specified on the command line, and writes
 // a sector of the image to file.
 //
-// the output filename is opmp-ids-sector.ids
+// the output filename is omtp-ids-sector.ids
 //
 // returns EXIT_SUCCESS if the sector was successfully written
 int
 main(int argc, char* argv[])
 {
 	if (argc < 2) {
-		std::cout << "Usage: "
-			<< basename(argv[0])
+		std::cout << "Usage: " << argv[0]
 			<< " OpenMTP_filename\n";
 
 		return EXIT_FAILURE;
 	}
 
-        if (!strcmp(argv[1], "-V")) {
-                std::cout << argv[0] << " " << PACKAGE_STRING << std::endl;
-                return 0;
-        }
+	if (!strcmp(argv[1], "-V")) {
+		std::cout << argv[0] << " " << PACKAGE_STRING << std::endl;
+		return 0;
+	}
 
 	std::cout << "read..." << std::endl;
 	OpenMTP_IDS omtp_ids;
 	try {
 		omtp_ids = OpenMTP_IDS(argv[1]);
 	} catch (char* err) {
-		std::cout << basename(argv[0]) << ": "
-			<< err << std::endl;
+		std::cout << argv[0] << ": " << err << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	if (!openmtp_ids_sector(omtp_ids))
+	if (!openmtp_ids_sector(omtp_ids)) {
 		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }
-

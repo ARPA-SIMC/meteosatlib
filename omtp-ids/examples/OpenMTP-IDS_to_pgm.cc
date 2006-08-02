@@ -1,16 +1,33 @@
-// $Id$
-
-#include <config.h>
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * OpenMTP-IDS_to_pgm - OpenMTP-IDS to pgm conversion
+ */
 
 // SYSTEM INCLUDES
 //
 #include <iostream>
 #include <fstream>
 
-#include <libgen.h>
-
 // PROJECT INCLUDES
 //
+#include <config.h>
 
 // LOCAL INCLUDES
 //
@@ -19,39 +36,6 @@
 // FORWARD REFERENCES
 //
 
-// *********************************************************************
-//
-// NAME:
-//   OpenMTP-IDS_to_pgm - OpenMTP-IDS to pgm conversion programme
-//
-// TYPE:          C++-PROGRAMME
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         OpenMTP-IDS_to_pgm.cc
-// SEE ALSO:      OpenMTP-IDS library
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
 // *********************************************************************
 
 const char*
@@ -77,7 +61,6 @@ filename(unsigned id)
 	}
 }
 
-
 // write an image to a pgm file
 //
 // returns true on success and false on failure
@@ -87,20 +70,24 @@ write_pgm(const char* filename,
 	  const std::vector<std::vector<unsigned char> > image)
 {
 	const unsigned size_x = image.size();
-	if (!size_x)
+	if (!size_x) {
 		return false;
+	}
 
 	const unsigned size_y_0 = image[0].size();
-	if (!size_y_0)
+	if (!size_y_0) {
 		return false;
+	}
 
 	std::ofstream os(filename);
-	if (!os.good())
+	if (!os.good()) {
 		return false;
+	}
 
 	os << "P5" << std::endl;
-	if (comment)
+	if (comment) {
 		os << "# " << comment << std::endl;
+	}
 	os << size_y_0 << " " << size_x << std::endl
 		<< "255" << std::endl;
 
@@ -110,14 +97,14 @@ write_pgm(const char* filename,
 			os.close();
 			return false;
 		}
-		for (int y = 0; y < (int) size_y; ++y)
+		for (int y = 0; y < (int) size_y; ++y) {
 			os.put(image[x][y]);
+		}
 	}
 	os.close();
 	std::cout << "wrote " << filename << std::endl;
 	return true;
 }
-
 
 // write a channel to a pgm
 //
@@ -126,27 +113,11 @@ write_pgm(const char* filename,
 bool
 write_channel_pgm(unsigned channel_id, const OpenMTP_IDS& omtp_ids)
 {
-	if (channel_id == omtp_ids::NO_DATA)
+	if (channel_id == omtp_ids::NO_DATA) {
 		return false;
+	}
 
 	std::vector<std::vector<unsigned char> > image;
-
-/*
-	std::vector<ScanLine> scanlines = omtp_ids.scanline(3,33);
-
-	std::vector<ScanLine>::iterator
-		line = scanlines.begin();
-	std::vector<ScanLine>::iterator
-		 end_line = scanlines.end();
-
-	while (line != end_line) {
-		std::cout << "line " << line->lineheader().line() << std::endl;
-		if (line->lineheader().channel_id() == channel_id)
-			image.push_back(line->linepixel());
-
-		++line;
-	}
-*/
 
 	const unsigned no_recs = omtp_ids.fileheader().no_records() - 1;
 
@@ -157,16 +128,17 @@ write_channel_pgm(unsigned channel_id, const OpenMTP_IDS& omtp_ids)
 		for (unsigned scan = 0; scan < no_scans; ++ scan) {
 			const ScanLine& s = r.scanline()[scan];
 
-			if (s.lineheader().channel_id() == (int) channel_id)
+			if (s.lineheader().channel_id()
+			    == (int) channel_id) {
 				image.push_back(s.linepixel());
+			}
 		}
 	}
 
 	return write_pgm(filename(channel_id), 0, image);
 }
 
-
-// write the three channels in and ids file to pgm's
+// write the three channels in an ids file to pgm's
 //
 // returns true if any of the channels was written successfully, and
 // false of all three writes failed
@@ -201,30 +173,28 @@ int
 main(int argc, char* argv[])
 {
 	if (argc < 2) {
-		std::cout << "Usage : "
-			<< basename(argv[0])
+		std::cout << "Usage : " << argv[0]
 			<< " OpenMTP_filename\n";
 
 		return EXIT_FAILURE;
 	}
 
-        if (!strcmp(argv[1], "-V")) {
-                std::cout << argv[0] << " " << PACKAGE_STRING << std::endl;
-                return 0;
-        }
+	if (!strcmp(argv[1], "-V")) {
+		std::cout << argv[0] << " " << PACKAGE_STRING << std::endl;
+		return 0;
+	}
 
 	OpenMTP_IDS omtp_ids;
 	try {
 		omtp_ids = OpenMTP_IDS(argv[1]);
 	} catch (const char* err) {
-		std::cout << basename(argv[0]) << ": "
-			<< err << std::endl;
+		std::cout << argv[0] << ": " << err << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	if (!openmtp_ids_to_pgm(omtp_ids))
+	if (!openmtp_ids_to_pgm(omtp_ids)) {
 		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }
-

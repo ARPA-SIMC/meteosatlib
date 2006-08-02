@@ -1,30 +1,21 @@
-// $Id$
-//
-// NAME:
-//   Record -
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
 
 // SYSTEM INCLUDES
 //
@@ -37,9 +28,8 @@
 //
 #include "Record.hh" // class implemented
 
-// LOCAL CONSTANTS
+// FORWARD REFERENCES
 //
-
 using namespace omtp_ids;
 
 // **************************** PRIVATE    *****************************
@@ -59,8 +49,9 @@ operator<<(std::ostream& os,
 	os << record.m_recordheader;
 
 	const int no_scanlines = record.m_scanline.size();
-	for (int i = 0; i < no_scanlines; ++i)
+	for (int i = 0; i < no_scanlines; i++) {
 		os << record.m_scanline[i];
+	}
 
 	return os;
 }
@@ -72,16 +63,18 @@ operator>>(std::istream& is,
 	record = Record();
 
 	is >> record.m_recordheader;
-	if (!is.good())
+	if (!is.good()) {
 		throw "failure while reading record header\n";
+	}
 
 	const int no_scanlines = record.m_recordheader.no_scanlines();
 	record.m_scanline.resize(no_scanlines);
 
-	for (int i = 0; i < no_scanlines; ++i) {
+	for (int i = 0; i < no_scanlines; i++) {
 		is >> record.m_scanline[i];
-		if (!is.good())
+		if (!is.good()) {
 			throw "failure while reading scan line\n";
+		}
 	}
 
 	return is;
@@ -92,12 +85,13 @@ operator>>(std::istream& is,
 std::ostream&
 Record::debug(std::ostream& os) const
 {
-	os << "-- Record --" << std::endl;
+	os << "-- Record --\n";
 	m_recordheader.debug(os);
 
 	const unsigned no_scanlines = m_scanline.size();
-	for (unsigned i = 0; i < no_scanlines; ++i)
+	for (unsigned i = 0; i < no_scanlines; i++) {
 		m_scanline[i].debug(os);
+	}
 
 	return os;
 }

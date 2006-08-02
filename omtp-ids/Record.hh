@@ -1,4 +1,24 @@
-// $Id$
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * Record
+ */
 #ifndef DSM_RECORD_HH
 #define DSM_RECORD_HH
 
@@ -8,90 +28,57 @@
 
 // PROJECT INCLUDES
 //
+#include <omtp-ids/RecordHeader.hh>
+#include <omtp-ids/ScanLine.hh>
 
 // LOCAL INCLUDES
 //
-#include <omtp-ids/RecordHeader.hh>
-#include <omtp-ids/ScanLine.hh>
 
 // FORWARD REFERENCES
 //
 
 // *********************************************************************
-//
-// NAME:
-//   Record -
-//
-// TYPE:          C++-CLASS
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         Record.hh, Record.cc
-// SEE ALSO:
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
 
 class Record
 {
-	private:
+private:
 
-	protected:
+protected:
 
-		RecordHeader m_recordheader;
-		std::vector<ScanLine> m_scanline;
+	RecordHeader m_recordheader;
+	std::vector<ScanLine> m_scanline;
 
-	public:
+public:
 
-		// LIFECYCLE
+	// LIFECYCLE
 
-		// OPERATORS
+	// OPERATORS
 
-		friend std::ostream& operator<<(std::ostream& os,
-						const Record& record);
-		friend std::istream& operator>>(std::istream& is,
-						Record& record);
+	friend std::ostream& operator<<(std::ostream& os,
+					const Record& record);
+	friend std::istream& operator>>(std::istream& is,
+					Record& record);
 
-		const ScanLine& operator[](const unsigned index) const;
-		ScanLine& operator[](const unsigned index);
+	const ScanLine& operator[](const unsigned index) const;
+	ScanLine& operator[](const unsigned index);
 
-		// OPERATIONS
+	// OPERATIONS
 
-		std::ostream& debug(std::ostream& os) const;
+	std::ostream& debug(std::ostream& os) const;
 
-		// INQUIRY
+	// INQUIRY
 
-		// ACCESS
+	// ACCESS
 
-		// get
-		const RecordHeader& recordheader() const;
-		RecordHeader& recordheader();
-		const std::vector<ScanLine>& scanline() const;
-		std::vector<ScanLine>& scanline();
+	// get
+	const RecordHeader& recordheader() const;
+	RecordHeader& recordheader();
+	const std::vector<ScanLine>& scanline() const;
+	std::vector<ScanLine>& scanline();
 
-		// set
-		void recordheader(const RecordHeader& recordheader);
-		void scanline(const std::vector<ScanLine>& scanline);
+	// set
+	void recordheader(const RecordHeader& recordheader);
+	void scanline(const std::vector<ScanLine>& scanline);
 };
 
 // EXTERNAL REFERENCES

@@ -1,4 +1,24 @@
-// $Id$
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * Constants used throughout the omtp-ids library
+ */
 #ifndef DSM_CONSTANTS_HH
 #define DSM_CONSTANTS_HH
 
@@ -15,42 +35,7 @@
 //
 
 // *********************************************************************
-//
-// NAME:
-//   Constants -
-//
-// TYPE:          C++-DECLARATIONS
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         Constants.hh, Constants.cc
-// SEE ALSO:
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
 
-// EXTERNAL REFERENCES
-//
 namespace omtp_ids {
 
 	// Header lengths
@@ -140,5 +125,8 @@ namespace omtp_ids {
 	};
 #endif
 }
+
+// EXTERNAL REFERENCES
+//
 
 #endif // DSM_CONSTANTS_HH

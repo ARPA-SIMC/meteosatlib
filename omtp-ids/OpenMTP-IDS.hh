@@ -1,4 +1,31 @@
-// $Id$
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * OpenMTP-IDS - Open Meteosat Transition Programme -- ISSCP Data Set
+ *
+ * Reference:
+ *   The Meteosat Archive
+ *   EUM.FG.3: Format Guide 3 - IDS in OpenMTP
+ *   Revision 1.1
+ *   January 1998
+ *   http://www.eumetsat.int
+ */
 #ifndef DSM_OPENMTP_IDS_HH
 #define DSM_OPENMTP_IDS_HH
 
@@ -9,102 +36,69 @@
 
 // PROJECT INCLUDES
 //
+#include <omtp-ids/FileHeader.hh>
+#include <omtp-ids/Record.hh>
 
 // LOCAL INCLUDES
 //
-#include <omtp-ids/FileHeader.hh>
-#include <omtp-ids/Record.hh>
 
 // FORWARD REFERENCES
 //
 
 // *********************************************************************
-//
-// NAME:
-//   OpenMTP-IDS - Open Meteosat Trasition Programme -- ISSCP Data Set
-//
-// TYPE:          C++-CLASS
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         OpenMTP-IDS.hh, OpenMTP-IDS.cc
-// SEE ALSO:
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
 
 class OpenMTP_IDS
 {
-	private:
+private:
 
-	protected:
+protected:
 
-		FileHeader m_fileheader;
-		std::vector<Record> m_record;
+	FileHeader m_fileheader;
+	std::vector<Record> m_record;
 
-	public:
+public:
 
-		// LIFECYCLE
+	// LIFECYCLE
 
-		OpenMTP_IDS();
-		OpenMTP_IDS(const OpenMTP_IDS& openmtp_ids);
-		OpenMTP_IDS(const char* filename);
+	OpenMTP_IDS();
+	OpenMTP_IDS(const OpenMTP_IDS& openmtp_ids);
+	OpenMTP_IDS(const char* filename);
 
-		// OPERATORS
+	// OPERATORS
 
-		friend std::ostream& operator<<(std::ostream& os,
-						const OpenMTP_IDS& openmtp_ids);
-		friend std::istream& operator>>(std::istream& is,
-						OpenMTP_IDS& openmtp_ids);
+	friend std::ostream& operator<<(std::ostream& os,
+					const OpenMTP_IDS& openmtp_ids);
+	friend std::istream& operator>>(std::istream& is,
+					OpenMTP_IDS& openmtp_ids);
 
-		// OPERATIONS
+	// OPERATIONS
 
-		bool read(const char* filename);
-		bool write(const char* filename);
+	bool read(const char* filename);
+	bool write(const char* filename);
 
-		std::ostream& debug(std::ostream& os) const;
+	std::ostream& debug(std::ostream& os) const;
 
-		// INQUIRY
+	// INQUIRY
 
-		// ACCESS
+	// ACCESS
 
-		// get
-		const FileHeader& fileheader() const;
-		FileHeader& fileheader();
-		const std::vector<Record>& record() const;
-		std::vector<Record>& record();
+	// get
+	const FileHeader& fileheader() const;
+	FileHeader& fileheader();
+	const std::vector<Record>& record() const;
+	std::vector<Record>& record();
 
-		// set
-		void fileheader(const FileHeader& fileheader);
-		void record(const std::vector<Record>& record);
+	// set
+	void fileheader(const FileHeader& fileheader);
+	void record(const std::vector<Record>& record);
 
-		std::vector<ScanLine>
-			scanline() const;
-		std::vector<ScanLine>
-			scanline(const unsigned line) const;
-		std::vector<ScanLine>
-			scanline(const unsigned from,
-				 const unsigned to) const;
+	std::vector<ScanLine>
+		scanline() const;
+	std::vector<ScanLine>
+		scanline(const unsigned line) const;
+	std::vector<ScanLine>
+		scanline(const unsigned from,
+			 const unsigned to) const;
 
 };
 
@@ -126,8 +120,9 @@ OpenMTP_IDS::OpenMTP_IDS(const OpenMTP_IDS& openmtp_ids)
 inline
 OpenMTP_IDS::OpenMTP_IDS(const char* filename)
 {
-	if (!read(filename))
+	if (!read(filename)) {
 		throw "read failure";
+	}
 }
 
 inline

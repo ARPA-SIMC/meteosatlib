@@ -1,30 +1,21 @@
-// $Id$
-//
-// NAME:
-//   OpenMTP-IDS -
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
 
 // SYSTEM INCLUDES
 //
@@ -35,17 +26,16 @@
 
 // PROJECT INCLUDES
 //
-
-// LOCAL INCLUDES
-//
 #include "ByteSex.hh"
-#include "OpenMTP-IDS.hh" // class implemented
 #include "FileHeader.hh"
 #include "Record.hh"
 
-// LOCAL CONSTANTS
+// LOCAL INCLUDES
 //
+#include "OpenMTP-IDS.hh" // class implemented
 
+// FORWARD REFERENCES
+//
 using namespace omtp_ids;
 
 // **************************** PRIVATE    *****************************
@@ -65,10 +55,12 @@ operator<<(std::ostream& os,
 	os << openmtp_ids.m_fileheader;
 
 	// the first record was just written..
-	const unsigned no_records = openmtp_ids.m_fileheader.no_records() - 1;
+	const unsigned no_records =
+		openmtp_ids.m_fileheader.no_records() - 1;
 
-	for (unsigned i = 0; i < no_records; ++i)
+	for (unsigned i = 0; i < no_records; i++) {
 		os << openmtp_ids.m_record[i];
+	}
 
 	return os;
 }
@@ -80,17 +72,20 @@ operator>>(std::istream& is,
 	openmtp_ids = OpenMTP_IDS();
 
 	is >> openmtp_ids.m_fileheader;
-	if (!is.good())
+	if (!is.good()) {
 		throw "failure while reading file header\n";
+	}
 
 	// the first record was just read..
-	const unsigned no_records = openmtp_ids.m_fileheader.no_records() - 1;
+	const unsigned no_records =
+		openmtp_ids.m_fileheader.no_records() - 1;
 	openmtp_ids.m_record.resize(no_records);
 
-	for (unsigned i = 0; i < no_records; ++i) {
+	for (unsigned i = 0; i < no_records; i++) {
 		is >> openmtp_ids.m_record[i];
-		if (!is.good())
+		if (!is.good()) {
 			throw "failure while reading record\n";
+		}
 	}
 
 	return is;
@@ -110,11 +105,7 @@ OpenMTP_IDS::read(const char* filename)
 		throw err.c_str();
 	}
 
-	try {
-		is >> *this;
-	} catch (const char* err) {
-		throw err;
-	}
+	is >> *this;
 
 	if (!is.good()) {
 		std::string err;
@@ -156,13 +147,14 @@ OpenMTP_IDS::write(const char* filename)
 std::ostream&
 OpenMTP_IDS::debug(std::ostream& os) const
 {
-	os << "-- * OpenMTP-IDS * --" << std::endl;
+	os << "-- * OpenMTP-IDS * --\n";
 
 	m_fileheader.debug(os);
 
 	const unsigned no_records = m_record.size();
-	for (unsigned i = 0; i < no_records; ++i)
+	for (unsigned i = 0; i < no_records; i++) {
 		m_record[i].debug(os);
+	}
 
 	return os;
 }
@@ -178,8 +170,9 @@ OpenMTP_IDS::scanline() const
 	unsigned last = 0;
 
 	const unsigned no_records = m_record.size();
-	for (unsigned i = 0; i < no_records; ++i)
+	for (unsigned i = 0; i < no_records; i++) {
 		last += m_record[i].scanline().size();
+	}
 
 	return scanline(0, last - 1);
 }
@@ -196,8 +189,9 @@ std::vector<ScanLine>
 OpenMTP_IDS::scanline(unsigned from,
 		      unsigned to) const
 {
-	if (to <= from)
+	if (to <= from) {
 		return std::vector<ScanLine>();
+	}
 
 	std::vector<ScanLine> lines;
 
@@ -217,14 +211,15 @@ OpenMTP_IDS::scanline(unsigned from,
 			copy(begin, end, back_inserter(lines));
 		}
 
-		if (to < size)
+		if (to < size) {
 			// we found the end
 			break;
+		}
 
 		from = (from < size) ? 0 : from - size;
 		to -= size;
 
-		++rec;
+		rec++;
 	}
 
 	return lines;

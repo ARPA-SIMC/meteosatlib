@@ -1,4 +1,24 @@
-// $Id$
+/* $Id$
+ * Copyright: (C) 2004, 2005, 2006 Deneys S. Maartens
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ */
+/*
+ * Record Header
+ */
 #ifndef DSM_RECORDHEADER_HH
 #define DSM_RECORDHEADER_HH
 
@@ -8,95 +28,62 @@
 
 // PROJECT INCLUDES
 //
+#include <omtp-ids/Constants.hh>
 
 // LOCAL INCLUDES
 //
-#include <omtp-ids/Constants.hh>
 
 // FORWARD REFERENCES
 //
 
 // *********************************************************************
-//
-// NAME:
-//   RecordHeader -
-//
-// TYPE:          C++-CLASS
-// SYNOPSIS:
-// DESCRIPTION:
-// EXAMPLES:
-// FILES:         RecordHeader.hh, RecordHeader.cc
-// SEE ALSO:
-//
-// AUTHOR:        Deneys Maartens
-// VERSION:       $Rev$
-// DATE:          $Date: 2004/07/16 11:05:26 $
-// COPYRIGHT:     Deneys Maartens (C) 2004
-//
-// LICENCE:
-//   This program is free software; you can redistribute it and/or
-//   modify it under the terms of the GNU General Public License as
-//   published by the Free Software Foundation; either version 2, or (at
-//   your option) any later version.
-//
-//   This program is distributed in the hope that it will be useful, but
-//   WITHOUT ANY WARRANTY; without even the implied warranty of
-//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//   General Public License for more details.
-//
-//   You should have received a copy of the GNU General Public License
-//   along with this program; if not, write to the Free Software
-//   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-//   02111-1307, USA.
-//
-// *********************************************************************
 
 class RecordHeader
 {
-	private:
+private:
 
-	protected:
+protected:
 
-		char m_fortran[omtp_ids::FORTRAN_LEN];
-		int m_record_header_length;
-		int m_no_scanlines;
-		int m_record_length;
-		int m_zero;
+	char m_fortran[omtp_ids::FORTRAN_LEN];
+	int m_record_header_length;
+	int m_no_scanlines;
+	int m_record_length;
+	int m_zero;
 
-	public:
+public:
 
-		// LIFECYCLE
+	// LIFECYCLE
 
-		RecordHeader();
+	RecordHeader();
 
-		// OPERATORS
+	// OPERATORS
 
-		friend std::ostream& operator<<(std::ostream& os,
-						const RecordHeader& recordheader);
-		friend std::istream& operator>>(std::istream& is,
-						RecordHeader& recordheader);
+	friend std::ostream& operator<<(std::ostream& os,
+					const RecordHeader& recordheader);
+	friend std::istream& operator>>(std::istream& is,
+					RecordHeader& recordheader);
 
-		// OPERATIONS
+	// OPERATIONS
 
-		std::ostream& debug(std::ostream& os) const;
+	std::ostream& debug(std::ostream& os) const;
 
-		// INQUIRY
+	// INQUIRY
 
-		// ACCESS
+	// ACCESS
 
-		// get
-		const char* fortran() const;
-		int record_header_length() const;
-		int no_scanlines() const;
-		int record_length() const;
-		int zero() const;
+	// get
+	const char* fortran() const;
+	int record_header_length() const;
+	int no_scanlines() const;
+	int record_length() const;
+	int zero() const;
 
-		// set
-		void fortran(const char* fortran);
-		void record_header_length(const int record_header_length);
-		void no_scanlines(const int no_scanlines);
-		void record_length(const int record_length);
-		void zero(const int zero);
+	// set
+	void fortran(const char* fortran);
+	void record_header_length(const int record_header_length);
+	void no_scanlines(const int no_scanlines);
+	void record_length(const int record_length);
+	void zero(const int zero);
 };
 
 // EXTERNAL REFERENCES
