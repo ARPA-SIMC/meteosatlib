@@ -1,4 +1,4 @@
-// $Id: OpenMTP-IDS.hh,v 1.1.1.1 2004/07/16 11:05:26 giuliani Exp $
+// $Id$
 #ifndef DSM_OPENMTP_IDS_HH
 #define DSM_OPENMTP_IDS_HH
 

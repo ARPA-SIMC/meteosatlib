@@ -1,4 +1,4 @@
-// $Id: LineHeader.cc,v 1.1.1.1 2004/07/16 11:05:26 giuliani Exp $
+// $Id$
 //
 // NAME:
 //   LineHeader -

@@ -1,4 +1,4 @@
-// $Id: LineHeader.hh,v 1.1.1.1 2004/07/16 11:05:26 giuliani Exp $
+// $Id$
 #ifndef DSM_LINEHEADER_HH
 #define DSM_LINEHEADER_HH
 

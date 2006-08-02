@@ -1,4 +1,4 @@
-// $Id: OpenMTP-IDS_sector.cc,v 1.2 2004/12/10 09:54:32 giuliani Exp $
+// $Id$
 
 #include <config.h>
 
