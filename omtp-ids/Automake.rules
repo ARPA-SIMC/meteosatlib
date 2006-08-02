@@ -38,6 +38,7 @@ bin_PROGRAMS += \
 
 nobase_include_HEADERS += \
     omtp-ids/ByteSex.hh \
+    omtp-ids/Constants.hh \
     omtp-ids/FileHeader.hh \
     omtp-ids/LineHeader.hh \
     omtp-ids/OpenMTP-IDS.hh \
@@ -46,7 +47,6 @@ nobase_include_HEADERS += \
     omtp-ids/ScanLine.hh
 
 noinst_HEADERS += \
-    omtp-ids/Constants.hh \
     omtp-ids/sysdep.h
 
 # CURRENT:REVISION:AGE
