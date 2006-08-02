@@ -76,8 +76,8 @@ include $(srcdir)/iniparser/Automake.rules
 
 include $(srcdir)/images/Automake.rules
 
-.PHONY: distrpm
-distrpm: distcheck
+.PHONY: dist-rpm
+dist-rpm: distcheck
 	rpmbuild -ta $(distdir).tar.gz
 
 EXTRA_DIST = \
