@@ -1,7 +1,7 @@
 ## Subdir -- Include this file in the toplevel Makefile with an include
 ## directive
 ## $Id$
-## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -54,6 +54,8 @@ noinst_HEADERS += \
 # - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
 # - interfaces added -> inc AGE
 # - interfaces removed -> AGE = 0
+omtp_ids_libomtp_ids_la_LDFLAGS = \
+    -version-info 0:0:0
 omtp_ids_libomtp_ids_la_SOURCES = \
     omtp-ids/ByteSex.cc \
     omtp-ids/FileHeader.cc \
@@ -68,17 +70,17 @@ omtp_ids_examples_OpenMTP_IDS_debug_LDADD = \
 omtp_ids_examples_OpenMTP_IDS_debug_SOURCES = \
     omtp-ids/examples/OpenMTP-IDS_debug.cc
 
-omtp_ids_examples_OpenMTP_IDS_sector_LDFLAGS = \
+omtp_ids_examples_OpenMTP_IDS_sector_LDADD = \
     omtp-ids/libomtp-ids.la
 omtp_ids_examples_OpenMTP_IDS_sector_SOURCES = \
     omtp-ids/examples/OpenMTP-IDS_sector.cc
 
-omtp_ids_examples_OpenMTP_IDS_to_pgm_LDFLAGS = \
+omtp_ids_examples_OpenMTP_IDS_to_pgm_LDADD = \
     omtp-ids/libomtp-ids.la
 omtp_ids_examples_OpenMTP_IDS_to_pgm_SOURCES = \
     omtp-ids/examples/OpenMTP-IDS_to_pgm.cc
 
-omtp_ids_examples_OpenMTP_IDS_write_LDFLAGS = \
+omtp_ids_examples_OpenMTP_IDS_write_LDADD = \
     omtp-ids/libomtp-ids.la
 omtp_ids_examples_OpenMTP_IDS_write_SOURCES = \
     omtp-ids/examples/OpenMTP-IDS_write.cc
