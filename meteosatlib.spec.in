@@ -12,7 +12,7 @@ NoSource:       1
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Vendor:         Graziano Giuliani <giuliani@lamma.rete.toscana.it>
-Packager:       Deneys S. Maartens
+Packager:       Deneys S. Maartens <dsm@tlabs.ac.za>
 
 %description
 Programs to convert Meteosat8 HRIT format images to WMO GRIB version 1
@@ -91,7 +91,16 @@ test -f %{SOURCE1} \
     || echo " *** WARNING: source file not found: %{SOURCE1}"
 
 %build
-%configure
+configure_disable=
+@HRI_FALSE@configure_disable="$configure_disable --disable-hri"
+@HRIT_FALSE@configure_disable="$configure_disable --disable-hrit"
+@MSG_NATIVE_FALSE@configure_disable="$configure_disable --disable-msg-native"
+@OMTP_IDS_FALSE@configure_disable="$configure_disable --disable-omtp-ids"
+@OPENMTP_FALSE@configure_disable="$configure_disable --disable-openmtp"
+@THORNSDS_DB1_FALSE@configure_disable="$configure_disable --disable-thornsds_db1"
+@HDF5_FALSE@configure_disable="$configure_disable --disable-hdf5"
+
+%configure $configure_disable
 make %{?_smp_mflags}
 
 %install
@@ -149,6 +158,9 @@ rm -rf $RPM_BUILD_ROOT
 @OPENMTP_TRUE@%{_libdir}/libopenmtp.a
 
 %changelog
+* Tue Aug 15 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>  0.4.2
+- Added logic to add conditional disable-* flags to %configure
+
 * Wed Aug 08 2005  Graziano Giuliani  <graziano.giuliani@poste.it>  0.4.0
 - Added ThornSDS DB1 file interface
 
