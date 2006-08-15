@@ -18,7 +18,7 @@
 ##
 
 all clean:
-	@cd $(top_builddir) && $(MAKE) $(MFLAGS) hrit/examples/$@
+	@cd $(top_builddir) && $(MAKE) $(MFLAGS) omtp-ids/examples/$@
 
 MAINTAINERCLEANFILES = \
     Makefile.in
