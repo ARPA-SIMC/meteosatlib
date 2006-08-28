@@ -26,6 +26,7 @@ A program to convert GRIB images back to NetCDF images for reprojection
 is also given.
 
 @HRI_TRUE@%package hri-devel
+@HRI_TRUE@Requires: @PACKAGE_NAME@ = %{version}
 @HRI_TRUE@
 @HRI_TRUE@Group: Libraries/Meteo
 @HRI_TRUE@Summary: Development for Meteosat HRI satellite images
@@ -34,6 +35,7 @@ is also given.
 @HRI_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
 @HRIT_TRUE@%package hrit-devel
+@HRIT_TRUE@Requires: @PACKAGE_NAME@ = %{version}
 @HRIT_TRUE@
 @HRIT_TRUE@License: Non Free (Copyright Eumetsat)
 @HRIT_TRUE@Group: Libraries/Meteo
@@ -53,6 +55,7 @@ is also given.
 @HRIT_TRUE@!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 @MSG_NATIVE_TRUE@%package msg-native-devel
+@MSG_NATIVE_TRUE@Requires: @PACKAGE_NAME@ = %{version}
 @MSG_NATIVE_TRUE@
 @MSG_NATIVE_TRUE@Group: Libraries/Meteo
 @MSG_NATIVE_TRUE@Summary: Development for Meteosat MSG satellite images
@@ -61,6 +64,7 @@ is also given.
 @MSG_NATIVE_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
 @OMTP_IDS_TRUE@%package omtp-ids-devel
+@OMTP_IDS_TRUE@Requires: @PACKAGE_NAME@ = %{version}
 @OMTP_IDS_TRUE@
 @OMTP_IDS_TRUE@Group: Libraries/Meteo
 @OMTP_IDS_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
@@ -69,6 +73,7 @@ is also given.
 @OMTP_IDS_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
 @OPENMTP_TRUE@%package openmtp-devel
+@OPENMTP_TRUE@Requires: @PACKAGE_NAME@ = %{version}
 @OPENMTP_TRUE@
 @OPENMTP_TRUE@Group: Libraries/Meteo
 @OPENMTP_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
@@ -77,6 +82,7 @@ is also given.
 @OPENMTP_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
 @THORNSDS_DB1_TRUE@%package thornsds_db1-devel
+@THORNSDS_DB1_TRUE@Requires: @PACKAGE_NAME@ = %{version}
 @THORNSDS_DB1_TRUE@
 @THORNSDS_DB1_TRUE@Group: Libraries/Meteo
 @THORNSDS_DB1_TRUE@Summary: Development for Meteosat ThornSDS DB1 PDUS images
