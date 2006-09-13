@@ -10,11 +10,13 @@ using namespace std;
 
 float ImageData::pixelSize() const
 {
+	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
 }
 
 float ImageData::seviriDX() const
 {
+	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
 }
 
