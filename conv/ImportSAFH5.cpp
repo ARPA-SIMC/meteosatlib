@@ -167,11 +167,7 @@ public:
 				continue;
 			std::auto_ptr<Image> img = ImportSAFH5(group, name);
 			if (shouldCrop())
-			{
-				img->data->crop(cropX, cropY, cropWidth, cropHeight);
-				img->column_offset += cropX;
-				img->line_offset += cropY;
-			}
+				img->crop(cropX, cropY, cropWidth, cropHeight);
 			output.processImage(*img);
 		}
 	}

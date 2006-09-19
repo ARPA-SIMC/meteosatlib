@@ -23,6 +23,12 @@ void Image::setData(ImageData* data)
 	this->data = data;
 }
 
+void Image::crop(int x, int y, int width, int height)
+{
+	data->crop(x, y, width, height);
+	column_offset += x;
+	line_offset += y;
+}
 
 
 float Image::pixelSize() const

@@ -50,7 +50,14 @@ struct Image {
 	Image() : data(0) {}
 	~Image();
 
+	/// Set the image data for this image
 	void setData(ImageData* data);
+
+	/**
+	 * Crop the image to the given rectangle specified in coordinates relative
+	 * to the image itself
+	 */
+	void crop(int x, int y, int width, int height);
 };
 
 /// Interface for image data of various types
