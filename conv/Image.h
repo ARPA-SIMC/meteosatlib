@@ -22,9 +22,11 @@ struct Image {
   int column_factor;
 	// TODO
   int line_factor;
-	// TODO
+
+	// Horizontal position of the image on the entire world view
   int column_offset;
-	// TODO
+
+	// Vertical position of the image on the entire world view
   int line_offset;
 
 	/// Pixel resolution at nadir point

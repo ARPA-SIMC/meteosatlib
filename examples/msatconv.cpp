@@ -175,6 +175,11 @@ int main( int argc, char* argv[] )
 		for (int i = optind; i < argc; ++i)
 		{
 			std::auto_ptr<ImageImporter> importer = getImporter(argv[i]);
+			if (!importer.get())
+			{
+				cerr << "No importer found for " << argv[i] << ": ignoring." << endl;
+				continue;
+			}
 			importer->cropX = ax;
 			importer->cropY = ay;
 			importer->cropWidth = aw;

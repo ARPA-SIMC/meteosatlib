@@ -236,7 +236,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   if (opts.subarea)
 		work_img.crop(opts.AreaPixStart, opts.AreaLinStart, opts.AreaNpix, opts.AreaNlin);
 
-
 	// Final, calibrated image
   std::auto_ptr<Image> img(new Image);
 
@@ -317,6 +316,11 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   img->line_factor = header[0].image_navigation->line_scaling_factor;
   img->column_offset = header[0].image_navigation->column_offset;
   img->line_offset = header[0].image_navigation->line_offset;
+  if (opts.subarea)
+	{
+		img->column_offset += opts.AreaPixStart;
+		img->line_offset += opts.AreaLinStart;
+	}
 
 
   // FIXME: and this? pds.sublon = header[0].image_navigation->subsatellite_longitude;
