@@ -49,6 +49,7 @@
 #include <getopt.h>
 
 using namespace H5;
+using namespace msat;
 
 static char rcs_id_string[] = "$Id$";
 
@@ -233,21 +234,21 @@ void view(H5File& file)
   for (vector<string>::const_iterator i = images.begin();
       i != images.end(); ++i)
   {
-    auto_ptr<ImageData> img = ImportSAFH5(group, *i);
+    auto_ptr<Image> img = ImportSAFH5(group, *i);
 		
 		if (i == images.begin())
 		{
 			cout << img->name << " " << img->datetime() << endl;
 			cout << " proj: " << img->projection << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
-			cout << " size: " << img->columns << "x" << img->lines << " factor: " << img->column_factor << "x" << img->line_factor
+			cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 					 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
 
 			cout << " Images: " << endl;
 		}
 
     cout << "  " << *i
-    	 << "\t" << img->columns << "x" << img->lines << " " << img->bpp << "bpp"
-	    " *" << img->slope << "+" << img->offset
+    	 << "\t" << img->data->columns << "x" << img->data->lines << " " << img->data->bpp << "bpp"
+	    " *" << img->data->slope << "+" << img->data->offset
 			<< " PSIZE " << img->pixelSize()
 			<< " DX " << img->seviriDX()
 			<< " DXY " << img->seviriDY()
@@ -266,12 +267,12 @@ void dump(H5File& file, const std::set<std::string>& selected)
   {
     if (!selected.empty() && selected.find(*i) == selected.end())
     	continue;
-    auto_ptr<ImageData> img = ImportSAFH5(group, *i);
+    auto_ptr<Image> img = ImportSAFH5(group, *i);
 		if (first)
 		{
 			cout << img->name << " " << img->datetime() << endl;
 			cout << " proj: " << img->projection << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
-			cout << " size: " << img->columns << "x" << img->lines << " factor: " << img->column_factor << "x" << img->line_factor
+			cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 					 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
 
 			cout << " Images: " << endl;
@@ -279,13 +280,13 @@ void dump(H5File& file, const std::set<std::string>& selected)
 		}
 
     cout << "  " << *i
-    		 << "\t" << img->columns << "x" << img->lines << " " << img->bpp << "bpp"
-						" *" << img->slope << "+" << img->offset << " decscale: " << img->decimalScale()
+    		 << "\t" << img->data->columns << "x" << img->data->lines << " " << img->data->bpp << "bpp"
+						" *" << img->data->slope << "+" << img->data->offset << " decscale: " << img->data->decimalScale()
 				 << endl;
     cout << "Coord\tUnscaled\tScaled" << endl;
-    for (int l = 0; l < img->lines; ++l)
-      for (int c = 0; c < img->lines; ++c)
-				cout << c << "x" << l << '\t' << img->unscaled(c, l) << '\t' << img->scaled(c, l) << endl;
+    for (int l = 0; l < img->data->lines; ++l)
+      for (int c = 0; c < img->data->lines; ++c)
+				cout << c << "x" << l << '\t' << img->data->unscaled(c, l) << '\t' << img->data->scaled(c, l) << endl;
   }
 }
 
@@ -305,7 +306,7 @@ void convertGrib(H5File& file, const std::set<std::string>& selected)
   {
     if (!selected.empty() && selected.find(*i) == selected.end())
 			continue;
-    auto_ptr<ImageData> img = ImportSAFH5(group, *i);
+    auto_ptr<Image> img = ImportSAFH5(group, *i);
 		if (first)
 		{
 			if (images.size() == 1)
@@ -354,7 +355,7 @@ void convertNetCDF(H5File& file, const std::set<std::string>& selected)
 			continue;
 
 		cout << "Converting " << *i << "..." << endl;
-    auto_ptr<ImageData> img = ImportSAFH5(group, *i);
+    auto_ptr<Image> img = ImportSAFH5(group, *i);
 
 		// Get the channel name
 		string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img->spacecraft_id, img->channel_id);

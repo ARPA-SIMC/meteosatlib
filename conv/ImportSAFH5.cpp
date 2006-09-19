@@ -11,44 +11,44 @@
 using namespace H5;
 using namespace std;
 
-struct H5Image
+namespace msat {
+
+bool isSAFH5(const std::string& filename)
 {
-  virtual void acquire(DataSet& dataset) = 0;
-};
+	return H5File::isHdf5(filename);
+}
 
-// Container for image data, which can be used with different sample sizes
-template<typename Item>
-struct H5ImageData : public ImageDataWithPixels<Item>, public H5Image
+template<typename Sample>
+static ImageData* acquireImage(const DataSet& dataset)
 {
-public:
-	// This is not const, but it's used for once-only initialization of mutable
-	// m_pixels, and needed to allow floats() to be const
-  void acquire(DataSet& dataset)
-  {
-		if (this->pixels)
-			delete[] this->pixels;
-    this->pixels = new Item[this->columns * this->lines];
+	int cols = readIntAttribute(dataset, "N_COLS");
+	int lines = readIntAttribute(dataset, "N_LINES");
+	auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(cols, lines));
 
-    DataSpace space = dataset.getSpace();
-    int ndims = space.getSimpleExtentNdims();
-    hsize_t *dims = new hsize_t[ndims];
-    space.getSimpleExtentDims(dims);
-    hsize_t size = 1;
-    for (int i=0; i<ndims; ++i)
-			size = size * dims[i];
-    delete[] dims;
-    if (size != this->columns * this->lines)
-    {
-			stringstream err;
-			err << "Image declares " << this->columns * this->lines << " samples "
-									 "but has " << size << " instead" << endl;
-      throw std::runtime_error(err.str());
-    }
-    dataset.read(this->pixels, dataset.getDataType());
-  }
-};
+  res->slope = readFloatAttribute(dataset, "SCALING_FACTOR");
+  res->offset = readFloatAttribute(dataset, "OFFSET");
 
-auto_ptr<ImageData> ImportSAFH5(const H5::Group& group, const std::string& name)
+	DataSpace space = dataset.getSpace();
+	int ndims = space.getSimpleExtentNdims();
+	hsize_t *dims = new hsize_t[ndims];
+	space.getSimpleExtentDims(dims);
+	hsize_t size = 1;
+	for (int i=0; i<ndims; ++i)
+		size = size * dims[i];
+	delete[] dims;
+	if (size != res->columns * res->lines)
+	{
+		stringstream err;
+		err << "Image declares " << res->columns * res->lines << " samples "
+								 "but has " << size << " instead" << endl;
+		throw std::runtime_error(err.str());
+	}
+	dataset.read(res->pixels, dataset.getDataType());
+
+	return res.release();
+}
+
+auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 {
 	DataSet dataset = group.openDataSet(name);
 
@@ -59,19 +59,55 @@ auto_ptr<ImageData> ImportSAFH5(const H5::Group& group, const std::string& name)
 		groupName.resize(groupName.size() - 1);
 
   // Get image dataset
-  auto_ptr<ImageData> data;
+  auto_ptr<Image> img(new Image);
 
-	// Create the right ImageData
+	// Read group metadata
+
+	// Get date and time
+	std::string datetime = readStringAttribute(group, "IMAGE_ACQUISITION_TIME");
+	// Split datetime to year, month, etc
+	if (sscanf(datetime.c_str(), "%04d%02d%02d%02d%02d", &img->year, &img->month, &img->day, &img->hour, &img->minute) != 5)
+	{
+		stringstream err;
+		err << "Unable to parse datetime " << datetime << endl;
+		throw std::runtime_error(err.str());
+	}
+
+	// Get projection name
+	img->projection = readStringAttribute(group, "PROJECTION_NAME");
+	
+	// Get channel ID
+	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
+	
+	// Get spacecraft ID
+	img->spacecraft_id = readIntAttribute(group, "GP_SC_ID");
+	
+	// Get scale factor
+	img->column_factor = readIntAttribute(group, "CFAC"); 
+	img->line_factor = readIntAttribute(group, "LFAC");
+	
+	// Get offset
+	img->column_offset = readIntAttribute(group, "COFF");
+	img->line_offset = readIntAttribute(group, "LOFF");
+
+
+  // Read image metadata
+
+  // Compute/invent the spectral channel id
+	SAFChannelInfo* ci = SAFChannelByName(name);
+	img->channel_id = ci == NULL ? 0 : ci->channelID;
+
+	// Read image data
   switch (dataset.getDataType().getSize())
   {
     case 1:
-      data.reset(new H5ImageData<uint8_t>());
+      img->setData(acquireImage<uint8_t>(dataset));
       break;
     case 2:
-      data.reset(new H5ImageData<uint16_t>());
+      img->setData(acquireImage<uint16_t>(dataset));
       break;
     case 4:
-      data.reset(new H5ImageData<uint32_t>());
+      img->setData(acquireImage<uint32_t>(dataset));
       break;
     default: {
       stringstream err;
@@ -80,51 +116,6 @@ auto_ptr<ImageData> ImportSAFH5(const H5::Group& group, const std::string& name)
 		}
   }
 
-	// Read group metadata
-
-	// Get date and time
-	std::string datetime = readStringAttribute(group, "IMAGE_ACQUISITION_TIME");
-	// Split datetime to year, month, etc
-	if (sscanf(datetime.c_str(), "%04d%02d%02d%02d%02d", &data->year, &data->month, &data->day, &data->hour, &data->minute) != 5)
-	{
-		stringstream err;
-		err << "Unable to parse datetime " << datetime << endl;
-		throw std::runtime_error(err.str());
-	}
-
-	// Get projection name
-	data->projection = readStringAttribute(group, "PROJECTION_NAME");
-	
-	// Get channel ID
-	data->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
-	
-	// Get spacecraft ID
-	data->spacecraft_id = readIntAttribute(group, "GP_SC_ID");
-	
-	// Get scale factor
-	data->column_factor = readIntAttribute(group, "CFAC"); 
-	data->line_factor = readIntAttribute(group, "LFAC");
-	
-	// Get offset
-	data->column_offset = readIntAttribute(group, "COFF");
-	data->line_offset = readIntAttribute(group, "LOFF");
-
-
-  // Read image metadata
-
-  // Compute/invent the spectral channel id
-	SAFChannelInfo* ci = SAFChannelByName(name);
-	data->channel_id = ci == NULL ? 0 : ci->channelID;
-
-  data->slope = readFloatAttribute(dataset, "SCALING_FACTOR");
-  data->offset = readFloatAttribute(dataset, "OFFSET");
-
-	data->columns = readIntAttribute(dataset, "N_COLS");
-	data->lines = readIntAttribute(dataset, "N_LINES");
-
-	// Read image data
-	dynamic_cast<H5Image*>(data.get())->acquire(dataset);
-
 	// Consistency checks
 
 	// Check that slope, offset and bpp match the ones that we have in
@@ -132,22 +123,17 @@ auto_ptr<ImageData> ImportSAFH5(const H5::Group& group, const std::string& name)
 	if (ci == NULL)
 		cerr << "Warning: unknown channel informations for product " << name << endl;
 	else {
-		if (ci->slope != data->slope)
-			cerr << "Warning: slope for image (" << data->slope << ") is different from the usual one (" << ci->slope << ")" << endl;
-		if (ci->offset != data->offset)
-			cerr << "Warning: offset for image (" << data->offset << ") is different from the usual one (" << ci->offset << ")" << endl;
-		if (ci->bpp != data->bpp)
-			cerr << "Warning: bpp for image (" << data->bpp << ") is different from the usual one (" << ci->bpp << ")" << endl;
+		if (ci->slope != img->data->slope)
+			cerr << "Warning: slope for image (" << img->data->slope << ") is different from the usual one (" << ci->slope << ")" << endl;
+		if (ci->offset != img->data->offset)
+			cerr << "Warning: offset for image (" << img->data->offset << ") is different from the usual one (" << ci->offset << ")" << endl;
+		if (ci->bpp != img->data->bpp)
+			cerr << "Warning: bpp for image (" << img->data->bpp << ") is different from the usual one (" << ci->bpp << ")" << endl;
 	}
 
-  return data;
+  return img;
 }
 
-
-bool isSAFH5(const std::string& filename)
-{
-	return H5File::isHdf5(filename);
-}
 
 class SAFH5ImageImporter : public ImageImporter
 {
@@ -170,7 +156,7 @@ public:
 			string c = readStringAttribute(dataset, "CLASS");
 			if (c != "IMAGE")
 				continue;
-			std::auto_ptr<ImageData> img = ImportSAFH5(group, name);
+			std::auto_ptr<Image> img = ImportSAFH5(group, name);
 			output.processImage(*img);
 		}
 	}
@@ -179,6 +165,8 @@ public:
 std::auto_ptr<ImageImporter> createSAFH5Importer(const std::string& filename)
 {
 	return std::auto_ptr<ImageImporter>(new SAFH5ImageImporter(filename));
+}
+
 }
 
 // vim:set ts=2 sw=2:

@@ -39,7 +39,7 @@ test_msatlib_test_SOURCES = \
 	test/tut-main.cpp \
 	test/test-utils.cpp \
 	test/test-importxrit.cpp \
-	conv/ImageData.cpp \
+	conv/Image.cpp \
 	conv/ImportXRIT.cpp
 
 

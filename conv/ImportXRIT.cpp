@@ -29,7 +29,7 @@
 #include <hrit/MSG_HRIT.h>
 #include <glob.h>
 
-#include <conv/ImageData.tcc>
+#include <conv/Image.tcc>
 
 using namespace std;
 
@@ -44,6 +44,8 @@ static std::string underscoreit(const std::string& base, int final_len)
 	res.resize(final_len, '_');
 	return res;
 }
+
+namespace msat {
 
 void XRITImportOptions::ensureComplete() const
 {
@@ -109,7 +111,7 @@ std::vector<std::string> XRITImportOptions::segmentFiles() const
 	return res;
 }
 
-std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts)
+std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 {
 	opts.ensureComplete();
 
@@ -189,13 +191,8 @@ std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts)
 		work_img.crop(opts.AreaPixStart, opts.AreaLinStart, opts.AreaNpix, opts.AreaNlin);
 
 
-
-
-
-
-
 	// Final, calibrated image
-	auto_ptr< ImageDataWithPixels<float> > img(new ImageDataWithPixels<float>);
+  std::auto_ptr<Image> img(new Image);
 
   // Get calibration values
   float *cal = PRO_data.prologue->radiometric_proc.get_calibration(
@@ -214,17 +211,16 @@ std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts)
 			break;
 	}
 	// Perform calibration and copy the data to the result image
+	auto_ptr< ImageDataWithPixels<float> > data(new ImageDataWithPixels<float>(work_img.columns, work_img.lines));
 	int size = work_img.columns * work_img.lines;
-  img->pixels = new float[size];
   for (int i = 0; i < (int)size; ++i)
     if (work_img.pixels[i] > 0)
-			img->pixels[i] = cal[work_img.pixels[i]] - base;
+			data->pixels[i] = cal[work_img.pixels[i]] - base;
     else
-			img->pixels[i] = 0.0;
-	img->columns = work_img.columns;
-	img->lines = work_img.lines;
+			data->pixels[i] = 0.0;
   delete [ ] cal;
 
+	img->setData(data.release());
 
 	// TODO
 #if 0
@@ -244,8 +240,8 @@ std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts)
   pds.cal_offset = p->radiometric_proc.ImageCalibration[pds.chn-1].Cal_Offset;
   pds.cal_slope = p->radiometric_proc.ImageCalibration[pds.chn-1].Cal_Slope;
 #endif
-  img->slope = 1 /* TODO */;
-  img->offset = 0 /* TODO */;
+  img->data->slope = 1 /* TODO */;
+  img->data->offset = 0 /* TODO */;
 
 	// Image time
   struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
@@ -297,7 +293,9 @@ std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts)
   if (pds.chn == MSG_SEVIRI_1_5_WV_7_3)   fakechan = 21;
   fakechan = pds.chn;
 	*/
-  return std::auto_ptr<ImageData>(img.release());
+  return img;
+}
+
 }
 
 #if 0

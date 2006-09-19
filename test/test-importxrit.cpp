@@ -22,6 +22,8 @@
 #include "test-utils.h"
 #include <ImportXRIT.h>
 
+using namespace msat;
+
 namespace tut {
 
 struct importxrit_shar
@@ -49,13 +51,13 @@ void to::test<1>()
 	opts.subarea = false;
 	//int AreaLinStart, AreaNlin, AreaPixStart, AreaNpix;
 
-	std::auto_ptr<ImageData> img = importXRIT(opts);
+	std::auto_ptr<Image> img = importXRIT(opts);
 
 	gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->columns, 5568);
-	gen_ensure_equals(img->lines, 11136);
-	gen_ensure_equals(img->slope, 1);
-	gen_ensure_equals(img->offset, 0);
+	gen_ensure_equals(img->data->columns, 5568);
+	gen_ensure_equals(img->data->lines, 11136);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -68,11 +70,11 @@ void to::test<1>()
 	gen_ensure_equals(img->line_factor, -40927014);
 	gen_ensure_equals(img->column_offset, -2);
 	gen_ensure_equals(img->line_offset, 5566);
-	gen_ensure_equals(img->bpp, 32); // unverified
-	gen_ensure_equals(img->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->scaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->scaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->bpp, 32); // unverified
+	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 }
 
 // Import a subarea of an XRIT product
@@ -91,13 +93,13 @@ void to::test<2>()
 	opts.AreaPixStart = 1000;
 	opts.AreaNpix = 400;
 
-	std::auto_ptr<ImageData> img = importXRIT(opts);
+	std::auto_ptr<Image> img = importXRIT(opts);
 
 	gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->columns, 400);
-	gen_ensure_equals(img->lines, 300);
-	gen_ensure_equals(img->slope, 1);
-	gen_ensure_equals(img->offset, 0);
+	gen_ensure_equals(img->data->columns, 400);
+	gen_ensure_equals(img->data->lines, 300);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -110,11 +112,11 @@ void to::test<2>()
 	gen_ensure_equals(img->line_factor, -40927014);
 	gen_ensure_equals(img->column_offset, -2);
 	gen_ensure_equals(img->line_offset, 5566);
-	gen_ensure_equals(img->bpp, 32); // unverified
-	gen_ensure_equals(img->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->scaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->scaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->bpp, 32); // unverified
+	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 }
 
 }

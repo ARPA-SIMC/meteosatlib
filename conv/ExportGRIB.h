@@ -28,17 +28,21 @@
 #ifndef MLIB_GRIBEXPORT_H
 #define MLIB_GRIBEXPORT_H
 
-#include <conv/ImageData.h>
+#include <conv/Image.h>
 #include <string>
 #include <memory>
 
 class GRIB_FILE;
 
+namespace msat {
+
 /// Export data from an ImageData into a GRIB_FILE
-void ExportGRIB(const ImageData& img, GRIB_FILE& gf);
+void ExportGRIB(const Image& img, GRIB_FILE& gf);
 
 // Use a factory method, so that we don't have to include the GRIB headers here
 std::auto_ptr<ImageConsumer> createGribExporter();
+
+}
 
 #endif
 

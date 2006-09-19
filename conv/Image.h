@@ -47,6 +47,8 @@ struct Image {
 
 	Image() : data(0) {}
 	~Image();
+
+	void setData(ImageData* data);
 };
 
 /// Interface for image data of various types
@@ -142,7 +144,7 @@ struct ImageConsumer
 
 struct ImageImporter
 {
-	virtual void read(Image& output) = 0;
+	virtual void read(ImageConsumer& output) = 0;
 };
 
 std::auto_ptr<ImageConsumer> createImageDumper(bool withContents);

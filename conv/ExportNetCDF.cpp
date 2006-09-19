@@ -28,7 +28,6 @@
 //#include "../config.h"
 
 #include <conv/ExportNetCDF.h>
-#include <conv/ImageData.h>
 
 #include <netcdfcpp.h>
 
@@ -50,11 +49,9 @@ using namespace std;
 #include <string>
 #include <vector>
 #include <stdexcept>
-
-
-
-
 #endif
+
+namespace msat {
 
 template<typename NCObject, typename T>
 static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
@@ -70,7 +67,7 @@ static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
 //
 // Creates NetCDF product
 //
-void ExportNetCDF(const ImageData& img, const std::string& fileName)
+void ExportNetCDF(const Image& img, const std::string& fileName)
 {
   // Get the channel name
   string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id);
@@ -136,9 +133,9 @@ void ExportNetCDF(const ImageData& img, const std::string& fileName)
 
   NcDim *tdim = ncf.add_dim("time");
   if (!tdim->is_valid()) throw std::runtime_error("adding time dimension failed");
-  NcDim *ldim = ncf.add_dim("line", img.lines);
+  NcDim *ldim = ncf.add_dim("line", img.data->lines);
   if (!ldim->is_valid()) throw std::runtime_error("adding line dimension failed");
-  NcDim *cdim = ncf.add_dim("column", img.columns);
+  NcDim *cdim = ncf.add_dim("column", img.data->columns);
   if (!cdim->is_valid()) throw std::runtime_error("adding column dimension failed");
 
   // Add Calibration values
@@ -157,11 +154,11 @@ void ExportNetCDF(const ImageData& img, const std::string& fileName)
   ncfAddAttr(*ivar, "scale_factor", 1.0);
   ncfAddAttr(*ivar, "chnum", img.channel_id);
 
-  float *pixels = img.allScaled();
+  float *pixels = img.data->allScaled();
   if (img.channel_id > 3 && img.channel_id < 12)
   {
     ivar->add_att("units", "K");
-    for (int i = 0; i < img.lines * img.columns; i ++)
+    for (int i = 0; i < img.data->lines * img.data->columns; i ++)
       if (pixels[i] > 0) pixels[i] += 145.0;
   }
   else
@@ -169,7 +166,7 @@ void ExportNetCDF(const ImageData& img, const std::string& fileName)
 
   // Write output values
   cerr << "output." << endl;
-  if (!ivar->put(pixels, 1, img.lines, img.columns))
+  if (!ivar->put(pixels, 1, img.data->lines, img.data->columns))
 		throw std::runtime_error("writing image values failed");
 
   // Close NetCDF output
@@ -184,7 +181,7 @@ void ExportNetCDF(const ImageData& img, const std::string& fileName)
 class NetCDFExporter : public ImageConsumer
 {
 public:
-	virtual void processImage(const ImageData& img)
+	virtual void processImage(const Image& img)
 	{
 		// Get the channel name
 		string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id);
@@ -207,5 +204,6 @@ std::auto_ptr<ImageConsumer> createNetCDFExporter()
 	return std::auto_ptr<ImageConsumer>(new NetCDFExporter());
 }
 
+}
 
 // vim:set ts=2 sw=2:

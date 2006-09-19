@@ -18,7 +18,7 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 noinst_HEADERS += \
-    conv/ImageData.h \
+    conv/Image.h \
     conv/ExportGRIB.h \
     conv/ExportNetCDF.h \
     conv/ImportSAFH5.h \

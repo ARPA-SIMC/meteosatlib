@@ -31,7 +31,7 @@
 
 #include <netcdfcpp.h>
 
-#include <conv/ImageData.h>
+#include <conv/Image.h>
 
 // HRI format interface
 
@@ -54,45 +54,41 @@
 
 using namespace std;
 
-void usage(char *pname);
-char *chname(char *chdesc, int len);
-bool GribProduct(char *ncfname);
+// char *chname(char *chdesc, int len);
+// bool GribProduct(char *ncfname);
 
-struct NetCDFImage
-{
-	virtual void acquire(const NcVar& var) = 0;
-};
+namespace msat {
 
-template<typename Item>
-struct NetCDFImageData : public ImageDataWithPixels<Item>, public NetCDFImage
+bool isNetCDF(const std::string& filename)
 {
-	virtual void acquire(const NcVar& var)
+	return filename.substr(filename.size() - 3) == ".nc";
+}
+
+template<typename Sample>
+static ImageData* acquireImage(const NcVar& var)
+{
+	if (var.num_dims() != 3)
 	{
-		if (var.num_dims() != 3)
-		{
-			stringstream msg;
-			msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << "instead";
-			throw std::runtime_error(msg.str());
-		}
-		int tsize = var.get_dim(0)->size();
-		if (tsize != 1)
-		{
-			stringstream msg;
-			msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << "instead";
-			throw std::runtime_error(msg.str());
-		}
-
-		this->lines = var.get_dim(1)->size();
-		this->columns = var.get_dim(2)->size();
-
-		if (this->pixels)
-			delete[] this->pixels;
-		this->pixels = new Item[this->columns * this->lines];
-
-		if (!var.get(this->pixels, 1, this->lines, this->columns))
-			throw std::runtime_error("reading image pixels failed");
+		stringstream msg;
+		msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << "instead";
+		throw std::runtime_error(msg.str());
 	}
-};
+
+	int tsize = var.get_dim(0)->size();
+	if (tsize != 1)
+	{
+		stringstream msg;
+		msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << "instead";
+		throw std::runtime_error(msg.str());
+	}
+
+	auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
+
+	if (!var.get(res->pixels, 1, res->lines, res->columns))
+		throw std::runtime_error("reading image pixels failed");
+
+	return res.release();
+}
 
 
 #if 0
@@ -214,17 +210,12 @@ std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename)
 }
 #endif
 
-bool isNetCDF(const std::string& filename)
-{
-	return filename.substr(filename.size() - 3) == ".nc";
-}
-
 class NetCDFImageImporter : public ImageImporter
 {
 	std::string filename;
   NcFile ncf;
 
-	void readHeader(ImageData& img)
+	void readHeader(Image& img)
 	{
 		NcAtt* a;
 		int tmp;
@@ -292,16 +283,17 @@ class NetCDFImageImporter : public ImageImporter
 #undef GETDEF
 	}
 
-	void readData(const NcVar& var, ImageData& img)
+	template<typename Sample>
+	void readData(const NcVar& var, Image& img)
 	{
 		NcAtt* a;
 
-		img.offset = ((a = var.get_att("add_offset")) != NULL ? a->as_float(0) : 0);
-		img.slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
+		img.setData(acquireImage<Sample>(var));
+
+		img.data->offset = ((a = var.get_att("add_offset")) != NULL ? a->as_float(0) : 0);
+		img.data->slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
 		img.channel_id = ((a = var.get_att("chnum")) != NULL ? a->as_int(0) :
 			throw std::runtime_error(string("could not find the 'chnum' attribute in image ") + var.name()));
-
-		dynamic_cast<NetCDFImage*>(&img)->acquire(var);
 	}
 
 public:
@@ -314,24 +306,25 @@ public:
 
 	virtual void read(ImageConsumer& output)
 	{
-		auto_ptr<ImageData> data;
+		Image img;
+		readHeader(img);
+
 		for (int i = 0; i < ncf.num_vars(); ++i)
 		{
 			NcVar* var = ncf.get_var(i);
 			if (string(var->name()) == "time")
 				continue;
+
 			switch (var->type())
 			{
-				case ncByte: data.reset(new NetCDFImageData<unsigned char>()); break;
-				case ncChar: data.reset(new NetCDFImageData<char>()); break;
-				case ncShort: data.reset(new NetCDFImageData<int16_t>()); break;
-				case ncLong: data.reset(new NetCDFImageData<int32_t>()); break;
-				case ncFloat: data.reset(new NetCDFImageData<float>()); break;
-				case ncDouble: data.reset(new NetCDFImageData<double>()); break;
+				case ncByte: readData<unsigned char>(*var, img); break;
+				case ncChar: readData<char>(*var, img); break;
+				case ncShort: readData<int16_t>(*var, img); break;
+				case ncLong: readData<int32_t>(*var, img); break;
+				case ncFloat: readData<float>(*var, img); break;
+				case ncDouble: readData<double>(*var, img); break;
 			}
-			readHeader(*data);
-			readData(*var, *data);
-			output.processImage(*data);
+			output.processImage(img);
 		}
 	}
 };
@@ -339,6 +332,8 @@ public:
 std::auto_ptr<ImageImporter> createNetCDFImporter(const std::string& filename)
 {
 	return std::auto_ptr<ImageImporter>(new NetCDFImageImporter(filename));
+}
+
 }
 
 // vim:set ts=2 sw=2:

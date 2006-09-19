@@ -54,7 +54,7 @@ examples_Met_Reproj_SOURCES = \
 examples_msatconv_SOURCES = \
     grib/Ebisuzaki.cpp \
     grib/GRIB.cpp \
-    conv/ImageData.cpp \
+    conv/Image.cpp \
     conv/ImportNetCDF.cpp \
     conv/ImportSAFH5.cpp \
     conv/ExportGRIB.cpp \

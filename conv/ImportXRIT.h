@@ -1,9 +1,11 @@
 #ifndef MSATLIB_XRIT_IMPORT_H
 #define MSATLIB_XRIT_IMPORT_H
 
-#include <conv/ImageData.h>
+#include <conv/Image.h>
 #include <memory>
 #include <vector>
+
+namespace msat {
 
 struct XRITImportOptions
 {
@@ -24,7 +26,9 @@ struct XRITImportOptions
   std::vector<std::string> segmentFiles() const;
 };
 
-std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts);
+std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts);
+
+}
 
 // vim:set sw=2:
 #endif

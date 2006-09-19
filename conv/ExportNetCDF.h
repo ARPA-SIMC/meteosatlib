@@ -28,17 +28,19 @@
 #ifndef MLIB_EXPORT_NETCDF_H
 #define MLIB_EXPORT_NETCDF_H
 
-#include <conv/ImageData.h>
+#include <conv/Image.h>
 #include <string>
 #include <memory>
 
-class ImageData;
+namespace msat {
 
 /// Export data from an ImageData to a NetCDF file
-void ExportNetCDF(const ImageData& img, const std::string& fileName);
+void ExportNetCDF(const Image& img, const std::string& fileName);
 
 // Use a factory method, so that we don't have to include the GRIB headers here
 std::auto_ptr<ImageConsumer> createNetCDFExporter();
+
+}
 
 #endif
 

@@ -26,7 +26,7 @@ noinst_HEADERS += \
 hdf5_SAFH52Grib_SOURCES = \
     grib/Ebisuzaki.cpp \
     grib/GRIB.cpp \
-    conv/ImageData.cpp \
+    conv/Image.cpp \
     conv/ImportSAFH5.cpp \
     conv/ExportGRIB.cpp \
     conv/ExportNetCDF.cpp \

@@ -1,4 +1,4 @@
-#include "ImageData.h"
+#include "Image.h"
 
 #include <sstream>
 #include <iomanip>
@@ -16,6 +16,14 @@ namespace msat {
 //
 
 Image::~Image() { if (data) delete data; }
+
+void Image::setData(ImageData* data)
+{
+	if (this->data) delete this->data;
+	this->data = data;
+}
+
+
 
 float Image::pixelSize() const
 {

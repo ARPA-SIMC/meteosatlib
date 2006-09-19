@@ -41,6 +41,7 @@
 #include <getopt.h>
 
 using namespace std;
+using namespace msat;
 
 static char rcs_id_string[] = "$Id$";
 
@@ -102,10 +103,12 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 	}
 }
 
+/*
 void view(const ImageData& img);
 void dump(const ImageData& img);
 void convertGrib(const ImageData& img);
 void convertNetCDF(const ImageData& img);
+*/
 
 /* ************************************************************************* */
 /* Reads Data Images, performs calibration and store output in NetCDF format */

@@ -27,7 +27,6 @@
 
 #include "ExportGRIB.h"
 
-#include <conv/ImageData.h>
 #include <grib/GRIB.h>
 #include <cmath>
 #include <stdexcept>
@@ -64,18 +63,20 @@ static char rcs_id_string[] = "$Id$";
 
 //#define EXTENDED_PDS
 
+namespace msat {
+
 //
 // Export data from an ImageData into a GRIB_FILE
 //
-void ExportGRIB(const ImageData& img, GRIB_FILE& gf)
+void ExportGRIB(const Image& img, GRIB_FILE& gf)
 {
   //
   // Extract data out of HDF5_source
   // 
 
   // Get image dataset
-  float cal_offset = img.offset;
-  float cal_slope = img.slope;
+  float cal_offset = img.data->offset;
+  float cal_slope = img.data->slope;
 
 	/*
   cout << "Scaling factor: " << cal_offset << endl;
@@ -133,10 +134,7 @@ void ExportGRIB(const ImageData& img, GRIB_FILE& gf)
 
 
   // Dimensions
-  int bpp = img.bpp;
-  int ncal = (int) pow(2.0, bpp);
-
-  grid.set_size(img.columns, img.lines);
+  grid.set_size(img.data->columns, img.data->lines);
   grid.set_earth_spheroid();
   grid.is_dirincgiven = true;
 
@@ -167,11 +165,11 @@ void ExportGRIB(const ImageData& img, GRIB_FILE& gf)
 									METEOSAT_IMAGE_NCOLUMNS/2-img.column_offset + 1, METEOSAT_IMAGE_NLINES/2-img.line_offset + 1);
 
   // Get the calibrated image
-  float *fvals = img.allScaled();
+  float *fvals = img.data->allScaled();
 
   f.set_table(GRIB_CENTER, GRIB_SUBCENTER, GRIB_TABLE, GRIB_PROCESS);
-  f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.lines * img.columns, FILL_VALUE, FILL_VALUE);
-  f.set_scale(img.decimalScale());
+  f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, FILL_VALUE, FILL_VALUE);
+  f.set_scale(img.data->decimalScale());
 
 #if LOCALDEF == 3
   unsigned char localdefinition3[LOCALDEF3LEN];
@@ -266,7 +264,7 @@ public:
 			throw std::runtime_error("closing grib file");
 	}
 
-	virtual void processImage(const ImageData& img)
+	virtual void processImage(const Image& img)
 	{
 		if (first)
 		{
@@ -292,6 +290,8 @@ public:
 std::auto_ptr<ImageConsumer> createGribExporter()
 {
 	return std::auto_ptr<ImageConsumer>(new GRIBExporter());
+}
+
 }
 
 // vim:set ts=2 sw=2:
