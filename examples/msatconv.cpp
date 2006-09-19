@@ -56,11 +56,12 @@ void do_help(const char* argv0, ostream& out)
       << "  SAF H5   Import only" << endl
       << "  XRIT     Import only" << endl
       << "Options are:" << endl
-      << "  --help   Print this help message" << endl
-      << "  --view   View the contents of a file" << endl
-      << "  --dump   View the contents of a file, including the pixel data" << endl
-      << "  --grib   Convert to GRIB" << endl
-      << "  --netcdf Convert to NetCDF" << endl;
+      << "  --help           Print this help message" << endl
+      << "  --view           View the contents of a file" << endl
+      << "  --dump           View the contents of a file, including the pixel data" << endl
+      << "  --grib           Convert to GRIB" << endl
+      << "  --netcdf         Convert to NetCDF" << endl
+      << "  --area='x,y,w,h' Crop the source image(s) to the given area" << endl;
 }
 void usage(char *pname)
 {
@@ -107,13 +108,6 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 	}
 }
 
-/*
-void view(const ImageData& img);
-void dump(const ImageData& img);
-void convertGrib(const ImageData& img);
-void convertNetCDF(const ImageData& img);
-*/
-
 /* ************************************************************************* */
 /* Reads Data Images, performs calibration and store output in NetCDF format */
 /* ************************************************************************* */
@@ -122,6 +116,7 @@ int main( int argc, char* argv[] )
 {
 	// Defaults to view
   Action action = VIEW;
+	int ax = 0, ay = 0, aw = 0, ah = 0;
 
   static struct option longopts[] = {
     { "help",	0, NULL, 'H' },
@@ -129,6 +124,7 @@ int main( int argc, char* argv[] )
 		{ "dump",	0, NULL, 'D' },
 		{ "grib",	0, NULL, 'G' },
 		{ "netcdf",	0, NULL, 'N' },
+		{ "area", 1, 0, 'a' },
   };
 
   bool done = false;
@@ -149,6 +145,14 @@ int main( int argc, char* argv[] )
 				break;
       case 'N': // --netcdf
 				action = NETCDF;
+				break;
+			case 'a':
+				if (sscanf(optarg, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
+				{
+					cerr << "Area value should be in the format x,y,width,height" << endl;
+					do_help(argv[0], cerr);
+					return 1;
+				}
 				break;
       case -1:
 				done = true;
@@ -171,6 +175,10 @@ int main( int argc, char* argv[] )
 		for (int i = optind; i < argc; ++i)
 		{
 			std::auto_ptr<ImageImporter> importer = getImporter(argv[i]);
+			importer->cropX = ax;
+			importer->cropY = ay;
+			importer->cropWidth = aw;
+			importer->cropHeight = ah;
 			std::auto_ptr<ImageConsumer> consumer = getExporter(action);
 			importer->read(*consumer);
 		}

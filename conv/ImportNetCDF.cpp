@@ -44,6 +44,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <conv/Image.tcc>
+
 #define TITLE "Observation File from MSG-SEVIRI"
 #define INSTITUTION "HIMET"
 #define TYPE "Obs file"
@@ -326,6 +328,8 @@ public:
 				case ncFloat: readData<float>(*var, img); break;
 				case ncDouble: readData<double>(*var, img); break;
 			}
+			if (shouldCrop())
+				img.data->crop(cropX, cropY, cropWidth, cropHeight);
 			output.processImage(img);
 		}
 	}

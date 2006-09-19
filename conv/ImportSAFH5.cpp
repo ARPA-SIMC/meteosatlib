@@ -8,6 +8,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <conv/Image.tcc>
+
 using namespace H5;
 using namespace std;
 
@@ -164,6 +166,8 @@ public:
 			if (c != "IMAGE")
 				continue;
 			std::auto_ptr<Image> img = ImportSAFH5(group, name);
+			if (shouldCrop())
+				img->data->crop(cropX, cropY, cropWidth, cropHeight);
 			output.processImage(*img);
 		}
 	}

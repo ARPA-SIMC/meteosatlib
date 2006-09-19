@@ -93,6 +93,9 @@ struct ImageData
 	/// Return the decimal scaling factor that can be used before truncating
 	/// scaled values as integers
 	int decimalScale() const;
+
+	/// Crop the image to the given rectangle
+	virtual void crop(int x, int y, int width, int height) = 0;
 };
 
 // Container for image data, which can be used with different sample sizes
@@ -139,11 +142,19 @@ public:
 
 struct ImageConsumer
 {
+	virtual ~ImageConsumer() {}
 	virtual void processImage(const Image& image) = 0;
 };
 
 struct ImageImporter
 {
+	int cropX, cropY, cropWidth, cropHeight;
+
+	ImageImporter() : cropX(0), cropY(0), cropWidth(0), cropHeight(0) {}
+	virtual ~ImageImporter() {}
+
+	bool shouldCrop() const { return cropWidth != 0 && cropHeight != 0; }
+
 	virtual void read(ImageConsumer& output) = 0;
 };
 

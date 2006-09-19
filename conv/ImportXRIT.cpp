@@ -351,6 +351,14 @@ public:
 
 	virtual void read(ImageConsumer& output)
 	{
+		if (shouldCrop())
+		{
+			opts.subarea = true;
+			opts.AreaPixStart = cropX;
+			opts.AreaLinStart = cropY;
+			opts.AreaNpix = cropWidth;
+			opts.AreaNlin = cropHeight;
+		}
 		std::auto_ptr<Image> img = importXRIT(opts);
 		output.processImage(*img);
 	}
