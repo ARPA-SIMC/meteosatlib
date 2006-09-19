@@ -24,7 +24,7 @@ struct XRITImportOptions
   std::vector<std::string> segmentFiles() const;
 };
 
-std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts);
+std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts);
 
 // vim:set sw=2:
 #endif

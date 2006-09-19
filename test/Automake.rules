@@ -24,20 +24,21 @@ test/all: $(test_bin)
 noinst_PROGRAMS += $(test_bin)
 
 noinst_HEADERS += \
-    test/tut.h \
-    test/tut_reporter.h \
-    test/tut_restartable.h
+	test/tut.h \
+	test/tut_reporter.h \
+	test/tut_restartable.h
 
 test_msatlib_test_CPPFLAGS = \
-    -I$(top_srcdir)/conv \
-    -I$(top_srcdir)/grib
+	-I$(top_srcdir)/conv \
+	-I$(top_srcdir)/grib
 test_msatlib_test_LDADD = \
-    -lnetcdf_c++ \
-    -lnetcdf
+	hrit/libhrit.la
+	-lnetcdf_c++ \
+	-lnetcdf
 test_msatlib_test_SOURCES = \
-    test/tut-main.cpp \
-    conv/ImageData.cpp \
-    conv/ImportXRIT.cpp
+	test/tut-main.cpp \
+	conv/ImageData.cpp \
+	conv/ImportXRIT.cpp
 
 
 ## -fin-

@@ -29,6 +29,8 @@
 #include <hrit/MSG_HRIT.h>
 #include <glob.h>
 
+#include <conv/ImageData.tcc>
+
 using namespace std;
 
 #define PATH_SEPARATOR "/"
@@ -107,7 +109,7 @@ std::vector<std::string> XRITImportOptions::segmentFiles() const
 	return res;
 }
 
-std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
+std::auto_ptr<ImageData> importXRIT(const XRITImportOptions& opts)
 {
 	opts.ensureComplete();
 
@@ -295,7 +297,7 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
   if (pds.chn == MSG_SEVIRI_1_5_WV_7_3)   fakechan = 21;
   fakechan = pds.chn;
 	*/
-  return img;
+  return std::auto_ptr<ImageData>(img.release());
 }
 
 #if 0
