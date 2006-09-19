@@ -95,6 +95,21 @@ public:
   {
       return static_cast<int>(pixels[line * columns + column]);
   }
+
+	// Rotate the image by 180 degrees, in place
+	void rotate180()
+	{
+		for (int y = 0; y < lines; ++y)
+			for (int x = 0; x < columns; ++x)
+			{
+				Item i = pixels[y * columns + x];
+				pixels[y * columns + x] = pixels[(lines - y - 1) * columns + (columns - x - 1)];
+				pixels[(lines - y - 1) * columns + (columns - x - 1)] = i;
+			}
+	}
+
+	// Throw away all the samples outside of a given area
+	void crop(int x, int y, int width, int height);
 };
 
 struct ImageConsumer

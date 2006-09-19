@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
 #include <math.h>
 #include "parameters.h"
 
@@ -89,6 +90,24 @@ time_t ImageData::forecastSeconds2000() const
 	return res - s_epoch_2000;
 }
 
+template<typename EL>
+void ImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
+{
+	// Consistency checks
+	if (x < 0  || x > columns - width)
+		throw std::runtime_error("Area to crop does not fit horizontally inside image data");
+	if (y < 0  || y > lines - height)
+		throw std::runtime_error("Area to crop does not fit vertically inside image data");
+
+	size_t newsize = width * height;
+	Item *newpix = new Item[newsize];
+	for (int i = 0; i < height; ++i)
+		memcpy(newpix + i * width, pixels + (y + i) * columns + x, width * sizeof(Item));
+	delete [ ] pixels;
+	pixels = newpix;
+	lines = height;
+	columns = width;
+}
 
 class ImageDumper : public ImageConsumer
 {

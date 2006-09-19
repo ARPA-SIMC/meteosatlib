@@ -22,7 +22,8 @@ noinst_HEADERS += \
     conv/ExportGRIB.h \
     conv/ExportNetCDF.h \
     conv/ImportSAFH5.h \
-    conv/ImportNetCDF.h
+    conv/ImportNetCDF.h \
+    conv/ImportXRIT.h
 
 ## -fin-
 ## vim:syn=automake:
