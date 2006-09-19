@@ -37,6 +37,8 @@ test_msatlib_test_LDADD = \
 	-lnetcdf
 test_msatlib_test_SOURCES = \
 	test/tut-main.cpp \
+	test/test-utils.cpp \
+	test/test-importxrit.cpp \
 	conv/ImageData.cpp \
 	conv/ImportXRIT.cpp
 
