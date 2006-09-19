@@ -57,6 +57,7 @@ examples_msatconv_SOURCES = \
     conv/Image.cpp \
     conv/ImportNetCDF.cpp \
     conv/ImportSAFH5.cpp \
+    conv/ImportXRIT.cpp \
     conv/ExportGRIB.cpp \
     conv/ExportNetCDF.cpp \
     hdf5/Utils.cpp \

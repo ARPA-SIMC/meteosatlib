@@ -19,6 +19,7 @@ struct XRITImportOptions
 
   XRITImportOptions() :
     directory("."), subarea(false) {}
+  XRITImportOptions(const std::string& filename);
 
   void ensureComplete() const;
 
@@ -26,7 +27,9 @@ struct XRITImportOptions
   std::vector<std::string> segmentFiles() const;
 };
 
+bool isXRIT(const std::string& filename);
 std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts);
+std::auto_ptr<ImageImporter> createXRITImporter(const std::string& filename);
 
 }
 

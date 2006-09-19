@@ -15,7 +15,14 @@ namespace msat {
 
 bool isSAFH5(const std::string& filename)
 {
-	return H5File::isHdf5(filename);
+	try {
+		if (access(filename.c_str(), F_OK) == 0)
+			return H5File::isHdf5(filename);
+		return false;
+	} catch (FileIException& e) {
+		e.printError(stderr);
+		return false;
+	}
 }
 
 template<typename Sample>

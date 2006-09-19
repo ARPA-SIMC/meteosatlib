@@ -29,6 +29,7 @@
 
 #include <conv/ImportSAFH5.h>
 #include <conv/ImportNetCDF.h>
+#include <conv/ImportXRIT.h>
 #include <conv/ExportGRIB.h>
 #include <conv/ExportNetCDF.h>
 
@@ -53,6 +54,7 @@ void do_help(const char* argv0, ostream& out)
       << "  NetCDF   Import/Export" << endl
       << "  Grib     Export only" << endl
       << "  SAF H5   Import only" << endl
+      << "  XRIT     Import only" << endl
       << "Options are:" << endl
       << "  --help   Print this help message" << endl
       << "  --view   View the contents of a file" << endl
@@ -68,7 +70,7 @@ void usage(char *pname)
             << pname << "<output option> file(s)..."
             << std::endl << std::endl
             << "Examples: " << std::endl << "\t" << pname
-            << "  " << pname << " --grib Data0.nc SAFNWC_MSG1_CT___04356_051_EUROPE______.h5"
+            << "  " << pname << " --grib Data0.nc SAFNWC_MSG1_CT___04356_051_EUROPE______.h5 hritdir/H:MSG1:HRV:200605031200"
             << std::endl;
   return;
 }
@@ -86,6 +88,8 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 		return createNetCDFImporter(filename);
 	if (isSAFH5(filename))
 		return createSAFH5Importer(filename);
+	if (isXRIT(filename))
+		return createXRITImporter(filename);
 	return std::auto_ptr<ImageImporter>();
 }
 

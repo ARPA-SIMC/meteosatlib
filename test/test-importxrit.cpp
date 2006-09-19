@@ -38,9 +38,17 @@ struct importxrit_shar
 };
 TESTGRP(importxrit);
 
-// Import a full XRIT product
+// Test the isXRIT function
 template<> template<>
 void to::test<1>()
+{
+	gen_ensure(isXRIT("data/H:MSG1:HRV:200604261945"));
+	gen_ensure(!isXRIT("data/H:MSG1:HRV"));
+}
+
+// Import a full XRIT product
+template<> template<>
+void to::test<2>()
 {
 	XRITImportOptions opts;
 	opts.directory = "data";
@@ -79,7 +87,7 @@ void to::test<1>()
 
 // Import a subarea of an XRIT product
 template<> template<>
-void to::test<2>()
+void to::test<3>()
 {
 	XRITImportOptions opts;
 	opts.directory = "data";

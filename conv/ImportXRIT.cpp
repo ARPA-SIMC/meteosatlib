@@ -23,7 +23,7 @@
 //  
 //---------------------------------------------------------------------------
 
-#include <ImportXRIT.h>
+#include <conv/ImportXRIT.h>
 #include <stdexcept>
 #include <fstream>
 #include <hrit/MSG_HRIT.h>
@@ -46,6 +46,52 @@ static std::string underscoreit(const std::string& base, int final_len)
 }
 
 namespace msat {
+
+// dir/res:prodid1:prodid2:time
+bool isXRIT(const std::string& filename)
+{
+	// check that it contains at least 3 ':' signs
+	size_t pos = 0;
+	for (int i = 0; i < 3; ++i)
+		if ((pos = filename.find(':', pos)) == string::npos)
+			return false;
+	return true;
+}
+
+// dir/res:prodid1:prodid2:time
+XRITImportOptions::XRITImportOptions(const std::string& filename)
+{
+	size_t beg;
+	size_t end = filename.rfind('/');
+	if (end == string::npos)
+	{
+		directory = ".";
+		beg = 0;
+	}
+	else
+	{
+		directory = filename.substr(0, end);
+		if (directory.size() == 0) directory = "/";
+		beg = end + 1;
+	}
+
+	if ((end = filename.find(':', beg)) == string::npos)
+		throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
+	resolution = filename.substr(beg, end-beg);
+
+	beg = end + 1;
+	if ((end = filename.find(':', beg)) == string::npos)
+		throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
+	productid1 = filename.substr(beg, end-beg);
+
+	beg = end + 1;
+	if ((end = filename.find(':', beg)) == string::npos)
+		throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
+	productid2 = filename.substr(beg, end-beg);
+
+	beg = end + 1;
+	timing = filename.substr(beg);
+}
 
 void XRITImportOptions::ensureComplete() const
 {
@@ -294,6 +340,25 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   fakechan = pds.chn;
 	*/
   return img;
+}
+
+class XRITImageImporter : public ImageImporter
+{
+	XRITImportOptions opts;
+
+public:
+	XRITImageImporter(const std::string& filename) : opts(filename) {}
+
+	virtual void read(ImageConsumer& output)
+	{
+		std::auto_ptr<Image> img = importXRIT(opts);
+		output.processImage(*img);
+	}
+};
+
+std::auto_ptr<ImageImporter> createXRITImporter(const std::string& filename)
+{
+	return std::auto_ptr<ImageImporter>(new XRITImageImporter(filename));
 }
 
 }

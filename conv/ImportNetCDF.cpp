@@ -61,6 +61,8 @@ namespace msat {
 
 bool isNetCDF(const std::string& filename)
 {
+	if (access(filename.c_str(), F_OK) != 0)
+		return false;
 	return filename.substr(filename.size() - 3) == ".nc";
 }
 
