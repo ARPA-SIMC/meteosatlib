@@ -3,6 +3,7 @@
 
 #include <conv/ImageData.h>
 #include <memory>
+#include <vector>
 
 struct XRITImportOptions
 {
@@ -17,11 +18,11 @@ struct XRITImportOptions
   XRITImportOptions() :
     directory("."), subarea(false) {}
 
-  void ensureComplete();
+  void ensureComplete() const;
 
-  std::string prologueFile();
-  std::vector<std::string> segmentFiles();
-}
+  std::string prologueFile() const;
+  std::vector<std::string> segmentFiles() const;
+};
 
 std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts);
 

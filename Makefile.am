@@ -29,13 +29,15 @@ DIST_SUBDIRS = \
     msg-native \
     omtp-ids \
     openmtp \
-    thornsds_db1
+    thornsds_db1 \
+    test
 
 bin_PROGRAMS =
 lib_LTLIBRARIES =
 nobase_include_HEADERS =
 noinst_HEADERS =
 dist_noinst_DATA =
+noinst_PROGRAMS =
 
 if HRI
 include $(srcdir)/hri/Automake.rules
@@ -75,6 +77,8 @@ include $(srcdir)/grib/Automake.rules
 include $(srcdir)/iniparser/Automake.rules
 
 include $(srcdir)/images/Automake.rules
+
+include $(srcdir)/test/Automake.rules
 
 .PHONY: dist-rpm
 dist-rpm: distcheck

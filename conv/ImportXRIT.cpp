@@ -24,6 +24,12 @@
 //---------------------------------------------------------------------------
 
 #include <ImportXRIT.h>
+#include <stdexcept>
+#include <fstream>
+#include <hrit/MSG_HRIT.h>
+#include <glob.h>
+
+using namespace std;
 
 #define PATH_SEPARATOR "/"
 // For windows use #define PATH_SEPARATOR "\"
@@ -37,7 +43,7 @@ static std::string underscoreit(const std::string& base, int final_len)
 	return res;
 }
 
-void XRITImportOptions::ensureComplete()
+void XRITImportOptions::ensureComplete() const
 {
 	if (directory.empty())
 		throw std::runtime_error("source directory is missing");
@@ -51,17 +57,16 @@ void XRITImportOptions::ensureComplete()
 		throw std::runtime_error("timing is missing");
 }
 
-std::string XRITImportOptions::prologueFile()
+std::string XRITImportOptions::prologueFile() const
 {
-  std::string filename;
-  filename = directory
+  std::string filename = directory
 		       + PATH_SEPARATOR
 					 + resolution
 		       + "-???-??????-"
 					 + underscoreit(productid1, 12) + "-"
 					 + underscoreit("_", 9) + "-"
 					 + "PRO______-"
-					 + opts.timing
+					 + timing
 					 + "-__";
 
   glob_t globbuf;
@@ -78,16 +83,16 @@ std::string XRITImportOptions::prologueFile()
   return res;
 }
 
-std::vector<std::string> XRITImportOptions::segmentFiles()
+std::vector<std::string> XRITImportOptions::segmentFiles() const
 {
-  filename = directory
+  string filename = directory
 					 + PATH_SEPARATOR
 					 + resolution
            + "-???-??????-"
-           + underscoreit(opts.productid1, 12) + "-"
-           + underscoreit(opts.productid2, 9) + "-"
+           + underscoreit(productid1, 12) + "-"
+           + underscoreit(productid2, 9) + "-"
            + "0?????___" + "-"
-           + opts.timing + "-" + "?_";
+           + timing + "-" + "?_";
 
   glob_t globbuf;
   globbuf.gl_offs = 1;
@@ -106,13 +111,9 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
 {
 	opts.ensureComplete();
 
-  std::ifstream hrit(opts.prologueFile(), (std::ios::binary | std::ios::in));
+  std::ifstream hrit(opts.prologueFile().c_str(), (std::ios::binary | std::ios::in));
   if (hrit.fail())
-  {
-    std::cerr << "Cannot open input hrit file "
-              << globbuf.gl_pathv[1] << std::endl;
-		return 1;
-  }
+		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
 
   MSG_header PRO_head;
   PRO_head.read_from(hrit);
@@ -123,9 +124,6 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
   hrit.close();
   //std::cout << PRO_head;
 
-  MSG_header *header;
-  MSG_data *msgdat;
-
 	std::vector<std::string> segments = opts.segmentFiles();
 
   MSG_header header[segments.size()];
@@ -133,7 +131,7 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
 
   for (int i = 0; i < segments.size(); ++i)
   {
-    std::ifstream hrit(segments[i], (std::ios::binary | std::ios::in));
+    std::ifstream hrit(segments[i].c_str(), (std::ios::binary | std::ios::in));
     if (hrit.fail())
 			throw std::runtime_error("Cannot open input hrit file " + segments[i]);
     header[i].read_from(hrit);
@@ -151,7 +149,7 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
   for (int i = 0; i < totalsegs; i ++)
     segsindexes[i] = -1;
 
-  for (int i = 0; i < nsegments; i ++)
+  for (int i = 0; i < segments.size(); i ++)
     segsindexes[header[i].segment_id->sequence_number-1] = i;
 
 	// Perform image rotation and cropping on the uncalibrated data
@@ -163,8 +161,8 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
   work_img.lines = seglines * totalsegs;
 
   size_t npixperseg = work_img.columns * seglines;
-  int SP_X0 = npix/2;
-  int SP_Y0 = nlin/2;
+  int SP_X0 = work_img.columns/2;
+  int SP_Y0 = work_img.lines/2;
 
   // Assemble all the segments together
 	size_t total_size = work_img.columns * work_img.lines;
@@ -186,7 +184,7 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
 
   // Slice the subarea if needed
   if (opts.subarea)
-		work_img.crop(opts.areaPixStart, opts.AreaLinStart, opts.AreaNpix, opts.areaNlin);
+		work_img.crop(opts.AreaPixStart, opts.AreaLinStart, opts.AreaNpix, opts.AreaNlin);
 
 
 
@@ -198,7 +196,7 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
 	auto_ptr< ImageDataWithPixels<float> > img(new ImageDataWithPixels<float>);
 
   // Get calibration values
-  float *cal = PRO_data->prologue->radiometric_proc.get_calibration(
+  float *cal = PRO_data.prologue->radiometric_proc.get_calibration(
 								header[0].segment_id->spectral_channel_id,
 								header[0].image_structure->number_of_bits_per_pixel);
 	float base;
@@ -248,11 +246,11 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
   img->offset = 0 /* TODO */;
 
 	// Image time
-  struct tm *tmtime = PRO_data->prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
+  struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
   img->year = tmtime->tm_year+1900;
 	img->month = tmtime->tm_mon+1;
 	img->day = tmtime->tm_mday;
-	img->hour = ttime->tm_hour;
+	img->hour = tmtime->tm_hour;
 	img->minute = tmtime->tm_min;
 
 
@@ -346,7 +344,6 @@ std::auto_ptr<ImageImporter> createXRITImporter(const XRITImportOptions& opts)
 #include <hrit/MSG_HRIT.h>
 
 #include <getopt.h>
-#include <glob.h>
 
 #define PATH_SEPARATOR "/"
 // For windows use #define PATH_SEPARATOR "\"
