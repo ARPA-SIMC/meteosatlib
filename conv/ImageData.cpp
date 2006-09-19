@@ -9,51 +9,32 @@
 
 using namespace std;
 
-float ImageData::pixelSize() const
+namespace msat {
+
+//
+// Image
+//
+
+Image::~Image() { if (data) delete data; }
+
+float Image::pixelSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
 }
 
-float ImageData::seviriDX() const
+float Image::seviriDX() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
 }
 
-float ImageData::seviriDY() const
+float Image::seviriDY() const
 {
 	return seviriDX();
 }
 
-float* ImageData::allScaled() const
-{
-	float* res = new float[lines * columns];
-	for (int y = 0; y < lines; ++y)
-		for (int x = 0; x < columns; ++x)
-			res[y * columns + x] = scaled(x, y);
-	return res;
-}
-
-int* ImageData::allUnscaled() const
-{
-	int* res = new int[lines * columns];
-	for (int y = 0; y < lines; ++y)
-		for (int x = 0; x < columns; ++x)
-			res[y * columns + x] = unscaled(x, y);
-	return res;
-}
-
-int ImageData::decimalScale() const
-{
-	int res = -(int)floor(log10(slope));
-	if (exp10(res) == slope)
-		return res;
-	else
-		return res + 1;
-}
-
-std::string ImageData::datetime() const
+std::string Image::datetime() const
 {
 	stringstream res;
 	res << setfill('0') << setw(4) << year << "-" << setw(2) << month << "-" << setw(2) << day
@@ -61,7 +42,7 @@ std::string ImageData::datetime() const
 	return res.str();
 }
 
-time_t ImageData::forecastSeconds2000() const
+time_t Image::forecastSeconds2000() const
 {
 	const time_t s_epoch_2000 = 946684800;
 	struct tm itm;
@@ -90,6 +71,42 @@ time_t ImageData::forecastSeconds2000() const
 	return res - s_epoch_2000;
 }
 
+//
+// ImageData
+//
+
+float* ImageData::allScaled() const
+{
+	float* res = new float[lines * columns];
+	for (int y = 0; y < lines; ++y)
+		for (int x = 0; x < columns; ++x)
+			res[y * columns + x] = scaled(x, y);
+	return res;
+}
+
+int* ImageData::allUnscaled() const
+{
+	int* res = new int[lines * columns];
+	for (int y = 0; y < lines; ++y)
+		for (int x = 0; x < columns; ++x)
+			res[y * columns + x] = unscaled(x, y);
+	return res;
+}
+
+int ImageData::decimalScale() const
+{
+	int res = -(int)floor(log10(slope));
+	if (exp10(res) == slope)
+		return res;
+	else
+		return res + 1;
+}
+
+
+//
+// ImageDumper
+//
+
 class ImageDumper : public ImageConsumer
 {
 	bool withContents;
@@ -97,18 +114,18 @@ class ImageDumper : public ImageConsumer
 public:
 	ImageDumper(bool withContents) : withContents(withContents) {}
 
-	virtual void processImage(const ImageData& img)
+	virtual void processImage(const Image& img)
 	{
 		cout << img.name << " " << img.datetime() << endl;
 		cout << " proj: " << img.projection << " ch.id: " << img.channel_id << " sp.id: " << img.spacecraft_id << endl;
-		cout << " size: " << img.columns << "x" << img.lines << " factor: " << img.column_factor << "x" << img.line_factor
+		cout << " size: " << img.data->columns << "x" << img.data->lines << " factor: " << img.column_factor << "x" << img.line_factor
 				 << " offset: " << img.column_offset << "x" << img.line_offset << endl;
 
 		cout << " Images: " << endl;
 
 		cout << "  " //<< *i
-				 << "\t" << img.columns << "x" << img.lines << " " << img.bpp << "bpp"
-						" *" << img.slope << "+" << img.offset << " decscale: " << img.decimalScale()
+				 << "\t" << img.data->columns << "x" << img.data->lines << " " << img.data->bpp << "bpp"
+						" *" << img.data->slope << "+" << img.data->offset << " decscale: " << img.data->decimalScale()
 				 << " PSIZE " << img.pixelSize()
 				 << " DX " << img.seviriDX()
 				 << " DXY " << img.seviriDY()
@@ -118,9 +135,9 @@ public:
 		if (withContents)
 		{
 			cout << "Coord\tUnscaled\tScaled" << endl;
-			for (int l = 0; l < img.lines; ++l)
-				for (int c = 0; c < img.lines; ++c)
-					cout << c << "x" << l << '\t' << img.unscaled(c, l) << '\t' << img.scaled(c, l) << endl;
+			for (int l = 0; l < img.data->lines; ++l)
+				for (int c = 0; c < img.data->lines; ++c)
+					cout << c << "x" << l << '\t' << img.data->unscaled(c, l) << '\t' << img.data->scaled(c, l) << endl;
 		}
   }
 };
@@ -128,6 +145,8 @@ public:
 std::auto_ptr<ImageConsumer> createImageDumper(bool withContents)
 {
 	return std::auto_ptr<ImageConsumer>(new ImageDumper(withContents));
+}
+
 }
 
 // vim:set ts=2 sw=2:
