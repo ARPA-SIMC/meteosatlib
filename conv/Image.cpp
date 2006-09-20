@@ -31,21 +31,44 @@ void Image::crop(int x, int y, int width, int height)
 }
 
 
-float Image::pixelSize() const
+float Image::pixelHSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
 }
 
-float Image::seviriDX() const
+float Image::pixelVSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
-	return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
+	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_factor/exp2(-16)) * PI / 180 );
 }
 
-float Image::seviriDY() const
+int Image::seviriDXFromColumnFactor(int column_factor)
 {
-	return seviriDX();
+#if 0
+	double ps = (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
+	return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(ps / (ORBIT_RADIUS-EARTH_RADIUS)));
+#endif
+
+	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * column_factor * exp2(-15) * 180 / PI);
+}
+
+int Image::seviriDYFromLineFactor(int line_factor)
+{
+	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * line_factor * exp2(-15) * 180 / PI);
+	//return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelVSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
+}
+
+int Image::columnFactorFromSeviriDX(int seviriDX)
+{
+	return (int)round((double)seviriDX * PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
+}
+
+int Image::lineFactorFromSeviriDY(int seviriDY)
+{
+	return (int)round((double)seviriDY * PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
 }
 
 std::string Image::datetime() const
@@ -140,9 +163,9 @@ public:
 		cout << "  " //<< *i
 				 << "\t" << img.data->columns << "x" << img.data->lines << " " << img.data->bpp << "bpp"
 						" *" << img.data->slope << "+" << img.data->offset << " decscale: " << img.data->decimalScale()
-				 << " PSIZE " << img.pixelSize()
-				 << " DX " << img.seviriDX()
-				 << " DXY " << img.seviriDY()
+				 << " PSIZE " << img.pixelHSize() << "x" << img.pixelVSize()
+				 << " DX " << Image::seviriDXFromColumnFactor(img.column_factor)
+				 << " DY " << Image::seviriDYFromLineFactor(img.line_factor)
 				 << " CHID " << img.channel_id
 				 << endl;
 

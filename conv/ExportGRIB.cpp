@@ -159,7 +159,8 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
  */
 
   // Earth Equatorial Radius is 6378.160 Km (IAU 1965)
-  grid.set_spaceview(0.0, 0.0, img.seviriDX() / 1000, img.seviriDX() / 1000,
+  grid.set_spaceview(0.0, 0.0,
+									img.seviriDX() / 1000, img.seviriDY() / 1000,
                   METEOSAT_IMAGE_NCOLUMNS/2, METEOSAT_IMAGE_NLINES/2,
 									SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
 									METEOSAT_IMAGE_NCOLUMNS/2-img.column_offset + 1, METEOSAT_IMAGE_NLINES/2-img.line_offset + 1);

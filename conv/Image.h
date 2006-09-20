@@ -31,14 +31,17 @@ struct Image {
 	// Vertical position of the image on the entire world view
   int line_offset;
 
-	/// Pixel resolution at nadir point
-	float pixelSize() const;
+	/// Horizontal pixel resolution at nadir point
+	float pixelHSize() const;
+
+	/// Vertical pixel resolution at nadir point
+	float pixelVSize() const;
 
 	/// Earth dimension scanned by Seviri in the X direction
-	float seviriDX() const;
+	int seviriDX() const { return seviriDXFromColumnFactor(column_factor); }
 
 	/// Earth dimension scanned by Seviri in the Y direction
-	float seviriDY() const;
+	int seviriDY() const { return seviriDYFromLineFactor(column_factor); }
 
   // Get the datetime as a string
   std::string datetime() const;
@@ -60,6 +63,19 @@ struct Image {
 	 * to the image itself
 	 */
 	void crop(int x, int y, int width, int height);
+
+
+	/// Earth dimension scanned by Seviri in the X direction
+	static int seviriDXFromColumnFactor(int column_factor);
+
+	/// Earth dimension scanned by Seviri in the Y direction
+	static int seviriDYFromLineFactor(int line_factor);
+
+	/// Set the column factor from a seviri DX value
+	static int columnFactorFromSeviriDX(int seviriDX);
+
+	/// Set the column factor from a seviri DY value
+	static int lineFactorFromSeviriDY(int seviriDY);
 };
 
 /// Interface for image data of various types

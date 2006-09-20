@@ -78,6 +78,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 			img->column_offset = (int)m.grid.sp.X0;	// probably need some (x-1)*2
 			img->line_offset = (int)m.grid.sp.Y0;		// probably need some (x-1)*2
 			img->sublon = m.grid.sp.lop;
+			img->column_factor = Image::columnFactorFromSeviriDX(m.grid.sp.dx * 1000);
+			img->line_factor = Image::lineFactorFromSeviriDY(m.grid.sp.dy * 1000);
 			break;
 		default:
 		{
@@ -104,8 +106,6 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	-- TODO:
   std::string name;
   int spacecraft_id;
-  int column_factor;
-  int line_factor;
 #endif
 
 #if 0
@@ -135,24 +135,9 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
   NcFile ncf ( NcName , NcFile::Replace );
   if (! ncf.is_valid()) return false;
 
-  // Fill arrays on creation
-  ncf.set_fill(NcFile::Fill);
-
   // Add Global Attributes
   if (! ncf.add_att("Satellite",
             MSG_spacecraft_name((t_enum_MSG_spacecraft) pds.spc).c_str()))
-    return false;
-  sprintf(reftime, "%04d-%02d-%02d %02d:%02d:00 UTC",
-           m.gtime.year, m.gtime.month, m.gtime.day,
-	   m.gtime.hour, m.gtime.minute);
-  if (! ncf.add_att("Antenna", "Fixed") ) return false;
-  if (! ncf.add_att("Receiver", "HIMET") ) return false;
-  if (! ncf.add_att("Time", reftime) ) return false;
-  if (! ncf.add_att("Column_Scale_Factor", pds.cfac) ) return false;
-  if (! ncf.add_att("Line_Scale_Factor", pds.lfac) ) return false;
-  if (! ncf.add_att("Column_Offset", pds.coff) ) return false;
-  if (! ncf.add_att("Line_Offset", pds.loff) ) return false;
-  if (! ncf.add_att("Orbit_Radius", pds.sh) ) return false;
 #endif 
 
   return img;

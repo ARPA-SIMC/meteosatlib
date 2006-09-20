@@ -249,7 +249,7 @@ void view(H5File& file)
     cout << "  " << *i
     	 << "\t" << img->data->columns << "x" << img->data->lines << " " << img->data->bpp << "bpp"
 	    " *" << img->data->slope << "+" << img->data->offset
-			<< " PSIZE " << img->pixelSize()
+			<< " PSIZE " << img->pixelHSize() << "x" << img->pixelVSize()
 			<< " DX " << img->seviriDX()
 			<< " DXY " << img->seviriDY()
 			<< " CHID " << img->channel_id
