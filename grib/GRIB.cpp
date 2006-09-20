@@ -2063,11 +2063,11 @@ GRIB_FILE::GRIB_FILE( )
   fd      = -1;
 }
 
-int GRIB_FILE::OpenRead(char *fname)
+int GRIB_FILE::OpenRead(const std::string& fname)
 {
   struct stat finfo;
 
-  if (stat(fname, &finfo) < 0)
+  if (stat(fname.c_str(), &finfo) < 0)
   {
     std::cerr << "Error opening input file " << fname << std::endl;
     return -1;
@@ -2076,7 +2076,7 @@ int GRIB_FILE::OpenRead(char *fname)
   size = finfo.st_size;
   limit = size-4;
 
-  fd = open(fname, O_RDONLY);
+  fd = open(fname.c_str(), O_RDONLY);
   if (fd < 0)
   {
     std::cerr << "Error opening input file " << fname << std::endl;
@@ -2091,11 +2091,6 @@ int GRIB_FILE::OpenRead(char *fname)
   }
 
   return 0;
-}
-
-int GRIB_FILE::OpenRead(std::string fname)
-{
-  return this->OpenRead(fname.c_str( ));
 }
 
 int GRIB_FILE::OpenWrite(char *fname)
