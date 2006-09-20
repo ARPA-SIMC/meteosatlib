@@ -71,13 +71,13 @@ void to::test<2>()
 	gen_ensure_equals(img->day, 26);
 	gen_ensure_equals(img->hour, 19);
 	gen_ensure_equals(img->minute, 45);
-	gen_ensure_equals(img->projection, "");
+	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 12);
 	gen_ensure_equals(img->spacecraft_id, 321); // unverified
 	gen_ensure_equals(img->column_factor, -40927014);
 	gen_ensure_equals(img->line_factor, -40927014);
 	gen_ensure_equals(img->column_offset, -2);
-	gen_ensure_equals(img->line_offset, 5566);
+	gen_ensure_equals(img->line_offset, 462);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
 	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
@@ -113,13 +113,13 @@ void to::test<3>()
 	gen_ensure_equals(img->day, 26);
 	gen_ensure_equals(img->hour, 19);
 	gen_ensure_equals(img->minute, 45);
-	gen_ensure_equals(img->projection, "");
+	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 12);
 	gen_ensure_equals(img->spacecraft_id, 321); // unverified
 	gen_ensure_equals(img->column_factor, -40927014);
 	gen_ensure_equals(img->line_factor, -40927014);
-	gen_ensure_equals(img->column_offset, -2);
-	gen_ensure_equals(img->line_offset, 5566);
+	gen_ensure_equals(img->column_offset, 998);
+	gen_ensure_equals(img->line_offset, 2462);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
 	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified

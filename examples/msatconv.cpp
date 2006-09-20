@@ -27,6 +27,7 @@
 
 //#include "../config.h"
 
+#include <conv/ImportGRIB.h>
 #include <conv/ImportSAFH5.h>
 #include <conv/ImportNetCDF.h>
 #include <conv/ImportXRIT.h>
@@ -52,8 +53,8 @@ void do_help(const char* argv0, ostream& out)
       << "Convert meteosat image files from and to various formats." << endl << endl
       << "Formats supported are:" << endl
       << "  NetCDF   Import/Export" << endl
-      << "  Grib     Export only" << endl
-      << "  SAF H5   Import only" << endl
+      << "  Grib     Import/Export" << endl
+      << "  SAFH5    Import only" << endl
       << "  XRIT     Import only" << endl
       << "Options are:" << endl
       << "  --help           Print this help message" << endl
@@ -85,6 +86,8 @@ enum Action { VIEW, DUMP, GRIB, NETCDF };
  */
 std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 {
+	if (isGrib(filename))
+		return createGribImporter(filename);
 	if (isNetCDF(filename))
 		return createNetCDFImporter(filename);
 	if (isSAFH5(filename))

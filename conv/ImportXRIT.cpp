@@ -52,7 +52,7 @@ bool isXRIT(const std::string& filename)
 {
 	// check that it contains at least 3 ':' signs
 	size_t pos = 0;
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 3; ++i, ++pos)
 		if ((pos = filename.find(':', pos)) == string::npos)
 			return false;
 	return true;
@@ -307,7 +307,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
                   SP_X0, SP_Y0, SEVIRI_ORIENTATION,
                   SEVIRI_CAMERA_H, AreaPixStart+1, AreaLinStart+1);
 #endif
-  img->projection = "" /* TODO */;
+	img->sublon = header[0].image_navigation->subsatellite_longitude;
 
 
   img->channel_id = (unsigned char ) header[0].segment_id->spectral_channel_id;

@@ -21,6 +21,7 @@ noinst_HEADERS += \
     conv/Image.h \
     conv/ExportGRIB.h \
     conv/ExportNetCDF.h \
+    conv/ImportGRIB.h \
     conv/ImportSAFH5.h \
     conv/ImportNetCDF.h \
     conv/ImportXRIT.h

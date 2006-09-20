@@ -239,7 +239,7 @@ void view(H5File& file)
 		if (i == images.begin())
 		{
 			cout << img->name << " " << img->datetime() << endl;
-			cout << " proj: " << img->projection << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
+			cout << " proj: GEOS(" << img->sublon << ") ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 			cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 					 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
 
@@ -271,7 +271,7 @@ void dump(H5File& file, const std::set<std::string>& selected)
 		if (first)
 		{
 			cout << img->name << " " << img->datetime() << endl;
-			cout << " proj: " << img->projection << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
+			cout << " proj: GEOS(" << img->sublon << ") ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 			cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 					 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
 

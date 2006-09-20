@@ -14,7 +14,9 @@ struct Image {
   /// Image time
   int year, month, day, hour, minute;
 
-  std::string projection;
+	/// Longitude of sub-satellite point
+	float sublon;
+
   int channel_id;
   int spacecraft_id;
 
@@ -63,6 +65,7 @@ struct Image {
 /// Interface for image data of various types
 struct ImageData
 {
+	ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0) {}
   virtual ~ImageData() {}
 
   // Image metadata

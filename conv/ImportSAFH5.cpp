@@ -83,7 +83,8 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	}
 
 	// Get projection name
-	img->projection = readStringAttribute(group, "PROJECTION_NAME");
+	string proj = readStringAttribute(group, "PROJECTION_NAME");
+	sscanf(proj.c_str(), "GEOS(%f)", &img->sublon);
 	
 	// Get channel ID
 	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
