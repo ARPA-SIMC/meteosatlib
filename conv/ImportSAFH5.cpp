@@ -169,7 +169,7 @@ public:
 			std::auto_ptr<Image> img = ImportSAFH5(group, name);
 			if (shouldCrop())
 				img->crop(cropX, cropY, cropWidth, cropHeight);
-			output.processImage(*img);
+			output.processImage(img);
 		}
 	}
 };

@@ -36,12 +36,16 @@ test_msatlib_test_LDADD = \
 	-lnetcdf_c++ \
 	-lnetcdf
 test_msatlib_test_SOURCES = \
+	grib/Ebisuzaki.cpp \
+	grib/GRIB.cpp \
 	test/tut-main.cpp \
 	test/test-utils.cpp \
 	test/test-importxrit.cpp \
+	test/test-importgrib.cpp \
 	test/test-image.cpp \
 	conv/Image.cpp \
-	conv/ImportXRIT.cpp
+	conv/ImportXRIT.cpp \
+	conv/ImportGRIB.cpp
 
 
 ## -fin-

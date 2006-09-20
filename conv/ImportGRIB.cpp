@@ -123,43 +123,6 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 		delete[] pds;
 	}
 
-#if 0
-	-- TODO:
-  std::string name;
-#endif
-
-#if 0
-  GRIB_MSG_PDS pds;
-
-  if (m.get_pds_size() < sizeof(GRIB_MSG_PDS) + 20)
-    throw std::runtime_error("The Grib PDS does not seem to have information I need");
-
-  unsigned char *tmp = m.get_pds_values(m.get_pds_size( ) -
-         sizeof(GRIB_MSG_PDS), sizeof(GRIB_MSG_PDS));
-  if (tmp == 0)
-  {
-    std::cerr << "GRIB seems not MSG HIMET extended..." << std::endl;
-    throw;
-  }
-  memcpy(&pds, tmp, sizeof(GRIB_MSG_PDS));
-  delete [ ] tmp;
-
-  char *channelstring = strdup(MSG_channel_name((t_enum_MSG_spacecraft) pds.spc,
-                               pds.chn).c_str( ));
-  char *channel = chname(channelstring, strlen(channelstring) + 1);
-
-  // Build up output NetCDF file name and open it
-  sprintf( NcName, "%s_%4d%02d%02d_%02d%02d.nc", channel,
-           m.gtime.year, m.gtime.month, m.gtime.day,
-	   m.gtime.hour, m.gtime.minute);
-  NcFile ncf ( NcName , NcFile::Replace );
-  if (! ncf.is_valid()) return false;
-
-  // Add Global Attributes
-  if (! ncf.add_att("Satellite",
-            MSG_spacecraft_name((t_enum_MSG_spacecraft) pds.spc).c_str()))
-#endif 
-
   return img;
 }
 
@@ -184,7 +147,7 @@ public:
 		while (gf.ReadMessage(m) == 0)
 		{
 			auto_ptr<Image> img = importGrib(m);
-			output.processImage(*img);
+			output.processImage(img);
 			++count;
 		}
 		if (count == 0)

@@ -364,7 +364,7 @@ public:
 			opts.AreaNlin = cropHeight;
 		}
 		std::auto_ptr<Image> img = importXRIT(opts);
-		output.processImage(*img);
+		output.processImage(img);
 	}
 };
 

@@ -2,13 +2,63 @@
 #define IMAGE_DATA_H
 
 #include <string>
+#include <vector>
 
 namespace msat {
 
 struct ImageData;
 
-struct Image
+class Image
 {
+private:
+	// Copy is not straightforward: disable it
+	Image(const Image& img);
+	Image& operator=(const Image& img);
+
+#if 0
+	--- Prototypes that are still not working
+	Image(const Image& img) : data(0)
+	{
+		year = img.year;
+		month = img.month;
+		day = img.day;
+		hour = img.hour;
+		minute = img.minute;
+		sublon = img.sublon;
+		channel_id = img.channel_id;
+		spacecraft_id = img.spacecraft_id;
+		column_factor = img.column_factor;
+		line_factor = img.line_factor;
+		column_offset = img.column_offset;
+		line_offset = img.line_offset;
+		if (img.data)
+			data = img.data->clone();
+	}
+
+	/// Copy constructor
+	Image& operator=(const Image& img)
+	{
+		if (this == &img) return *this;
+		year = img.year;
+		month = img.month;
+		day = img.day;
+		hour = img.hour;
+		minute = img.minute;
+		sublon = img.sublon;
+		channel_id = img.channel_id;
+		spacecraft_id = img.spacecraft_id;
+		column_factor = img.column_factor;
+		line_factor = img.line_factor;
+		column_offset = img.column_offset;
+		line_offset = img.line_offset;
+		if (data) { delete data; data = 0; }
+		if (img.data)
+			data = img.data->clone();
+		return *this;
+	}
+#endif
+
+public:
   /// Image time
   int year, month, day, hour, minute;
 
@@ -32,6 +82,13 @@ struct Image
 	// Vertical position of the image on the entire world view
   int line_offset;
 
+	// Image data
+	ImageData* data;
+
+	Image() : data(0) {}
+	~Image();
+
+
 	/// Horizontal pixel resolution at nadir point
 	float pixelHSize() const;
 
@@ -49,12 +106,6 @@ struct Image
 
   // Get the image time as number of seconds since 1/1/2000 UTC
   time_t forecastSeconds2000() const;
-
-	// Image data
-	ImageData* data;
-
-	Image() : data(0) {}
-	~Image();
 
 	/// Set the image data for this image
 	void setData(ImageData* data);
@@ -172,7 +223,7 @@ public:
 struct ImageConsumer
 {
 	virtual ~ImageConsumer() {}
-	virtual void processImage(const Image& image) = 0;
+	virtual void processImage(std::auto_ptr<Image> image) = 0;
 };
 
 struct ImageImporter
@@ -185,6 +236,15 @@ struct ImageImporter
 	bool shouldCrop() const { return cropWidth != 0 && cropHeight != 0; }
 
 	virtual void read(ImageConsumer& output) = 0;
+};
+
+struct ImageVector : public std::vector<Image*>, ImageConsumer
+{
+	virtual ~ImageVector();
+	virtual void processImage(std::auto_ptr<Image> image)
+	{
+		push_back(image.release());
+	}
 };
 
 std::auto_ptr<ImageConsumer> createImageDumper(bool withContents);

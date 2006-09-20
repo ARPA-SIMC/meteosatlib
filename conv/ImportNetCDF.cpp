@@ -310,26 +310,26 @@ public:
 
 	virtual void read(ImageConsumer& output)
 	{
-		Image img;
-		readHeader(img);
-
 		for (int i = 0; i < ncf.num_vars(); ++i)
 		{
+			auto_ptr<Image> img(new Image);
+			readHeader(*img);
+
 			NcVar* var = ncf.get_var(i);
 			if (string(var->name()) == "time")
 				continue;
 
 			switch (var->type())
 			{
-				case ncByte: readData<unsigned char>(*var, img); break;
-				case ncChar: readData<char>(*var, img); break;
-				case ncShort: readData<int16_t>(*var, img); break;
-				case ncLong: readData<int32_t>(*var, img); break;
-				case ncFloat: readData<float>(*var, img); break;
-				case ncDouble: readData<double>(*var, img); break;
+				case ncByte: readData<unsigned char>(*var, *img); break;
+				case ncChar: readData<char>(*var, *img); break;
+				case ncShort: readData<int16_t>(*var, *img); break;
+				case ncLong: readData<int32_t>(*var, *img); break;
+				case ncFloat: readData<float>(*var, *img); break;
+				case ncDouble: readData<double>(*var, *img); break;
 			}
 			if (shouldCrop())
-				img.data->crop(cropX, cropY, cropWidth, cropHeight);
+				img->data->crop(cropX, cropY, cropWidth, cropHeight);
 			output.processImage(img);
 		}
 	}

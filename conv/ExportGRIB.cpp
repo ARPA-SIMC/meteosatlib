@@ -265,7 +265,7 @@ public:
 			throw std::runtime_error("closing grib file");
 	}
 
-	virtual void processImage(const Image& img)
+	virtual void processImage(std::auto_ptr<Image> img)
 	{
 		if (first)
 		{
@@ -275,7 +275,7 @@ public:
 			// Build up output Grib file name and open it
 			sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb",
 					"",
-					img.year, img.month, img.day, img.hour, img.minute);
+					img->year, img->month, img->day, img->hour, img->minute);
 
 			int ret = gf.OpenWrite(GribName);
 			if (ret != 0)
@@ -284,7 +284,7 @@ public:
 		}
 
 		//cout << "Converting " << *i << "..." << endl;
-		ExportGRIB(img, gf);
+		ExportGRIB(*img, gf);
   }
 };
 

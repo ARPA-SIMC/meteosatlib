@@ -139,6 +139,15 @@ int ImageData::decimalScale() const
 		return res + 1;
 }
 
+//
+// ImageVector
+// 
+
+ImageVector::~ImageVector()
+{
+	for (iterator i = begin(); i != end(); ++i)
+		delete *i;
+}
 
 //
 // ImageDumper
@@ -151,30 +160,30 @@ class ImageDumper : public ImageConsumer
 public:
 	ImageDumper(bool withContents) : withContents(withContents) {}
 
-	virtual void processImage(const Image& img)
+	virtual void processImage(std::auto_ptr<Image> img)
 	{
-		cout << "Image " << img.datetime() << endl;
-		cout << " proj: GEOS(" << img.sublon << ") ch.id: " << img.channel_id << " sp.id: " << img.spacecraft_id << endl;
-		cout << " size: " << img.data->columns << "x" << img.data->lines << " factor: " << img.column_factor << "x" << img.line_factor
-				 << " offset: " << img.column_offset << "x" << img.line_offset << endl;
+		cout << "Image " << img->datetime() << endl;
+		cout << " proj: GEOS(" << img->sublon << ") ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
+		cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
+				 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
 
 		cout << " Images: " << endl;
 
 		cout << "  " //<< *i
-				 << "\t" << img.data->columns << "x" << img.data->lines << " " << img.data->bpp << "bpp"
-						" *" << img.data->slope << "+" << img.data->offset << " decscale: " << img.data->decimalScale()
-				 << " PSIZE " << img.pixelHSize() << "x" << img.pixelVSize()
-				 << " DX " << Image::seviriDXFromColumnFactor(img.column_factor)
-				 << " DY " << Image::seviriDYFromLineFactor(img.line_factor)
-				 << " CHID " << img.channel_id
+				 << "\t" << img->data->columns << "x" << img->data->lines << " " << img->data->bpp << "bpp"
+						" *" << img->data->slope << "+" << img->data->offset << " decscale: " << img->data->decimalScale()
+				 << " PSIZE " << img->pixelHSize() << "x" << img->pixelVSize()
+				 << " DX " << Image::seviriDXFromColumnFactor(img->column_factor)
+				 << " DY " << Image::seviriDYFromLineFactor(img->line_factor)
+				 << " CHID " << img->channel_id
 				 << endl;
 
 		if (withContents)
 		{
 			cout << "Coord\tUnscaled\tScaled" << endl;
-			for (int l = 0; l < img.data->lines; ++l)
-				for (int c = 0; c < img.data->lines; ++c)
-					cout << c << "x" << l << '\t' << img.data->unscaled(c, l) << '\t' << img.data->scaled(c, l) << endl;
+			for (int l = 0; l < img->data->lines; ++l)
+				for (int c = 0; c < img->data->lines; ++c)
+					cout << c << "x" << l << '\t' << img->data->unscaled(c, l) << '\t' << img->data->scaled(c, l) << endl;
 		}
   }
 };
