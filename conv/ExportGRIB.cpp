@@ -274,7 +274,7 @@ public:
 
 			// Build up output Grib file name and open it
 			sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb",
-					img.name.c_str(),
+					"",
 					img.year, img.month, img.day, img.hour, img.minute);
 
 			int ret = gf.OpenWrite(GribName);

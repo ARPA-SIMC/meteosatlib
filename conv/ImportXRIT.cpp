@@ -278,7 +278,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
            tmtime->tm_year + 1900, tmtime->tm_mon + 1, tmtime->tm_mday,
 	   tmtime->tm_hour, tmtime->tm_min );
 #endif
-	img->name = "" /* TODO */;
+	//img->name = "" /* TODO */;
 
 #if 0
   MSG_data_level_15_header *p = PRO_data->prologue;

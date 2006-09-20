@@ -7,22 +7,23 @@ namespace msat {
 
 struct ImageData;
 
-struct Image {
-  /// Image name
-  std::string name;
-
+struct Image
+{
   /// Image time
   int year, month, day, hour, minute;
 
 	/// Longitude of sub-satellite point
 	float sublon;
 
+	/// Channel ID (from table TODO)
   int channel_id;
+
+	/// Spacecraft identifier (from table TODO)
   int spacecraft_id;
 
-	// TODO
+	// TODO: description missing
   int column_factor;
-	// TODO
+	// TODO: description missing
   int line_factor;
 
 	// Horizontal position of the image on the entire world view

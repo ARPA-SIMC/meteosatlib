@@ -61,7 +61,7 @@ void to::test<2>()
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
-	gen_ensure_equals(img->name, ""); // unverified
+	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 5568);
 	gen_ensure_equals(img->data->lines, 11136);
 	gen_ensure_equals(img->data->slope, 1);
@@ -103,7 +103,7 @@ void to::test<3>()
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
-	gen_ensure_equals(img->name, ""); // unverified
+	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 400);
 	gen_ensure_equals(img->data->lines, 300);
 	gen_ensure_equals(img->data->slope, 1);

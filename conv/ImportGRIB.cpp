@@ -34,6 +34,7 @@
 #include <GRIB.h>
 
 #include <sstream>
+#include <iostream>
 #include <stdexcept>
 
 #include <conv/Image.tcc>
@@ -78,8 +79,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 			img->column_offset = (int)m.grid.sp.X0;	// probably need some (x-1)*2
 			img->line_offset = (int)m.grid.sp.Y0;		// probably need some (x-1)*2
 			img->sublon = m.grid.sp.lop;
-			img->column_factor = Image::columnFactorFromSeviriDX(m.grid.sp.dx * 1000);
-			img->line_factor = Image::lineFactorFromSeviriDY(m.grid.sp.dy * 1000);
+			img->column_factor = Image::columnFactorFromSeviriDX((int)round(m.grid.sp.dx * 1000));
+			img->line_factor = Image::lineFactorFromSeviriDY((int)round(m.grid.sp.dy * 1000));
 			break;
 		default:
 		{
@@ -102,10 +103,29 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 		}
 	}
 
+	if (m.get_pds_size() >= 12)
+	{
+		unsigned char* pds = m.get_pds_values(0, 12);
+		switch (pds[0])
+		{
+			case 3:
+				std::cerr << "pds type 3 does not convey satellite identifier information: using default of 55." << endl;
+				img->spacecraft_id = 55;
+				break;
+			case 24:
+				img->spacecraft_id = (pds[9] << 8) + pds[10];
+				break;
+			default:
+				std::cerr << "unsupported pds type " << pds[0] << ": using default satellite identifier 55." << endl;
+				img->spacecraft_id = 55;
+				break;
+		}
+		delete[] pds;
+	}
+
 #if 0
 	-- TODO:
   std::string name;
-  int spacecraft_id;
 #endif
 
 #if 0

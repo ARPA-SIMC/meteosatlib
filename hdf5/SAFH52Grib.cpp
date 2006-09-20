@@ -238,7 +238,7 @@ void view(H5File& file)
 		
 		if (i == images.begin())
 		{
-			cout << img->name << " " << img->datetime() << endl;
+			cout << "Image " << img->datetime() << endl;
 			cout << " proj: GEOS(" << img->sublon << ") ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 			cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 					 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
@@ -270,7 +270,7 @@ void dump(H5File& file, const std::set<std::string>& selected)
     auto_ptr<Image> img = ImportSAFH5(group, *i);
 		if (first)
 		{
-			cout << img->name << " " << img->datetime() << endl;
+			cout << "Image " << img->datetime() << endl;
 			cout << " proj: GEOS(" << img->sublon << ") ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 			cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 					 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
@@ -312,11 +312,11 @@ void convertGrib(H5File& file, const std::set<std::string>& selected)
 			if (images.size() == 1)
 			{
 				// Build up output Grib file name and open it
-				sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb", img->name.c_str(),
+				sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb", "",
 					img->year, img->month, img->day, img->hour, img->minute);
 			} else {
 				// Build up output Grib file name and open it
-				sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb", img->name.c_str(),
+				sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb", "",
 					img->year, img->month, img->day, img->hour, img->minute);
 			}
 			int ret = gf.OpenWrite(GribName);
