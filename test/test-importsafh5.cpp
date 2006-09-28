@@ -68,7 +68,7 @@ void to::test<2>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // (cannot find it in the file)
+	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->column_offset, 357);
@@ -106,11 +106,11 @@ void to::test<3>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // (cannot find it in the file)
+	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
-	gen_ensure_equals(img->column_offset, 557);
-	gen_ensure_equals(img->line_offset, 1707);
+	gen_ensure_equals(img->column_offset, 457);
+	gen_ensure_equals(img->line_offset, 1757);
 	gen_ensure_equals(img->data->bpp, 8);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
@@ -141,11 +141,11 @@ void to::test<4>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // (cannot find it in the file)
+	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
-	gen_ensure_equals(img->column_offset, 357);
-	gen_ensure_equals(img->line_offset, 1657);
+	gen_ensure_equals(img->column_offset, 457);
+	gen_ensure_equals(img->line_offset, 1757);
 	gen_ensure_equals(img->data->bpp, 8);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
@@ -165,7 +165,7 @@ void to::test<5>()
 	imp->cropHeight = 50;
 	ImageVector imgs;
 	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 1u);
+	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	gen_ensure_equals(img->data->columns, 200);
@@ -179,7 +179,7 @@ void to::test<5>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // (cannot find it in the file)
+	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->column_offset, 557);

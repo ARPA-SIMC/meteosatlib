@@ -84,7 +84,13 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 
 	// Get projection name
 	string proj = readStringAttribute(group, "PROJECTION_NAME");
-	sscanf(proj.c_str(), "GEOS(%f)", &img->sublon);
+	if (proj.size() < 8)
+		throw std::runtime_error("projection name '"+proj+"' is too short to contain subsatellite longitude");
+	const char* s = proj.c_str() + 6;
+	// skip initial zeros
+	while (*(s+1) && *(s+1) == '0') ++s;
+	if (sscanf(s, "%f", &img->sublon) != 1)
+		throw std::runtime_error("cannot read subsatellite longitude from projection name '" + proj + "' at '" + s + "'");
 	
 	// Get channel ID
 	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
@@ -105,7 +111,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 
   // Compute/invent the spectral channel id
 	SAFChannelInfo* ci = SAFChannelByName(name);
-	img->channel_id = ci == NULL ? 0 : ci->channelID;
+	//img->channel_id = ci == NULL ? 0 : ci->channelID;
 
 	// Read image data
   switch (dataset.getDataType().getSize())
