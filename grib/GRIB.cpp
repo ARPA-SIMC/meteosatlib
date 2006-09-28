@@ -2093,9 +2093,9 @@ int GRIB_FILE::OpenRead(const std::string& fname)
   return 0;
 }
 
-int GRIB_FILE::OpenWrite(char *fname)
+int GRIB_FILE::OpenWrite(const std::string& fname)
 {
-  fd = open(fname, O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+  fd = open(fname.c_str(), O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
   if (fd < 0)
   {
     std::cerr << "Error opening output file " << fname << std::endl;
@@ -2103,11 +2103,6 @@ int GRIB_FILE::OpenWrite(char *fname)
   }
 
   return 0;
-}
-
-int GRIB_FILE::OpenWrite(std::string fname)
-{
-  return this->OpenWrite(fname.c_str( ));
 }
 
 int GRIB_FILE::Append(char *fname)

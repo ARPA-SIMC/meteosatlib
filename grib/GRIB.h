@@ -1144,16 +1144,12 @@ class GRIB_FILE {
     /// param fname: file name with full path
     int OpenRead(const std::string& fname);
 
-    // Note from Enrico: OpenRead(char*) was delete because it caused
-    // OpenRead(string) to recursively call itself
-
     /// @brief Open grib file for write. File is truncated
     /// param fname: file name with full path
-    int OpenWrite(char *fname);
+    int OpenWrite(const std::string& fname);
 
-    /// @brief Open grib file for write. File is truncated
-    /// param fname: file name with full path
-    int OpenWrite(std::string fname);
+    // Note from Enrico: OpenRead(char*) and OpenWrite(char*) were deleted
+    // because their string counterparts to recursively call themselves
 
     /// @brief Open grib file for append
     /// param fname: file name with full path
