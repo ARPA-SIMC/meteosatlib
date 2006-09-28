@@ -76,8 +76,10 @@ void to::test<2>()
 	gen_ensure_equals(img->data->bpp, 8);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
+	gen_ensure_equals(img->data->unscaled(516, 54), 3);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+	gen_ensure_equals(img->data->scaled(516, 54), 3);
 }
 
 // Import a subarea of a SAFH5 product
@@ -86,8 +88,8 @@ void to::test<3>()
 {
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
+	imp->cropY = 50;
+	imp->cropWidth = 500;
 	imp->cropHeight = 50;
 	ImageVector imgs;
 	imp->read(imgs);
@@ -95,7 +97,7 @@ void to::test<3>()
 	gen_ensure_equals(imgs.size(), 3u);
 	Image* img = imgs[0];
 
-	gen_ensure_equals(img->data->columns, 200);
+	gen_ensure_equals(img->data->columns, 500);
 	gen_ensure_equals(img->data->lines, 50);
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
@@ -110,12 +112,14 @@ void to::test<3>()
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->column_offset, 457);
-	gen_ensure_equals(img->line_offset, 1757);
+	gen_ensure_equals(img->line_offset, 1707);
 	gen_ensure_equals(img->data->bpp, 8);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
+	gen_ensure_equals(img->data->unscaled(416, 4), 3);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+	gen_ensure_equals(img->data->scaled(416, 4), 3);
 }
 
 // Try reimporting an exported grib
@@ -142,15 +146,17 @@ void to::test<4>()
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
 	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
-	gen_ensure_equals(img->column_factor, 13642337);
-	gen_ensure_equals(img->line_factor, 13642337);
-	gen_ensure_equals(img->column_offset, 457);
-	gen_ensure_equals(img->line_offset, 1757);
-	gen_ensure_equals(img->data->bpp, 8);
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_offset, 357);
+	gen_ensure_equals(img->line_offset, 1657);
+	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
+	gen_ensure_equals(img->data->unscaled(516, 54), 3);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+	gen_ensure_equals(img->data->scaled(516, 54), 3);
 }
 
 // Try reimporting a subarea exported to grib
@@ -161,14 +167,14 @@ void to::test<5>()
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
 	imp->cropY = 100;
-	imp->cropWidth = 200;
+	imp->cropWidth = 500;
 	imp->cropHeight = 50;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->data->columns, 200);
+	gen_ensure_equals(img->data->columns, 500);
 	gen_ensure_equals(img->data->lines, 50);
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
@@ -180,11 +186,11 @@ void to::test<5>()
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
 	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
-	gen_ensure_equals(img->column_factor, 13642337);
-	gen_ensure_equals(img->line_factor, 13642337);
-	gen_ensure_equals(img->column_offset, 557);
-	gen_ensure_equals(img->line_offset, 1707);
-	gen_ensure_equals(img->data->bpp, 8);
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_offset, 457);
+	gen_ensure_equals(img->line_offset, 1757);
+	gen_ensure_equals(img->data->bpp, 2);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
