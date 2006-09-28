@@ -21,8 +21,6 @@
 
 #include "test-utils.h"
 #include <ImportGRIB.h>
-#include <ExportGRIB.h>
-#include <grib/GRIB.h>
 
 using namespace msat;
 
@@ -133,20 +131,7 @@ void to::test<4>()
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
-	Image* img = imgs[0];
-
-	// Write the grib
-	GRIB_FILE gf;
-	ensure(gf.OpenWrite(fname) == 0);
-	ExportGRIB(*img, gf);
-	ensure(gf.Close() == 0);
-
-	// Reread the grib
-	std::auto_ptr<ImageImporter> imp1(createGribImporter(fname));
-	ImageVector imgs1;
-	imp1->read(imgs1);
-	gen_ensure_equals(imgs1.size(), 1u);
-	img = imgs1[0];
+	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	// Check the contents
 	gen_ensure_equals(img->data->columns, 1300);

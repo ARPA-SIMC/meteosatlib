@@ -245,6 +245,13 @@ struct ImageVector : public std::vector<Image*>, ImageConsumer
 	{
 		push_back(image.release());
 	}
+	// Remove the first image from the vector, and returns it.
+	virtual std::auto_ptr<Image> shift()
+	{
+		std::auto_ptr<Image> res(*begin());
+		erase(begin());
+		return res;
+	}
 };
 
 std::auto_ptr<ImageConsumer> createImageDumper(bool withContents);

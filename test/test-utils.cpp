@@ -24,6 +24,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <grib/GRIB.h>
+#include <ImportGRIB.h>
+#include <ExportGRIB.h>
+
 
 namespace tut {
 
@@ -47,6 +51,36 @@ std::string __ensure_errmsg(std::string file, int line, std::string msg)
 		ss << "[" << tag << "] ";
 	ss << "'" << msg << "'";
 	return ss.str();
+}
+
+TempTestFile::TempTestFile()
+{
+	char* pn = tempnam("data/", "test");
+	pathname = pn;
+	free(pn);
+}
+
+std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img)
+{
+	using namespace msat;
+
+	TempTestFile file;
+
+	// Write the grib
+	GRIB_FILE gf;
+	if (gf.OpenWrite(file.name()) != 0)
+		return std::auto_ptr<Image>();
+	ExportGRIB(img, gf);
+	if (gf.Close() != 0)
+		return std::auto_ptr<Image>();
+
+	// Reread the grib
+	std::auto_ptr<ImageImporter> imp(createGribImporter(file.name()));
+	ImageVector imgs;
+	imp->read(imgs);
+	if (imgs.empty())
+		return std::auto_ptr<Image>();
+	return imgs.shift();
 }
 
 }

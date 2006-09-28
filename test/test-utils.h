@@ -20,6 +20,7 @@
  */
 
 #include "tut.h"
+#include <conv/Image.h>
 
 #define TESTGRP(name) \
 typedef test_group<name ## _shar> tg; \
@@ -75,8 +76,13 @@ class TempTestFile
 {
 	std::string pathname;
 public:
+	TempTestFile();
 	TempTestFile(const std::string& pathname) : pathname(pathname) { unlink(pathname.c_str()); }
 	~TempTestFile() { unlink(pathname.c_str()); }
+
+	const std::string& name() const { return pathname; }
 };
+
+std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img);
 
 }
