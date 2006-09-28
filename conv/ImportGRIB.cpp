@@ -51,6 +51,23 @@ using namespace std;
 
 namespace msat {
 
+struct GribImageData : public ImageDataWithPixels<float>
+{
+	GribImageData() : ImageDataWithPixels<float>() {}
+	GribImageData(size_t width, size_t height) : ImageDataWithPixels<float>(width, height) {}
+
+	virtual int unscaled(int column, int line) const
+  {
+		// Unscaled would just return a truncated value for grib, so we better just
+		// return 0 here to (hopefully) reduce confusion
+		return 0;
+  }
+  virtual float scaled(int column, int line) const
+  {
+		return pixels[line * columns + column];
+  }
+};
+
 bool isGrib(const std::string& filename)
 {
 	if (access(filename.c_str(), F_OK) != 0)
@@ -61,7 +78,7 @@ bool isGrib(const std::string& filename)
 auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 {
 	// Read image data
-	auto_ptr< ImageDataWithPixels<float> > res(new ImageDataWithPixels<float>(m.grid.nx, m.grid.ny));
+	auto_ptr< ImageDataWithPixels<float> > res(new GribImageData(m.grid.nx, m.grid.ny));
   memcpy(res->pixels, m.field.vals, m.grid.nxny * sizeof(float));
 
 	auto_ptr< Image > img(new Image());
@@ -146,6 +163,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	} else
 			std::cerr << "no local PDS extentions: using default satellite identifier 55." << endl;
 #endif
+
+	img->data->bpp = m.field.numbits;
 
   return img;
 }

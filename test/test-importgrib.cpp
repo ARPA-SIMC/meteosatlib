@@ -74,10 +74,11 @@ void to::test<2>()
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
 	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->unscaled(0, 0), 97.699997);
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->scaled(0, 0), 97.699997);
-	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+	// It does not make sense to test unscaled() with data coming from grib
+	//gen_ensure_equals(img->data->unscaled(0, 0), 97.699997);
+	//gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
+	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
 }
 
 // Import a subarea of a Grib product
