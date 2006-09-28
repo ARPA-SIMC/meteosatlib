@@ -123,9 +123,6 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-	const std::string fname = "data/test-importgrib.grb";
-	TempTestFile ttf(fname);
-
 	// Read the grib
 	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	ImageVector imgs;
@@ -155,6 +152,44 @@ void to::test<4>()
 	gen_ensure_equals(img->data->unscaled(10, 10), 981);
 	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
 	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
+}
+
+// Try reimporting an exported subarea grib
+template<> template<>
+void to::test<5>()
+{
+	// Read and crop the grib
+	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	imp->cropX = 100;
+	imp->cropY = 100;
+	imp->cropWidth = 200;
+	imp->cropHeight = 50;
+	ImageVector imgs;
+	imp->read(imgs);
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
+
+	gen_ensure_equals(img->data->columns, 200);
+	gen_ensure_equals(img->data->lines, 50);
+	gen_ensure_equals(img->data->slope, 10);
+	gen_ensure_equals(img->data->offset, 910);
+	gen_ensure_equals(img->year, 2006);
+	gen_ensure_equals(img->month, 4);
+	gen_ensure_equals(img->day, 26);
+	gen_ensure_equals(img->hour, 19);
+	gen_ensure_equals(img->minute, 45);
+	gen_ensure_equals(img->sublon, 0);
+	gen_ensure_equals(img->channel_id, 2049);
+	gen_ensure_equals(img->spacecraft_id, 55);
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_equals(img->column_offset, 1600);
+	gen_ensure_equals(img->line_offset, 300);
+	gen_ensure_equals(img->data->bpp, 8);
+	gen_ensure_equals(img->data->unscaled(0, 0), 10105);
+	gen_ensure_equals(img->data->unscaled(10, 10), 10078);
+	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
+	gen_ensure_equals(img->data->scaled(10, 10), 97.800003f);
 }
 
 }
