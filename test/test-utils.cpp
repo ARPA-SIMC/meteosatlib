@@ -53,18 +53,18 @@ std::string __ensure_errmsg(std::string file, int line, std::string msg)
 	return ss.str();
 }
 
-TempTestFile::TempTestFile()
+TempTestFile::TempTestFile(bool leave) : leave(leave)
 {
 	char* pn = tempnam("data/", "test");
 	pathname = pn;
 	free(pn);
 }
 
-std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img)
+std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile)
 {
 	using namespace msat;
 
-	TempTestFile file;
+	TempTestFile file(leaveFile);
 
 	// Write the grib
 	GRIB_FILE gf;

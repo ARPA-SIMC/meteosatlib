@@ -75,14 +75,15 @@ public:
 class TempTestFile
 {
 	std::string pathname;
+	bool leave;
 public:
-	TempTestFile();
-	TempTestFile(const std::string& pathname) : pathname(pathname) { unlink(pathname.c_str()); }
-	~TempTestFile() { unlink(pathname.c_str()); }
+	TempTestFile(bool leave = false);
+	TempTestFile(const std::string& pathname, bool leave = false) : pathname(pathname), leave(leave) { unlink(pathname.c_str()); }
+	~TempTestFile() { if (!leave) unlink(pathname.c_str()); }
 
 	const std::string& name() const { return pathname; }
 };
 
-std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img);
+std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile = false);
 
 }
