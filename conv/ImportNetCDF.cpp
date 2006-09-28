@@ -329,7 +329,7 @@ public:
 				case ncDouble: readData<double>(*var, *img); break;
 			}
 			if (shouldCrop())
-				img->data->crop(cropX, cropY, cropWidth, cropHeight);
+				img->crop(cropX, cropY, cropWidth, cropHeight);
 			output.processImage(img);
 		}
 	}
