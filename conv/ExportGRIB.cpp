@@ -126,11 +126,11 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
         0, 0, 0, 0);
 
   // Satellite identifier, satellite spectral band, ?
-#if LOCALDEF == 3
-  l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, img.channel_id, LOCALDEF3FUNC);
-#else
+//#if LOCALDEF == 3
+//  l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, img.channel_id, LOCALDEF3FUNC);
+//#else
   l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, (img.channel_id >> 8) & 255, img.channel_id & 255);
-#endif
+//#endif
 
 
   // Dimensions
@@ -215,8 +215,8 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   localdefinition24[6] = 0x30; // 0
   localdefinition24[7] = 0x30; // 0
   localdefinition24[8] = 0x31; // 1
-  localdefinition24[9] = (LOCALDEF24SATID >> 8) & 255;
-  localdefinition24[10] = LOCALDEF24SATID & 255;
+  localdefinition24[9] = (img.spacecraft_id >> 8) & 255;
+  localdefinition24[10] = img.spacecraft_id & 255;
   localdefinition24[11] = (LOCALDEF24INSTR >> 8) & 255;
   localdefinition24[12] = LOCALDEF24INSTR & 255;
   localdefinition24[13] = (img.channel_id >> 8) & 255;

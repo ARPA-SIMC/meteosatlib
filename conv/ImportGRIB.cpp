@@ -90,10 +90,12 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 		}
 	}
 
+#if 0
 	switch (m.level.type)
 	{
 		case GRIB_LEVEL_SATELLITE_METEOSAT8:
 			img->channel_id = (int)m.level.lv1 << 8 + (int)m.level.lv2;
+			cerr << "CHID " << m.level.lv1 << "--" << m.level.lv2 << endl;
 			break;
 		default:
 		{
@@ -102,26 +104,48 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 			throw std::runtime_error(str.str());
 		}
 	}
+#endif
 
 	if (m.get_pds_size() >= 12)
 	{
 		unsigned char* pds = m.get_pds_values(0, 12);
-		switch (pds[0])
+		img->spacecraft_id = (int)pds[9];
+		img->channel_id = ((int)pds[10] << 8) + (int)pds[11];
+		delete[] pds;
+	} else {
+		std::stringstream str;
+		str << "GRIB PDS is too short (" << m.get_pds_size() << " where at least 12 are needed)";
+		throw std::runtime_error(str.str());
+	}
+
+#if 0
+	img->spacecraft_id = 55;
+	if (m.get_pds_size() >= 52)
+	{
+		// ECMWF local GRIB extensions, see:
+		// http://www.ecmwf.int/publications/manuals/libraries/gribex/localGRIBUsage.html
+		unsigned char* pds = m.get_pds_values(0, 52);
+		if (pds[4] != 200)
 		{
-			case 3:
-				std::cerr << "pds type 3 does not convey satellite identifier information: using default of 55." << endl;
-				img->spacecraft_id = 55;
-				break;
-			case 24:
-				img->spacecraft_id = (pds[9] << 8) + pds[10];
-				break;
-			default:
-				std::cerr << "unsupported pds type " << pds[0] << ": using default satellite identifier 55." << endl;
-				img->spacecraft_id = 55;
-				break;
+				std::cerr << "pds extensions found but from an unsupported originating centre (" << (int)pds[5] << "): using default satellite identifier 55." << endl;
+		} else {
+			switch (pds[40])
+			{
+				case 3:
+					std::cerr << "pds type 3 does not convey satellite identifier information: using default of 55.  TODO: does displgrib get the default as well?" << endl;
+					break;
+				case 24:
+					img->spacecraft_id = (pds[49] << 8) + pds[50];
+					break;
+				default:
+					std::cerr << "unsupported pds type " << (int)pds[0] << ": using default satellite identifier 55." << endl;
+					break;
+			}
 		}
 		delete[] pds;
-	}
+	} else
+			std::cerr << "no local PDS extentions: using default satellite identifier 55." << endl;
+#endif
 
   return img;
 }
