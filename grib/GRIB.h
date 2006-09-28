@@ -713,13 +713,13 @@ class GRIB_GRID_spaceview {
     /// @param Nr: Camera altitude from earth center in ER units
     /// @param X0: X coordinate of origin of sector image.
     /// @param Y0: Y coordinate of origin of sector image.
-    void set(float lap, float lop, float dx, float dy,
+    void set(float lap, float lop, int dx, int dy,
              float Xp, float Yp, float orient, float Nr, float X0, float Y0);
 
     float lap;     ///< Latitude of sub-satellite point
     float lop;     ///< Longitude of sub-satellite point
-    float dx;      ///< Apparent diameter of earth in grid lenght, X direction
-    float dy;      ///< Apparent diameter of earth in grid lenght, Y direction
+    int dx;      ///< Apparent diameter of earth in grid lenght, X direction
+    int dy;      ///< Apparent diameter of earth in grid lenght, Y direction
     float Xp;      ///< X-coordinate of sub-satellite point
     float Yp;      ///< Y-coordinate of sub-satellite point
     float orient;  ///< Grid orientation in mdeg
@@ -875,7 +875,7 @@ class GRIB_GRID {
     /// @param Nr: Camera altitude from earth center in ER units
     /// @param X0: X coordinate of origin of sector image.
     /// @param Y0: Y coordinate of origin of sector image.
-    void set_spaceview(float lap, float lop, float dx, float dy,
+    void set_spaceview(float lap, float lop, int dx, int dy,
                        float Xp, float Yp, float orient, float Nr,
                        float X0, float Y0);
 

@@ -58,7 +58,7 @@
 #define SEVIRI_SCANSTEP    (0.00025153/3.0) // scan step angle (rd) for 3 lines
 #define SEVIRI_ORIENTATION 180.0
 #define SEVIRI_CAMERA_H    6610.6839590101218
-#define SEVIRI_DX          2.0*asin(1.0/SEVIRI_CAMERA_H)/SEVIRI_SCANSTEP
+#define SEVIRI_DX          2.0*asin(1.0/SEVIRI_CAMERA_H)/SEVIRI_SCANSTEP*1000
 #define SEVIRI_DY          SEVIRI_DX
 
 // HRI format interface

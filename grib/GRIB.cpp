@@ -1100,7 +1100,7 @@ std::ostream& operator<< ( std::ostream& os, GRIB_GRID_mercator &g )
   return os;
 }
 
-void GRIB_GRID_spaceview::set(float lap, float lop, float dx, float dy,
+void GRIB_GRID_spaceview::set(float lap, float lop, int dx, int dy,
                               float Xp, float Yp, float orient, float Nr,
                               float X0, float Y0)
 {
@@ -1235,7 +1235,7 @@ void GRIB_GRID::set_mercator(float lat1, float lon1, float lat2, float lon2,
   return;
 }
 
-void GRIB_GRID::set_spaceview(float lap, float lop, float dx, float dy,
+void GRIB_GRID::set_spaceview(float lap, float lop, int dx, int dy,
                               float Xp, float Yp, float orient, float Nr,
                               float X0, float Y0)
 {
@@ -1429,8 +1429,8 @@ unsigned char *GRIB_GRID::Encode( )
                    WGRIB_ENCODE_S3BYTES, 10, (int) (1000.0*(sp.lap)),
                    WGRIB_ENCODE_S3BYTES, 13, (int) (1000.0*(sp.lop)),
                    WGRIB_ENCODE_BYTE,    16, mode,
-                   WGRIB_ENCODE_S3BYTES, 17, (int) (1000.0*(sp.dx)),
-                   WGRIB_ENCODE_S3BYTES, 20, (int) (1000.0*(sp.dy)),
+                   WGRIB_ENCODE_S3BYTES, 17, sp.dx,
+                   WGRIB_ENCODE_S3BYTES, 20, sp.dy,
                    WGRIB_ENCODE_S2BYTES, 23, (int) sp.Xp,
                    WGRIB_ENCODE_S2BYTES, 25, (int) sp.Yp,
                    WGRIB_ENCODE_BYTE,    27, scan,
@@ -1520,7 +1520,7 @@ void GRIB_GRID::Decode(unsigned char *pds,
         break;
       case GRIB_GRID_SPACEVIEW:
         sp.set(0.001*GDS_Spaceview_lap(gds), 0.001*GDS_Spaceview_lop(gds),
-               0.001*GDS_Spaceview_dx(gds), 0.001*GDS_Spaceview_dy(gds),
+               GDS_Spaceview_dx(gds), GDS_Spaceview_dy(gds),
                GDS_Spaceview_Xp(gds), GDS_Spaceview_Yp(gds),
                0.001*GDS_Spaceview_or(gds), 0.001*GDS_Spaceview_nr(gds),
                GDS_Spaceview_X0(gds), GDS_Spaceview_Y0(gds));
