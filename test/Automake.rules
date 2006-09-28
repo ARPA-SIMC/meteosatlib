@@ -44,11 +44,13 @@ test_msatlib_test_SOURCES = \
 	test/test-importxrit.cpp \
 	test/test-importgrib.cpp \
 	test/test-importsafh5.cpp \
+	test/test-importnetcdf.cpp \
 	test/test-image.cpp \
 	conv/Image.cpp \
 	conv/ImportXRIT.cpp \
 	conv/ImportGRIB.cpp \
 	conv/ImportSAFH5.cpp \
+	conv/ImportNetCDF.cpp \
 	conv/ExportGRIB.cpp \
 	hdf5/Utils.cpp
 
