@@ -21,6 +21,8 @@
 
 #include "test-utils.h"
 #include <ImportGRIB.h>
+#include <ExportGRIB.h>
+#include <grib/GRIB.h>
 
 using namespace msat;
 
@@ -59,7 +61,7 @@ void to::test<2>()
 
 	gen_ensure_equals(img->data->columns, 1300);
 	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->slope, 10);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -74,9 +76,8 @@ void to::test<2>()
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
 	gen_ensure_equals(img->data->bpp, 11);
-	// It does not make sense to test unscaled() with data coming from grib
-	//gen_ensure_equals(img->data->unscaled(0, 0), 97.699997);
-	//gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(0, 0), 977);
+	gen_ensure_equals(img->data->unscaled(10, 10), 981);
 	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
 	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
 }
@@ -98,7 +99,7 @@ void to::test<3>()
 
 	gen_ensure_equals(img->data->columns, 200);
 	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->slope, 10);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -113,12 +114,62 @@ void to::test<3>()
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
 	gen_ensure_equals(img->data->bpp, 11);
-	// It does not make sense to test unscaled() with data coming from grib
-	//gen_ensure_equals(img->data->unscaled(0, 0), 97.699997);
-	//gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(0, 0), 1005);
+	gen_ensure_equals(img->data->unscaled(10, 10), 978);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
 	gen_ensure_equals(img->data->scaled(10, 10), 97.800003f);
 
+}
+
+// Try reimporting an exported grib
+template<> template<>
+void to::test<4>()
+{
+	const std::string fname = "data/test-importgrib.grb";
+	TempTestFile ttf(fname);
+
+	// Read the grib
+	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	ImageVector imgs;
+	imp->read(imgs);
+	gen_ensure_equals(imgs.size(), 1u);
+	Image* img = imgs[0];
+
+	// Write the grib
+	GRIB_FILE gf;
+	ensure(gf.OpenWrite(fname) == 0);
+	ExportGRIB(*img, gf);
+	ensure(gf.Close() == 0);
+
+	// Reread the grib
+	std::auto_ptr<ImageImporter> imp1(createGribImporter(fname));
+	ImageVector imgs1;
+	imp1->read(imgs1);
+	gen_ensure_equals(imgs1.size(), 1u);
+	img = imgs1[0];
+
+	// Check the contents
+	gen_ensure_equals(img->data->columns, 1300);
+	gen_ensure_equals(img->data->lines, 700);
+	gen_ensure_equals(img->data->slope, 10);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->year, 2006);
+	gen_ensure_equals(img->month, 4);
+	gen_ensure_equals(img->day, 26);
+	gen_ensure_equals(img->hour, 19);
+	gen_ensure_equals(img->minute, 45);
+	gen_ensure_equals(img->sublon, 0);
+	gen_ensure_equals(img->channel_id, 2049);
+	gen_ensure_equals(img->spacecraft_id, 55);
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_equals(img->column_offset, 1500);
+	gen_ensure_equals(img->line_offset, 200);
+	gen_ensure_equals(img->data->bpp, 11);
+	gen_ensure_equals(img->data->unscaled(0, 0), 977);
+	gen_ensure_equals(img->data->unscaled(10, 10), 981);
+	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
+	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
 }
 
 }

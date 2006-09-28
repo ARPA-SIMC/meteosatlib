@@ -58,9 +58,8 @@ struct GribImageData : public ImageDataWithPixels<float>
 
 	virtual int unscaled(int column, int line) const
   {
-		// Unscaled would just return a truncated value for grib, so we better just
-		// return 0 here to (hopefully) reduce confusion
-		return 0;
+		// 'unscale' the value
+		return (int)round((pixels[line * columns + column] + offset) * slope);
   }
   virtual float scaled(int column, int line) const
   {
@@ -80,6 +79,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	// Read image data
 	auto_ptr< ImageDataWithPixels<float> > res(new GribImageData(m.grid.nx, m.grid.ny));
   memcpy(res->pixels, m.field.vals, m.grid.nxny * sizeof(float));
+	res->slope = (int)exp10(m.field.decimalscale);
+	res->offset = m.field.refvalue;
 
 	auto_ptr< Image > img(new Image());
 	img->setData(res.release());

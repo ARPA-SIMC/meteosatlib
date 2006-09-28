@@ -61,8 +61,6 @@ static char rcs_id_string[] = "$Id$";
 // What local definition to use (0 for none, 3 or 24)
 #define LOCALDEF 24
 
-//#define EXTENDED_PDS
-
 namespace msat {
 
 //
@@ -74,41 +72,14 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   // Extract data out of HDF5_source
   // 
 
+#ifdef EXTENDED_PDS
   // Get image dataset
   float cal_offset = img.data->offset;
   float cal_slope = img.data->slope;
 
-	/*
-  cout << "Scaling factor: " << cal_offset << endl;
-  cout << "Offset: " << cal_slope << endl;
-  cout << "nlines: " << img.lines << endl;
-  cout << "ncols: " << img.columns << endl;
-  cout << "Read " << img.columns << "x" << img.lines << " image"
-          " (" << img.columns * img.lines << " " << img.bpp << "bit samples)" << endl;
-	*/
-
   //
   // Create the Grib file with the data we got
   //
-#ifdef EXTENDED_PDS
-  GRIB_MSG_PDS pds;
-
-  // Fill pds extra section
-  pds.spc = (unsigned short) img.spacecraft_id;
-  // Spectral channel id
-  // Mettere la versione rimappata (fakechan)
-  // TODO fdg: cosa va nel chn 'ristretto'?
-  pds.chn = (unsigned char) img.channel_id;
-  // Subsatellite longitude
-  pds.sublon = 0;
-  pds.npix = METEOSAT_IMAGE_NCOLUMNS;
-  pds.nlin = METEOSAT_IMAGE_NLINES;
-  pds.cfac = img.column_factor;
-  pds.lfac = img.line_factor;
-  pds.coff = img.column_offset;
-  pds.loff = img.line_offset;
-  // Satellite height (hopefully constant for Meteosat)
-  pds.sh = SEVIRI_CAMERA_H * 1000000;
   // Calibration offset
   pds.cal_offset = cal_offset;
   // Calibration slope
@@ -125,12 +96,8 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
         GRIB_TIMEUNIT_MINUTE, GRIB_TIMERANGE_FORECAST_AT_REFTIME_PLUS_P1,
         0, 0, 0, 0);
 
-  // Satellite identifier, satellite spectral band, ?
-//#if LOCALDEF == 3
-//  l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, img.channel_id, LOCALDEF3FUNC);
-//#else
+  // Satellite identifier, satellite spectral band
   l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, (img.channel_id >> 8) & 255, img.channel_id & 255);
-//#endif
 
 
   // Dimensions
@@ -138,32 +105,12 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   grid.set_earth_spheroid();
   grid.is_dirincgiven = true;
 
-/*
- *  Data represent type = space/ortho  (Table 6)        90
- *  Number of points along X axis.                    1300
- *  Number of points along Y axis.                     700
- *  Latitude of sub-satellite point.                     0
- *  Longitude of sub-satellite point.                    0
- *  Diameter of the earth in x direction.             3623
- *  Diameter of the earth in y direction.             3623
- *  X coordinate of sub-satellite point.              1856
- *  Y coordinate of sub-satellite point.              1856
- *  Scanning mode flags (Code Table 8)            00000000
- *  Number of vertical coordinate parameters.            0
- *  Orientation of the grid.                        180000
- *  Altitude of the camera.                        6610710
- *  Y coordinate of origin of sector image.           1500
- *  X coordinate of origin of sector image.            200
- *  Earth flag                                          64
- *  Components flag                                      0
- */
-
   // Earth Equatorial Radius is 6378.160 Km (IAU 1965)
-  grid.set_spaceview(0.0, 0.0,
-									img.seviriDX() / 1000, img.seviriDY() / 1000,
+  grid.set_spaceview(0.0, img.sublon,
+									(float)img.seviriDX() / 1000, (float)img.seviriDY() / 1000,
                   METEOSAT_IMAGE_NCOLUMNS/2, METEOSAT_IMAGE_NLINES/2,
 									SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
-									METEOSAT_IMAGE_NCOLUMNS/2-img.column_offset + 1, METEOSAT_IMAGE_NLINES/2-img.line_offset + 1);
+									img.column_offset, img.line_offset);
 
   // Get the calibrated image
   float *fvals = img.data->allScaled();
@@ -174,7 +121,6 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 
 #if LOCALDEF == 3
   unsigned char localdefinition3[LOCALDEF3LEN];
-
   localdefinition3[0] = LOCALDEF3ID;			// 41
   localdefinition3[1] = LOCALDEF3CLASS;			// 42
   localdefinition3[2] = LOCALDEF3TYPE;			// 43
@@ -187,24 +133,11 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   localdefinition3[9] = img.channel_id;			// 50
   localdefinition3[10] = LOCALDEF3FUNC;			// 51
   localdefinition3[11] = 0;				// 52
-
-//  std::cout << "Adding local use PDS of " << sizeof(GRIB_MSG_PDS) << " bytes"
-//            << std::endl;
-#ifdef EXTENDED_PDS
-  size_t add_total = LOCALDEF3LEN + sizeof(GRIB_MSG_PDS);
-  unsigned char *pdsadd = new unsigned char[add_total];
-  memcpy(pdsadd, localdefinition3, LOCALDEF3LEN);
-  memcpy(pdsadd+LOCALDEF3LEN, &pds, sizeof(GRIB_MSG_PDS));
-  f.add_local_def(add_total, pdsadd);
-	delete[] pdsadd;
-#else
   f.add_local_def(LOCALDEF3LEN, localdefinition3);
-#endif
 
 #else
 #if LOCALDEF == 24
   unsigned char localdefinition24[LOCALDEF24LEN];
-
   localdefinition24[0] = LOCALDEF24ID;
   localdefinition24[1] = LOCALDEF24CLASS;
   localdefinition24[2] = LOCALDEF24TYPE;
@@ -222,20 +155,7 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   localdefinition24[13] = (img.channel_id >> 8) & 255;
   localdefinition24[14] = img.channel_id & 255;
   localdefinition24[15] = LOCALDEF24FUNC;
-
-//  std::cout << "Adding local use PDS of " << sizeof(GRIB_MSG_PDS) << " bytes"
-//            << std::endl;
-#ifdef EXTENDED_PDS
-  size_t add_total = LOCALDEF24LEN + sizeof(GRIB_MSG_PDS);
-  unsigned char *pdsadd = new unsigned char[add_total];
-  memcpy(pdsadd, localdefinition24, LOCALDEF24LEN);
-  memcpy(pdsadd+LOCALDEF24LEN, &pds, sizeof(GRIB_MSG_PDS));
-  f.add_local_def(add_total, pdsadd);
-	delete[] pdsadd;
-#else
   f.add_local_def(LOCALDEF24LEN, localdefinition24);
-#endif
-
 #endif
 #endif
 

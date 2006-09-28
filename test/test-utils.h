@@ -70,4 +70,13 @@ public:
 	}
 };
 
+// RAII-style class to ensure cleanup of a temporary test file
+class TempTestFile
+{
+	std::string pathname;
+public:
+	TempTestFile(const std::string& pathname) : pathname(pathname) { unlink(pathname.c_str()); }
+	~TempTestFile() { unlink(pathname.c_str()); }
+};
+
 }

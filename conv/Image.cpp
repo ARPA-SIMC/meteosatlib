@@ -132,7 +132,7 @@ int* ImageData::allUnscaled() const
 
 int ImageData::decimalScale() const
 {
-	int res = -(int)floor(log10(slope));
+	int res = (int)floor(log10(slope));
 	if (exp10(res) == slope)
 		return res;
 	else

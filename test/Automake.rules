@@ -45,7 +45,8 @@ test_msatlib_test_SOURCES = \
 	test/test-image.cpp \
 	conv/Image.cpp \
 	conv/ImportXRIT.cpp \
-	conv/ImportGRIB.cpp
+	conv/ImportGRIB.cpp \
+	conv/ExportGRIB.cpp
 
 
 ## -fin-
