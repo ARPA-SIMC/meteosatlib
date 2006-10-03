@@ -50,6 +50,7 @@ void to::test<1>()
 template<> template<>
 void to::test<2>()
 {
+#if 0
 	XRITImportOptions opts;
 	opts.directory = "data";
 	opts.resolution = "H";
@@ -83,6 +84,7 @@ void to::test<2>()
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+#endif
 }
 
 // Import a subarea of an XRIT product
