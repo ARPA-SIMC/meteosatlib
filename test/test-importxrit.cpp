@@ -50,7 +50,6 @@ void to::test<1>()
 template<> template<>
 void to::test<2>()
 {
-#if 0
 	XRITImportOptions opts;
 	opts.directory = "data";
 	opts.resolution = "H";
@@ -74,7 +73,7 @@ void to::test<2>()
 	gen_ensure_equals(img->minute, 45);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 12);
-	gen_ensure_equals(img->spacecraft_id, 321); // unverified
+	gen_ensure_equals(img->spacecraft_id, 55); // unverified
 	gen_ensure_equals(img->column_factor, -40927014);
 	gen_ensure_equals(img->line_factor, -40927014);
 	gen_ensure_equals(img->column_offset, -2);
@@ -82,8 +81,34 @@ void to::test<2>()
 	gen_ensure_equals(img->data->bpp, 32); // unverified
 	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(356, 5569), 9); // unverified
+	gen_ensure_equals(img->data->unscaled(357, 5569), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(358, 5569), 5); // unverified
+	gen_ensure_equals(img->data->unscaled(214, 5570), 12); // unverified
+	gen_ensure_equals(img->data->unscaled(215, 5570), 10); // unverified
+	gen_ensure_equals(img->data->unscaled(216, 5570), 11); // unverified
+	gen_ensure_equals(img->data->unscaled(466, 5571), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(467, 5571), 8); // unverified
+	gen_ensure_equals(img->data->unscaled(468, 5571), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(356, 5569), 9.0); // unverified
+	gen_ensure_equals(img->data->scaled(357, 5569), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(358, 5569), 5.0); // unverified
+	gen_ensure_equals(img->data->scaled(214, 5570), 12.0); // unverified
+	gen_ensure_equals(img->data->scaled(215, 5570), 10.0); // unverified
+	gen_ensure_equals(img->data->scaled(216, 5570), 11.0); // unverified
+	gen_ensure_equals(img->data->scaled(466, 5571), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(467, 5571), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(468, 5571), 8.0); // unverified
+
+#if 0
+	-- look for nonempty values
+	using namespace std;
+	for (size_t y = 0; y < img->data->lines; ++y)
+		for (size_t x = 0; x < img->data->columns; ++x)
+			if (img->data->scaled(x, y) != 0)
+				cout << "(" << x << ", " << y << "): " << img->data->scaled(x, y) << endl;
 #endif
 }
 
@@ -98,9 +123,9 @@ void to::test<3>()
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
 	opts.subarea = true;
-	opts.AreaLinStart = 2000;
+	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
-	opts.AreaPixStart = 1000;
+	opts.AreaPixStart = 100;
 	opts.AreaNpix = 400;
 
 	std::auto_ptr<Image> img = importXRIT(opts);
@@ -120,13 +145,31 @@ void to::test<3>()
 	gen_ensure_equals(img->spacecraft_id, 55); // unverified
 	gen_ensure_equals(img->column_factor, -40927014);
 	gen_ensure_equals(img->line_factor, -40927014);
-	gen_ensure_equals(img->column_offset, 998);
-	gen_ensure_equals(img->line_offset, 2462);
+	gen_ensure_equals(img->column_offset, 98);
+	gen_ensure_equals(img->line_offset, 5962);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
 	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
+	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(258, 69), 5); // unverified
+	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
+	gen_ensure_equals(img->data->unscaled(115, 70), 10); // unverified
+	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
+	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
+	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(256, 69), 9.0); // unverified
+	gen_ensure_equals(img->data->scaled(257, 69), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(258, 69), 5.0); // unverified
+	gen_ensure_equals(img->data->scaled(114, 70), 12.0); // unverified
+	gen_ensure_equals(img->data->scaled(115, 70), 10.0); // unverified
+	gen_ensure_equals(img->data->scaled(116, 70), 11.0); // unverified
+	gen_ensure_equals(img->data->scaled(366, 71), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(367, 71), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
 }
 
 // Import a full XRIT product and pass it from grib
@@ -158,7 +201,7 @@ void to::test<4>()
 	gen_ensure_equals(img->minute, 45);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 12);
-	gen_ensure_equals(img->spacecraft_id, 321); // unverified
+	gen_ensure_equals(img->spacecraft_id, 55); // unverified
 	gen_ensure_equals(img->column_factor, -40927014);
 	gen_ensure_equals(img->line_factor, -40927014);
 	gen_ensure_equals(img->column_offset, -2);
@@ -182,9 +225,9 @@ void to::test<5>()
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
 	opts.subarea = true;
-	opts.AreaLinStart = 2000;
+	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
-	opts.AreaPixStart = 1000;
+	opts.AreaPixStart = 100;
 	opts.AreaNpix = 400;
 
 	std::auto_ptr<Image> img = importXRIT(opts);
@@ -205,13 +248,31 @@ void to::test<5>()
 	gen_ensure_equals(img->spacecraft_id, 55); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(-40927014)));
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
-	gen_ensure_equals(img->column_offset, 998);
-	gen_ensure_equals(img->line_offset, 2462);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
+	gen_ensure_equals(img->column_offset, 98);
+	gen_ensure_equals(img->line_offset, 5962);
+	gen_ensure_equals(img->data->bpp, 5); // unverified
 	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
+	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(258, 69), 5); // unverified
+	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
+	gen_ensure_equals(img->data->unscaled(115, 70), 10); // unverified
+	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
+	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
+	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(256, 69), 9.0); // unverified
+	gen_ensure_equals(img->data->scaled(257, 69), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(258, 69), 5.0); // unverified
+	gen_ensure_equals(img->data->scaled(114, 70), 12.0); // unverified
+	gen_ensure_equals(img->data->scaled(115, 70), 10.0); // unverified
+	gen_ensure_equals(img->data->scaled(116, 70), 11.0); // unverified
+	gen_ensure_equals(img->data->scaled(366, 71), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(367, 71), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
 }
 
 }
