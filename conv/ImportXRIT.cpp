@@ -157,28 +157,128 @@ std::vector<std::string> XRITImportOptions::segmentFiles() const
 	return res;
 }
 
+struct Decoder
+{
+	struct Segment
+	{
+		std::string file;
+		MSG_header header;
+		MSG_data msgdat;
+		bool loaded;
+
+		Segment(const std::string& file) : file(file), loaded(false)
+		{
+			std::ifstream hrit(file.c_str(), (std::ios::binary | std::ios::in));
+			if (hrit.fail())
+				throw std::runtime_error("Cannot open input hrit segment " + file);
+			header.read_from(hrit);
+			hrit.close( );
+
+			if (header.segment_id->data_field_format == MSG_NO_FORMAT)
+				throw std::runtime_error("Product dumped in binary format.");
+		}
+
+		int index() const { header.segment_id->sequence_number-1; }
+
+		MSG_data& data()
+		{
+			// Load segment data only on demand
+			if (!loaded)
+			{
+				std::ifstream hrit(file.c_str(), (std::ios::binary | std::ios::in));
+				if (hrit.fail())
+					throw std::runtime_error("Cannot open input hrit segment " + file);
+				header.read_from(hrit);
+				msgdat.read_from(hrit, header);
+				hrit.close( );
+				loaded = true;
+			}
+			return msgdat;
+		}
+	};
+
+	const XRITImportOptions& opts;
+  MSG_header PRO_head;
+  MSG_data PRO_data;
+	std::vector<Segment*> segments;
+	Segment* anySegment;
+	int seglines;
+	int columns;
+	int lines;
+	size_t npixperseg;
+
+	Decoder(const XRITImportOptions& opts)
+		: opts(opts), anySegment(0), seglines(0), columns(0), lines(0), npixperseg(0)
+	{
+		std::ifstream hrit(opts.prologueFile().c_str(), (std::ios::binary | std::ios::in));
+		if (hrit.fail())
+			throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
+
+		PRO_head.read_from(hrit);
+		PRO_data.read_from(hrit, PRO_head);
+
+		hrit.close();
+		//std::cout << PRO_head;
+
+		// Read the segment headers
+		vector<string> segfiles = opts.segmentFiles();
+		for (vector<string>::const_iterator i = segfiles.begin();
+					i != segfiles.end(); ++i)
+		{
+			Segment* s = new Segment(*i);
+			if (anySegment == 0) anySegment = s;
+			if (s->index() >= segments.size())
+				segments.resize(s->index()+1, 0);
+			segments[s->index()] = s;
+		}
+
+		int totalsegs = anySegment->header.segment_id->planned_end_segment_sequence_number;
+
+		// Number of lines per segment
+		seglines = anySegment->header.image_structure->number_of_lines;
+		columns = anySegment->header.image_structure->number_of_columns;
+		lines = seglines * totalsegs;
+		npixperseg = columns * seglines;
+	}
+
+	~Decoder()
+	{
+		for (vector<Segment*>::iterator i = segments.begin();
+					i != segments.end(); ++i)
+			if (*i)
+				delete *i;
+	}
+
+	MSG_header& anyHeader() const { return anySegment->header; }
+
+	MSG_SAMPLE get(size_t x, size_t y)
+	{
+		// Rotate by 180deg
+		x = columns - x;
+		y = lines - y;
+
+		// Absolute position in image data
+		size_t pos = y * columns + x;
+
+		// Segment number where is the pixel
+		size_t segno = pos / npixperseg;
+
+		Segment* s = segments[segno];
+		if (s == 0) return 0;
+
+		// Offset of the pixel in the segment
+		size_t segoff = pos - (segno * npixperseg);
+		return s->data().image->data[segoff];
+	}
+};
+
 std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 {
 	opts.ensureComplete();
 
-  std::ifstream hrit(opts.prologueFile().c_str(), (std::ios::binary | std::ios::in));
-  if (hrit.fail())
-		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
+	Decoder h(opts);
 
-  MSG_header PRO_head;
-  PRO_head.read_from(hrit);
-
-  MSG_data PRO_data;
-  PRO_data.read_from(hrit, PRO_head);
-
-  hrit.close();
-  //std::cout << PRO_head;
-
-	std::vector<std::string> segments = opts.segmentFiles();
-
-  MSG_header header[segments.size()];
-  MSG_data msgdat[segments.size()];
-
+#if 0
   for (int i = 0; i < segments.size(); ++i)
   {
     std::ifstream hrit(segments[i].c_str(), (std::ios::binary | std::ios::in));
@@ -189,30 +289,11 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
     hrit.close( );
     // std::cout << header[i];
   }
+#endif
 
-  if (header[0].segment_id->data_field_format == MSG_NO_FORMAT)
-		throw std::runtime_error("Product dumped in binary format.");
-
-  int totalsegs = header[0].segment_id->planned_end_segment_sequence_number;
-  int segsindexes[totalsegs]; 
-
-  for (int i = 0; i < totalsegs; i ++)
-    segsindexes[i] = -1;
-
-  for (int i = 0; i < segments.size(); i ++)
-    segsindexes[header[i].segment_id->sequence_number-1] = i;
-
+#if 0
 	// Perform image rotation and cropping on the uncalibrated data
 	ImageDataWithPixels<MSG_SAMPLE> work_img;
-
-	// Number of lines per segment
-	int seglines = header[0].image_structure->number_of_lines;
-  work_img.columns = header[0].image_structure->number_of_columns;
-  work_img.lines = seglines * totalsegs;
-
-  size_t npixperseg = work_img.columns * seglines;
-  int SP_X0 = work_img.columns/2;
-  int SP_Y0 = work_img.lines/2;
 
   // Assemble all the segments together
 	size_t total_size = work_img.columns * work_img.lines;
@@ -226,25 +307,30 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 					npixperseg*sizeof(MSG_SAMPLE));
 		pos += npixperseg;
   }
+#endif
 
-	// TODO: it's more efficient to slice before rotating, but the slicing area must be rotated
-
-  // Rotate the image 180deg
-	work_img.rotate180();
+	int x = 0;
+	int y = 0;
+	int width = h.columns;
+	int height = h.lines;
 
   // Slice the subarea if needed
   if (opts.subarea)
-		work_img.crop(opts.AreaPixStart, opts.AreaLinStart, opts.AreaNpix, opts.AreaNlin);
+	{
+		x = opts.AreaPixStart;
+		y = opts.AreaLinStart;
+		width = opts.AreaNpix;
+		height = opts.AreaNlin;
+	}
 
 	// Final, calibrated image
-  std::auto_ptr<Image> img(new Image);
 
   // Get calibration values
-  float *cal = PRO_data.prologue->radiometric_proc.get_calibration(
-								header[0].segment_id->spectral_channel_id,
-								header[0].image_structure->number_of_bits_per_pixel);
+  float *cal = h.PRO_data.prologue->radiometric_proc.get_calibration(
+								h.anyHeader().segment_id->spectral_channel_id,
+								h.anyHeader().image_structure->number_of_bits_per_pixel);
 	float base;
-	switch (header[0].segment_id->spectral_channel_id)
+	switch (h.anyHeader().segment_id->spectral_channel_id)
 	{
   	case MSG_SEVIRI_1_5_VIS_0_6:
   	case MSG_SEVIRI_1_5_VIS_0_8:
@@ -256,15 +342,19 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			break;
 	}
 	// Perform calibration and copy the data to the result image
-	auto_ptr< ImageDataWithPixels<float> > data(new ImageDataWithPixels<float>(work_img.columns, work_img.lines));
-	int size = work_img.columns * work_img.lines;
-  for (int i = 0; i < (int)size; ++i)
-    if (work_img.pixels[i] > 0)
-			data->pixels[i] = cal[work_img.pixels[i]] - base;
-    else
-			data->pixels[i] = 0.0;
+	auto_ptr< ImageDataWithPixels<float> > data(new ImageDataWithPixels<float>(width, height));
+	for (size_t iy = 0; iy < height; ++iy)
+		for (size_t ix = 0; ix < width; ++ix)
+		{
+			MSG_SAMPLE sample = h.get(x + ix, y + iy);
+			if (sample > 0)
+				data->pixels[iy*width+ix] = cal[sample] - base;
+			else
+				data->pixels[iy*width+ix] = 0.0;
+		}
   delete [ ] cal;
 
+  std::auto_ptr<Image> img(new Image);
 	img->setData(data.release());
 
 	// TODO
@@ -289,7 +379,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   img->data->offset = 0 /* TODO */;
 
 	// Image time
-  struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
+  struct tm *tmtime = h.PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
   img->year = tmtime->tm_year+1900;
 	img->month = tmtime->tm_mon+1;
 	img->day = tmtime->tm_mday;
@@ -307,21 +397,15 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
                   SP_X0, SP_Y0, SEVIRI_ORIENTATION,
                   SEVIRI_CAMERA_H, AreaPixStart+1, AreaLinStart+1);
 #endif
-	img->sublon = header[0].image_navigation->subsatellite_longitude;
+	img->sublon = h.anyHeader().image_navigation->subsatellite_longitude;
 
 
-  img->channel_id = (unsigned char ) header[0].segment_id->spectral_channel_id;
-  img->spacecraft_id = header[0].segment_id->spacecraft_id;
-  img->column_factor = header[0].image_navigation->column_scaling_factor;
-  img->line_factor = header[0].image_navigation->line_scaling_factor;
-  img->column_offset = header[0].image_navigation->column_offset;
-  img->line_offset = header[0].image_navigation->line_offset;
-  if (opts.subarea)
-	{
-		img->column_offset += opts.AreaPixStart;
-		img->line_offset += opts.AreaLinStart;
-	}
-
+  img->channel_id = (unsigned char ) h.anyHeader().segment_id->spectral_channel_id;
+  img->spacecraft_id = h.anyHeader().segment_id->spacecraft_id;
+  img->column_factor = h.anyHeader().image_navigation->column_scaling_factor;
+  img->line_factor = h.anyHeader().image_navigation->line_scaling_factor;
+  img->column_offset = h.anyHeader().image_navigation->column_offset + x;
+  img->line_offset = h.anyHeader().image_navigation->line_offset + y;
 
   // FIXME: and this? pds.sublon = header[0].image_navigation->subsatellite_longitude;
   // FIXME: and this? pds.sh = header[0].image_navigation->satellite_h;
