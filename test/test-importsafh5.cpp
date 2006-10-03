@@ -68,7 +68,7 @@ void to::test<2>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->column_offset, 357);
@@ -108,7 +108,7 @@ void to::test<3>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->column_offset, 457);
@@ -145,7 +145,7 @@ void to::test<4>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->column_offset, 357);
@@ -185,7 +185,7 @@ void to::test<5>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 321); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->column_offset, 457);

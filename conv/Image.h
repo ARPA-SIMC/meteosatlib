@@ -128,6 +128,13 @@ public:
 
 	/// Set the column factor from a seviri DY value
 	static int lineFactorFromSeviriDY(int seviriDY);
+
+	/// Convert the HRIT spacecraft ID to the ID as in WMO Common code table C-5
+	static int spacecraftIDFromHRIT(int id);
+
+	/// Convert the spacecraft ID as in WMO Common code table C-5 to the value
+	/// used by HRIT
+	static int spacecraftIDToHRIT(int id);
 };
 
 /// Interface for image data of various types

@@ -96,7 +96,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
 	
 	// Get spacecraft ID
-	img->spacecraft_id = readIntAttribute(group, "GP_SC_ID");
+	img->spacecraft_id = Image::spacecraftIDFromHRIT(readIntAttribute(group, "GP_SC_ID"));
 	
 	// Get scale factor
 	img->column_factor = readIntAttribute(group, "CFAC"); 
