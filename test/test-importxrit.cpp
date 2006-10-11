@@ -92,15 +92,15 @@ void to::test<2>()
 	gen_ensure_equals(img->data->unscaled(468, 5571), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->scaled(356, 5569), 9.0); // unverified
-	gen_ensure_equals(img->data->scaled(357, 5569), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(358, 5569), 5.0); // unverified
-	gen_ensure_equals(img->data->scaled(214, 5570), 12.0); // unverified
-	gen_ensure_equals(img->data->scaled(215, 5570), 10.0); // unverified
-	gen_ensure_equals(img->data->scaled(216, 5570), 11.0); // unverified
-	gen_ensure_equals(img->data->scaled(466, 5571), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(467, 5571), 8.0); // unverified
-	gen_ensure_equals(img->data->scaled(468, 5571), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(356, 5569),  9.40779495239257812500); // unverified
+	gen_ensure_equals(img->data->scaled(357, 5569),  7.29584074020385742188); // unverified
+	gen_ensure_equals(img->data->scaled(358, 5569),  5.72787475585937500000); // unverified
+	gen_ensure_equals(img->data->scaled(214, 5570), 12.28773117065429687500); // unverified
+	gen_ensure_equals(img->data->scaled(215, 5570), 10.81576347351074218750); // unverified
+	gen_ensure_equals(img->data->scaled(216, 5570), 11.00776004791259765625); // unverified
+	gen_ensure_equals(img->data->scaled(466, 5571),  7.48783636093139648438); // unverified
+	gen_ensure_equals(img->data->scaled(467, 5571),  8.31981849670410156250); // unverified
+	gen_ensure_equals(img->data->scaled(468, 5571),  8.83180713653564453125); // unverified
 
 #if 0
 	-- look for nonempty values
@@ -161,15 +161,15 @@ void to::test<3>()
 	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->scaled(256, 69), 9.0); // unverified
-	gen_ensure_equals(img->data->scaled(257, 69), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(258, 69), 5.0); // unverified
-	gen_ensure_equals(img->data->scaled(114, 70), 12.0); // unverified
-	gen_ensure_equals(img->data->scaled(115, 70), 10.0); // unverified
-	gen_ensure_equals(img->data->scaled(116, 70), 11.0); // unverified
-	gen_ensure_equals(img->data->scaled(366, 71), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(367, 71), 8.0); // unverified
-	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
+	gen_ensure_equals(img->data->scaled(257, 69),  7.29584074020385742188); // unverified
+	gen_ensure_equals(img->data->scaled(258, 69),  5.72787475585937500000); // unverified
+	gen_ensure_equals(img->data->scaled(114, 70), 12.28773117065429687500); // unverified
+	gen_ensure_equals(img->data->scaled(115, 70), 10.81576347351074218750); // unverified
+	gen_ensure_equals(img->data->scaled(116, 70), 11.00776004791259765625); // unverified
+	gen_ensure_equals(img->data->scaled(366, 71),  7.48783636093139648438); // unverified
+	gen_ensure_equals(img->data->scaled(367, 71),  8.31981849670410156250); // unverified
+	gen_ensure_equals(img->data->scaled(368, 71),  8.83180713653564453125); // unverified
 }
 
 // Import a full XRIT product and pass it from grib
@@ -255,24 +255,24 @@ void to::test<5>()
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
 	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(258, 69), 5); // unverified
+	gen_ensure_equals(img->data->unscaled(258, 69), 6); // unverified
 	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
-	gen_ensure_equals(img->data->unscaled(115, 70), 10); // unverified
+	gen_ensure_equals(img->data->unscaled(115, 70), 11); // unverified
 	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
 	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
 	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
-	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
+	gen_ensure_equals(img->data->unscaled(368, 71), 9); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->scaled(256, 69), 9.0); // unverified
-	gen_ensure_equals(img->data->scaled(257, 69), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(258, 69), 5.0); // unverified
-	gen_ensure_equals(img->data->scaled(114, 70), 12.0); // unverified
-	gen_ensure_equals(img->data->scaled(115, 70), 10.0); // unverified
-	gen_ensure_equals(img->data->scaled(116, 70), 11.0); // unverified
-	gen_ensure_equals(img->data->scaled(366, 71), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(367, 71), 8.0); // unverified
-	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
+	gen_ensure_equals(img->data->scaled(257, 69),  7.29584074020385742188); // unverified
+	gen_ensure_equals(img->data->scaled(258, 69),  5.72787475585937500000); // unverified
+	gen_ensure_equals(img->data->scaled(114, 70), 12.28773117065429687500); // unverified
+	gen_ensure_equals(img->data->scaled(115, 70), 10.81576347351074218750); // unverified
+	gen_ensure_equals(img->data->scaled(116, 70), 11.00776004791259765625); // unverified
+	gen_ensure_equals(img->data->scaled(366, 71),  7.48783636093139648438); // unverified
+	gen_ensure_equals(img->data->scaled(367, 71),  8.31981849670410156250); // unverified
+	gen_ensure_equals(img->data->scaled(368, 71),  8.83180713653564453125); // unverified
 }
 
 // Import a full XRIT product and pass it from netcdf24
@@ -353,7 +353,7 @@ void to::test<7>()
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
-	gen_ensure_equals(img->data->bpp, 5); // unverified
+	gen_ensure_equals(img->data->bpp, 32); // unverified
 	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
@@ -367,15 +367,15 @@ void to::test<7>()
 	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->scaled(256, 69), 9.0); // unverified
-	gen_ensure_equals(img->data->scaled(257, 69), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(258, 69), 5.0); // unverified
-	gen_ensure_equals(img->data->scaled(114, 70), 12.0); // unverified
-	gen_ensure_equals(img->data->scaled(115, 70), 10.0); // unverified
-	gen_ensure_equals(img->data->scaled(116, 70), 11.0); // unverified
-	gen_ensure_equals(img->data->scaled(366, 71), 7.0); // unverified
-	gen_ensure_equals(img->data->scaled(367, 71), 8.0); // unverified
-	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
+	gen_ensure_equals(img->data->scaled(257, 69),  7.29584074020385742188); // unverified
+	gen_ensure_equals(img->data->scaled(258, 69),  5.72787475585937500000); // unverified
+	gen_ensure_equals(img->data->scaled(114, 70), 12.28773117065429687500); // unverified
+	gen_ensure_equals(img->data->scaled(115, 70), 10.81576347351074218750); // unverified
+	gen_ensure_equals(img->data->scaled(116, 70), 11.00776004791259765625); // unverified
+	gen_ensure_equals(img->data->scaled(366, 71),  7.48783636093139648438); // unverified
+	gen_ensure_equals(img->data->scaled(367, 71),  8.31981849670410156250); // unverified
+	gen_ensure_equals(img->data->scaled(368, 71),  8.83180713653564453125); // unverified
 }
 
 }

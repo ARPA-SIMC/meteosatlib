@@ -187,20 +187,20 @@ struct ImageData
 
 // Container for image data, which can be used with different sample sizes
 template<typename EL>
-struct ImageDataWithPixels : public ImageData
+struct BaseImageDataWithPixels : public ImageData
 {
 public:
   typedef EL Sample;
   Sample* pixels;
 
-  ImageDataWithPixels() : pixels(0) { bpp = sizeof(Sample) * 8; }
-  ImageDataWithPixels(size_t width, size_t height) : pixels(new Sample[width*height])
+  BaseImageDataWithPixels() : pixels(0) { bpp = sizeof(Sample) * 8; }
+  BaseImageDataWithPixels(size_t width, size_t height) : pixels(new Sample[width*height])
 	{
 		bpp = sizeof(Sample) * 8;
 		columns = width;
 		lines = height;
 	}
-  ~ImageDataWithPixels()
+  ~BaseImageDataWithPixels()
   {
     if (pixels)
       delete[] pixels;
@@ -208,7 +208,7 @@ public:
 
   virtual int unscaled(int column, int line) const
   {
-      return static_cast<int>(pixels[line * columns + column]);
+      return static_cast<int>(this->pixels[line * columns + column]);
   }
 
 	// Rotate the image by 180 degrees, in place
@@ -225,6 +225,41 @@ public:
 
 	// Throw away all the samples outside of a given area
 	void crop(int x, int y, int width, int height);
+};
+
+// Container for image data, which can be used with different sample sizes
+template<typename EL>
+struct ImageDataWithPixels : public BaseImageDataWithPixels<EL>
+{
+public:
+  ImageDataWithPixels() : BaseImageDataWithPixels<EL>() {}
+  ImageDataWithPixels(size_t width, size_t height) : BaseImageDataWithPixels<EL>(width, height) {}
+};
+
+template<>
+struct ImageDataWithPixels<float> : public BaseImageDataWithPixels<float>
+{
+public:
+  ImageDataWithPixels() : BaseImageDataWithPixels<float>() {}
+  ImageDataWithPixels(size_t width, size_t height) : BaseImageDataWithPixels<float>(width, height) {}
+
+  virtual float scaled(int column, int line) const
+  {
+    return this->pixels[line * columns + column] * slope + offset;
+  }
+};
+
+template<>
+struct ImageDataWithPixels<double> : public BaseImageDataWithPixels<double>
+{
+public:
+  ImageDataWithPixels() : BaseImageDataWithPixels<double>() {}
+  ImageDataWithPixels(size_t width, size_t height) : BaseImageDataWithPixels<double>(width, height) {}
+
+  virtual float scaled(int column, int line) const
+  {
+    return this->pixels[line * columns + column] * slope + offset;
+  }
 };
 
 struct ImageConsumer

@@ -206,7 +206,7 @@ void to::test<6>()
 	// Check the contents
 	gen_ensure_equals(img->data->columns, 1300);
 	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 10);
+	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -220,9 +220,9 @@ void to::test<6>()
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->unscaled(0, 0), 977);
-	gen_ensure_equals(img->data->unscaled(10, 10), 981);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->unscaled(0, 0), 97);
+	gen_ensure_equals(img->data->unscaled(10, 10), 98);
 	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
 	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
 }
@@ -244,8 +244,8 @@ void to::test<7>()
 
 	gen_ensure_equals(img->data->columns, 200);
 	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 10);
-	gen_ensure_equals(img->data->offset, 910);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -258,9 +258,9 @@ void to::test<7>()
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
-	gen_ensure_equals(img->data->bpp, 8);
-	gen_ensure_equals(img->data->unscaled(0, 0), 10105);
-	gen_ensure_equals(img->data->unscaled(10, 10), 10078);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->unscaled(0, 0), 100);
+	gen_ensure_equals(img->data->unscaled(10, 10), 97);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
 	gen_ensure_equals(img->data->scaled(10, 10), 97.800003f);
 }

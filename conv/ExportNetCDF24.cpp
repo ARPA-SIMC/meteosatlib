@@ -90,7 +90,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 //	ncfAddAttr(ncf, "P1", );
 //	ncfAddAttr(ncf, "P2", );
 
-  NcDim *nameDim = ncf.add_dim("name");
+  NcDim *nameDim = ncf.add_dim("name", 1);
   if (!nameDim->is_valid()) throw std::runtime_error("adding name dimension failed");
 
   NcVar *projVar = ncf.add_var("Projection", ncInt);
@@ -138,7 +138,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
   if (!tvar->put(&atime, 1)) throw std::runtime_error("setting time variable failed");
 
 	stringstream channelName;
-	channelName << "Channel " << img.channel_id;
+	channelName << "Channel" << img.channel_id;
   NcVar *ivar = ncf.add_var(channelName.str().c_str(), ncFloat, tdim, ldim, cdim);
   if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
 	ncfAddAttr(*ivar, "add_offset", 0.0);

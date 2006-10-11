@@ -78,7 +78,7 @@ static ImageData* acquireImage(const NcVar& var)
 	if (var.num_dims() != 3)
 	{
 		stringstream msg;
-		msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << "instead";
+		msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << " instead";
 		throw std::runtime_error(msg.str());
 	}
 
@@ -86,7 +86,7 @@ static ImageData* acquireImage(const NcVar& var)
 	if (tsize != 1)
 	{
 		stringstream msg;
-		msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << "instead";
+		msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << " instead";
 		throw std::runtime_error(msg.str());
 	}
 
@@ -180,6 +180,8 @@ public:
 			readHeader(*img);
 
 			NcVar* var = ncf.get_var(i);
+			if (string(var->name()) == "Projection")
+				continue;
 			if (string(var->name()) == "time")
 				continue;
 

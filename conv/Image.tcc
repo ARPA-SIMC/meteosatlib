@@ -7,7 +7,7 @@
 namespace msat {
 
 template<typename EL>
-void ImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
+void BaseImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
 {
 	using namespace std;
 	// Consistency checks

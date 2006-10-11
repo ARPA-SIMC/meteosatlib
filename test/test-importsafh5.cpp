@@ -225,7 +225,7 @@ void to::test<6>()
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->column_offset, 357);
 	gen_ensure_equals(img->line_offset, 1657);
-	gen_ensure_equals(img->data->bpp, 3);
+	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
 	gen_ensure_equals(img->data->unscaled(516, 54), 3);
@@ -265,7 +265,7 @@ void to::test<7>()
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->column_offset, 457);
 	gen_ensure_equals(img->line_offset, 1757);
-	gen_ensure_equals(img->data->bpp, 2);
+	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->unscaled(0, 0), 0);
 	gen_ensure_equals(img->data->unscaled(10, 10), 0);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
