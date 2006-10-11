@@ -21,18 +21,18 @@ DIST_SUBDIRS = \
     examples \
     conv \
     iniparser \
-    images \
     hdf5 \
     hri \
     hrit \
     msg-native \
     omtp-ids \
     openmtp \
-    thornsds_db1 \
-    test
+    thornsds_db1
 
 SUBDIRS = \
-    grib
+    grib \
+    images \
+    test
 
 bin_PROGRAMS =
 lib_LTLIBRARIES =
@@ -75,10 +75,6 @@ include $(srcdir)/hdf5/Automake.rules
 endif
 
 include $(srcdir)/iniparser/Automake.rules
-
-include $(srcdir)/images/Automake.rules
-
-include $(srcdir)/test/Automake.rules
 
 .PHONY: dist-rpm
 dist-rpm: distcheck

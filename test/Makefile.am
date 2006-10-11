@@ -1,6 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-## $Id: /local/meteosatlib/examples/Makefile.am 1722 2006-08-02T09:18:59.409587Z dsmaartens  $
-## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Copyright (C) 2006 Enrico Zini <enrico@enricozini.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,12 +16,43 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-DIST_SUBDIRS =
+check_PROGRAMS = msatlib_test
+TESTS = $(check_PROGRAMS)
 
-all clean:
-	@cd $(top_builddir) && $(MAKE) $(MFLAGS) test/$@
+noinst_PROGRAMS = $(test_bin)
+
+noinst_HEADERS = \
+	tut.h \
+	tut_reporter.h \
+	tut_restartable.h
+
+msatlib_test_CPPFLAGS = \
+	-I$(top_srcdir)/conv \
+	-I$(top_srcdir)/grib
+msatlib_test_LDADD = \
+	-lhdf5_cpp \
+	../hrit/libhrit.la \
+	../grib/libgrib.la \
+	-lnetcdf_c++ \
+	-lnetcdf
+msatlib_test_SOURCES = \
+	tut-main.cpp \
+	test-utils.cpp \
+	test-importxrit.cpp \
+	test-importgrib.cpp \
+	test-importsafh5.cpp \
+	test-importnetcdf.cpp \
+	test-image.cpp \
+	../conv/Image.cpp \
+	../conv/ImportXRIT.cpp \
+	../conv/ImportGRIB.cpp \
+	../conv/ImportSAFH5.cpp \
+	../conv/ImportNetCDF.cpp \
+	../conv/ExportGRIB.cpp \
+	../hdf5/Utils.cpp
 
 MAINTAINERCLEANFILES = \
     Makefile.in
 
+## vim:syn=automake:
 ## -fin-

@@ -1,6 +1,7 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ## $Id$
 ## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Modified 2006 Enrico Zini <enrico@enricozini.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,9 +18,8 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-DIST_SUBDIRS =
-
-all clean:
+dist_noinst_DATA = \
+   SEVIRI_OVERLAY.pgm
 
 MAINTAINERCLEANFILES = \
     Makefile.in
