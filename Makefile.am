@@ -20,7 +20,6 @@ DIST_SUBDIRS = \
     decompress \
     examples \
     iniparser \
-    hdf5 \
     hri \
     hrit \
     msg-native \

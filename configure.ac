@@ -237,7 +237,6 @@ AC_CONFIG_FILES([
     grib/Makefile
     iniparser/Makefile
     images/Makefile
-    hdf5/Makefile
     hri/Makefile
     hri/examples/Makefile
     hrit/Makefile
