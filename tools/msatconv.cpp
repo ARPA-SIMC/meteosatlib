@@ -30,9 +30,11 @@
 #include <conv/ImportGRIB.h>
 #include <conv/ImportSAFH5.h>
 #include <conv/ImportNetCDF.h>
+#include <conv/ImportNetCDF24.h>
 #include <conv/ImportXRIT.h>
 #include <conv/ExportGRIB.h>
 #include <conv/ExportNetCDF.h>
+#include <conv/ExportNetCDF24.h>
 
 #include <set>
 #include <string>
@@ -53,6 +55,7 @@ void do_help(const char* argv0, ostream& out)
       << "Convert meteosat image files from and to various formats." << endl << endl
       << "Formats supported are:" << endl
       << "  NetCDF   Import/Export" << endl
+      << "  NetCDF24 Import/Export" << endl
       << "  Grib     Import/Export" << endl
       << "  SAFH5    Import only" << endl
       << "  XRIT     Import only" << endl
@@ -62,6 +65,7 @@ void do_help(const char* argv0, ostream& out)
       << "  --dump           View the contents of a file, including the pixel data" << endl
       << "  --grib           Convert to GRIB" << endl
       << "  --netcdf         Convert to NetCDF" << endl
+      << "  --netcdf24       Convert to NetCDF" << endl
       << "  --area='x,y,w,h' Crop the source image(s) to the given area" << endl;
 }
 void usage(char *pname)
@@ -77,7 +81,7 @@ void usage(char *pname)
   return;
 }
 
-enum Action { VIEW, DUMP, GRIB, NETCDF };
+enum Action { VIEW, DUMP, GRIB, NETCDF, NETCDF24 };
 
 /*
  * Create an importer for the given file, auto-detecting the file type.
@@ -90,6 +94,8 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 		return createGribImporter(filename);
 	if (isNetCDF(filename))
 		return createNetCDFImporter(filename);
+	if (isNetCDF24(filename))
+		return createNetCDF24Importer(filename);
 	if (isSAFH5(filename))
 		return createSAFH5Importer(filename);
 	if (isXRIT(filename))
@@ -108,6 +114,7 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 		case DUMP: return createImageDumper(true);
 		case GRIB: return createGribExporter();
 		case NETCDF: return createNetCDFExporter();
+		case NETCDF24: return createNetCDF24Exporter();
 	}
 }
 
@@ -127,6 +134,7 @@ int main( int argc, char* argv[] )
 		{ "dump",	0, NULL, 'D' },
 		{ "grib",	0, NULL, 'G' },
 		{ "netcdf",	0, NULL, 'N' },
+		{ "netcdf24",	0, NULL, '2' },
 		{ "area", 1, 0, 'a' },
   };
 
@@ -148,6 +156,9 @@ int main( int argc, char* argv[] )
 				break;
       case 'N': // --netcdf
 				action = NETCDF;
+				break;
+      case '2': // --netcdf24
+				action = NETCDF24;
 				break;
 			case 'a':
 				if (sscanf(optarg, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)

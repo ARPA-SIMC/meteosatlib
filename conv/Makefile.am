@@ -21,9 +21,11 @@ noinst_HEADERS = \
     Image.h \
     ExportGRIB.h \
     ExportNetCDF.h \
+    ExportNetCDF24.h \
     ImportGRIB.h \
     ImportSAFH5.h \
     ImportNetCDF.h \
+    ImportNetCDF24.h \
     ImportXRIT.h \
     SAFH5Utils.h
 
@@ -41,7 +43,7 @@ libconv_la_LIBADD += ../hrit/libhrit.la
 endif
 
 if HAVE_NETCDF
-libconv_la_SOURCES += ImportNetCDF.cpp ExportNetCDF.cpp
+libconv_la_SOURCES += ImportNetCDF.cpp ExportNetCDF.cpp ImportNetCDF24.cpp ExportNetCDF24.cpp
 libconv_la_LIBADD += -lnetcdf_c++ -lnetcdf
 endif
 

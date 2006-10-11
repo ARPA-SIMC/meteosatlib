@@ -197,6 +197,81 @@ void to::test<5>()
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 }
 
+// Try reimporting an exported netcdf24
+template<> template<>
+void to::test<6>()
+{
+	// Read the grib
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	ImageVector imgs;
+	imp->read(imgs);
+	gen_ensure_equals(imgs.size(), 3u);
+	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
+
+	// Check the contents
+	gen_ensure_equals(img->data->columns, 1300);
+	gen_ensure_equals(img->data->lines, 700);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->year, 2005);
+	gen_ensure_equals(img->month, 12);
+	gen_ensure_equals(img->day, 5);
+	gen_ensure_equals(img->hour, 6);
+	gen_ensure_equals(img->minute, 15);
+	gen_ensure_equals(img->sublon, 0);
+	gen_ensure_equals(img->channel_id, 546);
+	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_offset, 357);
+	gen_ensure_equals(img->line_offset, 1657);
+	gen_ensure_equals(img->data->bpp, 3);
+	gen_ensure_equals(img->data->unscaled(0, 0), 0);
+	gen_ensure_equals(img->data->unscaled(10, 10), 0);
+	gen_ensure_equals(img->data->unscaled(516, 54), 3);
+	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
+	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+	gen_ensure_equals(img->data->scaled(516, 54), 3);
+}
+
+// Try reimporting a subarea exported to netcdf24
+template<> template<>
+void to::test<7>()
+{
+	// Read and crop the grib
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	imp->cropX = 100;
+	imp->cropY = 100;
+	imp->cropWidth = 500;
+	imp->cropHeight = 50;
+	ImageVector imgs;
+	imp->read(imgs);
+	gen_ensure_equals(imgs.size(), 3u);
+	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
+
+	gen_ensure_equals(img->data->columns, 500);
+	gen_ensure_equals(img->data->lines, 50);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->year, 2005);
+	gen_ensure_equals(img->month, 12);
+	gen_ensure_equals(img->day, 5);
+	gen_ensure_equals(img->hour, 6);
+	gen_ensure_equals(img->minute, 15);
+	gen_ensure_equals(img->sublon, 0);
+	gen_ensure_equals(img->channel_id, 546);
+	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_offset, 457);
+	gen_ensure_equals(img->line_offset, 1757);
+	gen_ensure_equals(img->data->bpp, 2);
+	gen_ensure_equals(img->data->unscaled(0, 0), 0);
+	gen_ensure_equals(img->data->unscaled(10, 10), 0);
+	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
+	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+}
+
 }
 
 /* vim:set ts=4 sw=4: */

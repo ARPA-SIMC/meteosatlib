@@ -57,7 +57,16 @@ bool isNetCDF(const std::string& filename)
 {
 	if (access(filename.c_str(), F_OK) != 0)
 		return false;
-	return filename.substr(filename.size() - 3) == ".nc";
+	if (filename.substr(filename.size() - 3) != ".nc")
+		return false;
+	try {
+		NcFile ncf(filename.c_str(), NcFile::ReadOnly);
+		if (! ncf.is_valid())
+			return false;
+		return ncf.get_att("Column_Scale_Factor") != NULL;
+	} catch (...) {
+		return false;
+	}
 }
 
 template<typename Sample>

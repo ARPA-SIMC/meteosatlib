@@ -275,6 +275,109 @@ void to::test<5>()
 	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
 }
 
+// Import a full XRIT product and pass it from netcdf24
+template<> template<>
+void to::test<6>()
+{
+#if 0
+	-- Temporarily disabled as it currently uses too much ram
+
+	XRITImportOptions opts;
+	opts.directory = "data";
+	opts.resolution = "H";
+	opts.productid1 = "MSG1";
+	opts.productid2 = "HRV";
+	opts.timing = "200604261945";
+	opts.subarea = false;
+	std::auto_ptr<Image> img = importXRIT(opts);
+	img = recodeThroughNetCDF24(*img);
+
+	//gen_ensure_equals(img->name, ""); // unverified
+	gen_ensure_equals(img->data->columns, 5568);
+	gen_ensure_equals(img->data->lines, 11136);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->year, 2006);
+	gen_ensure_equals(img->month, 4);
+	gen_ensure_equals(img->day, 26);
+	gen_ensure_equals(img->hour, 19);
+	gen_ensure_equals(img->minute, 45);
+	gen_ensure_equals(img->sublon, 0);
+	gen_ensure_equals(img->channel_id, 12);
+	gen_ensure_equals(img->spacecraft_id, 55); // unverified
+	gen_ensure_equals(img->column_factor, -40927014);
+	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->column_offset, -2);
+	gen_ensure_equals(img->line_offset, 462);
+	gen_ensure_equals(img->data->bpp, 32); // unverified
+	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+#endif
+}
+
+// Import a subarea of an XRIT product and pass it from netcdf24
+template<> template<>
+void to::test<7>()
+{
+	XRITImportOptions opts;
+	opts.directory = "data";
+	opts.resolution = "H";
+	opts.productid1 = "MSG1";
+	opts.productid2 = "HRV";
+	opts.timing = "200604261945";
+	opts.subarea = true;
+	opts.AreaLinStart = 5500;
+	opts.AreaNlin = 300;
+	opts.AreaPixStart = 100;
+	opts.AreaNpix = 400;
+
+	std::auto_ptr<Image> img = importXRIT(opts);
+	img = recodeThroughNetCDF24(*img);
+
+	//gen_ensure_equals(img->name, ""); // unverified
+	gen_ensure_equals(img->data->columns, 400);
+	gen_ensure_equals(img->data->lines, 300);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->year, 2006);
+	gen_ensure_equals(img->month, 4);
+	gen_ensure_equals(img->day, 26);
+	gen_ensure_equals(img->hour, 19);
+	gen_ensure_equals(img->minute, 45);
+	gen_ensure_equals(img->sublon, 0);
+	gen_ensure_equals(img->channel_id, 12);
+	gen_ensure_equals(img->spacecraft_id, 55); // unverified
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(-40927014)));
+	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
+	gen_ensure_equals(img->column_offset, 98);
+	gen_ensure_equals(img->line_offset, 5962);
+	gen_ensure_equals(img->data->bpp, 5); // unverified
+	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
+	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(258, 69), 5); // unverified
+	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
+	gen_ensure_equals(img->data->unscaled(115, 70), 10); // unverified
+	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
+	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
+	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
+	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
+	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
+	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+	gen_ensure_equals(img->data->scaled(256, 69), 9.0); // unverified
+	gen_ensure_equals(img->data->scaled(257, 69), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(258, 69), 5.0); // unverified
+	gen_ensure_equals(img->data->scaled(114, 70), 12.0); // unverified
+	gen_ensure_equals(img->data->scaled(115, 70), 10.0); // unverified
+	gen_ensure_equals(img->data->scaled(116, 70), 11.0); // unverified
+	gen_ensure_equals(img->data->scaled(366, 71), 7.0); // unverified
+	gen_ensure_equals(img->data->scaled(367, 71), 8.0); // unverified
+	gen_ensure_equals(img->data->scaled(368, 71), 8.0); // unverified
+}
+
 }
 
 /* vim:set ts=4 sw=4: */
