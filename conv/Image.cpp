@@ -201,15 +201,6 @@ float* ImageData::allScaled() const
 	return res;
 }
 
-int* ImageData::allUnscaled() const
-{
-	int* res = new int[lines * columns];
-	for (int y = 0; y < lines; ++y)
-		for (int x = 0; x < columns; ++x)
-			res[y * columns + x] = unscaled(x, y);
-	return res;
-}
-
 int ImageData::decimalScale() const
 {
 	int res = (int)floor(log10(slope));
@@ -263,7 +254,7 @@ public:
 			cout << "Coord\tUnscaled\tScaled" << endl;
 			for (int l = 0; l < img->data->lines; ++l)
 				for (int c = 0; c < img->data->lines; ++c)
-					cout << c << "x" << l << '\t' << img->data->unscaled(c, l) << '\t' << img->data->scaled(c, l) << endl;
+					cout << c << "x" << l << '\t' << '\t' << img->data->scaled(c, l) << endl;
 		}
   }
 };

@@ -163,19 +163,10 @@ struct ImageData
   size_t bpp;
 
   /// Image sample as physical value (already scaled with slope and offset)
-  virtual float scaled(int column, int line) const
-  {
-    return unscaled(column, line) * slope + offset;
-  }
+  virtual float scaled(int column, int line) const = 0;
 
 	/// Get all the lines * columns samples, scaled
 	virtual float* allScaled() const;
-
-  /// Image sample as unscaled int value (to be scaled with slope and offset)
-  virtual int unscaled(int column, int line) const = 0;
-
-	/// Get all the lines * columns samples, unscaled
-	virtual int* allUnscaled() const;
 
 	/// Return the decimal scaling factor that can be used before truncating
 	/// scaled values as integers
@@ -187,28 +178,28 @@ struct ImageData
 
 // Container for image data, which can be used with different sample sizes
 template<typename EL>
-struct BaseImageDataWithPixels : public ImageData
+struct ImageDataWithPixels : public ImageData
 {
 public:
   typedef EL Sample;
   Sample* pixels;
 
-  BaseImageDataWithPixels() : pixels(0) { bpp = sizeof(Sample) * 8; }
-  BaseImageDataWithPixels(size_t width, size_t height) : pixels(new Sample[width*height])
+  ImageDataWithPixels() : pixels(0) { bpp = sizeof(Sample) * 8; }
+  ImageDataWithPixels(size_t width, size_t height) : pixels(new Sample[width*height])
 	{
 		bpp = sizeof(Sample) * 8;
 		columns = width;
 		lines = height;
 	}
-  ~BaseImageDataWithPixels()
+  ~ImageDataWithPixels()
   {
     if (pixels)
       delete[] pixels;
   }
 
-  virtual int unscaled(int column, int line) const
+  virtual float scaled(int column, int line) const
   {
-      return static_cast<int>(this->pixels[line * columns + column]);
+    return this->pixels[line * columns + column] * slope + offset;
   }
 
 	// Rotate the image by 180 degrees, in place
@@ -225,41 +216,6 @@ public:
 
 	// Throw away all the samples outside of a given area
 	void crop(int x, int y, int width, int height);
-};
-
-// Container for image data, which can be used with different sample sizes
-template<typename EL>
-struct ImageDataWithPixels : public BaseImageDataWithPixels<EL>
-{
-public:
-  ImageDataWithPixels() : BaseImageDataWithPixels<EL>() {}
-  ImageDataWithPixels(size_t width, size_t height) : BaseImageDataWithPixels<EL>(width, height) {}
-};
-
-template<>
-struct ImageDataWithPixels<float> : public BaseImageDataWithPixels<float>
-{
-public:
-  ImageDataWithPixels() : BaseImageDataWithPixels<float>() {}
-  ImageDataWithPixels(size_t width, size_t height) : BaseImageDataWithPixels<float>(width, height) {}
-
-  virtual float scaled(int column, int line) const
-  {
-    return this->pixels[line * columns + column] * slope + offset;
-  }
-};
-
-template<>
-struct ImageDataWithPixels<double> : public BaseImageDataWithPixels<double>
-{
-public:
-  ImageDataWithPixels() : BaseImageDataWithPixels<double>() {}
-  ImageDataWithPixels(size_t width, size_t height) : BaseImageDataWithPixels<double>(width, height) {}
-
-  virtual float scaled(int column, int line) const
-  {
-    return this->pixels[line * columns + column] * slope + offset;
-  }
 };
 
 struct ImageConsumer

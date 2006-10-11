@@ -79,17 +79,6 @@ void to::test<2>()
 	gen_ensure_equals(img->column_offset, -2);
 	gen_ensure_equals(img->line_offset, 462);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(356, 5569), 9); // unverified
-	gen_ensure_equals(img->data->unscaled(357, 5569), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(358, 5569), 5); // unverified
-	gen_ensure_equals(img->data->unscaled(214, 5570), 12); // unverified
-	gen_ensure_equals(img->data->unscaled(215, 5570), 10); // unverified
-	gen_ensure_equals(img->data->unscaled(216, 5570), 11); // unverified
-	gen_ensure_equals(img->data->unscaled(466, 5571), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(467, 5571), 8); // unverified
-	gen_ensure_equals(img->data->unscaled(468, 5571), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(356, 5569),  9.40779495239257812500); // unverified
@@ -148,17 +137,6 @@ void to::test<3>()
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
-	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(258, 69), 5); // unverified
-	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
-	gen_ensure_equals(img->data->unscaled(115, 70), 10); // unverified
-	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
-	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
-	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
@@ -207,8 +185,6 @@ void to::test<4>()
 	gen_ensure_equals(img->column_offset, -2);
 	gen_ensure_equals(img->line_offset, 462);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 #endif
@@ -251,17 +227,6 @@ void to::test<5>()
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
 	gen_ensure_equals(img->data->bpp, 5); // unverified
-	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
-	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(258, 69), 6); // unverified
-	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
-	gen_ensure_equals(img->data->unscaled(115, 70), 11); // unverified
-	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
-	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
-	gen_ensure_equals(img->data->unscaled(368, 71), 9); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
@@ -310,8 +275,6 @@ void to::test<6>()
 	gen_ensure_equals(img->column_offset, -2);
 	gen_ensure_equals(img->line_offset, 462);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 #endif
@@ -354,17 +317,6 @@ void to::test<7>()
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->unscaled(0, 0), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->unscaled(256, 69), 9); // unverified
-	gen_ensure_equals(img->data->unscaled(257, 69), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(258, 69), 5); // unverified
-	gen_ensure_equals(img->data->unscaled(114, 70), 12); // unverified
-	gen_ensure_equals(img->data->unscaled(115, 70), 10); // unverified
-	gen_ensure_equals(img->data->unscaled(116, 70), 11); // unverified
-	gen_ensure_equals(img->data->unscaled(366, 71), 7); // unverified
-	gen_ensure_equals(img->data->unscaled(367, 71), 8); // unverified
-	gen_ensure_equals(img->data->unscaled(368, 71), 8); // unverified
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
