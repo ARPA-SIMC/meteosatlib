@@ -52,13 +52,6 @@ examples_Met_Reproj_SOURCES = \
     grib/GRIB.cpp
 
 examples_msatconv_SOURCES = \
-    conv/Image.cpp \
-    conv/ImportGRIB.cpp \
-    conv/ImportNetCDF.cpp \
-    conv/ImportSAFH5.cpp \
-    conv/ImportXRIT.cpp \
-    conv/ExportGRIB.cpp \
-    conv/ExportNetCDF.cpp \
     hdf5/Utils.cpp \
     examples/msatconv.cpp
 examples_msatconv_CPPFLAGS = \
@@ -66,6 +59,7 @@ examples_msatconv_CPPFLAGS = \
 examples_msatconv_LDADD = \
     hrit/libhrit.la \
     grib/libgrib.la \
+    conv/libconv.la \
     -lhdf5_cpp \
     -lnetcdf_c++ \
     -lnetcdf

@@ -1,6 +1,6 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ## $Id$
-## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Copyright (C) 2006 Enrico Zini <enrico@enricozini.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,12 +17,29 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-DIST_SUBDIRS =
+noinst_HEADERS = \
+    Image.h \
+    ExportGRIB.h \
+    ExportNetCDF.h \
+    ImportGRIB.h \
+    ImportSAFH5.h \
+    ImportNetCDF.h \
+    ImportXRIT.h
 
-all clean:
-	@cd $(top_builddir) && $(MAKE) $(MFLAGS) conv/$@
+noinst_LTLIBRARIES = libconv.la
+libconv_la_SOURCES = \
+    Image.cpp \
+    ImportGRIB.cpp \
+    ImportNetCDF.cpp \
+    ImportSAFH5.cpp \
+    ImportXRIT.cpp \
+    ExportGRIB.cpp \
+    ExportNetCDF.cpp
+libconv_la_LIBADD = \
+    ../grib/libgrib.la
 
 MAINTAINERCLEANFILES = \
     Makefile.in
 
 ## -fin-
+## vim:syn=automake:

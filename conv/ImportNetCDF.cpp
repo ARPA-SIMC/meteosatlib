@@ -33,14 +33,6 @@
 
 #include <conv/Image.h>
 
-// HRI format interface
-
-#include <hrit/MSG_HRIT.h>
-
-// GRIB Interface
-
-#include <GRIB.h>
-
 #include <sstream>
 #include <stdexcept>
 

@@ -19,7 +19,6 @@
 DIST_SUBDIRS = \
     decompress \
     examples \
-    conv \
     iniparser \
     hdf5 \
     hri \
@@ -31,6 +30,7 @@ DIST_SUBDIRS = \
 
 SUBDIRS = \
     grib \
+    conv \
     images \
     test
 

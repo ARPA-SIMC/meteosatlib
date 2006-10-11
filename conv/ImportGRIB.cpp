@@ -31,7 +31,7 @@
 
 // GRIB Interface
 
-#include <GRIB.h>
+#include <grib/GRIB.h>
 
 #include <sstream>
 #include <iostream>

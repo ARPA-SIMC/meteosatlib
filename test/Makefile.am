@@ -33,6 +33,7 @@ msatlib_test_LDADD = \
 	-lhdf5_cpp \
 	../hrit/libhrit.la \
 	../grib/libgrib.la \
+	../conv/libconv.la \
 	-lnetcdf_c++ \
 	-lnetcdf
 msatlib_test_SOURCES = \
@@ -43,12 +44,6 @@ msatlib_test_SOURCES = \
 	test-importsafh5.cpp \
 	test-importnetcdf.cpp \
 	test-image.cpp \
-	../conv/Image.cpp \
-	../conv/ImportXRIT.cpp \
-	../conv/ImportGRIB.cpp \
-	../conv/ImportSAFH5.cpp \
-	../conv/ImportNetCDF.cpp \
-	../conv/ExportGRIB.cpp \
 	../hdf5/Utils.cpp
 
 MAINTAINERCLEANFILES = \
