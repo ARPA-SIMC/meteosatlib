@@ -64,8 +64,8 @@ void to::test<2>()
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 5568);
 	gen_ensure_equals(img->data->lines, 11136);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->data->slope, 0.0319993012);
+	gen_ensure_equals(img->data->offset, -1.6319643259);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -122,8 +122,8 @@ void to::test<3>()
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 400);
 	gen_ensure_equals(img->data->lines, 300);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->data->slope, 0.0319993012);
+	gen_ensure_equals(img->data->offset, -1.6319643259);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);

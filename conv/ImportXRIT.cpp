@@ -352,7 +352,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			break;
 	}
 	// Perform calibration and copy the data to the result image
-	auto_ptr< ImageDataWithPixels<float> > data(new ImageDataWithPixels<float>(width, height));
+	auto_ptr< ImageDataWithPixelsPrescaled<float> > data(new ImageDataWithPixelsPrescaled<float>(width, height));
 	for (size_t iy = 0; iy < height; ++iy)
 		for (size_t ix = 0; ix < width; ++ix)
 		{
@@ -384,8 +384,11 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   pds.cal_offset = p->radiometric_proc.ImageCalibration[pds.chn-1].Cal_Offset;
   pds.cal_slope = p->radiometric_proc.ImageCalibration[pds.chn-1].Cal_Slope;
 #endif
-  img->data->slope = 1 /* TODO */;
-  img->data->offset = 0 /* TODO */;
+	double slope;
+	double offset;
+  PRO_data.prologue->radiometric_proc.get_slope_offset(img->channel_id, slope, offset);
+  img->data->slope = slope;
+  img->data->offset = offset;
 
 	// Image time
   struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );

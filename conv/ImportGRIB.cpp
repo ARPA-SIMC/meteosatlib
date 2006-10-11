@@ -51,17 +51,6 @@ using namespace std;
 
 namespace msat {
 
-struct GribImageData : public ImageDataWithPixels<float>
-{
-	GribImageData() : ImageDataWithPixels<float>() {}
-	GribImageData(size_t width, size_t height) : ImageDataWithPixels<float>(width, height) {}
-
-  virtual float scaled(int column, int line) const
-  {
-		return pixels[line * columns + column];
-  }
-};
-
 bool isGrib(const std::string& filename)
 {
 	if (access(filename.c_str(), F_OK) != 0)
@@ -72,7 +61,7 @@ bool isGrib(const std::string& filename)
 auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 {
 	// Read image data
-	auto_ptr< ImageDataWithPixels<float> > res(new GribImageData(m.grid.nx, m.grid.ny));
+	auto_ptr< ImageDataWithPixels<float> > res(new ImageDataWithPixelsPrescaled<float>(m.grid.nx, m.grid.ny));
   memcpy(res->pixels, m.field.vals, m.grid.nxny * sizeof(float));
 	res->slope = (int)exp10(m.field.decimalscale);
 	res->offset = m.field.refvalue;

@@ -218,6 +218,21 @@ public:
 	void crop(int x, int y, int width, int height);
 };
 
+// Container for image data, which can be used with different sample sizes
+template<typename EL>
+struct ImageDataWithPixelsPrescaled : public ImageDataWithPixels<EL>
+{
+public:
+  ImageDataWithPixelsPrescaled() : ImageDataWithPixels<EL>() {}
+  ImageDataWithPixelsPrescaled(size_t width, size_t height) : ImageDataWithPixels<EL>(width, height) {}
+
+  virtual float scaled(int column, int line) const
+  {
+    return this->pixels[line * this->columns + column];
+  }
+};
+
+
 struct ImageConsumer
 {
 	virtual ~ImageConsumer() {}
