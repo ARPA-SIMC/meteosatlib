@@ -56,11 +56,6 @@ struct GribImageData : public ImageDataWithPixels<float>
 	GribImageData() : ImageDataWithPixels<float>() {}
 	GribImageData(size_t width, size_t height) : ImageDataWithPixels<float>(width, height) {}
 
-	virtual int unscaled(int column, int line) const
-  {
-		// 'unscale' the value
-		return (int)round((pixels[line * columns + column] + offset) * slope);
-  }
   virtual float scaled(int column, int line) const
   {
 		return pixels[line * columns + column];
