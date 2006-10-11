@@ -1,6 +1,5 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
-## $Id$
-## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Copyright (C) 2005 Enrico Zini <enrico@enricozini.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,12 +16,28 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-DIST_SUBDIRS =
+if HDF5
 
-all clean:
-	@cd $(top_builddir) && $(MAKE) $(MFLAGS) hdf5/$@
+bin_PROGRAMS = \
+    SAFH52Grib
+
+noinst_HEADERS = \
+    Utils.h
+
+SAFH52Grib_SOURCES = \
+    Utils.cpp \
+    SAFH52Grib.cpp
+SAFH52Grib_CPPFLAGS = \
+    -I$(top_srcdir)/grib
+SAFH52Grib_LDADD = \
+    -lhdf5_cpp \
+    ../hrit/libhrit.la \
+    ../conv/libconv.la
+
+endif
 
 MAINTAINERCLEANFILES = \
     Makefile.in
 
 ## -fin-
+## vim:syn=automake:

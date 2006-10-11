@@ -70,10 +70,6 @@ if HAVE_NETCDF
 include $(srcdir)/examples/Automake.rules
 endif
 
-if HDF5
-include $(srcdir)/hdf5/Automake.rules
-endif
-
 include $(srcdir)/iniparser/Automake.rules
 
 .PHONY: dist-rpm

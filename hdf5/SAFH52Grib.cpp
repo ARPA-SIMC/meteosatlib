@@ -28,28 +28,22 @@
 //#include "../config.h"
 
 #include <conv/ImportSAFH5.h>
-#include <conv/ExportGRIB.h>
-#include <conv/ExportNetCDF.h>
 #include "Utils.h"
 
 #include <set>
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 // HDF5 format interface
 #include <H5Cpp.h>
-
-// Grib Library
-#include <grib/GRIB.h>
-
-// For MSG_channel_name
-#include <hrit/MSG_HRIT.h>
 
 #include <getopt.h>
 
 using namespace H5;
 using namespace msat;
+using namespace std;
 
 static char rcs_id_string[] = "$Id$";
 
@@ -79,8 +73,6 @@ void usage(char *pname)
 
 void view(H5File& source);
 void dump(H5File& file, const std::set<std::string>& selected);
-void convertGrib(H5File& file, const std::set<std::string>& selected);
-void convertNetCDF(H5File& file, const std::set<std::string>& selected);
 
 /* ************************************************************************* */
 /* Reads Data Images, performs calibration and store output in NetCDF format */
@@ -88,22 +80,14 @@ void convertNetCDF(H5File& file, const std::set<std::string>& selected);
 
 int main( int argc, char* argv[] )
 {
-  enum { VIEW, DUMP, CONVERTGRIB, CONVERTNETCDF } action = CONVERTGRIB;
+  enum { VIEW, DUMP } action = VIEW;
   set<string> sel_imgs;
-
-  {
-    string argv0(argv[0]);
-    if (argv0.size() >= 12 && argv0.substr(argv0.size() - 12) == "SAFH52NetCDF")
-      action = CONVERTNETCDF;
-  }
 
   static struct option longopts[] = {
     	{ "help",	0, NULL, 'H' },
 	{ "view",	0, NULL, 'V' },
 	{ "images",	1, NULL, 'i' },
 	{ "dump",	0, NULL, 'D' },
-	{ "grib",	0, NULL, 'G' },
-	{ "netcdf",	0, NULL, 'N' },
   };
 
   bool done = false;
@@ -118,12 +102,6 @@ int main( int argc, char* argv[] )
 	break;
       case 'D': // --dump
 	action = DUMP;
-	break;
-      case 'G': // --grib
-	action = CONVERTGRIB;
-	break;
-      case 'N': // --netcdf
-	action = CONVERTNETCDF;
 	break;
       case 'i': { // --images
 	string args(optarg);
@@ -180,12 +158,6 @@ int main( int argc, char* argv[] )
         break;
       case DUMP:
         dump(*HDF5_source, sel_imgs);
-        break;
-      case CONVERTGRIB:
-        convertGrib(*HDF5_source, sel_imgs);
-        break;
-      case CONVERTNETCDF:
-        convertNetCDF(*HDF5_source, sel_imgs);
         break;
     }
   }
@@ -287,89 +259,6 @@ void dump(H5File& file, const std::set<std::string>& selected)
     for (int l = 0; l < img->data->lines; ++l)
       for (int c = 0; c < img->data->lines; ++c)
 				cout << c << "x" << l << '\t' << img->data->unscaled(c, l) << '\t' << img->data->scaled(c, l) << endl;
-  }
-}
-
-void convertGrib(H5File& file, const std::set<std::string>& selected)
-{
-  Group group = file.openGroup("/");
-  vector<string> images = getImages(group);
-
-	char GribName[1024];
-	GRIB_FILE gf;
-	GribName[0] = 0;
-
-	bool first = true;
-	int count = 0;
-  for (vector<string>::const_iterator i = images.begin();
-      i != images.end(); ++i)
-  {
-    if (!selected.empty() && selected.find(*i) == selected.end())
-			continue;
-    auto_ptr<Image> img = ImportSAFH5(group, *i);
-		if (first)
-		{
-			if (images.size() == 1)
-			{
-				// Build up output Grib file name and open it
-				sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb", "",
-					img->year, img->month, img->day, img->hour, img->minute);
-			} else {
-				// Build up output Grib file name and open it
-				sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb", "",
-					img->year, img->month, img->day, img->hour, img->minute);
-			}
-			int ret = gf.OpenWrite(GribName);
-			if (ret != 0)
-				throw std::runtime_error(string("error writing grib file ") + GribName);
-
-			first = false;
-		}
-
-		cout << "Converting " << *i << "..." << endl;
-		ExportGRIB(*img, gf);
-		++count;
-  }
-
-  // Close Grib output
-	if (GribName[0])
-	{
-		int ret = gf.Close( );
-		if (ret != 0)
-			throw std::runtime_error("closing grib file");
-		cout << "Wrote " << count << " images in file " << GribName << endl;
-	} else {
-		cout << "No images found" << endl;
-	}
-}
-
-void convertNetCDF(H5File& file, const std::set<std::string>& selected)
-{
-  Group group = file.openGroup("/");
-  vector<string> images = getImages(group);
-
-  for (vector<string>::const_iterator i = images.begin();
-      i != images.end(); ++i)
-  {
-    if (!selected.empty() && selected.find(*i) == selected.end())
-			continue;
-
-		cout << "Converting " << *i << "..." << endl;
-    auto_ptr<Image> img = ImportSAFH5(group, *i);
-
-		// Get the channel name
-		string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img->spacecraft_id, img->channel_id);
-		// Change sensitive characters into underscores
-		for (string::iterator i = channelstring.begin();
-		i != channelstring.end(); ++i)
-			if (*i == ' ' || *i == '.' || *i == ',')
-				*i = '_';
-		// Build up output NetCDF file name and open it
-		char NcName[1024];
-		sprintf(NcName, "%s_%4d%02d%02d_%02d%02d.nc", channelstring.c_str(),
-						 img->year, img->month, img->day, img->hour, img->minute);
-
-		ExportNetCDF(*img, NcName);
   }
 }
 
