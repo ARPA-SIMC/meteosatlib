@@ -250,6 +250,7 @@ AC_CONFIG_FILES([
     thornsds_db1/Makefile
     thornsds_db1/examples/Makefile
     test/Makefile
+    tools/Makefile
     meteosatlib.spec
 ])
 AC_OUTPUT

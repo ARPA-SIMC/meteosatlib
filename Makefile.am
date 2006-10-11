@@ -27,10 +27,11 @@ DIST_SUBDIRS = \
     openmtp \
     thornsds_db1
 
-SUBDIRS = \
+SUBDIRS = . \
     grib \
     conv \
     images \
+    tools \
     test
 
 bin_PROGRAMS =
