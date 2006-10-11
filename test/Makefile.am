@@ -29,14 +29,12 @@ noinst_HEADERS = \
 msatlib_test_CPPFLAGS = \
 	-I$(top_srcdir)/conv
 msatlib_test_LDADD = \
-	../grib/libgrib.la \
 	../conv/libconv.la
 msatlib_test_SOURCES = \
 	tut-main.cpp \
 	test-utils.cpp \
 	test-importgrib.cpp \
-	test-image.cpp \
-	../hdf5/Utils.cpp
+	test-image.cpp
 
 if HRIT
 msatlib_test_SOURCES += test-importxrit.cpp

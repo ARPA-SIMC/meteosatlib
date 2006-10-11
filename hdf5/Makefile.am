@@ -21,17 +21,9 @@ if HDF5
 bin_PROGRAMS = \
     SAFH52Grib
 
-noinst_HEADERS = \
-    Utils.h
-
 SAFH52Grib_SOURCES = \
-    Utils.cpp \
     SAFH52Grib.cpp
-SAFH52Grib_CPPFLAGS = \
-    -I$(top_srcdir)/grib
 SAFH52Grib_LDADD = \
-    -lhdf5_cpp \
-    ../hrit/libhrit.la \
     ../conv/libconv.la
 
 endif

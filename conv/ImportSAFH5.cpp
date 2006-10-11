@@ -1,7 +1,6 @@
 #include "ImportSAFH5.h"
+#include "SAFH5Utils.h"
 #include <string>
-
-#include <hdf5/Utils.h>
 
 #include <H5Cpp.h>
 #include <sstream>

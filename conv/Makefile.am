@@ -24,7 +24,8 @@ noinst_HEADERS = \
     ImportGRIB.h \
     ImportSAFH5.h \
     ImportNetCDF.h \
-    ImportXRIT.h
+    ImportXRIT.h \
+    SAFH5Utils.h
 
 noinst_LTLIBRARIES = libconv.la
 libconv_la_SOURCES = \
@@ -40,16 +41,12 @@ libconv_la_LIBADD += ../hrit/libhrit.la
 endif
 
 if HAVE_NETCDF
-libconv_la_SOURCES += \
-    ImportNetCDF.cpp \
-    ExportNetCDF.cpp
-libconv_la_LIBADD += \
-    -lnetcdf_c++ \
-    -lnetcdf
+libconv_la_SOURCES += ImportNetCDF.cpp ExportNetCDF.cpp
+libconv_la_LIBADD += -lnetcdf_c++ -lnetcdf
 endif
 
 if HDF5
-libconv_la_SOURCES += ImportSAFH5.cpp
+libconv_la_SOURCES += SAFH5Utils.cpp ImportSAFH5.cpp
 libconv_la_LIBADD += -lhdf5_cpp
 endif
 
