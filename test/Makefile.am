@@ -27,24 +27,28 @@ noinst_HEADERS = \
 	tut_restartable.h
 
 msatlib_test_CPPFLAGS = \
-	-I$(top_srcdir)/conv \
-	-I$(top_srcdir)/grib
+	-I$(top_srcdir)/conv
 msatlib_test_LDADD = \
-	-lhdf5_cpp \
-	../hrit/libhrit.la \
 	../grib/libgrib.la \
-	../conv/libconv.la \
-	-lnetcdf_c++ \
-	-lnetcdf
+	../conv/libconv.la
 msatlib_test_SOURCES = \
 	tut-main.cpp \
 	test-utils.cpp \
-	test-importxrit.cpp \
 	test-importgrib.cpp \
-	test-importsafh5.cpp \
-	test-importnetcdf.cpp \
 	test-image.cpp \
 	../hdf5/Utils.cpp
+
+if HRIT
+msatlib_test_SOURCES += test-importxrit.cpp
+endif
+
+if HAVE_NETCDF
+msatlib_test_SOURCES += test-importnetcdf.cpp
+endif
+
+if HDF5
+msatlib_test_SOURCES += test-importsafh5.cpp
+endif
 
 MAINTAINERCLEANFILES = \
     Makefile.in

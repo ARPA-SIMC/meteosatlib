@@ -30,13 +30,28 @@ noinst_LTLIBRARIES = libconv.la
 libconv_la_SOURCES = \
     Image.cpp \
     ImportGRIB.cpp \
-    ImportNetCDF.cpp \
-    ImportSAFH5.cpp \
-    ImportXRIT.cpp \
-    ExportGRIB.cpp \
-    ExportNetCDF.cpp
+    ExportGRIB.cpp
 libconv_la_LIBADD = \
     ../grib/libgrib.la
+
+if HRIT
+libconv_la_SOURCES += ImportXRIT.cpp
+libconv_la_LIBADD += ../hrit/libhrit.la
+endif
+
+if HAVE_NETCDF
+libconv_la_SOURCES += \
+    ImportNetCDF.cpp \
+    ExportNetCDF.cpp
+libconv_la_LIBADD += \
+    -lnetcdf_c++ \
+    -lnetcdf
+endif
+
+if HDF5
+libconv_la_SOURCES += ImportSAFH5.cpp
+libconv_la_LIBADD += -lhdf5_cpp
+endif
 
 MAINTAINERCLEANFILES = \
     Makefile.in
