@@ -1,6 +1,7 @@
 ## Makefile.am -- Process this file with automake to produce Makefile.in
 ## $Id$
 ## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Modified 2006 Enrico Zini <enrico@enricozini.org>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,12 +18,18 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-DIST_SUBDIRS =
+noinst_HEADERS = \
+    Ebisuzaki.h \
+    GRIB.h
 
-all clean:
-	@cd $(top_builddir) && $(MAKE) $(MFLAGS) grib/$@
+dist_noinst_DATA = \
+    gribtab
+
+noinst_LTLIBRARIES = libgrib.la
+libgrib_la_SOURCES = Ebisuzaki.cpp GRIB.cpp
 
 MAINTAINERCLEANFILES = \
     Makefile.in
 
 ## -fin-
+## vim:syn=automake:

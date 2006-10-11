@@ -20,7 +20,6 @@ DIST_SUBDIRS = \
     decompress \
     examples \
     conv \
-    grib \
     iniparser \
     images \
     hdf5 \
@@ -31,6 +30,9 @@ DIST_SUBDIRS = \
     openmtp \
     thornsds_db1 \
     test
+
+SUBDIRS = \
+    grib
 
 bin_PROGRAMS =
 lib_LTLIBRARIES =
@@ -71,8 +73,6 @@ endif
 if HDF5
 include $(srcdir)/hdf5/Automake.rules
 endif
-
-include $(srcdir)/grib/Automake.rules
 
 include $(srcdir)/iniparser/Automake.rules
 

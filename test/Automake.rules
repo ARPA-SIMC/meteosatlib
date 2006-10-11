@@ -34,11 +34,10 @@ test_msatlib_test_CPPFLAGS = \
 test_msatlib_test_LDADD = \
 	-lhdf5_cpp \
 	hrit/libhrit.la \
+	grib/libgrib.la \
 	-lnetcdf_c++ \
 	-lnetcdf
 test_msatlib_test_SOURCES = \
-	grib/Ebisuzaki.cpp \
-	grib/GRIB.cpp \
 	test/tut-main.cpp \
 	test/test-utils.cpp \
 	test/test-importxrit.cpp \
