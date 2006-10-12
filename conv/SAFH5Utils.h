@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef CONV_SAFH5_UTILS_H
+#define CONV_SAFH5_UTILS_H
 
 #include <string>
 
