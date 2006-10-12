@@ -7,6 +7,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include <math.h>
+
 #include <conv/Image.tcc>
 
 using namespace H5;
@@ -52,6 +54,13 @@ static ImageData* acquireImage(const DataSet& dataset)
 		throw std::runtime_error(err.str());
 	}
 	dataset.read(res->pixels, dataset.getDataType());
+
+	// Compute real number of BPPs
+	Sample max = res->pixels[0];
+	for (size_t i = 1; i < res->columns * res->lines; ++i)
+		if (res->pixels[i] > max)
+			max = res->pixels[i];
+	res->bpp = (int)ceil(log2(max + 1));
 
 	return res.release();
 }
@@ -136,8 +145,8 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 			cerr << "Warning: slope for image (" << img->data->slope << ") is different from the usual one (" << ci->slope << ")" << endl;
 		if (ci->offset != img->data->offset)
 			cerr << "Warning: offset for image (" << img->data->offset << ") is different from the usual one (" << ci->offset << ")" << endl;
-		if (ci->bpp != img->data->bpp)
-			cerr << "Warning: bpp for image (" << img->data->bpp << ") is different from the usual one (" << ci->bpp << ")" << endl;
+		if (ci->bpp < img->data->bpp)
+			cerr << "Warning: bpp for image (" << img->data->bpp << ") is more than the usual one (" << ci->bpp << ")" << endl;
 	}
 
   return img;
