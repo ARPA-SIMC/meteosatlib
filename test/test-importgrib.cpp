@@ -59,7 +59,7 @@ void to::test<2>()
 
 	gen_ensure_equals(img->data->columns, 1300);
 	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 10);
+	gen_ensure_similar(img->data->slope, 0.1, 0.001);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -74,7 +74,7 @@ void to::test<2>()
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
 	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
 	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
 }
@@ -96,7 +96,7 @@ void to::test<3>()
 
 	gen_ensure_equals(img->data->columns, 200);
 	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 10);
+	gen_ensure_similar(img->data->slope, 0.1, 0.001);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -111,7 +111,7 @@ void to::test<3>()
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
 	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
 	gen_ensure_equals(img->data->scaled(10, 10), 97.800003f);
 
@@ -131,7 +131,7 @@ void to::test<4>()
 	// Check the contents
 	gen_ensure_equals(img->data->columns, 1300);
 	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 10);
+	gen_ensure_similar(img->data->slope, 0.1, 0.001);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -146,9 +146,11 @@ void to::test<4>()
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
 	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
 	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 // Try reimporting an exported subarea grib
@@ -168,8 +170,8 @@ void to::test<5>()
 
 	gen_ensure_equals(img->data->columns, 200);
 	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 10);
-	gen_ensure_equals(img->data->offset, 910);
+	gen_ensure_similar(img->data->slope, 0.1, 0.001);
+	gen_ensure_equals(img->data->offset, -91);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -183,9 +185,11 @@ void to::test<5>()
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
 	gen_ensure_equals(img->data->bpp, 8);
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
 	gen_ensure_equals(img->data->scaled(10, 10), 97.800003f);
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 // Try reimporting an exported netcdf24
@@ -202,7 +206,7 @@ void to::test<6>()
 	// Check the contents
 	gen_ensure_equals(img->data->columns, 1300);
 	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_similar(img->data->slope, 0.1, 0.001);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -216,10 +220,12 @@ void to::test<6>()
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
-	gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
+	gen_ensure_equals(img->data->bpp, 11);
+	gen_ensure_equals(img->data->scalesToInt, true);
+	gen_ensure_similar(img->data->scaled(0, 0), 97.7, 0.001);
+	gen_ensure_similar(img->data->scaled(10, 10), 98.1, 0.001);
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 // Try reimporting an exported subarea netcdf24
@@ -239,7 +245,7 @@ void to::test<7>()
 
 	gen_ensure_equals(img->data->columns, 200);
 	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_similar(img->data->slope, 0.1, 0.001);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
@@ -253,10 +259,12 @@ void to::test<7>()
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->bpp, 11);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
 	gen_ensure_equals(img->data->scaled(10, 10), 97.800003f);
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 }

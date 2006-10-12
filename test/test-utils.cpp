@@ -55,6 +55,32 @@ std::string __ensure_errmsg(std::string file, int line, std::string msg)
 	return ss.str();
 }
 
+void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageData& actual, const msat::ImageData& expected, const float& delta)
+{
+	if (actual.lines != expected.lines)
+	{
+		std::stringstream ss;
+		ss << "Line count differ: expected " << expected.lines << " actual " << actual.lines;
+		throw failure(__ensure_errmsg(file, line, ss.str()));
+	}
+	if (actual.columns != expected.columns)
+	{
+		std::stringstream ss;
+		ss << "Column count differ: expected " << expected.columns << " actual " << actual.columns;
+		throw failure(__ensure_errmsg(file, line, ss.str()));
+	}
+	for (size_t y = 0; y < expected.lines; ++y)
+		for (size_t x = 0; x < expected.columns; ++x)
+			if( actual.scaled(x,y) < expected.scaled(x,y) - delta ||
+			    expected.scaled(x,y) + delta < actual.scaled(x,y) )
+			{
+				std::stringstream ss;
+				ss << "at position " << x << "," << y << ": expected "
+				   << expected.scaled(x,y) << " actual " << actual.scaled(x,y);
+				throw failure(__ensure_errmsg(file, line, ss.str()));
+			}
+}
+
 TempTestFile::TempTestFile(bool leave) : leave(leave)
 {
 	char* pn = tempnam("data/", "test");

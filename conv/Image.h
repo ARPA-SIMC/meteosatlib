@@ -63,7 +63,7 @@ public:
   int year, month, day, hour, minute;
 
 	/// Longitude of sub-satellite point
-	float sublon;
+	double sublon;
 
 	/// Channel ID (from table TODO)
   int channel_id;
@@ -90,10 +90,10 @@ public:
 
 
 	/// Horizontal pixel resolution at nadir point
-	float pixelHSize() const;
+	double pixelHSize() const;
 
 	/// Vertical pixel resolution at nadir point
-	float pixelVSize() const;
+	double pixelVSize() const;
 
 	/// Earth dimension scanned by Seviri in the X direction
 	int seviriDX() const { return seviriDXFromColumnFactor(column_factor); }
@@ -157,11 +157,11 @@ struct ImageData
 
   /// Scaling factor to apply to the raw image data to get the real physical
   /// values
-  float slope;
+  double slope;
 
   /// Reference value to add to the scaled raw image data to get the real
   /// physical values
-  float offset;
+  double offset;
 
   /// Number of bits per sample
   size_t bpp;

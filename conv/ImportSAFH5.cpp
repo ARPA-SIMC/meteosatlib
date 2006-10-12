@@ -97,7 +97,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	const char* s = proj.c_str() + 6;
 	// skip initial zeros
 	while (*(s+1) && *(s+1) == '0') ++s;
-	if (sscanf(s, "%f", &img->sublon) != 1)
+	if (sscanf(s, "%lf", &img->sublon) != 1)
 		throw std::runtime_error("cannot read subsatellite longitude from projection name '" + proj + "' at '" + s + "'");
 	
 	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");

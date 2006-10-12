@@ -41,6 +41,8 @@
 
 #include <conv/Image.tcc>
 
+#include "NetCDFUtils.h"
+
 #define TITLE "Observation File from MSG-SEVIRI"
 #define INSTITUTION "HIMET"
 #define TYPE "Obs file"
@@ -72,21 +74,6 @@ bool isNetCDF24(const std::string& filename)
 	}
 }
 
-// Recompute the BPP for an image made of integer values, by looking at what is
-// their maximum value.  Assume unsigned integers.
-template<typename Sample>
-static void computeBPP(ImageDataWithPixels<Sample>& img)
-{
-	Sample max = img.pixels[0];
-	for (size_t i = 1; i < img.columns * img.lines; ++i)
-		if (img.pixels[i] > max)
-			max = img.pixels[i];
-	img.bpp = (int)ceil(log2(max + 1));
-}
-// For float and double, leave the bpp value to the default
-static void computeBPP(ImageDataWithPixels<float>& img) {}
-static void computeBPP(ImageDataWithPixels<double>& img) {}
-
 template<typename Sample>
 static ImageData* acquireImage(const NcVar& var)
 {
@@ -109,8 +96,6 @@ static ImageData* acquireImage(const NcVar& var)
 
 	if (!var.get(res->pixels, 1, res->lines, res->columns))
 		throw std::runtime_error("reading image pixels failed");
-
-	computeBPP(*res);
 
 	return res.release();
 }
@@ -204,13 +189,14 @@ public:
 
 			switch (var->type())
 			{
-				case ncByte: readData<unsigned char>(*var, *img); img->data->scalesToInt = true; break;
-				case ncChar: readData<char>(*var, *img); img->data->scalesToInt = true; break;
-				case ncShort: readData<int16_t>(*var, *img); img->data->scalesToInt = true; break;
-				case ncLong: readData<int32_t>(*var, *img); img->data->scalesToInt = true; break;
-				case ncFloat: readData<float>(*var, *img); img->data->scalesToInt = false; break;
+				case ncByte:   readData<ncbyte>(*var, *img); img->data->scalesToInt = true;  break;
+				case ncChar:   readData<char>(*var, *img);   img->data->scalesToInt = true;  break;
+				case ncShort:  readData<short>(*var, *img);  img->data->scalesToInt = true;  break;
+				case ncInt:    readData<int>(*var, *img);    img->data->scalesToInt = true;  break;
+				case ncFloat:  readData<float>(*var, *img);  img->data->scalesToInt = false; break;
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
+			computeBPP(*img->data);
 			if (shouldCrop())
 				img->crop(cropX, cropY, cropWidth, cropHeight);
 			output.processImage(img);

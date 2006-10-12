@@ -61,14 +61,11 @@ void to::test<2>()
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
-	fprintf(stderr, "slope: %.30f offset: %.30f\n", img->data->slope, img->data->offset);
-fprintf(stderr, "unscaled: %.30f\n", img->data->scaled(356, 5569) / img->data->slope - img->data->offset);
-
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 5568);
 	gen_ensure_equals(img->data->lines, 11136);
-	gen_ensure_equals(img->data->slope, 0.031999301165342330932617187500);
-	gen_ensure_equals(img->data->offset, -1.631964325904846191406250000000);
+	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
+	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -82,7 +79,7 @@ fprintf(stderr, "unscaled: %.30f\n", img->data->scaled(356, 5569) / img->data->s
 	gen_ensure_equals(img->column_offset, -2);
 	gen_ensure_equals(img->line_offset, 462);
 	gen_ensure_equals(img->data->bpp, 10);
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(356, 5569),  9.40779495239257812500); // unverified
@@ -126,8 +123,8 @@ void to::test<3>()
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 400);
 	gen_ensure_equals(img->data->lines, 300);
-	gen_ensure_equals(img->data->slope, 0.0319993012);
-	gen_ensure_equals(img->data->offset, -1.6319643259);
+	gen_ensure_similar(img->data->slope, 0.0319993, 0.00001);
+	gen_ensure_similar(img->data->offset, -1.6319643, 0.00001);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -140,8 +137,8 @@ void to::test<3>()
 	gen_ensure_equals(img->line_factor, -40927014);
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->bpp, 10); // unverified
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
@@ -193,6 +190,8 @@ void to::test<4>()
 	gen_ensure_equals(img->data->scalesToInt, false);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -212,8 +211,8 @@ void to::test<5>()
 	opts.AreaPixStart = 100;
 	opts.AreaNpix = 400;
 
-	std::auto_ptr<Image> img = importXRIT(opts);
-	img = recodeThroughGrib(*img);
+	std::auto_ptr<Image> imgorig = importXRIT(opts);
+	std::auto_ptr<Image> img = recodeThroughGrib(*imgorig);
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 400);
@@ -233,7 +232,7 @@ void to::test<5>()
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
 	gen_ensure_equals(img->data->bpp, 5); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
@@ -245,6 +244,8 @@ void to::test<5>()
 	gen_ensure_equals(img->data->scaled(366, 71),  7.48783636093139648438); // unverified
 	gen_ensure_equals(img->data->scaled(367, 71),  8.31981849670410156250); // unverified
 	gen_ensure_equals(img->data->scaled(368, 71),  8.83180713653564453125); // unverified
+
+	gen_ensure_imagedata_similar(*img->data, *imgorig->data, 0.0001);
 }
 
 // Import a full XRIT product and pass it from netcdf24
@@ -267,8 +268,8 @@ void to::test<6>()
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 5568);
 	gen_ensure_equals(img->data->lines, 11136);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
+	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -285,6 +286,8 @@ void to::test<6>()
 	gen_ensure_equals(img->data->scalesToInt, false);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -304,14 +307,14 @@ void to::test<7>()
 	opts.AreaPixStart = 100;
 	opts.AreaNpix = 400;
 
-	std::auto_ptr<Image> img = importXRIT(opts);
-	img = recodeThroughNetCDF24(*img);
+	std::auto_ptr<Image> imgorig = importXRIT(opts);
+	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgorig);
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->data->columns, 400);
 	gen_ensure_equals(img->data->lines, 300);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
+	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->year, 2006);
 	gen_ensure_equals(img->month, 4);
 	gen_ensure_equals(img->day, 26);
@@ -324,8 +327,8 @@ void to::test<7>()
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
 	gen_ensure_equals(img->column_offset, 98);
 	gen_ensure_equals(img->line_offset, 5962);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_equals(img->data->bpp, 10);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
 	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
@@ -337,6 +340,8 @@ void to::test<7>()
 	gen_ensure_equals(img->data->scaled(366, 71),  7.48783636093139648438); // unverified
 	gen_ensure_equals(img->data->scaled(367, 71),  8.31981849670410156250); // unverified
 	gen_ensure_equals(img->data->scaled(368, 71),  8.83180713653564453125); // unverified
+
+	gen_ensure_imagedata_similar(*img->data, *imgorig->data, 0.0001);
 }
 
 }

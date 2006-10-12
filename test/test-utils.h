@@ -53,6 +53,24 @@ void my_ensure_equals(const char* file, int line, const Q& actual, const T& expe
 #define gen_ensure_equals(x, y) my_ensure_equals(__FILE__, __LINE__, (x), (y))
 #define inner_ensure_equals(x, y) my_ensure_equals(file, line, (x), (y))
 
+template <class T,class Q,class R>
+void my_ensure_similar(const char* file, int line, const Q& actual, const T& expected, const R& delta)
+{
+	if( actual < expected - delta || expected + delta < actual )
+	{
+		std::stringstream ss;
+		ss << "expected " << expected << " actual " << actual;
+		throw failure(__ensure_errmsg(file, line, ss.str()));
+	}
+}
+#define gen_ensure_similar(x, y, delta) my_ensure_similar(__FILE__, __LINE__, (x), (y), (delta))
+#define inner_ensure_similar(x, y, delta) my_ensure_similar(file, line, (x), (y), (delta))
+
+void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageData& actual, const msat::ImageData& expected, const float& delta);
+
+#define gen_ensure_imagedata_similar(x, y, delta) my_ensure_imagedata_similar(__FILE__, __LINE__, (x), (y), (delta))
+#define inner_ensure_imagedata_similar(x, y, delta) my_ensure_imagedata_similar(file, line, (x), (y), (delta))
+
 class LocalEnv
 {
 	std::string key;

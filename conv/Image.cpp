@@ -45,13 +45,13 @@ void Image::crop(int x, int y, int width, int height)
 }
 
 
-float Image::pixelHSize() const
+double Image::pixelHSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
 }
 
-float Image::pixelVSize() const
+double Image::pixelVSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_factor/exp2(-16)) * PI / 180 );

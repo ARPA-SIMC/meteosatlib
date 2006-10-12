@@ -33,6 +33,8 @@
 #include <stdexcept>
 #include <memory>
 
+#include <math.h>
+
 namespace msat {
 
 template<typename NCObject, typename T>
@@ -70,7 +72,7 @@ struct NcEncoderImpl : public NcEncoder
 		Sample* pixels = new Sample[img.data->columns * img.data->lines];
 		for (size_t y = 0; y < img.data->lines; ++y)
 			for (size_t x = 0; x < img.data->columns; ++x)
-				pixels[y + img.data->lines + x] = img.data->scaledToInt(x, y);
+				pixels[y * img.data->columns + x] = img.data->scaledToInt(x, y);
 
 		if (!var.put(pixels, 1, img.data->lines, img.data->columns))
 			throw std::runtime_error("writing image values failed");
@@ -87,6 +89,25 @@ static std::auto_ptr<NcEncoder> createEncoder(size_t bpp)
 		return std::auto_ptr<NcEncoder>(new NcEncoderImpl<short>);
 	else
 		return std::auto_ptr<NcEncoder>(new NcEncoderImpl<ncbyte>);
+}
+
+// Recompute the BPP for an image made of integer values, by looking at what is
+// their maximum value.  Assume unsigned integers.
+static void computeBPP(ImageData& img)
+{
+	if (img.scalesToInt)
+	{
+		int max = img.scaledToInt(0, 0);
+		for (size_t y = 0; y < img.lines; ++y)
+			for (size_t x = 0; x < img.columns; ++x)
+			{
+				int sample = img.scaledToInt(x, y);
+				if (sample > max)
+					max = sample;
+			}
+		img.bpp = (int)ceil(log2(max + 1));
+	}
+	// Else use the original BPPs
 }
 
 }
