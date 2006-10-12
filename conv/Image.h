@@ -173,6 +173,10 @@ struct ImageData
   /// Image sample as physical value (already scaled with slope and offset)
   virtual float scaled(int column, int line) const = 0;
 
+	/// Image sample scaled to int using slope and offset.
+	/// The function throws if scalesToInt is false.
+	virtual int scaledToInt(int column, int line) const = 0;
+
 	/// Get all the lines * columns samples, scaled
 	virtual float* allScaled() const;
 
@@ -206,6 +210,8 @@ public:
     return this->pixels[line * columns + column] * slope + offset;
   }
 
+	virtual int scaledToInt(int column, int line) const;
+
 	// Rotate the image by 180 degrees, in place
 	void rotate180()
 	{
@@ -234,6 +240,8 @@ public:
   {
     return this->pixels[line * this->columns + column];
   }
+
+	virtual int scaledToInt(int column, int line) const;
 };
 
 

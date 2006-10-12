@@ -3,8 +3,17 @@
 
 #include "Image.h"
 #include <stdexcept>
+#include <math.h>
 
 namespace msat {
+
+template<typename EL>
+int ImageDataWithPixels<EL>::scaledToInt(int column, int line) const
+{
+	if (!this->scalesToInt)
+		throw std::runtime_error("Image samples cannot be scaled to int");
+	return (int)this->pixels[line * this->columns + column];
+}
 
 template<typename EL>
 void ImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
@@ -28,6 +37,14 @@ void ImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
 	// Record the change of the starting point
 	//column_offset += x;
 	//line_offset += y;
+}
+
+template<typename EL>
+int ImageDataWithPixelsPrescaled<EL>::scaledToInt(int column, int line) const
+{
+	if (!this->scalesToInt)
+		throw std::runtime_error("Image samples cannot be scaled to int");
+	return (int)round((this->pixels[line * this->columns + column] - this->offset) / this->slope);
 }
 
 }
