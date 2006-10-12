@@ -73,7 +73,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 	ncfAddAttr(ncf, "GeneratingCentre", 200);
 	ncfAddAttr(ncf, "GeneratingSubCentre", 0);
 	ncfAddAttr(ncf, "GeneratingProcess", 254);	// FIXME: unsure
-	ncfAddAttr(ncf, "Parameter", 0);						// FIXME: to be decided
+	ncfAddAttr(ncf, "Parameter", GRIB_PARAMETER_IMG_D);
 	ncfAddAttr(ncf, "LevelType", GRIB_LEVEL_SATELLITE_METEOSAT8);
 	ncfAddAttr(ncf, "L1", img.channel_id);
 	ncfAddAttr(ncf, "L2", 0);
