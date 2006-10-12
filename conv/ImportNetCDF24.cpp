@@ -72,6 +72,21 @@ bool isNetCDF24(const std::string& filename)
 	}
 }
 
+// Recompute the BPP for an image made of integer values, by looking at what is
+// their maximum value.  Assume unsigned integers.
+template<typename Sample>
+static void computeBPP(ImageDataWithPixels<Sample>& img)
+{
+	Sample max = img.pixels[0];
+	for (size_t i = 1; i < img.columns * img.lines; ++i)
+		if (img.pixels[i] > max)
+			max = img.pixels[i];
+	img.bpp = (int)ceil(log2(max + 1));
+}
+// For float and double, leave the bpp value to the default
+static void computeBPP(ImageDataWithPixels<float>& img) {}
+static void computeBPP(ImageDataWithPixels<double>& img) {}
+
 template<typename Sample>
 static ImageData* acquireImage(const NcVar& var)
 {
@@ -94,6 +109,8 @@ static ImageData* acquireImage(const NcVar& var)
 
 	if (!var.get(res->pixels, 1, res->lines, res->columns))
 		throw std::runtime_error("reading image pixels failed");
+
+	computeBPP(*res);
 
 	return res.release();
 }
