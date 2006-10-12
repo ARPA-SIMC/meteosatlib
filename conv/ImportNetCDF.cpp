@@ -235,8 +235,11 @@ class NetCDFImageImporter : public ImageImporter
 #define GETDEF(type, name, def) \
 		((a = ncf.get_att(name)) != NULL ? a->as_##type(0) : def)
 
-		// FIXME: come la parso questa??
 		stmp = GET(string, "Satellite");
+		if (stmp == "MSG1")
+			img.spacecraft_id = 55;
+		else
+			throw std::runtime_error("finding the satellite ID for satellite " + stmp + " is still unimplemented");
 
 		if (GETDEF(int, "Columns", 3712) != 3712)
 			cerr << "Columns should have been 3712 but is " << GETDEF(int, "Columns", 3712) << " instead: ignoring it" << endl;

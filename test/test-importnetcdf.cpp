@@ -59,8 +59,8 @@ void to::test<2>()
 
 	gen_ensure_equals(img->data->columns, 1300);
 	gen_ensure_equals(img->data->lines, 700);
-	//gen_ensure_equals(img->data->slope, 10);
-	//gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 1);
 	gen_ensure_equals(img->year, 2005);
 	gen_ensure_equals(img->month, 12);
 	gen_ensure_equals(img->day, 19);
@@ -68,20 +68,18 @@ void to::test<2>()
 	gen_ensure_equals(img->minute, 15);
 	gen_ensure_equals(img->sublon, 0);
 
-	//gen_ensure_equals(img->channel_id, 2049);
-	//gen_ensure_equals(img->spacecraft_id, 55);
+	gen_ensure_equals(img->channel_id, 9);
+	gen_ensure_equals(img->spacecraft_id, 55);
 	//gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(3608));
 	//gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(3608));
 
-	//gen_ensure_equals(img->column_offset, 1500);
-	//gen_ensure_equals(img->line_offset, 200);
+	gen_ensure_equals(img->column_offset, 1856);
+	gen_ensure_equals(img->line_offset, 1856);
 
-	//gen_ensure_equals(img->data->bpp, 11);
-	//gen_ensure_equals(img->data->scalesToInt, false);
-	//gen_ensure_equals(img->data->unscaled(0, 0), 977);
-	//gen_ensure_equals(img->data->unscaled(10, 10), 981);
-	gen_ensure_equals(img->data->scaled(0, 0), 230.3f);
-	//gen_ensure_equals(img->data->scaled(10, 10), 98.099998f);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, false);
+	gen_ensure_similar(img->data->scaled(0, 0), 231.3, 0.01);
+	gen_ensure_similar(img->data->scaled(10, 10), 241.6, 0.01);
 }
 
 #if 0
