@@ -65,6 +65,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
   memcpy(res->pixels, m.field.vals, m.grid.nxny * sizeof(float));
 	res->slope = (int)exp10(m.field.decimalscale);
 	res->offset = m.field.refvalue;
+	res->bpp = m.field.numbits;
+	res->scalesToInt = m.field.binscale == 0;
 
 	auto_ptr< Image > img(new Image());
 	img->setData(res.release());
@@ -148,8 +150,6 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	} else
 			std::cerr << "no local PDS extentions: using default satellite identifier 55." << endl;
 #endif
-
-	img->data->bpp = m.field.numbits;
 
   return img;
 }
