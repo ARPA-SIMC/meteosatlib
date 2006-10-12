@@ -12,6 +12,17 @@
 
 using namespace std;
 
+static struct ChannelInfo {
+	size_t decimalDigits;
+} channelInfo[] = {
+	{ 2 },	// 0
+	{ 2 },	// 1
+	{ 2 },	// 2
+	{ 2 },	// 3
+};
+
+static const size_t channel_info_size = sizeof(channelInfo) / sizeof(struct ChannelInfo);
+
 namespace msat {
 
 //
@@ -188,6 +199,33 @@ time_t Image::forecastSeconds2000() const
 	return res - s_epoch_2000;
 }
 
+int Image::decimalDigitsOfScaledValues() const
+{
+	if (data->scalesToInt)
+	{
+		// When the original value was an integer value, we can compute the log10
+		// of the scaling factor, add 1 if the scaling factor is not a direct power
+		// of 10 and use the result as the count of decimal digits
+
+		int res = (int)round(log10(data->slope));
+		if (exp10(res) == data->slope)
+			return res;
+		else
+			return res + 1;
+	} else {
+		// When the original value was a float value, we can read the number of
+		// significant digits from a table indexed by channels
+
+		if (channel_id >= channel_info_size)
+		{
+			stringstream str;
+			str << "no information found for channel " << channel_id;
+			throw std::runtime_error(str.str());
+		}
+		return channelInfo[channel_id].decimalDigits;
+	}
+}
+
 //
 // ImageData
 //
@@ -199,15 +237,6 @@ float* ImageData::allScaled() const
 		for (int x = 0; x < columns; ++x)
 			res[y * columns + x] = scaled(x, y);
 	return res;
-}
-
-int ImageData::decimalScale() const
-{
-	int res = (int)floor(log10(slope));
-	if (exp10(res) == slope)
-		return res;
-	else
-		return res + 1;
 }
 
 //
@@ -242,7 +271,7 @@ public:
 
 		cout << "  " //<< *i
 				 << "\t" << img->data->columns << "x" << img->data->lines << " " << img->data->bpp << "bpp"
-						" *" << img->data->slope << "+" << img->data->offset << " decscale: " << img->data->decimalScale()
+						" *" << img->data->slope << "+" << img->data->offset << " decdigits: " << img->decimalDigitsOfScaledValues()
 				 << " PSIZE " << img->pixelHSize() << "x" << img->pixelVSize()
 				 << " DX " << Image::seviriDXFromColumnFactor(img->column_factor)
 				 << " DY " << Image::seviriDYFromLineFactor(img->line_factor)

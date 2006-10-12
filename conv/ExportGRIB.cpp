@@ -111,12 +111,30 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 									SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
 									img.column_offset, img.line_offset);
 
+  // * Notes on encoding data
+
+	// We cannot unscale the values, because GRIB cannot store slope and offset
+	// so we need to feed the scaled values to GRIB, losing the original slope
+	// and offset.
+  // So we have to ignore scaleToInt.
+	
+	// The only thing we can and must compute is the decimal scale, since the
+	// reference value is computed by the GRIB encoder automatically by taking
+	// the smallest value to encode.
+
+	// When the original value was an integer value, we can compute the logaritm
+	// in base 10 of the scaling factor, add 1 if the scaling factor is not a
+	// direct power of 10 and use the result as the count of decimal digits
+
+	// When the original value was a float value, we can read the number of
+	// significant digits from a table indexed by channels
+
   // Get the calibrated image
   float *fvals = img.data->allScaled();
 
   f.set_table(GRIB_CENTER, GRIB_SUBCENTER, GRIB_TABLE, GRIB_PROCESS);
   f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, FILL_VALUE, FILL_VALUE);
-  f.set_scale(img.data->decimalScale());
+  f.set_scale(img.decimalDigitsOfScaledValues());
 
 #if LOCALDEF == 3
   unsigned char localdefinition3[LOCALDEF3LEN];

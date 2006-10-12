@@ -107,6 +107,10 @@ public:
   // Get the image time as number of seconds since 1/1/2000 UTC
   time_t forecastSeconds2000() const;
 
+	/// Return the number of significant decimal digits for the scaled values.
+	/// It can be negative in case the values are scaled up
+	int decimalDigitsOfScaledValues() const;
+
 	/// Set the image data for this image
 	void setData(ImageData* data);
 
@@ -171,10 +175,6 @@ struct ImageData
 
 	/// Get all the lines * columns samples, scaled
 	virtual float* allScaled() const;
-
-	/// Return the decimal scaling factor that can be used before truncating
-	/// scaled values as integers
-	int decimalScale() const;
 
 	/// Crop the image to the given rectangle
 	virtual void crop(int x, int y, int width, int height) = 0;
