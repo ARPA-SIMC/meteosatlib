@@ -71,8 +71,8 @@ void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageDa
 	}
 	for (size_t y = 0; y < expected.lines; ++y)
 		for (size_t x = 0; x < expected.columns; ++x)
-			if( actual.scaled(x,y) < expected.scaled(x,y) - delta ||
-			    expected.scaled(x,y) + delta < actual.scaled(x,y) )
+			if( actual.scaled(x,y) <= expected.scaled(x,y) - delta ||
+			    expected.scaled(x,y) + delta <= actual.scaled(x,y) )
 			{
 				std::stringstream ss;
 				ss << "at position " << x << "," << y << ": expected "

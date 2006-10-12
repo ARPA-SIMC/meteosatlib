@@ -134,7 +134,7 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 
   f.set_table(GRIB_CENTER, GRIB_SUBCENTER, GRIB_TABLE, GRIB_PROCESS);
   f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, FILL_VALUE, FILL_VALUE);
-  f.set_scale(-img.decimalDigitsOfScaledValues());
+  f.set_scale(img.decimalDigitsOfScaledValues());
 
 #if LOCALDEF == 3
   unsigned char localdefinition3[LOCALDEF3LEN];

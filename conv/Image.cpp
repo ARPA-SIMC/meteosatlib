@@ -207,8 +207,8 @@ int Image::decimalDigitsOfScaledValues() const
 		// of the scaling factor, add 1 if the scaling factor is not a direct power
 		// of 10 and use the result as the count of decimal digits
 
-		int res = (int)round(log10(data->slope));
-		if (exp10(res) == data->slope)
+		int res = -(int)round(log10(data->slope));
+		if (exp10(-res) == data->slope)
 			return res;
 		else
 			return res + 1;
