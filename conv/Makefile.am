@@ -27,6 +27,7 @@ noinst_HEADERS = \
     ImportNetCDF.h \
     ImportNetCDF24.h \
     ImportXRIT.h \
+    NetCDFUtils.h \
     SAFH5Utils.h
 
 noinst_LTLIBRARIES = libconv.la

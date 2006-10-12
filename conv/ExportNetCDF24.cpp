@@ -39,21 +39,11 @@
 #include <hrit/MSG_HRIT.h>
 
 #include "parameters.h"
+#include "NetCDFUtils.h"
 
 using namespace std;
 
 namespace msat {
-
-template<typename NCObject, typename T>
-static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
-{
-  if (!ncf.add_att(name, val))
-  {
-    stringstream msg;
-    msg << "Adding '" << name << "' attribute " << val;
-    throw std::runtime_error(msg.str());
-  }
-}
 
 //
 // Creates NetCDF24 product
@@ -139,28 +129,48 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 
 	stringstream channelName;
 	channelName << "Channel" << img.channel_id;
-  NcVar *ivar = ncf.add_var(channelName.str().c_str(), ncFloat, tdim, ldim, cdim);
-  if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
-	ncfAddAttr(*ivar, "add_offset", 0.0);
-  ncfAddAttr(*ivar, "scale_factor", 1.0);
-  ncfAddAttr(*ivar, "channel", img.channel_id);
-	ncfAddAttr(*ivar, "channelName",
-			MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id).c_str());
 
-  float *pixels = img.data->allScaled();
-  if (img.channel_id > 3 && img.channel_id < 12)
-    ivar->add_att("units", "K");
-  else
-    ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
+	if (img.data->scalesToInt)
+	{
+		std::auto_ptr<NcEncoder> enc = createEncoder(img.data->bpp);
+		NcVar *ivar = ncf.add_var(channelName.str().c_str(), enc->getType(), tdim, ldim, cdim);
+		if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
+		ncfAddAttr(*ivar, "add_offset", img.data->offset);
+		ncfAddAttr(*ivar, "scale_factor", img.data->slope);
+		ncfAddAttr(*ivar, "channel", img.channel_id);
+		ncfAddAttr(*ivar, "channelName",
+				MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id).c_str());
 
-  // Write output values
-  if (!ivar->put(pixels, 1, img.data->lines, img.data->columns))
-		throw std::runtime_error("writing image values failed");
+		if (img.channel_id > 3 && img.channel_id < 12)
+			ivar->add_att("units", "K");
+		else
+			ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
+
+		// Write output values
+		enc->setData(*ivar, img);
+	} else {
+		NcVar *ivar = ncf.add_var(channelName.str().c_str(), ncFloat, tdim, ldim, cdim);
+		if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
+		ncfAddAttr(*ivar, "add_offset", 0.0);
+		ncfAddAttr(*ivar, "scale_factor", 1.0);
+		ncfAddAttr(*ivar, "channel", img.channel_id);
+		ncfAddAttr(*ivar, "channelName",
+				MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id).c_str());
+
+		if (img.channel_id > 3 && img.channel_id < 12)
+			ivar->add_att("units", "K");
+		else
+			ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
+
+		// Write output values
+		float *pixels = img.data->allScaled();
+		if (!ivar->put(pixels, 1, img.data->lines, img.data->columns))
+			throw std::runtime_error("writing image values failed");
+		delete [ ] pixels;
+	}
 
   // Close NetCDF output
   (void) ncf.close( );
-
-  delete [ ] pixels;
 }
 
 

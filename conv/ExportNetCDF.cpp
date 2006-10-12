@@ -37,6 +37,8 @@
 // For MSG_channel_name
 #include <hrit/MSG_HRIT.h>
 
+#include "NetCDFUtils.h"
+
 #define TITLE "SAFNWP Processed File from MSG-SEVIRI"
 #define INSTITUTION "ARPA-SIM"
 #define TYPE "Processed Products"
@@ -52,17 +54,6 @@ using namespace std;
 #endif
 
 namespace msat {
-
-template<typename NCObject, typename T>
-static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
-{
-  if (!ncf.add_att(name, val))
-  {
-    stringstream msg;
-    msg << "Adding '" << name << "' attribute " << val;
-    throw std::runtime_error(msg.str());
-  }
-}
 
 //
 // Creates NetCDF product
