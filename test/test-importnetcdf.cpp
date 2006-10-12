@@ -77,6 +77,7 @@ void to::test<2>()
 	//gen_ensure_equals(img->line_offset, 200);
 
 	//gen_ensure_equals(img->data->bpp, 11);
+	//gen_ensure_equals(img->data->scalesToInt, false);
 	//gen_ensure_equals(img->data->unscaled(0, 0), 977);
 	//gen_ensure_equals(img->data->unscaled(10, 10), 981);
 	gen_ensure_equals(img->data->scaled(0, 0), 230.3f);
@@ -116,6 +117,7 @@ void to::test<3>()
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
 	gen_ensure_equals(img->data->bpp, 11);
+	gen_ensure_equals(img->data->scalesToInt, false);
 	gen_ensure_equals(img->data->unscaled(0, 0), 1005);
 	gen_ensure_equals(img->data->unscaled(10, 10), 978);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);
@@ -152,6 +154,7 @@ void to::test<4>()
 	gen_ensure_equals(img->column_offset, 1500);
 	gen_ensure_equals(img->line_offset, 200);
 	gen_ensure_equals(img->data->bpp, 11);
+	gen_ensure_equals(img->data->scalesToInt, false);
 	gen_ensure_equals(img->data->unscaled(0, 0), 977);
 	gen_ensure_equals(img->data->unscaled(10, 10), 981);
 	gen_ensure_equals(img->data->scaled(0, 0), 97.699997f);
@@ -190,6 +193,7 @@ void to::test<5>()
 	gen_ensure_equals(img->column_offset, 1600);
 	gen_ensure_equals(img->line_offset, 300);
 	gen_ensure_equals(img->data->bpp, 8);
+	gen_ensure_equals(img->data->scalesToInt, false);
 	gen_ensure_equals(img->data->unscaled(0, 0), 10105);
 	gen_ensure_equals(img->data->unscaled(10, 10), 10078);
 	gen_ensure_equals(img->data->scaled(0, 0), 100.50f);

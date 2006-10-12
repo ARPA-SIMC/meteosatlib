@@ -386,9 +386,11 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 #endif
 	double slope;
 	double offset;
-  PRO_data.prologue->radiometric_proc.get_slope_offset(img->channel_id, slope, offset);
+  PRO_data.prologue->radiometric_proc.get_slope_offset(
+			img->channel_id, slope, offset, img->data->scalesToInt);
   img->data->slope = slope;
   img->data->offset = offset;
+	img->data->bpp = d.bpp;
 
 	// Image time
   struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );

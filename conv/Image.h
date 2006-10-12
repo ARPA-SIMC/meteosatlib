@@ -140,7 +140,7 @@ public:
 /// Interface for image data of various types
 struct ImageData
 {
-	ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0) {}
+	ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0), scalesToInt(false) {}
   virtual ~ImageData() {}
 
   // Image metadata
@@ -161,6 +161,10 @@ struct ImageData
 
   /// Number of bits per sample
   size_t bpp;
+
+	/// True if the result of dividing by slope and subtracting offset can be
+	/// rounded to an int without losing information
+	bool scalesToInt;
 
   /// Image sample as physical value (already scaled with slope and offset)
   virtual float scaled(int column, int line) const = 0;

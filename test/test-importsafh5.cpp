@@ -74,6 +74,7 @@ void to::test<2>()
 	gen_ensure_equals(img->column_offset, 357);
 	gen_ensure_equals(img->line_offset, 1657);
 	gen_ensure_equals(img->data->bpp, 8);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 	gen_ensure_equals(img->data->scaled(516, 54), 3);
@@ -111,6 +112,7 @@ void to::test<3>()
 	gen_ensure_equals(img->column_offset, 457);
 	gen_ensure_equals(img->line_offset, 1707);
 	gen_ensure_equals(img->data->bpp, 8);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 	gen_ensure_equals(img->data->scaled(416, 4), 3);
@@ -145,6 +147,7 @@ void to::test<4>()
 	gen_ensure_equals(img->column_offset, 357);
 	gen_ensure_equals(img->line_offset, 1657);
 	gen_ensure_equals(img->data->bpp, 3);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 	gen_ensure_equals(img->data->scaled(516, 54), 3);
@@ -182,6 +185,7 @@ void to::test<5>()
 	gen_ensure_equals(img->column_offset, 457);
 	gen_ensure_equals(img->line_offset, 1757);
 	gen_ensure_equals(img->data->bpp, 2);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 }
@@ -215,6 +219,7 @@ void to::test<6>()
 	gen_ensure_equals(img->column_offset, 357);
 	gen_ensure_equals(img->line_offset, 1657);
 	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 	gen_ensure_equals(img->data->scaled(516, 54), 3);
@@ -252,6 +257,7 @@ void to::test<7>()
 	gen_ensure_equals(img->column_offset, 457);
 	gen_ensure_equals(img->line_offset, 1757);
 	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
 }

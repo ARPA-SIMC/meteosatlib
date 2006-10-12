@@ -200,7 +200,7 @@ class MSG_data_RadiometricProc {
                                       MSG_data_RadiometricProc &g );
 
     float *get_calibration(int channel, int bpp);
-    void get_slope_offset(int channel, double& slope, double& offset);
+    void get_slope_offset(int channel, double& slope, double& offset, bool& scalesToInt);
 
     MSG_RPSummary            RPSummary;
     MSG_Image_Calibration    ImageCalibration[12];

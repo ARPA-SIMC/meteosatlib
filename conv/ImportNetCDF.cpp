@@ -322,12 +322,12 @@ public:
 
 			switch (var->type())
 			{
-				case ncByte: readData<unsigned char>(*var, *img); break;
-				case ncChar: readData<char>(*var, *img); break;
-				case ncShort: readData<int16_t>(*var, *img); break;
-				case ncLong: readData<int32_t>(*var, *img); break;
-				case ncFloat: readData<float>(*var, *img); break;
-				case ncDouble: readData<double>(*var, *img); break;
+				case ncByte: readData<unsigned char>(*var, *img); img->data->scalesToInt = true; break;
+				case ncChar: readData<char>(*var, *img); img->data->scalesToInt = true; break;
+				case ncShort: readData<int16_t>(*var, *img); img->data->scalesToInt = true; break;
+				case ncLong: readData<int32_t>(*var, *img); img->data->scalesToInt = true; break;
+				case ncFloat: readData<float>(*var, *img); img->data->scalesToInt = false; break;
+				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
 			if (shouldCrop())
 				img->crop(cropX, cropY, cropWidth, cropHeight);
