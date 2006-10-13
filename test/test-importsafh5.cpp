@@ -38,6 +38,44 @@ struct importsafh5_shar
 };
 TESTGRP(importsafh5);
 
+static void checkGeneralImageData(Image& img)
+{
+	gen_ensure_equals(img.year, 2005);
+	gen_ensure_equals(img.month, 12);
+	gen_ensure_equals(img.day, 5);
+	gen_ensure_equals(img.hour, 6);
+	gen_ensure_equals(img.minute, 15);
+	gen_ensure_equals(img.sublon, 0);
+	gen_ensure_equals(img.channel_id, 546);
+	gen_ensure_equals(img.spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
+}
+
+static void checkFullImageData(Image& img)
+{
+	checkGeneralImageData(img);
+
+	gen_ensure_equals(img.data->columns, 1300);
+	gen_ensure_equals(img.data->lines, 700);
+	gen_ensure_equals(img.column_offset, 357);
+	gen_ensure_equals(img.line_offset, 1657);
+	gen_ensure_equals(img.data->scaled(0, 0), 0.0f);
+	gen_ensure_equals(img.data->scaled(10, 10), 0.0f);
+	gen_ensure_equals(img.data->scaled(516, 54), 3);
+}
+
+static void checkCroppedImageData(Image& img)
+{
+	checkGeneralImageData(img);
+
+	gen_ensure_equals(img.data->columns, 500);
+	gen_ensure_equals(img.data->lines, 50);
+	gen_ensure_equals(img.column_offset, 457);
+	gen_ensure_equals(img.line_offset, 1707);
+	gen_ensure_equals(img.data->scaled(0, 0), 0.0f);
+	gen_ensure_equals(img.data->scaled(10, 10), 0.0f);
+	gen_ensure_equals(img.data->scaled(416, 4), 3);
+}
+
 // Test the isSAFH5 function
 template<> template<>
 void to::test<1>()
@@ -57,27 +95,16 @@ void to::test<2>()
 	gen_ensure_equals(imgs.size(), 3u);
 	Image* img = imgs[0];
 
-	gen_ensure_equals(img->data->columns, 1300);
-	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->year, 2005);
-	gen_ensure_equals(img->month, 12);
-	gen_ensure_equals(img->day, 5);
-	gen_ensure_equals(img->hour, 6);
-	gen_ensure_equals(img->minute, 15);
-	gen_ensure_equals(img->sublon, 0);
-	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
-	gen_ensure_equals(img->column_offset, 357);
-	gen_ensure_equals(img->line_offset, 1657);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
-	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
-	gen_ensure_equals(img->data->scaled(516, 54), 3);
+
+	test_tag("fullSAFH5");
+	checkFullImageData(*img);
+	test_untag();
 }
 
 // Import a subarea of a SAFH5 product
@@ -95,27 +122,16 @@ void to::test<3>()
 	gen_ensure_equals(imgs.size(), 3u);
 	Image* img = imgs[0];
 
-	gen_ensure_equals(img->data->columns, 500);
-	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->year, 2005);
-	gen_ensure_equals(img->month, 12);
-	gen_ensure_equals(img->day, 5);
-	gen_ensure_equals(img->hour, 6);
-	gen_ensure_equals(img->minute, 15);
-	gen_ensure_equals(img->sublon, 0);
-	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, 13642337);
 	gen_ensure_equals(img->line_factor, 13642337);
-	gen_ensure_equals(img->column_offset, 457);
-	gen_ensure_equals(img->line_offset, 1707);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
-	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
-	gen_ensure_equals(img->data->scaled(416, 4), 3);
+
+	test_tag("croppedSAFH5");
+	checkCroppedImageData(*img);
+	test_untag();
 }
 
 // Try reimporting an exported grib
@@ -129,28 +145,16 @@ void to::test<4>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	// Check the contents
-	gen_ensure_equals(img->data->columns, 1300);
-	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->year, 2005);
-	gen_ensure_equals(img->month, 12);
-	gen_ensure_equals(img->day, 5);
-	gen_ensure_equals(img->hour, 6);
-	gen_ensure_equals(img->minute, 15);
-	gen_ensure_equals(img->sublon, 0);
-	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->column_offset, 357);
-	gen_ensure_equals(img->line_offset, 1657);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
-	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
-	gen_ensure_equals(img->data->scaled(516, 54), 3);
+
+	test_tag("fullSAFH5RecodedGrib");
+	checkFullImageData(*img);
+	test_untag();
 
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
@@ -162,7 +166,7 @@ void to::test<5>()
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
-	imp->cropY = 100;
+	imp->cropY = 50;
 	imp->cropWidth = 500;
 	imp->cropHeight = 50;
 	ImageVector imgs;
@@ -170,26 +174,16 @@ void to::test<5>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->data->columns, 500);
-	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->year, 2005);
-	gen_ensure_equals(img->month, 12);
-	gen_ensure_equals(img->day, 5);
-	gen_ensure_equals(img->hour, 6);
-	gen_ensure_equals(img->minute, 15);
-	gen_ensure_equals(img->sublon, 0);
-	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->column_offset, 457);
-	gen_ensure_equals(img->line_offset, 1757);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 2);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
-	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+
+	test_tag("croppedSAFH5RecodedGrib");
+	checkCroppedImageData(*img);
+	test_untag();
 
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
@@ -205,28 +199,16 @@ void to::test<6>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
 
-	// Check the contents
-	gen_ensure_equals(img->data->columns, 1300);
-	gen_ensure_equals(img->data->lines, 700);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->year, 2005);
-	gen_ensure_equals(img->month, 12);
-	gen_ensure_equals(img->day, 5);
-	gen_ensure_equals(img->hour, 6);
-	gen_ensure_equals(img->minute, 15);
-	gen_ensure_equals(img->sublon, 0);
-	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->column_offset, 357);
-	gen_ensure_equals(img->line_offset, 1657);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
-	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
-	gen_ensure_equals(img->data->scaled(516, 54), 3);
+
+	test_tag("fullSAFH5RecodedNetCDF24");
+	checkFullImageData(*img);
+	test_untag();
 
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
@@ -238,7 +220,7 @@ void to::test<7>()
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
-	imp->cropY = 100;
+	imp->cropY = 50;
 	imp->cropWidth = 500;
 	imp->cropHeight = 50;
 	ImageVector imgs;
@@ -246,26 +228,70 @@ void to::test<7>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
 
-	gen_ensure_equals(img->data->columns, 500);
-	gen_ensure_equals(img->data->lines, 50);
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->year, 2005);
-	gen_ensure_equals(img->month, 12);
-	gen_ensure_equals(img->day, 5);
-	gen_ensure_equals(img->hour, 6);
-	gen_ensure_equals(img->minute, 15);
-	gen_ensure_equals(img->sublon, 0);
-	gen_ensure_equals(img->channel_id, 546);
-	gen_ensure_equals(img->spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
 	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->column_offset, 457);
-	gen_ensure_equals(img->line_offset, 1757);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 2);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->data->scaled(0, 0), 0.0f);
-	gen_ensure_equals(img->data->scaled(10, 10), 0.0f);
+
+	test_tag("croppedSAFH5RecodedNetCDF24");
+	checkCroppedImageData(*img);
+	test_untag();
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+}
+
+// Try reimporting an exported netcdf
+template<> template<>
+void to::test<8>()
+{
+	// Read the grib
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	ImageVector imgs;
+	imp->read(imgs);
+	gen_ensure_equals(imgs.size(), 3u);
+	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
+
+	gen_ensure_equals(img->column_factor, 13642337);
+	gen_ensure_equals(img->line_factor, 13642337);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->data->bpp, 3);
+	gen_ensure_equals(img->data->scalesToInt, true);
+
+	test_tag("fullSAFH5RecodedNetCDF");
+	checkFullImageData(*img);
+	test_untag();
+
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+}
+
+// Try reimporting a subarea exported to netcdf
+template<> template<>
+void to::test<9>()
+{
+	// Read and crop the grib
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	imp->cropX = 100;
+	imp->cropY = 50;
+	imp->cropWidth = 500;
+	imp->cropHeight = 50;
+	ImageVector imgs;
+	imp->read(imgs);
+	gen_ensure_equals(imgs.size(), 3u);
+	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
+
+	gen_ensure_equals(img->column_factor, 13642337);
+	gen_ensure_equals(img->line_factor, 13642337);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->data->bpp, 2);
+	gen_ensure_equals(img->data->scalesToInt, true);
+
+	test_tag("croppedSAFH5RecodedNetCDF");
+	checkCroppedImageData(*img);
+	test_untag();
 
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
