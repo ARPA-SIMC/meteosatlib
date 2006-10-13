@@ -103,6 +103,7 @@ public:
 };
 
 std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile = false);
+std::auto_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile = false);
 std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile = false);
 
 }
