@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <math.h>
+#include <limits.h>
 #include "parameters.h"
 
 // For HRIT satellite IDs
@@ -229,6 +230,9 @@ int Image::decimalDigitsOfScaledValues() const
 //
 // ImageData
 //
+
+ImageData::ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0),
+	              scalesToInt(false), missingValue(FP_NAN) {}
 
 float* ImageData::allScaled() const
 {

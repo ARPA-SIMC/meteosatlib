@@ -12,7 +12,19 @@ int ImageDataWithPixels<EL>::scaledToInt(int column, int line) const
 {
 	if (!this->scalesToInt)
 		throw std::runtime_error("Image samples cannot be scaled to int");
-	return (int)this->pixels[line * this->columns + column];
+	EL s = this->pixels[line * this->columns + column];
+	if (s == missing)
+		return unscaledMissingValue();
+	else
+		return (int)s;
+}
+
+template<typename EL>
+int ImageDataWithPixels<EL>::unscaledMissingValue() const
+{
+	if (!this->scalesToInt)
+		throw std::runtime_error("Image samples cannot be scaled to int");
+	return (int)missing;
 }
 
 template<typename EL>
@@ -44,7 +56,11 @@ int ImageDataWithPixelsPrescaled<EL>::scaledToInt(int column, int line) const
 {
 	if (!this->scalesToInt)
 		throw std::runtime_error("Image samples cannot be scaled to int");
-	return (int)round((this->pixels[line * this->columns + column] - this->offset) / this->slope);
+	EL s = this->pixels[line * this->columns + column];
+	if (s == this->missing)
+		return this->unscaledMissingValue();
+	else
+		return (int)round((s - this->offset) / this->slope);
 }
 
 }

@@ -331,15 +331,15 @@ void to::test<7>()
 	gen_ensure_equals(img->data->scalesToInt, true);
 	gen_ensure_equals(img->data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img->data->scaled(10, 10), 0); // unverified
-	gen_ensure_equals(img->data->scaled(256, 69),  9.40779495239257812500); // unverified
-	gen_ensure_equals(img->data->scaled(257, 69),  7.29584074020385742188); // unverified
-	gen_ensure_equals(img->data->scaled(258, 69),  5.72787475585937500000); // unverified
-	gen_ensure_equals(img->data->scaled(114, 70), 12.28773117065429687500); // unverified
-	gen_ensure_equals(img->data->scaled(115, 70), 10.81576347351074218750); // unverified
-	gen_ensure_equals(img->data->scaled(116, 70), 11.00776004791259765625); // unverified
-	gen_ensure_equals(img->data->scaled(366, 71),  7.48783636093139648438); // unverified
-	gen_ensure_equals(img->data->scaled(367, 71),  8.31981849670410156250); // unverified
-	gen_ensure_equals(img->data->scaled(368, 71),  8.83180713653564453125); // unverified
+	gen_ensure_similar(img->data->scaled(256, 69),  9.41, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(257, 69),  7.30, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(258, 69),  5.73, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(114, 70), 12.29, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(115, 70), 10.82, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(116, 70), 11.01, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(366, 71),  7.49, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(367, 71),  8.32, 0.01); // unverified
+	gen_ensure_similar(img->data->scaled(368, 71),  8.83, 0.01); // unverified
 
 	gen_ensure_imagedata_similar(*img->data, *imgorig->data, 0.0001);
 }

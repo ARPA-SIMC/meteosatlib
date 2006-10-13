@@ -144,7 +144,7 @@ public:
 /// Interface for image data of various types
 struct ImageData
 {
-	ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0), scalesToInt(false) {}
+	ImageData();
   virtual ~ImageData() {}
 
   // Image metadata
@@ -170,12 +170,19 @@ struct ImageData
 	/// rounded to an int without losing information
 	bool scalesToInt;
 
+	/// Value used to represent a missing value in the scaled data
+	float missingValue;
+
   /// Image sample as physical value (already scaled with slope and offset)
   virtual float scaled(int column, int line) const = 0;
 
 	/// Image sample scaled to int using slope and offset.
 	/// The function throws if scalesToInt is false.
 	virtual int scaledToInt(int column, int line) const = 0;
+
+	/// Value used to represent a missing value in the unscaled int
+	/// data, if available
+	virtual int unscaledMissingValue() const = 0;
 
 	/// Get all the lines * columns samples, scaled
 	virtual float* allScaled() const;
@@ -191,6 +198,7 @@ struct ImageDataWithPixels : public ImageData
 public:
   typedef EL Sample;
   Sample* pixels;
+	Sample missing;
 
   ImageDataWithPixels() : pixels(0) { bpp = sizeof(Sample) * 8; }
   ImageDataWithPixels(size_t width, size_t height) : pixels(new Sample[width*height])
@@ -207,10 +215,13 @@ public:
 
   virtual float scaled(int column, int line) const
   {
-    return this->pixels[line * columns + column] * slope + offset;
+		Sample s = this->pixels[line * columns + column];
+    return s == missing ? missingValue : s * slope + offset;
   }
 
 	virtual int scaledToInt(int column, int line) const;
+
+	virtual int unscaledMissingValue() const;
 
 	// Rotate the image by 180 degrees, in place
 	void rotate180()

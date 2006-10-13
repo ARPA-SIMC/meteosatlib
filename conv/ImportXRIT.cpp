@@ -287,38 +287,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	PRO_data.read_from(hrit, PRO_head);
 
 	hrit.close();
-	//std::cout << PRO_head;
-
-#if 0
-  for (int i = 0; i < segments.size(); ++i)
-  {
-    std::ifstream hrit(segments[i].c_str(), (std::ios::binary | std::ios::in));
-    if (hrit.fail())
-			throw std::runtime_error("Cannot open input hrit file " + segments[i]);
-    header[i].read_from(hrit);
-    msgdat[i].read_from(hrit, header[i]);
-    hrit.close( );
-    // std::cout << header[i];
-  }
-#endif
-
-#if 0
-	// Perform image rotation and cropping on the uncalibrated data
-	ImageDataWithPixels<MSG_SAMPLE> work_img;
-
-  // Assemble all the segments together
-	size_t total_size = work_img.columns * work_img.lines;
-  work_img.pixels = new MSG_SAMPLE[total_size];
-  bzero(work_img.pixels, total_size * sizeof(MSG_SAMPLE));
-  size_t pos = 0;
-  for (int i = 0; i < totalsegs; i ++)
-  {
-    if (segsindexes[i] >= 0)
-			memcpy(work_img.pixels+pos, msgdat[segsindexes[i]].image->data,
-					npixperseg*sizeof(MSG_SAMPLE));
-		pos += npixperseg;
-  }
-#endif
 
 	size_t x = 0;
 	size_t y = 0;
@@ -353,6 +321,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	}
 	// Perform calibration and copy the data to the result image
 	auto_ptr< ImageDataWithPixelsPrescaled<float> > data(new ImageDataWithPixelsPrescaled<float>(width, height));
+	data->missing = 0.0;
 	for (size_t iy = 0; iy < height; ++iy)
 		for (size_t ix = 0; ix < width; ++ix)
 		{
