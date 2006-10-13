@@ -203,7 +203,7 @@ void to::test<6>()
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
-// Try reimporting an exported subarea netcdf24
+// Try reimporting a subarea exported to netcdf24
 template<> template<>
 void to::test<7>()
 {
