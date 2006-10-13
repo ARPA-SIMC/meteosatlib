@@ -50,6 +50,15 @@ static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
 }
 
 template<typename Sample>
+static inline Sample getAttribute(const NcAtt& a) { throw std::runtime_error("requested to read attribute from unknown C++ type"); }
+template<> static inline ncbyte getAttribute<ncbyte>(const NcAtt& a) { return a.as_ncbyte(0); }
+template<> static inline char getAttribute<char>(const NcAtt& a) { return a.as_char(0); }
+template<> static inline short getAttribute<short>(const NcAtt& a) { return a.as_short(0); }
+template<> static inline int getAttribute<int>(const NcAtt& a) { return a.as_int(0); }
+template<> static inline float getAttribute<float>(const NcAtt& a) { return a.as_float(0); }
+template<> static inline double getAttribute<double>(const NcAtt& a) { return a.as_double(0); }
+
+template<typename Sample>
 static inline NcType getNcType() { throw std::runtime_error("requested NcType for unknown C++ type"); }
 template<> static inline NcType getNcType<ncbyte>() { return ncByte; }
 template<> static inline NcType getNcType<char>() { return ncChar; }
@@ -130,6 +139,54 @@ static void computeBPP(ImageData& img)
 		img.bpp = (int)ceil(log2(max + 1));
 	}
 	// Else use the original BPPs
+}
+
+// Get the attribute if it exists, otherwise returns 0
+static NcAtt* getAttrIfExists(const NcVar& var, const std::string& name)
+{
+	for (int i = 0; i < var.num_atts(); ++i)
+	{
+		NcAtt* cand = var.get_att(i);
+		if (cand->name() == name)
+			return cand;
+	}
+	return 0;
+}
+
+template<typename Sample>
+void decodeMissing(const NcVar& var, ImageDataWithPixels<Sample>& img)
+{
+	NcAtt* attrMissing = getAttrIfExists(var, "missing_value");
+	if (attrMissing != NULL)
+		img.missing = getAttribute<Sample>(*attrMissing);
+}
+
+template<typename Sample>
+static ImageData* acquireImage(const NcVar& var)
+{
+	if (var.num_dims() != 3)
+	{
+		std::stringstream msg;
+		msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << " instead";
+		throw std::runtime_error(msg.str());
+	}
+
+	int tsize = var.get_dim(0)->size();
+	if (tsize != 1)
+	{
+		std::stringstream msg;
+		msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << " instead";
+		throw std::runtime_error(msg.str());
+	}
+
+	std::auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
+
+	decodeMissing(var, *res);
+
+	if (!var.get(res->pixels, 1, res->lines, res->columns))
+		throw std::runtime_error("reading image pixels failed");
+
+	return res.release();
 }
 
 }

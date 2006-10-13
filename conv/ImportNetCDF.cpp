@@ -71,33 +71,6 @@ bool isNetCDF(const std::string& filename)
 	}
 }
 
-template<typename Sample>
-static ImageData* acquireImage(const NcVar& var)
-{
-	if (var.num_dims() != 3)
-	{
-		stringstream msg;
-		msg << "Number of dimensions for " << var.name() << " should be 3 but is " << var.num_dims() << "instead";
-		throw std::runtime_error(msg.str());
-	}
-
-	int tsize = var.get_dim(0)->size();
-	if (tsize != 1)
-	{
-		stringstream msg;
-		msg << "Size of the time dimension for " << var.name() << " should be 1 but is " << tsize << "instead";
-		throw std::runtime_error(msg.str());
-	}
-
-	auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
-
-	if (!var.get(res->pixels, 1, res->lines, res->columns))
-		throw std::runtime_error("reading image pixels failed");
-
-	return res.release();
-}
-
-
 #if 0
 std::auto_ptr<ImageData> ImportNetCDF(const std::string& filename)
 {
