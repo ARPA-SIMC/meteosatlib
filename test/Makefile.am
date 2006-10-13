@@ -17,7 +17,8 @@
 ##
 
 check_PROGRAMS = msatlib_test
-TESTS = $(check_PROGRAMS)
+check_SCRIPTS = msatlib_test_wrap
+TESTS = $(check_SCRIPTS)
 
 noinst_PROGRAMS = $(test_bin)
 
