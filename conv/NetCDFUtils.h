@@ -34,6 +34,7 @@
 #include <memory>
 
 #include <math.h>
+#include <limits>
 
 namespace msat {
 
@@ -57,6 +58,17 @@ template<> static inline NcType getNcType<int>() { return ncInt; }
 template<> static inline NcType getNcType<float>() { return ncFloat; }
 template<> static inline NcType getNcType<double>() { return ncDouble; }
 
+template<typename Sample>
+static inline Sample getMissing()
+{
+	if (std::numeric_limits<Sample>::has_quiet_NaN)
+		return std::numeric_limits<Sample>::quiet_NaN();
+	else if (std::numeric_limits<Sample>::is_signed)
+		return std::numeric_limits<Sample>::min();
+	else
+		return std::numeric_limits<Sample>::max();
+}
+
 struct NcEncoder
 {
 	virtual NcType getType() = 0;
@@ -70,9 +82,19 @@ struct NcEncoderImpl : public NcEncoder
 	virtual void setData(NcVar& var, const Image& img)
 	{
 		Sample* pixels = new Sample[img.data->columns * img.data->lines];
+		int missing = img.data->unscaledMissingValue();
+		Sample encodedMissing = getMissing<Sample>();
+		ncfAddAttr(var, "missing_value", encodedMissing);
+
 		for (size_t y = 0; y < img.data->lines; ++y)
 			for (size_t x = 0; x < img.data->columns; ++x)
-				pixels[y * img.data->columns + x] = img.data->scaledToInt(x, y);
+			{
+				int unscaled = img.data->scaledToInt(x, y);
+				if (unscaled == missing)
+					pixels[y * img.data->columns + x] = encodedMissing;
+				else
+					pixels[y * img.data->columns + x] = unscaled;
+			}
 
 		if (!var.put(pixels, 1, img.data->lines, img.data->columns))
 			throw std::runtime_error("writing image values failed");
