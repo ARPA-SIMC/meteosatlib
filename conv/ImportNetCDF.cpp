@@ -257,6 +257,7 @@ class NetCDFImageImporter : public ImageImporter
 			msg << "Longitude should have been 0 but is " << ftmp << " instead.";
 			throw std::runtime_error(msg.str());
 		}
+		img.sublon = ftmp;
 
 		stmp = GET(string, "Time");
 		if (sscanf(stmp.c_str(), "%04d-%02d-%02d %02d:%02d:00 UTC",
