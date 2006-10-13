@@ -200,7 +200,7 @@ public:
   Sample* pixels;
 	Sample missing;
 
-  ImageDataWithPixels() : pixels(0) { bpp = sizeof(Sample) * 8; }
+  ImageDataWithPixels();
   ImageDataWithPixels(size_t width, size_t height) : pixels(new Sample[width*height])
 	{
 		bpp = sizeof(Sample) * 8;

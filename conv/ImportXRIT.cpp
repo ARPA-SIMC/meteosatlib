@@ -335,6 +335,9 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	img->setData(data.release());
 
+	img->column_offset += x;
+	img->line_offset += y;
+
 	// TODO
 #if 0
   char *channelstring = strdup(MSG_channel_name((t_enum_MSG_spacecraft) pds.spc,
@@ -348,11 +351,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 #endif
 	//img->name = "" /* TODO */;
 
-#if 0
-  MSG_data_level_15_header *p = PRO_data->prologue;
-  pds.cal_offset = p->radiometric_proc.ImageCalibration[pds.chn-1].Cal_Offset;
-  pds.cal_slope = p->radiometric_proc.ImageCalibration[pds.chn-1].Cal_Slope;
-#endif
 	double slope;
 	double offset;
   PRO_data.prologue->radiometric_proc.get_slope_offset(
@@ -369,21 +367,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	img->hour = tmtime->tm_hour;
 	img->minute = tmtime->tm_min;
 
-	img->column_offset += x;
-	img->line_offset += y;
-
-
-#if 0
-  g.set_size(AreaNpix, AreaNlin);
-  g.set_earth_spheroid( );
-  g.is_dirincgiven = true;
-  // Earth Equatorial Radius is 6378.160 Km (IAU 1965)
-  g.set_spaceview(0.0, pds.sublon, SEVIRI_DX, SEVIRI_DY,
-                  SP_X0, SP_Y0, SEVIRI_ORIENTATION,
-                  SEVIRI_CAMERA_H, AreaPixStart+1, AreaLinStart+1);
-#endif
-
-  // FIXME: and this? pds.sublon = header[0].image_navigation->subsatellite_longitude;
   // FIXME: and this? pds.sh = header[0].image_navigation->satellite_h;
 
 	/* FIXME: and this?

@@ -4,8 +4,21 @@
 #include "Image.h"
 #include <stdexcept>
 #include <math.h>
+#include <limits>
 
 namespace msat {
+
+template<typename EL>
+ImageDataWithPixels<EL>::ImageDataWithPixels() : pixels(0)
+{
+	bpp = sizeof(Sample) * 8;
+	if (std::numeric_limits<EL>::has_quiet_NaN)
+		missing = std::numeric_limits<EL>::quiet_NaN();
+	else if (std::numeric_limits<EL>::is_signed)
+		missing = std::numeric_limits<EL>::min();
+	else
+		missing = std::numeric_limits<EL>::max();
+}
 
 template<typename EL>
 int ImageDataWithPixels<EL>::scaledToInt(int column, int line) const
