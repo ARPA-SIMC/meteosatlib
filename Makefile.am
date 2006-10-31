@@ -31,6 +31,7 @@ SUBDIRS = . \
     grib \
     conv \
     images \
+    proj \
     tools \
     test
 
