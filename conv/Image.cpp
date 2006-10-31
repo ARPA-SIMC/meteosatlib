@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <math.h>
 #include <limits.h>
-#include "parameters.h"
+#include <proj/const.h>
 
 // For HRIT satellite IDs
 #include <hrit/MSG_spacecraft.h>
@@ -61,13 +61,13 @@ void Image::coordsToPixels(double lat, double lon, int& x, int& y)
 double Image::pixelHSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
-	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
+	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * M_PI / 180 );
 }
 
 double Image::pixelVSize() const
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe
-	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_factor/exp2(-16)) * PI / 180 );
+	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_factor/exp2(-16)) * M_PI / 180 );
 }
 
 int Image::seviriDXFromColumnFactor(int column_factor)
@@ -78,24 +78,24 @@ int Image::seviriDXFromColumnFactor(int column_factor)
 #endif
 
 	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
-	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * column_factor * exp2(-15) * 180 / PI);
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * column_factor * exp2(-15) * 180 / M_PI);
 }
 
 int Image::seviriDYFromLineFactor(int line_factor)
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
-	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * line_factor * exp2(-15) * 180 / PI);
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * line_factor * exp2(-15) * 180 / M_PI);
 	//return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelVSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
 }
 
 int Image::columnFactorFromSeviriDX(int seviriDX)
 {
-	return (int)round((double)seviriDX * PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
+	return (int)round((double)seviriDX * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
 }
 
 int Image::lineFactorFromSeviriDY(int seviriDY)
 {
-	return (int)round((double)seviriDY * PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
+	return (int)round((double)seviriDY * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
 }
 
 int Image::spacecraftIDFromHRIT(int id)

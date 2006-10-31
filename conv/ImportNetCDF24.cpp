@@ -34,7 +34,7 @@
 #include <netcdfcpp.h>
 
 #include <conv/Image.h>
-#include <conv/parameters.h>
+#include <proj/const.h>
 #include <proj/Geos.h>
 #include <grib/GRIB.h>
 

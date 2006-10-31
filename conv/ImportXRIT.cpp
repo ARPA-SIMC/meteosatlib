@@ -24,7 +24,7 @@
 //---------------------------------------------------------------------------
 
 #include <conv/ImportXRIT.h>
-#include <conv/parameters.h>
+#include <proj/const.h>
 #include <proj/Geos.h>
 #include <stdexcept>
 #include <fstream>

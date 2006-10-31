@@ -34,6 +34,7 @@ msatlib_test_LDADD = \
 msatlib_test_SOURCES = \
 	tut-main.cpp \
 	test-utils.cpp \
+	test-proj.cpp \
 	test-importgrib.cpp \
 	test-image.cpp
 

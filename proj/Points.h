@@ -34,6 +34,7 @@ struct ImagePoint
 {
   long column;
   long line;
+  ImagePoint() {}
   ImagePoint(const long& column, const long& line) : column(column), line(line) {}
 };
 
@@ -41,6 +42,7 @@ struct ProjectedPoint
 {
   double x;
   double y;
+  ProjectedPoint() {}
   ProjectedPoint(const double& x, const double& y) : x(x), y(y) {}
 };
 
@@ -48,6 +50,7 @@ struct MapPoint
 {
   double lat;
   double lon;
+  MapPoint() {}
   MapPoint(const double& lat, const double& lon) : lat(lat), lon(lon) {}
 };
 

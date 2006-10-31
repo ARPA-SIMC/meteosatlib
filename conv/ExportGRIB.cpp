@@ -27,11 +27,11 @@
 
 #include "ExportGRIB.h"
 
+#include <proj/const.h>
 #include <proj/Geos.h>
 #include <grib/GRIB.h>
 #include <cmath>
 #include <stdexcept>
-#include "parameters.h"
 
 static char rcs_id_string[] = "$Id$";
 

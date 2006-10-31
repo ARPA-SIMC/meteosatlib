@@ -1,9 +1,10 @@
 //---------------------------------------------------------------------------
 //
-//  File        :   NetCDF2GRIB.cpp
-//  Description :   Convert MSG HRIT data from NetCDF format to GRIB format
+//  File        :   ImportGRIB.cpp
+//  Description :   Read a msag::Image from a GRIB message
 //  Project     :   Lamma 2004
-//  Author      :   Graziano Giuliani (Lamma Regione Toscana)
+//  Author      :   Enrico Zini (ARPA SIM Emilia Romagna)
+//  Based on work by: Graziano Giuliani (Lamma Regione Toscana)
 //  Source      :   n/a
 //
 //  This program is free software; you can redistribute it and/or modify
@@ -28,7 +29,7 @@
 #include "config.h"
 
 #include <conv/Image.h>
-#include <conv/parameters.h>
+#include <proj/const.h>
 #include <proj/Geos.h>
 
 // GRIB Interface

@@ -39,7 +39,7 @@
 // For MSG_channel_name
 #include <hrit/MSG_HRIT.h>
 
-#include "parameters.h"
+#include <proj/const.h>
 #include "NetCDFUtils.h"
 
 using namespace std;

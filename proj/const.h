@@ -1,7 +1,7 @@
 #ifndef MSAT_PARAMETERS_H
 #define MSAT_PARAMETERS_H
 
-#define PI 3.14159265
+//#define PI 3.14159265
 
 // Equatorial raius of the earth (Km.)
 #define EARTH_RADIUS 6378.1370	// R
