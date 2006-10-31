@@ -61,19 +61,19 @@ void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
 	proj::ProjectedPoint p;
 	proj->mapToProjected(proj::MapPoint(lat, lon), p);
 
-  x = rint((double) column_offset + p.x * column_factor / (1 << 16) - 1.0);
-  y = rint((double) line_offset   + p.y * line_factor   / (1 << 16) - 1.0);
+	//cerr << "  toProjected: " << p.x << "," << p.y << endl;
+
+  x = rint((double) -column_offset + METEOSAT_IMAGE_NCOLUMNS / 2 + p.x * column_factor * exp2(-16) - 1.0);
+  y = rint((double) -line_offset   + METEOSAT_IMAGE_NLINES / 2   + p.y * line_factor   * exp2(-16) - 1.0);
 }
 
 double Image::pixelHSize() const
 {
-	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * M_PI / 180 );
 }
 
 double Image::pixelVSize() const
 {
-	// This computation has been found by Dr2 Francesca Di Giuseppe
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_factor/exp2(-16)) * M_PI / 180 );
 }
 

@@ -42,6 +42,8 @@ public:
 	Geos() {}
 	Geos(const double& sublon, const double& orbitRadius) : sublon(sublon), orbitRadius(orbitRadius) {}
 
+	// ProjctedPoint gives the angle in degrees between the subsallite point, the
+	// satellite and the given point on the surface
   virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
 	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
 	virtual std::string format() const;

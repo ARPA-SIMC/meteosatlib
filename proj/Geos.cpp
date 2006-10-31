@@ -43,7 +43,7 @@
 #define EARTH_1E2      0.993243        // 1 - e^2
 #endif
 
-// SQRT(EARTH_E2) = 0,082201034
+// sqrt(EARTH_E2) = 0,082201034
 
 #ifndef EARTH_IE2
 #define EARTH_IE2      1.006803        // 1.0 / (1.0 - e^2)
@@ -55,8 +55,10 @@ namespace proj {
 
 void Geos::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
+	// Convert to radians
 	double lat = m.lat * M_PI / 180;
 	double lon = (m.lon - sublon) * M_PI / 180;
+
   double c_lat;
   double r1,r2,r3,rn,rl;
 
@@ -71,6 +73,19 @@ void Geos::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 
   p.x = atan(-r2 / r1) * 180 / M_PI;
   p.y = asin(-r3 / rn) * 180 / M_PI;
+
+/*
+	lat = 0;
+  lon = -M_PI/2;
+	c_lat = 0;
+	rl = EARTH_RPOL/sqrt(1.0-EART_E2);
+	r1 = orbitRadius;
+  r2 = rl;
+	r3 = 0;
+	rn = sqrt(orbitRadius**2 + rl**2);
+	p.x = atan(-rl / orbitRadius) (in gradi);
+	p.y = 0 (in gradi);
+*/
 }
 
 void Geos::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
