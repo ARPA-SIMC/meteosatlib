@@ -29,6 +29,25 @@
 #include <cmath>
 #include <sstream>
 
+#ifndef EARTH_REQU
+#define EARTH_REQU     6378.1690       // Equatorial radius of earth
+#endif
+
+#ifndef EARTH_RPOL
+#define EARTH_RPOL     6356.5838       // Polar radius of earth
+#endif
+
+#ifndef EARTH_E2
+// This is not e^2: e^2 is ~= 7.3890561.  What e is this?
+#define EARTH_E2       0.00675701      // e^2
+#define EARTH_1E2      0.993243        // 1 - e^2
+#endif
+
+#ifndef EARTH_IE2
+#define EARTH_IE2      1.006803        // 1.0 / (1.0 - e^2)
+#endif
+
+
 namespace msat {
 namespace proj {
 

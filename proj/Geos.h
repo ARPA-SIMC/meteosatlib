@@ -30,31 +30,6 @@
 
 // Normalised geostationary space view
 
-#ifndef EARTH_REQU
-#define EARTH_REQU     6378.1690       // Equatorial radius of earth
-#endif
-
-#ifndef EARTH_RPOL
-#define EARTH_RPOL     6356.5838       // Polar radius of earth
-#endif
-
-#ifndef EARTH_E2
-#define EARTH_E2       0.00675701      // e^2
-#define EARTH_1E2      0.993243        // 1 - e^2
-#endif
-
-#ifndef EARTH_IE2
-#define EARTH_IE2      1.006803        // 1.0 / (1.0 - e^2)
-#endif
-
-#ifndef EARTH_EDGE
-#define EARTH_EDGE     1.396263        // 80 degrees as radians
-#endif
-
-#ifndef EARTH_ROTATION
-#define EARTH_ROTATION 7.2722E-5       // Earth rotation radians / sec
-#endif
-
 namespace msat {
 namespace proj {
 
