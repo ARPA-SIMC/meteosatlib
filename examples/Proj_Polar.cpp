@@ -44,7 +44,7 @@ void ProjPolar::set_parameters( ProjectionParameters *p )
 {
   memcpy(&params, p, sizeof(ProjectionParameters));
   if (p->ifNorth) sign = 1.0;
-    else sign = 0.0;
+    else sign = -1.0;
   return;
 }
 
@@ -53,7 +53,7 @@ void ProjPolar::set_parameters( double Longitude, BOOL ifNorth )
   params.Longitude = Longitude;
   params.ifNorth = ifNorth;
   if (ifNorth) sign = 1.0;
-    else sign = 0.0;
+    else sign = -1.0;
   return;
 }
 
