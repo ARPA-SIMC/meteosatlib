@@ -40,43 +40,24 @@
 namespace msat {
 namespace proj {
 
-static double signum(double x)
-{
-  if (x >= 0.0) return 1.0;
-  else return -1.0;
-}
-
-#if 0
-void ProjPolar::set_parameters( ProjectionParameters *p )
-{
-  memcpy(&params, p, sizeof(ProjectionParameters));
-  if (p->ifNorth) sign = 1.0;
-    else sign = 0.0;
-  return;
-}
-
-void ProjPolar::set_parameters( double Longitude, BOOL ifNorth )
-{
-  params.Longitude = Longitude;
-  params.ifNorth = ifNorth;
-  if (ifNorth) sign = 1.0;
-    else sign = 0.0;
-  return;
-}
-#endif
-
 void Polar::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
-  double sign = north ? 1.0 : 0.0;
+  double sign = north ? 1.0 : -1.0;
 
   double a = tan((DTR*(90.0 - sign * m.lat)) * 0.5);
   p.x = a * sin(DTR*(m.lon - longitude));
   p.y = a * cos(DTR*(m.lon - longitude));
 }
 
+static double signum(double x)
+{
+  if (x >= 0.0) return 1.0;
+  else return -1.0;
+}
+
 void Polar::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
 {
-  double sign = north ? 1.0 : 0.0;
+  double sign = north ? 1.0 : -1.0;
 
   m.lon = RTD*atan2(p.x, p.y) + longitude + \
           sign * 90.0 * (1.0 - signum(p.y));

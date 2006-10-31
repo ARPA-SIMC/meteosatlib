@@ -43,6 +43,8 @@
 #define EARTH_1E2      0.993243        // 1 - e^2
 #endif
 
+// SQRT(EARTH_E2) = 0,082201034
+
 #ifndef EARTH_IE2
 #define EARTH_IE2      1.006803        // 1.0 / (1.0 - e^2)
 #endif
