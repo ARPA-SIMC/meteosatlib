@@ -56,6 +56,13 @@ void Image::crop(int x, int y, int width, int height)
 
 void Image::coordsToPixels(double lat, double lon, int& x, int& y)
 {
+  double column, line;
+
+	proj::ProjectedPoint p;
+	proj->mapToProjected(proj::MapPoint(lat, lon), p);
+
+  x = rint((double) column_offset + p.x * column_factor / (1 << 16) - 1.0);
+  y = rint((double) line_offset   + p.y * line_factor   / (1 << 16) - 1.0);
 }
 
 double Image::pixelHSize() const

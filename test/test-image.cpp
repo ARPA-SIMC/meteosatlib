@@ -21,6 +21,8 @@
 
 #include "test-utils.h"
 #include <Image.h>
+#include <proj/const.h>
+#include <proj/Geos.h>
 
 using namespace msat;
 
@@ -52,11 +54,38 @@ void to::test<1>()
 
 	// This computation is necessarily approximated, as we truncate significant digits
 	gen_ensure_equals(Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)), 13641224);
-	gen_ensure_equals(Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)), 13641224);
+	gen_ensure_equals(Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(13642337)), 13641224);
 
 	// This computation should be exact
 	gen_ensure_equals(Image::seviriDXFromColumnFactor(Image::columnFactorFromSeviriDX(3622)), 3622);
 	gen_ensure_equals(Image::seviriDXFromColumnFactor(Image::columnFactorFromSeviriDX(3622)), 3622);
+}
+
+// Test coordinates to point conversion
+template<> template<>
+void to::test<2>()
+{
+	Image img;
+	img.column_factor = 13642337;
+	img.line_factor = 13642337;
+	img.column_offset = 1500;
+	img.line_offset = 200;
+	img.proj.reset(new proj::Geos(0.0, ORBIT_RADIUS));
+	int x, y;
+	img.coordsToPixels(45, 10, x, y);
+	gen_ensure_equals(x, 1747);
+	gen_ensure_equals(y, -1213);
+
+#if 0
+	// Print some points to see how the mapping goes
+	for (int la = -90; la < 90; la += 20)
+		for (int lo = -180; lo < 180; lo += 40)
+		{
+			using namespace std;
+			img.coordsToPixels(la, lo, x, y);
+			cout << x << ' ' << y << endl;
+		}
+#endif
 }
 
 }
