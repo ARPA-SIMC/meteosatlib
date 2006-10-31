@@ -27,22 +27,31 @@
 #ifndef METEOSATLIB_PROJ_POINTS_H
 #define METEOSATLIB_PROJ_POINTS_H
 
-typedef struct {
+namespace msat {
+namespace proj {
+
+struct ImagePoint
+{
   long column;
   long line;
   ImagePoint(const long& column, const long& line) : column(column), line(line) {}
-} ImagePoint;
+};
 
-typedef struct {
+struct ProjectedPoint
+{
   double x;
   double y;
   ProjectedPoint(const double& x, const double& y) : x(x), y(y) {}
-} ProjectedPoint;
+};
 
-typedef struct {
+struct MapPoint
+{
   double lat;
   double lon;
   MapPoint(const double& lat, const double& lon) : lat(lat), lon(lon) {}
-} MapPoint;
+};
+
+}
+}
 
 #endif

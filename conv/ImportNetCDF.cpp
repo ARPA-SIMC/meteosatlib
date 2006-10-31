@@ -32,6 +32,8 @@
 #include <netcdfcpp.h>
 
 #include <conv/Image.h>
+#include <conv/parameters.h>
+#include <proj/Geos.h>
 
 #include <sstream>
 #include <stdexcept>
@@ -257,7 +259,7 @@ class NetCDFImageImporter : public ImageImporter
 			msg << "Longitude should have been 0 but is " << ftmp << " instead.";
 			throw std::runtime_error(msg.str());
 		}
-		img.sublon = ftmp;
+		img.proj.reset(new proj::Geos(ftmp, ORBIT_RADIUS));
 
 		stmp = GET(string, "Time");
 		if (sscanf(stmp.c_str(), "%04d-%02d-%02d %02d:%02d:00 UTC",

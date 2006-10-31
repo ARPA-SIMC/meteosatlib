@@ -22,8 +22,9 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //---------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-#include <proj/Points.h>
+
+#include <proj/Points.h> 
+#include <string>
 
 #ifndef METEOSATLIB_PROJ_PROJECTION_H
 #define METEOSATLIB_PROJ_PROJECTION_H
@@ -36,11 +37,18 @@ typedef struct {
 } ProjectionParameters;
 #endif
 
+namespace msat {
+namespace proj {
+
 struct Projection
 {
     virtual ~Projection() { }
     virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) = 0;
     virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) = 0;
+    virtual std::string format() = 0;
 };
+
+}
+}
 
 #endif

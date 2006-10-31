@@ -23,12 +23,10 @@
 //
 //---------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#include <Standard.h>
-#include <Points.h>
-#include <Projection.h>
+#include <proj/Projection.h>
 
-#ifndef __PROJ_GEOS_H__
-#define __PROJ_GEOS_H__
+#ifndef METEOSATLIB_PROJ_GEOS_H
+#define METEOSATLIB_PROJ_GEOS_H
 
 // Normalised geostationary space view
 
@@ -57,15 +55,25 @@
 #define EARTH_ROTATION 7.2722E-5       // Earth rotation radians / sec
 #endif
 
-class ProjGeos : public Projection {
-  public:
-    ProjGeos( );
-    ProjGeos( ProjectionParameters *p );
-    void set_parameters( ProjectionParameters *p );
-    void set_parameters( double Longitude, double OrbitRadius );
-    ProjectionParameters params;
-    virtual void Map_to_Projected( MapPoint *M, ProjectedPoint *P );
-    virtual void Projected_to_Map( ProjectedPoint *P, MapPoint *M );
+namespace msat {
+namespace proj {
+
+class Geos : public Projection
+{
+public:
+	double sublon;
+	double orbitRadius;
+
+	Geos();
+	Geos(const double& sublon, const double& orbitRadius) : sublon(sublon), orbitRadius(orbitRadius) {}
+
+  virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p);
+	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m);
+	virtual std::string format();
 };
 
+}
+}
+
+// vim:set ts=2 sw=2:
 #endif

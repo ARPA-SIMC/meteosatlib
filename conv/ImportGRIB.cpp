@@ -28,6 +28,8 @@
 #include "config.h"
 
 #include <conv/Image.h>
+#include <conv/parameters.h>
+#include <proj/Geos.h>
 
 // GRIB Interface
 
@@ -82,7 +84,7 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 		case GRIB_GRID_SPACEVIEW:
 			img->column_offset = (int)m.grid.sp.X0;	// probably need some (x-1)*2
 			img->line_offset = (int)m.grid.sp.Y0;		// probably need some (x-1)*2
-			img->sublon = m.grid.sp.lop;
+			img->proj.reset(new proj::Geos(m.grid.sp.lop, ORBIT_RADIUS));
 			img->column_factor = Image::columnFactorFromSeviriDX(m.grid.sp.dx);
 			img->line_factor = Image::lineFactorFromSeviriDY(m.grid.sp.dy);
 			break;

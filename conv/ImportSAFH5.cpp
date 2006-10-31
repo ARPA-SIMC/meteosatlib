@@ -9,6 +9,9 @@
 
 #include <math.h>
 
+#include <conv/parameters.h>
+#include <proj/Geos.h>
+
 #include <conv/Image.tcc>
 
 using namespace H5;
@@ -97,8 +100,10 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	const char* s = proj.c_str() + 6;
 	// skip initial zeros
 	while (*(s+1) && *(s+1) == '0') ++s;
-	if (sscanf(s, "%lf", &img->sublon) != 1)
+	double sublon;
+	if (sscanf(s, "%lf", &sublon) != 1)
 		throw std::runtime_error("cannot read subsatellite longitude from projection name '" + proj + "' at '" + s + "'");
+	img->proj.reset(new proj::Geos(sublon, ORBIT_RADIUS));
 	
 	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
 	img->spacecraft_id = Image::spacecraftIDFromHRIT(readIntAttribute(group, "GP_SC_ID"));

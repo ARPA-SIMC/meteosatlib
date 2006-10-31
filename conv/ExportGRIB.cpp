@@ -27,6 +27,7 @@
 
 #include "ExportGRIB.h"
 
+#include <proj/Geos.h>
 #include <grib/GRIB.h>
 #include <cmath>
 #include <stdexcept>
@@ -102,14 +103,19 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 
   // Dimensions
   grid.set_size(img.data->columns, img.data->lines);
-  grid.set_earth_spheroid();
-  grid.is_dirincgiven = true;
 
-  // Earth Equatorial Radius is 6378.160 Km (IAU 1965)
-  grid.set_spaceview(0.0, img.sublon, img.seviriDX(), img.seviriDY(),
-                  METEOSAT_IMAGE_NCOLUMNS/2, METEOSAT_IMAGE_NLINES/2,
-									SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
-									img.column_offset, img.line_offset);
+	if (proj::Geos* p = dynamic_cast<proj::Geos*>(img.proj.get()))
+	{
+		grid.set_earth_spheroid();
+		grid.is_dirincgiven = true;
+
+		// Earth Equatorial Radius is 6378.160 Km (IAU 1965)
+		grid.set_spaceview(0.0, p->sublon, img.seviriDX(), img.seviriDY(),
+										METEOSAT_IMAGE_NCOLUMNS/2, METEOSAT_IMAGE_NLINES/2,
+										SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
+										img.column_offset, img.line_offset);
+	} else
+		throw std::runtime_error("image has projection " + (img.proj.get() ? img.proj->format() : "(null)") + " instead of geostationary");
 
   // * Notes on encoding data
 

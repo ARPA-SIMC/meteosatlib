@@ -34,6 +34,8 @@
 #include <netcdfcpp.h>
 
 #include <conv/Image.h>
+#include <conv/parameters.h>
+#include <proj/Geos.h>
 #include <grib/GRIB.h>
 
 #include <sstream>
@@ -115,8 +117,7 @@ class NetCDF24ImageImporter : public ImageImporter
 		img.spacecraft_id = GET(int, "SatelliteID");
 
 		NcVar* proj = ncf.get_var("Projection");
-
-		img.sublon = PGET(float, "Lop");
+		img.proj.reset(new proj::Geos(PGET(float, "Lop"), ORBIT_RADIUS));
 		img.column_factor = Image::columnFactorFromSeviriDX(PGET(int, "DX"));
 		img.line_factor = Image::lineFactorFromSeviriDY(PGET(int, "DY"));
 		img.column_offset =	PGET(int, "X0");

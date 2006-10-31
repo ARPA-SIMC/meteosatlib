@@ -21,6 +21,7 @@
 
 #include "test-utils.h"
 #include <ImportXRIT.h>
+#include <proj/Geos.h>
 
 #undef PERFORM_SLOW_TESTS
 
@@ -47,7 +48,9 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.day, 26);
 	gen_ensure_equals(img.hour, 19);
 	gen_ensure_equals(img.minute, 45);
-	gen_ensure_equals(img.sublon, 0);
+	proj::Geos* p = dynamic_cast<proj::Geos*>(img.proj.get());
+	gen_ensure(p != 0);
+	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 12);
 	gen_ensure_equals(img.spacecraft_id, 55);
 }

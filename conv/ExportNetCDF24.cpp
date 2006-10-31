@@ -28,6 +28,7 @@
 //#include "../config.h"
 
 #include <conv/ExportNetCDF24.h>
+#include <proj/Geos.h>
 #include <grib/GRIB.h>
 
 #include <netcdfcpp.h>
@@ -86,16 +87,20 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
   NcVar *projVar = ncf.add_var("Projection", ncInt);
   if (!projVar->is_valid()) throw std::runtime_error("adding projection variable failed");
 
-	ncfAddAttr(*projVar, "Lap", 0.0);
-	ncfAddAttr(*projVar, "Lop", img.sublon);
-	ncfAddAttr(*projVar, "DX", img.seviriDX());
-	ncfAddAttr(*projVar, "DY", img.seviriDY());
-	ncfAddAttr(*projVar, "Xp", METEOSAT_IMAGE_NCOLUMNS/2);
-	ncfAddAttr(*projVar, "Yp", METEOSAT_IMAGE_NLINES/2);
-	ncfAddAttr(*projVar, "X0", img.column_offset);
-	ncfAddAttr(*projVar, "Y0", img.line_offset);
-	ncfAddAttr(*projVar, "Orientation", SEVIRI_ORIENTATION);
-	ncfAddAttr(*projVar, "Nz", SEVIRI_CAMERA_H);
+	if (proj::Geos* p = dynamic_cast<proj::Geos*>(img.proj.get()))
+	{
+		ncfAddAttr(*projVar, "Lap", 0.0);
+		ncfAddAttr(*projVar, "Lop", p->sublon);
+		ncfAddAttr(*projVar, "DX", img.seviriDX());
+		ncfAddAttr(*projVar, "DY", img.seviriDY());
+		ncfAddAttr(*projVar, "Xp", METEOSAT_IMAGE_NCOLUMNS/2);
+		ncfAddAttr(*projVar, "Yp", METEOSAT_IMAGE_NLINES/2);
+		ncfAddAttr(*projVar, "X0", img.column_offset);
+		ncfAddAttr(*projVar, "Y0", img.line_offset);
+		ncfAddAttr(*projVar, "Orientation", SEVIRI_ORIENTATION);
+		ncfAddAttr(*projVar, "Nz", SEVIRI_CAMERA_H);
+	} else
+		throw std::runtime_error("image has projection " + (img.proj.get() ? img.proj->format() : "(null)") + " instead of geostationary");
 
 	// Does not seem to be currently filled up in the GRIB exporter
 	//	ncfAddAttr(*projVar, "ScanningMode", );

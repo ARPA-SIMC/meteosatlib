@@ -24,6 +24,8 @@
 //---------------------------------------------------------------------------
 
 #include <conv/ImportXRIT.h>
+#include <conv/parameters.h>
+#include <proj/Geos.h>
 #include <stdexcept>
 #include <fstream>
 #include <hrit/MSG_HRIT.h>
@@ -198,7 +200,7 @@ struct Decoder
 				npixperseg = columns * seglines;
 
 				// Image metadata
-				img.sublon = header.image_navigation->subsatellite_longitude;
+				img.proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
 				img.channel_id = header.segment_id->spectral_channel_id;
 				img.spacecraft_id = Image::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
 				img.column_factor = header.image_navigation->column_scaling_factor;

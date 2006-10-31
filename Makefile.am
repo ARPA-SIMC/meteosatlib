@@ -28,10 +28,10 @@ DIST_SUBDIRS = \
     thornsds_db1
 
 SUBDIRS = . \
+    proj \
     grib \
     conv \
     images \
-    proj \
     tools \
     test
 

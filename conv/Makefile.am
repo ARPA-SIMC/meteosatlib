@@ -36,6 +36,7 @@ libconv_la_SOURCES = \
     ImportGRIB.cpp \
     ExportGRIB.cpp
 libconv_la_LIBADD = \
+    ../proj/libproj.la \
     ../grib/libgrib.la
 
 if HRIT

@@ -54,6 +54,9 @@ void Image::crop(int x, int y, int width, int height)
 	line_offset += y;
 }
 
+void Image::coordsToPixels(double lat, double lon, int& x, int& y)
+{
+}
 
 double Image::pixelHSize() const
 {
@@ -276,7 +279,7 @@ public:
 	virtual void processImage(std::auto_ptr<Image> img)
 	{
 		cout << "Image " << img->datetime() << endl;
-		cout << " proj: GEOS(" << img->sublon << ") ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
+		cout << " proj: " << img->proj->format() << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 		cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
 				 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
 

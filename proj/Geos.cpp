@@ -23,9 +23,11 @@
 //
 //---------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#include <Proj_Geos.h>
+#include <proj/Geos.h>
+#include <proj/Standard.h>
 #include <string.h>
 #include <cmath>
+#include <sstream>
 
 #define cosd(x) cos(DTR*(x))
 #define sind(x) sin(DTR*(x))
@@ -33,66 +35,57 @@
 #define atand(x) RTD*atan((x))
 #define asind(x) RTD*asin((x))
 
-ProjGeos::ProjGeos( ) { }
+namespace msat {
+namespace proj {
 
-ProjGeos::ProjGeos( ProjectionParameters *p )
-{
-  set_parameters(p);
-}
+Geos::Geos( ) { }
 
-void ProjGeos::set_parameters( ProjectionParameters *p )
-{
-  memcpy(&params, p, sizeof(ProjectionParameters));
-  return;
-}
-
-void ProjGeos::set_parameters( double Longitude, double OrbitRadius )
-{
-  params.Longitude = Longitude;
-  params.OrbitRadius = OrbitRadius;
-  return;
-}
-
-void ProjGeos::Map_to_Projected( MapPoint *M, ProjectedPoint *P )
+void Geos::mapToProjected(const MapPoint& m, ProjectedPoint& p)
 {
   double c_lat;
   double r1,r2,r3,rn,rl;
 
-  c_lat = atan( EARTH_1E2 * tand(M->latitude) );
+  c_lat = atan( EARTH_1E2 * tand(m.lat) );
   rl    = EARTH_RPOL / ( sqrt(1.0 - EARTH_E2 * pow(cos(c_lat), 2.0)) );
 
-  r1 = params.OrbitRadius - \
-        rl * cos(c_lat) * cosd((M->longitude - params.Longitude));
-  r2 = -rl * cos(c_lat) * sind((M->longitude - params.Longitude));
+  r1 = orbitRadius - \
+        rl * cos(c_lat) * cosd((m.lon - sublon));
+  r2 = -rl * cos(c_lat) * sind((m.lon - sublon));
   r3 = rl * sin(c_lat);
   rn = sqrt( r1*r1 + r2*r2 + r3*r3 );
 
-  P->x = atand( (-r2 / r1) );
-  P->y = asind( (-r3 / rn) );
-
-  return;
+  p.x = atand( (-r2 / r1) );
+  p.y = asind( (-r3 / rn) );
 }
 
-void ProjGeos::Projected_to_Map( ProjectedPoint *P, MapPoint *M )
+void Geos::projectedToMap(const ProjectedPoint& p, MapPoint& m)
 {
   double sd,sn;
   double s1,s2,s3,sxy;
 
-  sd = sqrt(pow((params.OrbitRadius * cosd(P->x) * cosd(P->y)), 2.0) - \
-       (pow(cosd(P->y), 2.0) + EARTH_IE2 * pow(sind(P->y), 2.0)) * \
+  sd = sqrt(pow((orbitRadius * cosd(p.x) * cosd(p.y)), 2.0) - \
+       (pow(cosd(p.y), 2.0) + EARTH_IE2 * pow(sind(p.y), 2.0)) * \
        1737121856 ); 
-  sn = (params.OrbitRadius * cosd(P->x) * cosd(P->y) - sd) / \
-       (pow(cosd(P->y), 2.0) + EARTH_IE2 * pow(sind(P->y), 2.0));
+  sn = (orbitRadius * cosd(p.x) * cosd(p.y) - sd) / \
+       (pow(cosd(p.y), 2.0) + EARTH_IE2 * pow(sind(p.y), 2.0));
 
-  s1 = params.OrbitRadius - sn * cosd(P->x) * cosd(P->y);
-  s2 = sn * sind(P->x) * cosd(P->y);
-  s3 = -sn * sind(P->y);
+  s1 = orbitRadius - sn * cosd(p.x) * cosd(p.y);
+  s2 = sn * sind(p.x) * cosd(p.y);
+  s3 = -sn * sind(p.y);
   sxy = sqrt( s1*s1 + s2*s2 );
 
-  M->longitude = atand((s2/s1))+params.Longitude;
-  M->latitude  = atand((EARTH_IE2 * (s3 / sxy)));
+  m.lon = atand((s2/s1))+sublon;
+  m.lat  = atand((EARTH_IE2 * (s3 / sxy)));
+}
 
-  return;
+std::string Geos::format()
+{
+	std::stringstream str;
+	str << "GEOS(sublon: " << sublon << ", orbitRadius: " << orbitRadius << ")";
+	return str.str();
+}
+
+}
 }
 
 #ifdef TESTME
@@ -134,3 +127,4 @@ int main(int argc, char *argv[])
 }
 
 #endif
+// vim:set ts=2 sw=2:

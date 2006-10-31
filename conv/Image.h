@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <proj/Projection.h>
 
 namespace msat {
 
@@ -62,8 +63,8 @@ public:
   /// Image time
   int year, month, day, hour, minute;
 
-	/// Longitude of sub-satellite point
-	double sublon;
+	/// Projection
+	std::auto_ptr<proj::Projection> proj;
 
 	/// Channel ID (from table TODO)
   int channel_id;
@@ -113,6 +114,9 @@ public:
 
 	/// Set the image data for this image
 	void setData(ImageData* data);
+
+	/// Return the nearest pixel coordinates to the given geographical place
+	void coordsToPixels(double lat, double lon, int& x, int& y);
 
 	/**
 	 * Crop the image to the given rectangle specified in coordinates relative
