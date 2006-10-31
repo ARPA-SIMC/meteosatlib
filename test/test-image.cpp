@@ -73,9 +73,10 @@ void to::test<2>()
 	img.proj.reset(new proj::Geos(0.0, ORBIT_RADIUS));
 	int x, y;
 	img.coordsToPixels(45, 10, x, y);
-	gen_ensure_equals(x, 1747);
-	gen_ensure_equals(y, -1213);
+	gen_ensure_equals(x, 603);
+	gen_ensure_equals(y, 243);
 
+#if 0
 	// Print some points to see how the mapping goes
 	for (int la = -90; la < 90; la += 20)
 		for (int lo = -180; lo < 180; lo += 40)
@@ -84,6 +85,7 @@ void to::test<2>()
 			img.coordsToPixels(la, lo, x, y);
 			cout << x << ' ' << y << endl;
 		}
+#endif
 }
 
 }
