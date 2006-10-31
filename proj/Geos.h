@@ -22,7 +22,7 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //---------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+
 #include <proj/Projection.h>
 
 #ifndef METEOSATLIB_PROJ_GEOS_H
@@ -39,12 +39,12 @@ public:
 	double sublon;
 	double orbitRadius;
 
-	Geos();
+	Geos() {}
 	Geos(const double& sublon, const double& orbitRadius) : sublon(sublon), orbitRadius(orbitRadius) {}
 
-  virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p);
-	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m);
-	virtual std::string format();
+  virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
+	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
+	virtual std::string format() const;
 };
 
 }

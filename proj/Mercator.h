@@ -22,20 +22,26 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //---------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-#include <Standard.h>
-#include <Points.h>
-#include <Projection.h>
 
-#ifndef __PROJ_MERCATOR_H__
-#define __PROJ_MERCATOR_H__
+#include <proj/Projection.h>
 
-class ProjMercator : public Projection {
-  public:
-    ProjMercator();
-    ProjectionParameters params;
-    virtual void Map_to_Projected( MapPoint *M, ProjectedPoint *P );
-    virtual void Projected_to_Map( ProjectedPoint *P, MapPoint *M );
+#ifndef METEOSATLIB_PROJ_MERCATOR_H
+#define METEOSATLIB_PROJ_MERCATOR_H
+
+namespace msat {
+namespace proj {
+
+class Mercator : public Projection
+{
+public:
+	Mercator() {}
+	virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
+	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
+	virtual std::string format() const { return "Mercator"; }
 };
 
+}
+}
+
+// vim:set ts=2 sw=2:
 #endif

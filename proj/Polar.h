@@ -22,26 +22,31 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //---------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-#include <Standard.h>
-#include <Points.h>
-#include <Projection.h>
 
-#ifndef __PROJ_POLAR_H__
-#define __PROJ_POLAR_H__
+#include <proj/Projection.h>
 
-class ProjPolar : public Projection {
-  public:
-    ProjPolar( );
-    ProjPolar( ProjectionParameters *p );
-    void set_parameters( ProjectionParameters *p );
-    void set_parameters( double Longitude, BOOL isNorth );
-    virtual void Map_to_Projected( MapPoint *M, ProjectedPoint *P );
-    virtual void Projected_to_Map( ProjectedPoint *P, MapPoint *M );
-    ProjectionParameters params;
-  private:
-    double sign;
-    double signum(double x);
+#ifndef METEOSATLIB_PROJ_POLAR_H
+#define METEOSATLIB_PROJ_POLAR_H
+
+namespace msat {
+namespace proj {
+
+class Polar : public Projection
+{
+public:
+	double longitude;
+	bool north;
+
+	Polar() {}
+	Polar(const double& longitude, const bool& north) : longitude(longitude), north(north) {}
+
+	virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
+	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
+	virtual std::string format() const;
 };
 
+}
+}
+
+// vim:set ts=2 sw=2:
 #endif

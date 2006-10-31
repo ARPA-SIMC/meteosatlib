@@ -51,9 +51,7 @@
 namespace msat {
 namespace proj {
 
-Geos::Geos( ) { }
-
-void Geos::mapToProjected(const MapPoint& m, ProjectedPoint& p)
+void Geos::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
 	double lat = m.lat * M_PI / 180;
 	double lon = (m.lon - sublon) * M_PI / 180;
@@ -73,7 +71,7 @@ void Geos::mapToProjected(const MapPoint& m, ProjectedPoint& p)
   p.y = asin(-r3 / rn) * 180 / M_PI;
 }
 
-void Geos::projectedToMap(const ProjectedPoint& p, MapPoint& m)
+void Geos::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
 {
 	double x = p.x * M_PI / 180;
 	double y = p.y * M_PI / 180;
@@ -95,10 +93,10 @@ void Geos::projectedToMap(const ProjectedPoint& p, MapPoint& m)
   m.lat = atan(EARTH_IE2 * (s3 / sxy)) * 180 / M_PI;
 }
 
-std::string Geos::format()
+std::string Geos::format() const
 {
 	std::stringstream str;
-	str << "GEOS(sublon: " << sublon << ", orbitRadius: " << orbitRadius << ")";
+	str << "Geos(sublon: " << sublon << ", orbitRadius: " << orbitRadius << ")";
 	return str.str();
 }
 

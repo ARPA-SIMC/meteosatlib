@@ -24,60 +24,25 @@
 //---------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
-#include <Proj_Mercator.h>
+#include <proj/Mercator.h>
 #include <cmath>
 
-ProjMercator::ProjMercator( )
+namespace msat {
+namespace proj {
+
+void Mercator::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
-  // empty
+  p.x = m.lon / 180.0;
+  p.y = M_1_PI * log(tan((M_PI/360)*(90.0-m.lat)));
 }
 
-void ProjMercator::Map_to_Projected( MapPoint *M, ProjectedPoint *P )
+void Mercator::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
 {
-  P->x = M->longitude / 180.0;
-  P->y = M_1_PI * log(tan(DTR*(90.0-M->latitude)*0.5));
-  return;
+  m.lon = 180.0 * p.x;
+  m.lat  = 90.0 - (360/M_PI) * atan(exp(p.y * M_PI));
 }
 
-void ProjMercator::Projected_to_Map( ProjectedPoint *P, MapPoint *M )
-{
-  M->longitude = 180.0 * P->x;
-  M->latitude  = 90.0 - 2.0 * RTD*atan(exp(P->y * M_PI));
-  return;
+}
 }
 
-#ifdef TESTME
-
-#include <iostream>
-
-int main(int argc, char *argv[])
-{
-  MapPoint M;
-  ProjectedPoint P;
-
-  Projection *proj;
-
-  ProjMercator pm;
-  proj = &pm;
-
-  M.latitude  = 45.0;
-  M.longitude = 13.0;
-
-  proj->Map_to_Projected(&M, &P);
-
-  std::cout << "Latitude  = " << M.latitude << std::endl;
-  std::cout << "Longitude = " << M.longitude << std::endl;
-  std::cout << "X         = " << P.x << std::endl;
-  std::cout << "Y         = " << P.y << std::endl;
-
-  proj->Projected_to_Map(&P, &M);
-
-  std::cout << "Latitude  = " << M.latitude << std::endl;
-  std::cout << "Longitude = " << M.longitude << std::endl;
-  std::cout << "X         = " << P.x << std::endl;
-  std::cout << "Y         = " << P.y << std::endl;
-
-  return 0;
-}
-
-#endif
+// vim:set ts=2 sw=2:

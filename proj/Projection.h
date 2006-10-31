@@ -43,9 +43,9 @@ namespace proj {
 struct Projection
 {
     virtual ~Projection() { }
-    virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) = 0;
-    virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) = 0;
-    virtual std::string format() = 0;
+    virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const = 0;
+    virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const = 0;
+    virtual std::string format() const = 0;
 };
 
 }

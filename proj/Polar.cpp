@@ -23,23 +23,30 @@
 //
 //---------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#include <Proj_Polar.h>
+#include <proj/Polar.h>
 #include <string.h>
 #include <cmath>
+#include <sstream>
 
-double ProjPolar::signum(double x)
+#ifndef DTR
+#define DTR 0.017453292
+#endif
+
+#ifndef RTD
+#define RTD 57.29577951
+#endif
+
+
+namespace msat {
+namespace proj {
+
+static double signum(double x)
 {
   if (x >= 0.0) return 1.0;
   else return -1.0;
 }
 
-ProjPolar::ProjPolar( ) { }
-
-ProjPolar::ProjPolar( ProjectionParameters *p )
-{
-  set_parameters(p);
-}
-
+#if 0
 void ProjPolar::set_parameters( ProjectionParameters *p )
 {
   memcpy(&params, p, sizeof(ProjectionParameters));
@@ -56,62 +63,35 @@ void ProjPolar::set_parameters( double Longitude, BOOL ifNorth )
     else sign = 0.0;
   return;
 }
-
-void ProjPolar::Map_to_Projected( MapPoint *M, ProjectedPoint *P )
-{
-  double a;
-
-  a = tan((DTR*(90.0-sign*M->latitude)) * 0.5);
-  P->x = a * sin(DTR*(M->longitude-params.Longitude));
-  P->y = a * cos(DTR*(M->longitude-params.Longitude));
-  return;
-}
-
-void ProjPolar::Projected_to_Map( ProjectedPoint *P, MapPoint *M )
-{
-  M->longitude = RTD*atan2(P->x, P->y) + params.Longitude + \
-                 sign * 90.0 * (1.0 - signum(P->y));
-  M->latitude  = sign * (90.0 - 2.0 * \
-                 RTD*atan(sqrt(pow(P->x, 2.0) + pow(P->y, 2.0))) );
-  return;
-}
-
-#ifdef TESTME
-
-#include <iostream>
-
-int main(int argc, char *argv[])
-{
-  ProjectionParameters p;
-  p.Longitude = 10.0;
-  p.ifNorth = TRUE;
-
-  MapPoint M;
-  ProjectedPoint P;
-
-  Projection *proj;
-  ProjPolar pp(&p);
-
-  proj = &pp;
-
-  M.latitude  = 45.0;
-  M.longitude = 13.0;
-
-  proj->Map_to_Projected(&M, &P);
-
-  std::cout << "Latitude  = " << M.latitude << std::endl;
-  std::cout << "Longitude = " << M.longitude << std::endl;
-  std::cout << "X         = " << P.x << std::endl;
-  std::cout << "Y         = " << P.y << std::endl;
-
-  proj->Projected_to_Map(&P, &M);
-
-  std::cout << "Latitude  = " << M.latitude << std::endl;
-  std::cout << "Longitude = " << M.longitude << std::endl;
-  std::cout << "X         = " << P.x << std::endl;
-  std::cout << "Y         = " << P.y << std::endl;
-
-  return 0;
-}
-
 #endif
+
+void Polar::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
+{
+  double sign = north ? 1.0 : 0.0;
+
+  double a = tan((DTR*(90.0 - sign * m.lat)) * 0.5);
+  p.x = a * sin(DTR*(m.lon - longitude));
+  p.y = a * cos(DTR*(m.lon - longitude));
+}
+
+void Polar::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
+{
+  double sign = north ? 1.0 : 0.0;
+
+  m.lon = RTD*atan2(p.x, p.y) + longitude + \
+          sign * 90.0 * (1.0 - signum(p.y));
+  m.lat = sign * (90.0 - 2.0 * \
+          RTD*atan(sqrt(pow(p.x, 2.0) + pow(p.y, 2.0))) );
+}
+
+std::string Polar::format() const
+{
+  std::stringstream str;
+  str << "Polar(longitude: " << longitude << ", north: " << north << ")";
+  return str.str();
+}
+
+}
+}
+
+// vim:set ts=2 sw=2:
