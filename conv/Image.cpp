@@ -54,7 +54,7 @@ void Image::crop(int x, int y, int width, int height)
 	line_offset += y;
 }
 
-void Image::coordsToPixels(double lat, double lon, int& x, int& y)
+void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
 {
   double column, line;
 

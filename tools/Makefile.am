@@ -16,10 +16,13 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-bin_PROGRAMS = msatconv
+bin_PROGRAMS = msatconv interpolate
 
 msatconv_SOURCES = msatconv.cpp
 msatconv_LDADD = ../conv/libconv.la 
+
+interpolate_SOURCES = interpolate.cpp
+interpolate_LDADD = ../conv/libconv.la 
 
 MAINTAINERCLEANFILES = \
     Makefile.in

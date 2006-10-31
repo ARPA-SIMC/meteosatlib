@@ -116,7 +116,7 @@ public:
 	void setData(ImageData* data);
 
 	/// Return the nearest pixel coordinates to the given geographical place
-	void coordsToPixels(double lat, double lon, int& x, int& y);
+	void coordsToPixels(double lat, double lon, int& x, int& y) const;
 
 	/**
 	 * Crop the image to the given rectangle specified in coordinates relative
