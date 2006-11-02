@@ -76,6 +76,12 @@ AC_ARG_ENABLE([hdf5],
         [disable hdf5 support])],
     [],
     [enable_hdf5="yes"])
+AC_ARG_ENABLE([dballe],
+    [AS_HELP_STRING(
+        [--disable-dballe],
+        [disable dballe support])],
+    [],
+    [enable_dballe="yes"])
 
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
@@ -156,6 +162,19 @@ AC_CHECK_HEADER([H5Cpp.h],
     fi
 ])
 
+if test "$enable_dballe" == "yes"; then
+	PKG_CHECK_EXISTS(libdballe, [
+		PKG_CHECK_MODULES(LIBDBALLE, libdballe)
+		AC_SUBST(LIBDBALLE_CFLAGS)
+		AC_SUBST(LIBDBALLE_LIBS)
+		enabl_dballe="yes"
+	],[
+		AC_MSG_WARN("*** dballe support disabled")
+		enabl_dballe="no"
+	])
+fi
+
+
 dnl --------------------------------------------------------------------
 dnl Checks for typedefs, structures, and compiler characteristics.
 
@@ -225,6 +244,7 @@ AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
 AM_CONDITIONAL([HDF5], [test x"$enable_hdf5" = x"yes"])
+AM_CONDITIONAL([DBALLE], [test x"$enable_dballe" = x"yes"])
 
 dnl --------------------------------------------------------------------
 dnl Create output files.
@@ -266,6 +286,7 @@ AS_HELP_STRING([msg-native:], [$enable_msg_native])
 AS_HELP_STRING([omtp-ids:], [$enable_omtp_ids])
 AS_HELP_STRING([openmtp:], [$enable_openmtp])
 AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
+AS_HELP_STRING([dballe:], [$enable_dballe])
 ===================================================])
 
 ## -fin-
