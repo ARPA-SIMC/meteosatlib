@@ -56,12 +56,12 @@ static const char* op_user = "";
 static const char* op_pass = "";
 static const char* op_area = "";
 static const char* op_satinfo = DEFAULT_SATINFO;
+static int op_overwrite = 0;
 #if 0
 static char* op_input_type = "auto";
 static char* op_report = "";
 static char* op_output_type = "bufr";
 static char* op_output_template = "";
-static int op_overwrite = 0;
 static int op_fast = 0;
 #endif
 int op_verbose = 0;
@@ -154,6 +154,7 @@ struct ChannelInfo
 	dba_varcode var;
 	int ltype, l1, l2;
 	int pind, p1, p2;
+	string rep;
 };
 
 struct ChannelTab : public std::map<int, ChannelInfo>
@@ -168,7 +169,7 @@ struct ChannelTab : public std::map<int, ChannelInfo>
 		int count;
 		while ((count = dba_csv_read_next(in, cols, 10)) != 0)
 		{
-			if (count < 8)
+			if (count < 9)
 				continue;
 			int channel = strtoul(cols[0], NULL, 0);
 			(*this)[channel].var = DBA_STRING_TO_VAR(cols[1]+1);
@@ -178,6 +179,11 @@ struct ChannelTab : public std::map<int, ChannelInfo>
 			(*this)[channel].pind = strtoul(cols[5], NULL, 0);
 			(*this)[channel].p1 = strtoul(cols[6], NULL, 0);
 			(*this)[channel].p2 = strtoul(cols[7], NULL, 0);
+			// Truncate trailing newline of report memo
+			string rep = cols[8];
+			if (rep[rep.size() - 1] == '\n')
+				rep.resize(rep.size() - 1);
+			(*this)[channel].rep = rep;
 
 			for (int i = 0; i < count; ++i)
 				free(cols[i]);
@@ -188,28 +194,12 @@ struct ChannelTab : public std::map<int, ChannelInfo>
 	}
 };
 
-struct Dumper
-{
-	dba_err operator()(dba_record ana, dba_var var, const Image& img, const ChannelInfo& c)
-	{
-		double lat, lon;
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LAT, &lat));
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LON, &lon));
-		fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d", lat, lon,
-				img.year, img.month, img.day, img.hour, img.minute,
-				c.ltype, c.l1, c.l2, c.pind, c.p1, c.p2);
-		dba_var_print(var, stdout);
-		return dba_error_ok();
-	}
-};
-
 template<typename OUT>
-dba_err interpolate(poptContext optCon, OUT consume)
+dba_err interpolate(poptContext optCon, dba_db db, OUT consume)
 {
 	int count, i;
 	dba_record query, result;
 	dba_db_cursor cursor;
-	dba_db db;
 
 	ChannelTab satinfo;
 	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
@@ -226,7 +216,6 @@ dba_err interpolate(poptContext optCon, OUT consume)
 	DBA_RUN_OR_RETURN(dba_cmdline_get_query(optCon, query));
 
 	// Connect the database and start the query
-	DBA_RUN_OR_RETURN(create_dba_db(&db));
 	DBA_RUN_OR_RETURN(dba_db_ana_query(db, query, &cursor, &count));
 	DBA_RUN_OR_RETURN(dba_record_create(&result));
 
@@ -276,11 +265,25 @@ dba_err interpolate(poptContext optCon, OUT consume)
 		}
 	}
 
-	dba_db_delete(db);
-
 	dba_record_delete(result);
 	dba_record_delete(query);
+	return dba_error_ok();
 }
+
+struct Dumper
+{
+	dba_err operator()(dba_record ana, dba_var var, const Image& img, const ChannelInfo& c)
+	{
+		double lat, lon;
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LAT, &lat));
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LON, &lon));
+		fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d", lat, lon,
+				img.year, img.month, img.day, img.hour, img.minute,
+				c.ltype, c.l1, c.l2, c.pind, c.p1, c.p2);
+		dba_var_print(var, stdout);
+		return dba_error_ok();
+	}
+};
 
 dba_err do_dump(poptContext optCon)
 {
@@ -289,14 +292,70 @@ dba_err do_dump(poptContext optCon)
 	action = poptGetArg(optCon);
 
 	DBA_RUN_OR_RETURN(dba_init());
+	dba_db db;
+	DBA_RUN_OR_RETURN(create_dba_db(&db));
 
 	Dumper consumer;
-	DBA_RUN_OR_RETURN(interpolate(optCon, consumer));
+	DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
 
+	dba_db_delete(db);
 	dba_shutdown();
 
 	return dba_error_ok();
 }
+
+struct Importer
+{
+	dba_db db;
+	bool overwrite;
+
+	Importer(dba_db db, bool overwrite) : db(db), overwrite(overwrite) {}
+
+	dba_err operator()(dba_record ana, dba_var var, const Image& img, const ChannelInfo& c)
+	{
+		dba_record_clear_vars(ana);
+		// Prepare the new input record
+		DBA_RUN_OR_RETURN(dba_record_var_set_direct(ana, var));
+		DBA_RUN_OR_RETURN(dba_record_key_unset(ana, DBA_KEY_CONTEXT_ID));
+		DBA_RUN_OR_RETURN(dba_record_key_unset(ana, DBA_KEY_REP_COD));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_YEAR, img.year));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_MONTH, img.month));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_DAY, img.day));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_HOUR, img.hour));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_MIN, img.minute));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_SEC, 0));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_LEVELTYPE, c.ltype));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_L1, c.l1));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_L2, c.l2));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_PINDICATOR, c.pind));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_P1, c.p1));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_P2, c.p2));
+		DBA_RUN_OR_RETURN(dba_record_key_setc(ana, DBA_KEY_REP_MEMO, c.rep.c_str()));
+		DBA_RUN_OR_RETURN(dba_db_insert(db, ana, overwrite ? 1 : 0, 0, NULL, NULL));
+		return dba_error_ok();
+	}
+};
+
+dba_err do_import(poptContext optCon)
+{
+	const char* action;
+	/* Throw away the command name */
+	action = poptGetArg(optCon);
+
+	DBA_RUN_OR_RETURN(dba_init());
+	dba_db db;
+	DBA_RUN_OR_RETURN(create_dba_db(&db));
+
+	Importer consumer(db, op_overwrite != 0);
+	DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
+
+	dba_db_delete(db);
+	dba_shutdown();
+
+	return dba_error_ok();
+}
+
+
 
 
 
@@ -313,6 +372,18 @@ struct poptOption dbasat_dump_options[] = {
 	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "read only the given subarea (in pixels) of the images (format: x,y,w,h)" },
 	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
 	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
+	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0,
+		"Options used to connect to the database" },
+	POPT_TABLEEND
+};
+
+struct poptOption dbasat_import_options[] = {
+	{ "help", '?', 0, 0, 1, "print an help message" },
+	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "read only the given subarea (in pixels) of the images (format: x,y,w,h)" },
+	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
+	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
+	{ "overwrite", 'f', POPT_ARG_NONE, &op_overwrite, 0,
+		"overwrite existing data" },
 	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0,
 		"Options used to connect to the database" },
 	POPT_TABLEEND
@@ -400,7 +471,7 @@ static void init()
 		", NetCDF, NetCDF24"
 #endif
 		" format.";
-	dbasat.ops = (struct op_dispatch_table*)calloc(2, sizeof(struct op_dispatch_table));
+	dbasat.ops = (struct op_dispatch_table*)calloc(3, sizeof(struct op_dispatch_table));
 
 	dbasat.ops[0].func = do_dump;
 	dbasat.ops[0].aliases[0] = "dump";
@@ -412,6 +483,16 @@ static void init()
 		"complete list.";
 	dbasat.ops[0].optable = dbasat_dump_options;
 
+	dbasat.ops[1].func = do_import;
+	dbasat.ops[1].aliases[0] = "import";
+	dbasat.ops[1].usage = "import [options] [file1 [file2...]] [queryparm1=val1 [queryparm2=val2 [...]]]";
+	dbasat.ops[1].desc = "Import satellite data corresponding to the stations found in the database matching the given query";
+	dbasat.ops[1].longdesc = "Query parameters are the same of the Fortran API. "
+		"Please see the section \"Input and output parameters -- For data "
+		"related action routines\" of the Fortran API documentation for a "
+		"complete list.";
+	dbasat.ops[1].optable = dbasat_import_options;
+
 #if 0
 	dbasat.ops[1].func = do_wipe;
 	dbasat.ops[1].aliases[0] = "wipe";
@@ -421,13 +502,6 @@ static void init()
 			"Reinitialisation is done using the given report code description file. "
 			"If no file is provided, a default version is used";
 	dbasat.ops[1].optable = dbasat_wipe_options;
-
-	dbasat.ops[2].func = do_import;
-	dbasat.ops[2].aliases[0] = "import";
-	dbasat.ops[2].usage = "import [options] filename [filename [ ... ] ]";
-	dbasat.ops[2].desc = "Import data into the database";
-	dbasat.ops[2].longdesc = NULL;
-	dbasat.ops[2].optable = dbasat_import_options;
 
 	dbasat.ops[3].func = do_export;
 	dbasat.ops[3].aliases[0] = "export";
@@ -470,11 +544,11 @@ static void init()
 	dbasat.ops[6].optable = dbasat_stations_options;
 #endif
 
-	dbasat.ops[1].func = NULL;
-	dbasat.ops[1].usage = NULL;
-	dbasat.ops[1].desc = NULL;
-	dbasat.ops[1].longdesc = NULL;
-	dbasat.ops[1].optable = NULL;
+	dbasat.ops[2].func = NULL;
+	dbasat.ops[2].usage = NULL;
+	dbasat.ops[2].desc = NULL;
+	dbasat.ops[2].longdesc = NULL;
+	dbasat.ops[2].optable = NULL;
 };
 
 int main (int argc, const char* argv[])
