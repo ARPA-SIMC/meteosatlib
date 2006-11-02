@@ -46,6 +46,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 
+#define DEFAULT_SATINFO "/usr/share/dballe/satinfo.csv"
+
 using namespace std;
 using namespace msat;
 
@@ -53,6 +55,7 @@ static const char* op_dsn = "test";
 static const char* op_user = "";
 static const char* op_pass = "";
 static const char* op_area = "";
+static const char* op_satinfo = DEFAULT_SATINFO;
 #if 0
 static char* op_input_type = "auto";
 static char* op_report = "";
@@ -187,7 +190,6 @@ struct ChannelTab : public std::map<int, ChannelInfo>
 
 dba_err do_dump(poptContext optCon)
 {
-	static const char* satinfo_fname = "satinfo.csv";
 	const char* action;
 	int count, i;
 	dba_record query, result;
@@ -198,7 +200,7 @@ dba_err do_dump(poptContext optCon)
 	action = poptGetArg(optCon);
 
 	ChannelTab satinfo;
-	satinfo.read(satinfo_fname);
+	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
 
 	// Read the input data
 	ImageVector imgs;
@@ -244,7 +246,7 @@ dba_err do_dump(poptContext optCon)
 				if (warned.find(channel) == warned.end())
 				{
 					fprintf(stderr, "No channel information for channel %d in %s: skipping image.\n",
-							channel, satinfo_fname);
+							channel, op_satinfo);
 					warned.insert(channel);
 				}
 				continue;
@@ -289,6 +291,7 @@ static struct tool_desc dbasat;
 struct poptOption dbasat_dump_options[] = {
 	{ "help", '?', 0, 0, 1, "print an help message" },
 	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "read only the given subarea (in pixels) of the images (format: x,y,w,h)" },
+	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
 	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
 	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0,
 		"Options used to connect to the database" },
