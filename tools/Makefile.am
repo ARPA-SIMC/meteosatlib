@@ -24,6 +24,14 @@ msatconv_LDADD = ../conv/libconv.la
 interpolate_SOURCES = interpolate.cpp
 interpolate_LDADD = ../conv/libconv.la 
 
+if DBALLE
+bin_PROGRAMS += dbasat
+
+dbasat_SOURCES = dbasat.cpp
+dbasat_LDADD = ../conv/libconv.la $(LIBDBALLE_LIBS)
+dbasat_INCLUDES = $(LIBDBALLE_CFLAGS)
+endif
+
 MAINTAINERCLEANFILES = \
     Makefile.in
 

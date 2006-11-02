@@ -137,7 +137,9 @@ AC_CHECK_HEADER([Magick++.h],
 ])
 
 AC_CHECK_HEADER([netcdfcpp.h],
-    [],
+    [
+     	AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
+    ],
     [
     if test "$enable_hri" == "yes"; then
         enable_hri="no"
@@ -209,6 +211,7 @@ if test x"$enable_hrit" == x"yes"; then
     if test x"$enable_hrit" == x"yes"; then
         make_hrit=hrit/Subdir.mk
         make_decompress=decompress/Subdir.mk
+	AC_DEFINE([HAVE_HRIT], 1, [XRIT functions are available])
     fi
 fi
 
@@ -232,6 +235,8 @@ if test x"$enable_hdf5" == x"yes"; then
     if ! test x"$have_libhdf5" = x"yes"; then
         enable_hdf5="no"
         AC_MSG_WARN("*** hdf5 support disabled")
+    else
+	AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
     fi
 fi
 
