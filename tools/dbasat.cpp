@@ -34,8 +34,11 @@
 #include <dballe/init.h>
 #include <dballe/cmdline.h>
 #include <dballe/db/dba_db.h>
+#include <dballe/core/csv.h>
 
 #include <string>
+#include <map>
+#include <set>
 #include <stdexcept>
 #include <iostream>
 
@@ -101,28 +104,15 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 }
 
 
-
-
-dba_err do_dump(poptContext optCon)
+static dba_err read_files(poptContext optCon, ImageVector& imgs)
 {
-	const char* action;
-	int count, i;
-	dba_record query, result;
-	dba_db_cursor cursor;
-	dba_db db;
-
 	// Default cropping parameters (all zeroes mean "no cropping")
 	int ax = 0, ay = 0, aw = 0, ah = 0;
-
-	/* Throw away the command name */
-	action = poptGetArg(optCon);
-
 	if (op_area[0] != 0)
 		if (sscanf(optarg, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
 			dba_cmdline_error(optCon, "area parameter should be in the format x,y,width,height");
 
 	// Get the file names and read the images
-	ImageVector imgs;
 	while (1)
 	{
 		const char* arg = poptPeekArg(optCon);
@@ -153,6 +143,66 @@ dba_err do_dump(poptContext optCon)
 		// Consume the argument if it was processed
 		poptGetArg(optCon);
 	}
+	return dba_error_ok();
+}
+
+struct ChannelInfo
+{
+	dba_varcode var;
+	int ltype, l1, l2;
+	int pind, p1, p2;
+};
+
+struct ChannelTab : public std::map<int, ChannelInfo>
+{
+	dba_err read(const std::string& file)
+	{
+		FILE* in = fopen(file.c_str(), "rt");
+		if (in == NULL)
+			return dba_error_system("Opening file %s", file.c_str());
+
+		char *cols[10];
+		int count;
+		while ((count = dba_csv_read_next(in, cols, 10)) != 0)
+		{
+			if (count < 8)
+				continue;
+			int channel = strtoul(cols[0], NULL, 0);
+			(*this)[channel].var = DBA_STRING_TO_VAR(cols[1]+1);
+			(*this)[channel].ltype = strtoul(cols[2], NULL, 0);
+			(*this)[channel].l1 = strtoul(cols[3], NULL, 0);
+			(*this)[channel].l2 = strtoul(cols[4], NULL, 0);
+			(*this)[channel].pind = strtoul(cols[5], NULL, 0);
+			(*this)[channel].p1 = strtoul(cols[6], NULL, 0);
+			(*this)[channel].p2 = strtoul(cols[7], NULL, 0);
+
+			for (int i = 0; i < count; ++i)
+				free(cols[i]);
+		}
+
+		fclose(in);
+		return dba_error_ok();
+	}
+};
+
+dba_err do_dump(poptContext optCon)
+{
+	static const char* satinfo_fname = "satinfo.csv";
+	const char* action;
+	int count, i;
+	dba_record query, result;
+	dba_db_cursor cursor;
+	dba_db db;
+
+	/* Throw away the command name */
+	action = poptGetArg(optCon);
+
+	ChannelTab satinfo;
+	satinfo.read(satinfo_fname);
+
+	// Read the input data
+	ImageVector imgs;
+	DBA_RUN_OR_RETURN(read_files(optCon, imgs));
 
 	if (imgs.empty())
 		dba_cmdline_error(optCon, "No valid input files found");
@@ -161,11 +211,15 @@ dba_err do_dump(poptContext optCon)
 	DBA_RUN_OR_RETURN(dba_record_create(&query));
 	DBA_RUN_OR_RETURN(dba_cmdline_get_query(optCon, query));
 
+	// Connect the database and start the query
 	DBA_RUN_OR_RETURN(dba_init());
 	DBA_RUN_OR_RETURN(create_dba_db(&db));
 	DBA_RUN_OR_RETURN(dba_db_ana_query(db, query, &cursor, &count));
 	DBA_RUN_OR_RETURN(dba_record_create(&result));
 
+	// Read the stations from the database and print the corresponding image
+	// values
+	set<int> warned;
 	for (i = 0; ; ++i)
 	{
 		int has_data;
@@ -183,11 +237,32 @@ dba_err do_dump(poptContext optCon)
 					i != imgs.end(); ++i)
 		{
 			int x, y;
+			int channel = (*i)->channel_id;
+			ChannelTab::const_iterator c = satinfo.find(channel);
+			if (c == satinfo.end())
+			{
+				if (warned.find(channel) == warned.end())
+				{
+					fprintf(stderr, "No channel information for channel %d in %s: skipping image.\n",
+							channel, satinfo_fname);
+					warned.insert(channel);
+				}
+				continue;
+			}
+
 			(*i)->coordsToPixels(lat, lon, x, y);
 			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
 			if (x >= 0 && x < (*i)->data->columns && y >= 0 && y < (*i)->data->lines)
 			{
-				fprintf(stdout, "%f,%f: %f\n", lat, lon, (*i)->data->scaled(x, y));
+				dba_var var;
+				DBA_RUN_OR_RETURN(dba_var_create_local(c->second.var, &var));
+				DBA_RUN_OR_RETURN(dba_var_setd(var, (*i)->data->scaled(x, y)));
+				fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d", lat, lon,
+						(*i)->year, (*i)->month, (*i)->day, (*i)->hour, (*i)->minute,
+						c->second.ltype, c->second.l1, c->second.l2,
+						c->second.pind, c->second.p1, c->second.p2);
+				dba_var_print(var, stdout);
+				dba_var_delete(var);
 			}
 		}
 	}
