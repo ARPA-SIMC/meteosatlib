@@ -188,16 +188,28 @@ struct ChannelTab : public std::map<int, ChannelInfo>
 	}
 };
 
-dba_err do_dump(poptContext optCon)
+struct Dumper
 {
-	const char* action;
+	dba_err operator()(dba_record ana, dba_var var, const Image& img, const ChannelInfo& c)
+	{
+		double lat, lon;
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LAT, &lat));
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LON, &lon));
+		fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d", lat, lon,
+				img.year, img.month, img.day, img.hour, img.minute,
+				c.ltype, c.l1, c.l2, c.pind, c.p1, c.p2);
+		dba_var_print(var, stdout);
+		return dba_error_ok();
+	}
+};
+
+template<typename OUT>
+dba_err interpolate(poptContext optCon, OUT consume)
+{
 	int count, i;
 	dba_record query, result;
 	dba_db_cursor cursor;
 	dba_db db;
-
-	/* Throw away the command name */
-	action = poptGetArg(optCon);
 
 	ChannelTab satinfo;
 	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
@@ -214,7 +226,6 @@ dba_err do_dump(poptContext optCon)
 	DBA_RUN_OR_RETURN(dba_cmdline_get_query(optCon, query));
 
 	// Connect the database and start the query
-	DBA_RUN_OR_RETURN(dba_init());
 	DBA_RUN_OR_RETURN(create_dba_db(&db));
 	DBA_RUN_OR_RETURN(dba_db_ana_query(db, query, &cursor, &count));
 	DBA_RUN_OR_RETURN(dba_record_create(&result));
@@ -259,21 +270,30 @@ dba_err do_dump(poptContext optCon)
 				dba_var var;
 				DBA_RUN_OR_RETURN(dba_var_create_local(c->second.var, &var));
 				DBA_RUN_OR_RETURN(dba_var_setd(var, (*i)->data->scaled(x, y)));
-				fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d", lat, lon,
-						(*i)->year, (*i)->month, (*i)->day, (*i)->hour, (*i)->minute,
-						c->second.ltype, c->second.l1, c->second.l2,
-						c->second.pind, c->second.p1, c->second.p2);
-				dba_var_print(var, stdout);
+				DBA_RUN_OR_RETURN(consume(result, var, **i, c->second));
 				dba_var_delete(var);
 			}
 		}
 	}
 
 	dba_db_delete(db);
-	dba_shutdown();
 
 	dba_record_delete(result);
 	dba_record_delete(query);
+}
+
+dba_err do_dump(poptContext optCon)
+{
+	const char* action;
+	/* Throw away the command name */
+	action = poptGetArg(optCon);
+
+	DBA_RUN_OR_RETURN(dba_init());
+
+	Dumper consumer;
+	DBA_RUN_OR_RETURN(interpolate(optCon, consumer));
+
+	dba_shutdown();
 
 	return dba_error_ok();
 }
