@@ -88,14 +88,20 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 {
 	if (isGrib(filename))
 		return createGribImporter(filename);
+#ifdef HAVE_NETCDF
 	if (isNetCDF(filename))
 		return createNetCDFImporter(filename);
 	if (isNetCDF24(filename))
 		return createNetCDF24Importer(filename);
+#endif
+#ifdef HAVE_HDF5
 	if (isSAFH5(filename))
 		return createSAFH5Importer(filename);
+#endif
+#ifdef HAVE_HRIT
 	if (isXRIT(filename))
 		return createXRITImporter(filename);
+#endif
 	return std::auto_ptr<ImageImporter>();
 }
 

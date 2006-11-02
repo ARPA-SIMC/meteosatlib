@@ -25,7 +25,7 @@
 //  
 //---------------------------------------------------------------------------
 
-//#include "../config.h"
+#include <config.h>
 
 #include <conv/ImportGRIB.h>
 #include <conv/ImportSAFH5.h>
@@ -54,18 +54,26 @@ void do_help(const char* argv0, ostream& out)
   out << "Usage: " << argv0 << " [options] file(s)..." << endl << endl
       << "Convert meteosat image files from and to various formats." << endl << endl
       << "Formats supported are:" << endl
+#ifdef HAVE_NETCDF
       << "  NetCDF   Import/Export" << endl
       << "  NetCDF24 Import/Export" << endl
+#endif
       << "  Grib     Import/Export" << endl
+#ifdef HAVE_HDF5
       << "  SAFH5    Import only" << endl
+#endif
+#ifdef HAVE_HRIT
       << "  XRIT     Import only" << endl
+#endif
       << "Options are:" << endl
       << "  --help           Print this help message" << endl
       << "  --view           View the contents of a file" << endl
       << "  --dump           View the contents of a file, including the pixel data" << endl
       << "  --grib           Convert to GRIB" << endl
+#ifdef HAVE_HDF5
       << "  --netcdf         Convert to NetCDF" << endl
       << "  --netcdf24       Convert to NetCDF" << endl
+#endif
       << "  --area='x,y,w,h' Crop the source image(s) to the given area" << endl;
 }
 void usage(char *pname)
@@ -81,7 +89,11 @@ void usage(char *pname)
   return;
 }
 
-enum Action { VIEW, DUMP, GRIB, NETCDF, NETCDF24 };
+enum Action { VIEW, DUMP, GRIB,
+#ifdef HAVE_NETCDF
+	NETCDF, NETCDF24
+#endif
+};
 
 /*
  * Create an importer for the given file, auto-detecting the file type.
@@ -92,14 +104,20 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 {
 	if (isGrib(filename))
 		return createGribImporter(filename);
+#ifdef HAVE_NETCDF
 	if (isNetCDF(filename))
 		return createNetCDFImporter(filename);
 	if (isNetCDF24(filename))
 		return createNetCDF24Importer(filename);
+#endif
+#ifdef HAVE_HDF5
 	if (isSAFH5(filename))
 		return createSAFH5Importer(filename);
+#endif
+#ifdef HAVE_HRIT
 	if (isXRIT(filename))
 		return createXRITImporter(filename);
+#endif
 	return std::auto_ptr<ImageImporter>();
 }
 
@@ -113,8 +131,10 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 		case VIEW: return createImageDumper(false);
 		case DUMP: return createImageDumper(true);
 		case GRIB: return createGribExporter();
+#ifdef HAVE_NETCDF
 		case NETCDF: return createNetCDFExporter();
 		case NETCDF24: return createNetCDF24Exporter();
+#endif
 	}
 }
 
@@ -133,8 +153,10 @@ int main( int argc, char* argv[] )
 		{ "view",	0, NULL, 'V' },
 		{ "dump",	0, NULL, 'D' },
 		{ "grib",	0, NULL, 'G' },
+#ifdef HAVE_NETCDF
 		{ "netcdf",	0, NULL, 'N' },
 		{ "netcdf24",	0, NULL, '2' },
+#endif
 		{ "area", 1, 0, 'a' },
   };
 
@@ -154,12 +176,14 @@ int main( int argc, char* argv[] )
       case 'G': // --grib
 				action = GRIB;
 				break;
+#ifdef HAVE_NETCDF
       case 'N': // --netcdf
 				action = NETCDF;
 				break;
       case '2': // --netcdf24
 				action = NETCDF24;
 				break;
+#endif
 			case 'a':
 				if (sscanf(optarg, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
 				{
