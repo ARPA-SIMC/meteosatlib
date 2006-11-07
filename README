@@ -11,7 +11,7 @@
  the decompression library for Wavelet, JPEG and T4 images.
  Please fill the form at
 
-   http://www.eumetsat.de/en/dps/helpdesk/tools.html
+   http://oiswww.eumetsat.int/WEBOPS-cgi/wavelet/register
 
  to obtain the source code and put the PublicDecompWT.zip file under
  the directory src/decompress.
