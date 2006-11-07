@@ -10,6 +10,8 @@
 
 // For HRIT satellite IDs
 #include <hrit/MSG_spacecraft.h>
+// For HRIT channel names
+#include <hrit/MSG_channel.h>
 
 using namespace std;
 
@@ -63,8 +65,8 @@ void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
 
 	//cerr << "  toProjected: " << p.x << "," << p.y << endl;
 
-  x = rint((double) -column_offset + METEOSAT_IMAGE_NCOLUMNS / 2 + p.x * column_factor * exp2(-16) - 1.0);
-  y = rint((double) -line_offset   + METEOSAT_IMAGE_NLINES / 2   + p.y * line_factor   * exp2(-16) - 1.0);
+  x = (int)rint((double) -column_offset + METEOSAT_IMAGE_NCOLUMNS / 2 + p.x * column_factor * exp2(-16) - 1.0);
+  y = (int)rint((double) -line_offset   + METEOSAT_IMAGE_NLINES / 2   + p.y * line_factor   * exp2(-16) - 1.0);
 }
 
 double Image::pixelHSize() const
@@ -244,6 +246,63 @@ int Image::decimalDigitsOfScaledValues() const
 		}
 		return channelInfo[channel_id].decimalDigits;
 	}
+}
+
+// Replace spaces and dots with underscores
+static void escape(std::string& str)
+{
+	for (string::iterator i = str.begin(); i != str.end(); ++i)
+		if (*i == ' ' || *i == '.')
+			*i = '_';
+}
+
+std::string Image::defaultFilename() const
+{
+	t_enum_MSG_spacecraft sc = (t_enum_MSG_spacecraft)spacecraftIDToHRIT(spacecraft_id);
+	// Get the string describing the spacecraft
+	std::string spacecraft = MSG_spacecraft_name(sc);
+
+	// Get the string describing the sensor
+	std::string sensor;
+
+	// Get the string describing the channel
+	std::string channel;
+	if (sc == MSG_MSG_1)
+	{
+		sensor = "Seviri";
+		switch (channel_id)
+		{
+			case MSG_SEVIRI_NO_CHANNEL:		channel = "no-channel"; break;
+			case MSG_SEVIRI_1_5_VIS_0_6:	channel = "VIS006"; break;
+			case MSG_SEVIRI_1_5_VIS_0_8:	channel = "VIS008"; break;
+			case MSG_SEVIRI_1_5_IR_1_6:		channel = "IR_016"; break;
+			case MSG_SEVIRI_1_5_IR_3_9:		channel = "IR_039"; break;
+			case MSG_SEVIRI_1_5_WV_6_2:		channel = "WV_062"; break;
+			case MSG_SEVIRI_1_5_WV_7_3:		channel = "WV_073"; break;
+			case MSG_SEVIRI_1_5_IR_8_7:		channel = "IR_087"; break;
+			case MSG_SEVIRI_1_5_IR_9_7:		channel = "IR_097"; break;
+			case MSG_SEVIRI_1_5_IR_10_8:	channel = "IR_108"; break;
+			case MSG_SEVIRI_1_5_IR_12_0:	channel = "IR_120"; break;
+			case MSG_SEVIRI_1_5_IR_13_4:	channel = "IR_134"; break;
+			case MSG_SEVIRI_1_5_HRV:			channel = "HRV"; break;
+			default: channel = "unknown"; break;
+		}
+	}
+	else
+	{
+		sensor = "unknown";
+		channel = "unknown";
+	}
+
+	escape(spacecraft);
+	escape(sensor);
+	escape(channel);
+
+	// Format the date
+	char datestring[15];
+	snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", year, month, day, hour, minute);
+
+	return spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
 }
 
 //

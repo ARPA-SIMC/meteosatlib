@@ -124,6 +124,11 @@ public:
 	 */
 	void crop(int x, int y, int width, int height);
 
+	/**
+	 * Compute a meaningful default file name (without extension) that can be
+	 * used to store this image
+	 */
+	std::string defaultFilename() const;
 
 	/// Earth dimension scanned by Seviri in the X direction
 	static int seviriDXFromColumnFactor(int column_factor);

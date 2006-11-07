@@ -51,6 +51,7 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 546);
 	gen_ensure_equals(img.spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_unknown_channel_20051205_0615");
 }
 
 static void checkFullImageData(Image& img)

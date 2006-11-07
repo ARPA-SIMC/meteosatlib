@@ -53,6 +53,7 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.spacecraft_id, 55);
 	gen_ensure_equals(img.column_factor, Image::columnFactorFromSeviriDX(3608));
 	gen_ensure_equals(img.line_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_unknown_channel_20060426_1945");
 }
 
 static void checkFullImageData(Image& img)

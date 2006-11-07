@@ -53,6 +53,7 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 12);
 	gen_ensure_equals(img.spacecraft_id, 55);
+	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
 }
 
 static void checkFullImageData(Image& img)
