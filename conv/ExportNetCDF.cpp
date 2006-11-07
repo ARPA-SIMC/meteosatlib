@@ -78,7 +78,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncf.set_fill(NcFile::Fill);
 
   // Add Global Attributes
-  cerr << "global." << endl;
+  //cerr << "global." << endl;
 
   ncfAddAttr(ncf, "Satellite", MSG_spacecraft_name((t_enum_MSG_spacecraft)Image::spacecraftIDToHRIT(img.spacecraft_id)).c_str());
   char reftime[64];
@@ -120,7 +120,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(ncf, "history", "Created from SAF HDF5 data");
 
   // Dimensions
-  cerr << "dimensions." << endl;
+  //cerr << "dimensions." << endl;
 
   NcDim *tdim = ncf.add_dim("time");
   if (!tdim->is_valid()) throw std::runtime_error("adding time dimension failed");
@@ -130,7 +130,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   if (!cdim->is_valid()) throw std::runtime_error("adding column dimension failed");
 
   // Add Calibration values
-  cerr << "calibration. cs: " << channelstring << endl;
+  //cerr << "calibration. cs: " << channelstring << endl;
 
   NcVar *tvar = ncf.add_var("time", ncDouble, tdim);
   if (!tvar->is_valid()) throw std::runtime_error("adding time variable failed");
@@ -152,7 +152,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
     ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
 
   // Write output values
-  cerr << "output." << endl;
+  //cerr << "output." << endl;
   if (!ivar->put(pixels, 1, img.data->lines, img.data->columns))
 		throw std::runtime_error("writing image values failed");
 
