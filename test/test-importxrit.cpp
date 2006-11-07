@@ -53,7 +53,6 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 12);
 	gen_ensure_equals(img.spacecraft_id, 55);
-	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
 }
 
 static void checkFullImageData(Image& img)
@@ -122,6 +121,8 @@ void to::test<2>()
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
+	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20060426_1945");
+
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
 	gen_ensure_equals(img->line_factor, 40927014);
@@ -162,6 +163,8 @@ void to::test<3>()
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
+	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20060426_1945");
+
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
 	gen_ensure_equals(img->line_factor, 40927014);
@@ -191,6 +194,8 @@ void to::test<4>()
 	opts.subarea = false;
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughGrib(*img);
+
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
@@ -227,6 +232,8 @@ void to::test<5>()
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgorig);
 
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
@@ -258,6 +265,8 @@ void to::test<6>()
 	opts.subarea = false;
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughNetCDF24(*img);
+
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -294,6 +303,8 @@ void to::test<7>()
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgorig);
 
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
@@ -325,6 +336,8 @@ void to::test<8>()
 	opts.subarea = false;
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughNetCDF(*img);
+
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -360,6 +373,8 @@ void to::test<9>()
 
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgorig);
+
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);

@@ -83,10 +83,13 @@ public:
 	// Vertical position of the image on the entire world view
   int line_offset;
 
+	// Character indicating image quality: "H" for high, "M" for medium, "L" for low, "_" for unknown.
+	char quality;
+
 	// Image data
 	ImageData* data;
 
-	Image() : data(0) {}
+	Image() : data(0), quality('_') {}
 	~Image();
 
 

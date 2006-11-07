@@ -276,6 +276,8 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
   std::auto_ptr<Image> img(new Image);
 
+	img->quality = opts.resolution[0];
+
 	Decoder d(opts, *img);
 
   MSG_header PRO_head;

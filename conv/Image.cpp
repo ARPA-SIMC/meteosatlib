@@ -302,7 +302,10 @@ std::string Image::defaultFilename() const
 	char datestring[15];
 	snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", year, month, day, hour, minute);
 
-	return spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
+	if (quality == '_')
+		return spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
+	else
+		return string() + quality + "_" + spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
 }
 
 //
@@ -358,6 +361,7 @@ public:
 				 << " DX " << Image::seviriDXFromColumnFactor(img->column_factor)
 				 << " DY " << Image::seviriDYFromLineFactor(img->line_factor)
 				 << " CHID " << img->channel_id
+				 << " Quality " << img->quality
 				 << endl;
 
 		if (withContents)
