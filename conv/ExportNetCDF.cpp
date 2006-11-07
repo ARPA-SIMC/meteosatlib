@@ -147,11 +147,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
 
   float *pixels = img.data->allScaled();
   if (img.channel_id > 3 && img.channel_id < 12)
-  {
     ivar->add_att("units", "K");
-    for (int i = 0; i < img.data->lines * img.data->columns; i ++)
-      if (pixels[i] > 0) pixels[i] += 145.0;
-  }
   else
     ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
 

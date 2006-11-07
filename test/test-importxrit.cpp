@@ -362,12 +362,12 @@ void to::test<9>()
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgorig);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(-40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
-	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
-	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
-	gen_ensure_equals(img->data->bpp, 10);
-	gen_ensure_equals(img->data->scalesToInt, true);
+	gen_ensure_equals(img->column_factor, -40927014);
+	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->data->slope, 1);
+	gen_ensure_equals(img->data->offset, 0);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, false);
 
 	test_tag("croppedXRITRecodedNetCDF");
 	checkCroppedImageData(*img);

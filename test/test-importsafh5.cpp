@@ -261,8 +261,8 @@ void to::test<8>()
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 3);
-	gen_ensure_equals(img->data->scalesToInt, true);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, false);
 
 	test_tag("fullSAFH5RecodedNetCDF");
 	checkFullImageData(*img);
@@ -290,8 +290,8 @@ void to::test<9>()
 	gen_ensure_equals(img->line_factor, 13642337);
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 2);
-	gen_ensure_equals(img->data->scalesToInt, true);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, false);
 
 	test_tag("croppedSAFH5RecodedNetCDF");
 	checkCroppedImageData(*img);

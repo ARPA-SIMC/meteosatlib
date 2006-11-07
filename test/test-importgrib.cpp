@@ -245,10 +245,10 @@ void to::test<8>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
 
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
+	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, true);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, false);
 
 	test_tag("fullGribRecodedNetCDF");
 	checkFullImageData(*img);
@@ -272,10 +272,10 @@ void to::test<9>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
 
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
+	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, true);
+	gen_ensure_equals(img->data->bpp, 32);
+	gen_ensure_equals(img->data->scalesToInt, false);
 
 	test_tag("croppedGribRecodedNetCDF");
 	checkCroppedImageData(*img);
