@@ -123,8 +123,8 @@ void to::test<2>()
 	std::auto_ptr<Image> img = importXRIT(opts);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, -40927014);
-	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->column_factor, 40927014);
+	gen_ensure_equals(img->line_factor, 40927014);
 	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
 	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->data->bpp, 10);
@@ -163,8 +163,8 @@ void to::test<3>()
 	std::auto_ptr<Image> img = importXRIT(opts);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, -40927014);
-	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->column_factor, 40927014);
+	gen_ensure_equals(img->line_factor, 40927014);
 	gen_ensure_similar(img->data->slope, 0.0319993, 0.00001);
 	gen_ensure_similar(img->data->offset, -1.6319643, 0.00001);
 	gen_ensure_equals(img->data->bpp, 10); // unverified
@@ -193,8 +193,8 @@ void to::test<4>()
 	img = recodeThroughGrib(*img);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(-40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
+	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
@@ -228,8 +228,8 @@ void to::test<5>()
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgorig);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(-40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
+	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
 	gen_ensure_equals(img->data->slope, 0.01);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 11); // unverified
@@ -260,8 +260,8 @@ void to::test<6>()
 	img = recodeThroughNetCDF24(*img);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, -40927014);
-	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->column_factor, 40927014);
+	gen_ensure_equals(img->line_factor, 40927014);
 	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
 	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
@@ -295,8 +295,8 @@ void to::test<7>()
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgorig);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(-40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(-40927014)));
+	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
+	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
 	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
 	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->data->bpp, 10);
@@ -327,8 +327,8 @@ void to::test<8>()
 	img = recodeThroughNetCDF(*img);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, -40927014);
-	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->column_factor, 40927014);
+	gen_ensure_equals(img->line_factor, 40927014);
 	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
 	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
@@ -362,8 +362,8 @@ void to::test<9>()
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgorig);
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, -40927014);
-	gen_ensure_equals(img->line_factor, -40927014);
+	gen_ensure_equals(img->column_factor, 40927014);
+	gen_ensure_equals(img->line_factor, 40927014);
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);

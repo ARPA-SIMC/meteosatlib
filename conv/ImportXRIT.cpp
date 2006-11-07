@@ -203,8 +203,8 @@ struct Decoder
 				img.proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
 				img.channel_id = header.segment_id->spectral_channel_id;
 				img.spacecraft_id = Image::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
-				img.column_factor = header.image_navigation->column_scaling_factor;
-				img.line_factor = header.image_navigation->line_scaling_factor;
+				img.column_factor = -header.image_navigation->column_scaling_factor;
+				img.line_factor = -header.image_navigation->line_scaling_factor;
 				img.column_offset = header.image_navigation->column_offset;
 				img.line_offset = header.image_navigation->line_offset;
 				bpp = header.image_structure->number_of_bits_per_pixel;
