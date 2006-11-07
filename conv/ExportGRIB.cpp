@@ -212,17 +212,10 @@ public:
 	{
 		if (first)
 		{
-			char GribName[1024];
-			GribName[0] = 0;
-
-			// Build up output Grib file name and open it
-			sprintf( GribName, "MSG_SAFNWC_%s_%4d%02d%02d_%02d%02d.grb",
-					"",
-					img->year, img->month, img->day, img->hour, img->minute);
-
-			int ret = gf.OpenWrite(GribName);
+			std::string gribName = img->defaultFilename() + ".grb";
+			int ret = gf.OpenWrite(gribName);
 			if (ret != 0)
-				throw std::runtime_error(std::string("error writing grib file ") + GribName);
+				throw std::runtime_error(std::string("error writing grib file ") + gribName);
 			first = false;
 		}
 

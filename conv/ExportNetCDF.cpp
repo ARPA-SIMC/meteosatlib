@@ -174,19 +174,7 @@ class NetCDFExporter : public ImageConsumer
 public:
 	virtual void processImage(auto_ptr<Image> img)
 	{
-		// Get the channel name
-		string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img->spacecraft_id, img->channel_id);
-		// Change sensitive characters into underscores
-		for (string::iterator i = channelstring.begin();
-		i != channelstring.end(); ++i)
-			if (*i == ' ' || *i == '.' || *i == ',')
-				*i = '_';
-		// Build up output NetCDF file name and open it
-		char NcName[1024];
-		sprintf(NcName, "%s_%4d%02d%02d_%02d%02d.nc", channelstring.c_str(),
-						 img->year, img->month, img->day, img->hour, img->minute);
-
-		ExportNetCDF(*img, NcName);
+		ExportNetCDF(*img, img->defaultFilename() + ".nc");
 	}
 };
 
