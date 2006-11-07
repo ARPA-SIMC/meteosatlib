@@ -80,7 +80,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   // Add Global Attributes
   cerr << "global." << endl;
 
-  ncfAddAttr(ncf, "Satellite", MSG_spacecraft_name((t_enum_MSG_spacecraft)img.spacecraft_id).c_str());
+  ncfAddAttr(ncf, "Satellite", MSG_spacecraft_name((t_enum_MSG_spacecraft)Image::spacecraftIDToHRIT(img.spacecraft_id)).c_str());
   char reftime[64];
   sprintf(reftime, "%04d-%02d-%02d %02d:%02d:00 UTC",
            img.year, img.month, img.day, img.hour, img.minute);
