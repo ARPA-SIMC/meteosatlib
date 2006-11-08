@@ -38,6 +38,8 @@ static ImageData* acquireImage(const DataSet& dataset)
 	int lines = readIntAttribute(dataset, "N_LINES");
 	auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(cols, lines));
 
+#warning What is the missing value to use here?
+
   res->slope = readFloatAttribute(dataset, "SCALING_FACTOR");
   res->offset = readFloatAttribute(dataset, "OFFSET");
 
