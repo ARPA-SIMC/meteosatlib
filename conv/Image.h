@@ -72,18 +72,34 @@ public:
 	/// Spacecraft identifier (from table TODO)
   int spacecraft_id;
 
-	// TODO: description missing
+	/**
+	 * Horizontal scaling coefficient computed as (2**16)/delta, where delta is
+	 * the size in micro Radians of one pixel
+	 */
   int column_factor;
-	// TODO: description missing
+
+	/**
+	 * Vertical scaling coefficient computed as (2**16)/delta, where delta is the
+	 * size in micro Radians of one pixel
+	 */
   int line_factor;
 
-	// Horizontal position of the image on the entire world view
-  int column_offset;
+	/// Horizontal offset in pixels of the sub-satellite point
+	int column_offset;
 
-	// Vertical position of the image on the entire world view
+	/// Vertical offset in pixels of the sub-satellite point
   int line_offset;
 
-	// Character indicating image quality: "H" for high, "M" for medium, "L" for low, "_" for unknown.
+	/**
+	 * Pixel coordinates of the top left point in the image, related to the
+	 * uncropped satellite image
+	 */
+	int x0, y0;
+
+	/**
+	 * Character indicating image quality: "H" for high, "M" for medium, "L" for
+	 * low, "_" for unknown.
+	 */
 	char quality;
 
 	// Image data

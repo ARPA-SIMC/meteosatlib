@@ -113,6 +113,8 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	img->line_factor = readIntAttribute(group, "LFAC");
 	img->column_offset = readIntAttribute(group, "COFF");
 	img->line_offset = readIntAttribute(group, "LOFF");
+	img->x0 = 1856 - img->column_offset + 1;
+	img->y0 = 1856 - img->line_offset + 1;
 
 
   // Read image metadata

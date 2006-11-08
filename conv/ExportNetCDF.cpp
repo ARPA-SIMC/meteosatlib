@@ -96,9 +96,9 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   //if (! ncf.add_att("Columns", pds.npix ) ) return false;
   ncfAddAttr(ncf, "Lines", 3712);
   //if (! ncf.add_att("Lines", pds.nlin ) ) return false;
-  ncfAddAttr(ncf, "AreaStartPix", (int) 3712/2-img.column_offset + 1 );
+  ncfAddAttr(ncf, "AreaStartPix", img.x0 );
   //if (! ncf.add_att("AreaStartPix", (int) m.grid.sp.X0 ) ) return false;
-  ncfAddAttr(ncf, "AreaStartLin", (int) 3712/2-img.line_offset + 1 );
+  ncfAddAttr(ncf, "AreaStartLin", img.y0 );
   //if (! ncf.add_att("AreaStartLin", (int) m.grid.sp.Y0 ) ) return false;
   ncfAddAttr(ncf, "SampleX", 1.0 );
   ncfAddAttr(ncf, "SampleY", 1.0 );

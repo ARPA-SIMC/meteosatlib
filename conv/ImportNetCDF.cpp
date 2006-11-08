@@ -221,8 +221,8 @@ class NetCDFImageImporter : public ImageImporter
 		if (GETDEF(int, "Lines", 3712) != 3712)
 			cerr << "Lines should have been 3712 but is " << GETDEF(int, "Lines", 3712) << " instead: ignoring it" << endl;
 
-		img.column_offset = 1 + 3712/2 - GET(int, "AreaStartPix");
-		img.line_offset = 1 + 3712/2 - GET(int, "AreaStartLin");
+//		img.column_offset = 1 + 3712/2 - GET(int, "AreaStartPix");
+//		img.line_offset = 1 + 3712/2 - GET(int, "AreaStartLin");
 
 		ftmp = GETDEF(float, "SampleX", 1.0);
 		if (ftmp != 1.0)
@@ -244,6 +244,8 @@ class NetCDFImageImporter : public ImageImporter
 		img.line_factor = GET(int, "Line_Scale_Factor");
 		img.column_offset = GET(int, "Column_Offset");
 		img.line_offset = GET(int, "Line_Offset");
+		img.x0 = GET(int, "AreaStartPix");
+		img.y0 = GET(int, "AreaStartLin");
 
 		ftmp = GETDEF(float, "Orbit_Radius", 6610684);
 		if (ftmp != 6610684)

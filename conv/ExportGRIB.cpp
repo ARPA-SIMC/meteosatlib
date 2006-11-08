@@ -111,9 +111,9 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 
 		// Earth Equatorial Radius is 6378.160 Km (IAU 1965)
 		grid.set_spaceview(0.0, p->sublon, img.seviriDX(), img.seviriDY(),
-										METEOSAT_IMAGE_NCOLUMNS/2, METEOSAT_IMAGE_NLINES/2,
+										img.column_offset, img.line_offset,
 										SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
-										img.column_offset, img.line_offset);
+										img.x0, img.y0);
 	} else
 		throw std::runtime_error("image has projection " + (img.proj.get() ? img.proj->format() : "(null)") + " instead of geostationary");
 

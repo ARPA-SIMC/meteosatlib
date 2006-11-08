@@ -52,8 +52,10 @@ void Image::setData(ImageData* data)
 void Image::crop(int x, int y, int width, int height)
 {
 	data->crop(x, y, width, height);
-	column_offset += x;
-	line_offset += y;
+	x0 += x;
+	y0 += y;
+	column_offset -= x;
+	line_offset -= y;
 }
 
 void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
@@ -350,7 +352,8 @@ public:
 		cout << "Image " << img->datetime() << endl;
 		cout << " proj: " << img->proj->format() << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 		cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
-				 << " offset: " << img->column_offset << "x" << img->line_offset << endl;
+				 << " origin: " << img->x0 << "," << img->y0 << " centre: " << img->column_offset << "," << img->line_offset
+				 << endl;
 
 		cout << " Images: " << endl;
 

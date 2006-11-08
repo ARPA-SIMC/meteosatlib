@@ -90,8 +90,10 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	switch (m.grid.type)
 	{
 		case GRIB_GRID_SPACEVIEW:
-			img->column_offset = (int)m.grid.sp.X0;	// probably need some (x-1)*2
-			img->line_offset = (int)m.grid.sp.Y0;		// probably need some (x-1)*2
+			img->x0 = (int)m.grid.sp.X0;	// probably need some (x-1)*2
+			img->y0 = (int)m.grid.sp.Y0;		// probably need some (x-1)*2
+			img->column_offset = (int)m.grid.sp.Xp;	// probably need some (x-1)*2
+			img->line_offset = (int)m.grid.sp.Yp;		// probably need some (x-1)*2
 			img->proj.reset(new proj::Geos(m.grid.sp.lop, ORBIT_RADIUS));
 			img->column_factor = Image::columnFactorFromSeviriDX(m.grid.sp.dx);
 			img->line_factor = Image::lineFactorFromSeviriDY(m.grid.sp.dy);

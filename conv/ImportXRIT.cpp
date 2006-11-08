@@ -207,6 +207,8 @@ struct Decoder
 				img.line_factor = -header.image_navigation->line_scaling_factor;
 				img.column_offset = header.image_navigation->column_offset;
 				img.line_offset = header.image_navigation->line_offset;
+				img.x0 = 1;
+				img.y0 = 1;
 				bpp = header.image_structure->number_of_bits_per_pixel;
 			}
 
@@ -339,8 +341,10 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	img->setData(data.release());
 
-	img->column_offset += x;
-	img->line_offset += y;
+	img->x0 += x;
+	img->y0 += y;
+	img->column_offset -= x;
+	img->line_offset -= y;
 
 	// TODO
 #if 0

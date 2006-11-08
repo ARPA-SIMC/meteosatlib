@@ -93,10 +93,10 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*projVar, "Lop", p->sublon);
 		ncfAddAttr(*projVar, "DX", img.seviriDX());
 		ncfAddAttr(*projVar, "DY", img.seviriDY());
-		ncfAddAttr(*projVar, "Xp", METEOSAT_IMAGE_NCOLUMNS/2);
-		ncfAddAttr(*projVar, "Yp", METEOSAT_IMAGE_NLINES/2);
-		ncfAddAttr(*projVar, "X0", img.column_offset);
-		ncfAddAttr(*projVar, "Y0", img.line_offset);
+		ncfAddAttr(*projVar, "Xp", img.column_offset);
+		ncfAddAttr(*projVar, "Yp", img.line_offset);
+		ncfAddAttr(*projVar, "X0", img.x0);
+		ncfAddAttr(*projVar, "Y0", img.y0); 
 		ncfAddAttr(*projVar, "Orientation", SEVIRI_ORIENTATION);
 		ncfAddAttr(*projVar, "Nz", SEVIRI_CAMERA_H);
 	} else

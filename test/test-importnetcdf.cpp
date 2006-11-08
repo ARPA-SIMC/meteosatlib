@@ -62,6 +62,8 @@ static void checkFullImageData(Image& img)
 
 	gen_ensure_equals(img.data->columns, 1300);
 	gen_ensure_equals(img.data->lines, 700);
+	gen_ensure_equals(img.x0, 1500);
+	gen_ensure_equals(img.y0, 200);
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_similar(img.data->scaled(0, 0), 231.3, 0.01);
@@ -74,8 +76,10 @@ static void checkCroppedImageData(Image& img)
 
 	gen_ensure_equals(img.data->columns, 200);
 	gen_ensure_equals(img.data->lines, 50);
-	gen_ensure_equals(img.column_offset, 1956);
-	gen_ensure_equals(img.line_offset, 1956);
+	gen_ensure_equals(img.x0, 1600);
+	gen_ensure_equals(img.y0, 300);
+	gen_ensure_equals(img.column_offset, 1756);
+	gen_ensure_equals(img.line_offset, 1756);
 	gen_ensure_similar(img.data->scaled(0, 0), 252.4, 0.01);
 	gen_ensure_similar(img.data->scaled(10, 10), 267.5, 0.01);
 }
