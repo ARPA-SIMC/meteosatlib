@@ -180,6 +180,8 @@ static ImageData* acquireImage(const NcVar& var)
 	}
 
 	std::auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
+#warning should this not be stored in / read from the NetCDF file itself?
+	res->missing = getMissing<Sample>();
 
 	decodeMissing(var, *res);
 
