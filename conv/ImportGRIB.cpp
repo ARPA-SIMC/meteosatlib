@@ -66,6 +66,13 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	// Read image data
 	auto_ptr< ImageDataWithPixels<float> > res(new ImageDataWithPixelsPrescaled<float>(m.grid.nx, m.grid.ny));
   memcpy(res->pixels, m.field.vals, m.grid.nxny * sizeof(float));
+
+	// Handle missing values
+	res->missing = m.field.undef_high;
+	for (size_t i = 0; i < m.grid.nxny; ++i)
+		if (res->pixels[i] >= m.field.undef_low && res->pixels[i] <= m.field.undef_high)
+			res->pixels[i] = res->missing;
+
 	res->slope = exp10(-m.field.decimalscale);
 	res->offset = -m.field.refvalue*res->slope;
 	res->bpp = m.field.numbits;
