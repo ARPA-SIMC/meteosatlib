@@ -28,13 +28,15 @@ noinst_HEADERS = \
     ImportNetCDF24.h \
     ImportXRIT.h \
     NetCDFUtils.h \
-    SAFH5Utils.h
+    SAFH5Utils.h \
+    Progress.h
 
 noinst_LTLIBRARIES = libconv.la
 libconv_la_SOURCES = \
     Image.cpp \
     ImportGRIB.cpp \
-    ExportGRIB.cpp
+    ExportGRIB.cpp \
+    Progress.cpp
 libconv_la_LIBADD = \
     ../proj/libproj.la \
     ../grib/libgrib.la
