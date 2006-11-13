@@ -42,6 +42,7 @@
 #include <stdexcept>
 
 #include <conv/Image.tcc>
+#include <conv/Progress.h>
 
 #include "NetCDFUtils.h"
 
@@ -153,6 +154,7 @@ public:
 
 	virtual void read(ImageConsumer& output)
 	{
+		ProgressTask p("Reading NetCDF24 file " + filename);
 		for (int i = 0; i < ncf.num_vars(); ++i)
 		{
 			auto_ptr<Image> img(new Image);
@@ -163,6 +165,8 @@ public:
 				continue;
 			if (string(var->name()) == "time")
 				continue;
+
+			ProgressTask p1(string("Reading NetCDF24 variable ") + var->name());
 
 			switch (var->type())
 			{

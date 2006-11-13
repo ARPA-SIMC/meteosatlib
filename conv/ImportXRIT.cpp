@@ -32,6 +32,7 @@
 #include <glob.h>
 
 #include <conv/Image.tcc>
+#include <conv/Progress.h>
 
 using namespace std;
 
@@ -198,6 +199,7 @@ struct Decoder
 	static const int UpperSouthLineActual = 8065;
 	static const int UpperWestColumnActual = 7631;
 
+	ProgressTask& p;
 	const XRITImportOptions& opts;
 	std::vector<string> segnames;
 	int seglines;
@@ -211,14 +213,15 @@ struct Decoder
 	bool swapY;
 	bool hrv;
 
-	Decoder(const XRITImportOptions& opts, Image& img)
-		: opts(opts), seglines(0), columns(0), lines(0), npixperseg(0), data(0), cur_data(-1)
+	Decoder(const XRITImportOptions& opts, Image& img, ProgressTask& p)
+		: p(p), opts(opts), seglines(0), columns(0), lines(0), npixperseg(0), data(0), cur_data(-1)
 	{
 		// Sort the segment names by their index
 		vector<string> segfiles = opts.segmentFiles();
 		for (vector<string>::const_iterator i = segfiles.begin();
 					i != segfiles.end(); ++i)
 		{
+			p.activity("Scanning segment " + *i);
 			std::ifstream hrit(i->c_str(), (std::ios::binary | std::ios::in));
 			if (hrit.fail())
 				throw std::runtime_error("Cannot open input hrit segment " + *i);
@@ -312,6 +315,7 @@ struct Decoder
 			if (idx >= segnames.size()) return 0;
 			if (segnames[idx].empty()) return data;
 
+			p.activity("Reading segment " + segnames[idx]);
 			std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
 			if (hrit.fail())
 				throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
@@ -371,15 +375,22 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 {
 	opts.ensureComplete();
 
+	ProgressTask p("Reading HRIT from " + opts.directory
+			                     + " res: " + opts.resolution
+									       + " prod1: " + opts.productid1
+									       + " prod2: " + opts.productid2
+									      + " timing: " + opts.timing);
+
   std::auto_ptr<Image> img(new Image);
 
 	img->quality = opts.resolution[0];
 
-	Decoder d(opts, *img);
+	Decoder d(opts, *img, p);
 
   MSG_header PRO_head;
   MSG_data PRO_data;
 
+	p.activity("Reading prologue " + opts.prologueFile());
 	std::ifstream hrit(opts.prologueFile().c_str(), (std::ios::binary | std::ios::in));
 	if (hrit.fail())
 		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());

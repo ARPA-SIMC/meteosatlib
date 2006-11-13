@@ -35,6 +35,7 @@
 #include <conv/ExportGRIB.h>
 #include <conv/ExportNetCDF.h>
 #include <conv/ExportNetCDF24.h>
+#include <conv/Progress.h>
 
 #include <set>
 #include <string>
@@ -207,6 +208,8 @@ int main( int argc, char* argv[] )
     do_help(argv[0], cerr);
     return 1;
   }
+
+	Progress::get().setHandler(new StreamProgressHandler(cerr));
 
   try
   {

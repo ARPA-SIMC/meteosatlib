@@ -6,7 +6,7 @@ namespace msat {
 
 static Progress* instance = 0;
 
-Progress::Progress& get()
+Progress& Progress::get()
 {
 	if (!instance)
 		instance = new Progress;

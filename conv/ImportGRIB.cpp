@@ -41,6 +41,7 @@
 #include <stdexcept>
 
 #include <conv/Image.tcc>
+#include <conv/Progress.h>
 
 #define TITLE "Observation File from MSG-SEVIRI"
 #define INSTITUTION "HIMET"
@@ -63,6 +64,8 @@ bool isGrib(const std::string& filename)
 
 auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 {
+	ProgressTask p("Reading GRIB file");
+
 	// Read image data
 	auto_ptr< ImageDataWithPixels<float> > res(new ImageDataWithPixelsPrescaled<float>(m.grid.nx, m.grid.ny));
   memcpy(res->pixels, m.field.vals, m.grid.nxny * sizeof(float));

@@ -13,6 +13,7 @@
 #include <proj/Geos.h>
 
 #include <conv/Image.tcc>
+#include <conv/Progress.h>
 
 using namespace H5;
 using namespace std;
@@ -84,6 +85,8 @@ static ImageData* acquireImage(const DataSet& dataset)
 
 auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 {
+	ProgressTask p("Reading SAFH5 group " + name);
+
 	DataSet dataset = group.openDataSet(name);
 
 	// Get the group name
@@ -185,6 +188,8 @@ public:
 
 	virtual void read(ImageConsumer& output)
 	{
+		ProgressTask p("Reading SAFH5 file " + filename);
+
 		Group group = HDF5_source.openGroup("/");
 
 		// Iterate on all the images within
