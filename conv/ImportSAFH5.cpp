@@ -17,6 +17,17 @@
 using namespace H5;
 using namespace std;
 
+template<typename Sample>
+static inline Sample missing_value()
+{
+	if (std::numeric_limits<Sample>::has_quiet_NaN)
+		return std::numeric_limits<Sample>::quiet_NaN();
+	else if (std::numeric_limits<Sample>::is_signed)
+		return std::numeric_limits<Sample>::min();
+	else
+		return std::numeric_limits<Sample>::max();
+}
+
 namespace msat {
 
 bool isSAFH5(const std::string& filename)
@@ -38,7 +49,8 @@ static ImageData* acquireImage(const DataSet& dataset)
 	int lines = readIntAttribute(dataset, "N_LINES");
 	auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(cols, lines));
 
-#warning What is the missing value to use here?
+	// SAF images do not have missing values
+	res->missing = missing_value<Sample>();
 
   res->slope = readFloatAttribute(dataset, "SCALING_FACTOR");
   res->offset = readFloatAttribute(dataset, "OFFSET");

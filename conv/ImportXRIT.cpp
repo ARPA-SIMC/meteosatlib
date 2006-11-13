@@ -250,10 +250,16 @@ struct Decoder
 				swapY = header.image_navigation->line_scaling_factor < 0;
 				img.column_factor = abs(header.image_navigation->column_scaling_factor);
 				img.line_factor = abs(header.image_navigation->line_scaling_factor);
-				//img.column_offset = header.image_navigation->column_offset;
-				//img.line_offset = header.image_navigation->line_offset;
-				img.column_offset = 5566;
-				img.line_offset = 5566;
+				if (hrv)
+				{
+					// Since we are omitting the first (11136-7631) of the rotated image,
+					// we need to shift the column offset accordingly
+					img.column_offset = 5566 - (11136 - 7630);
+					img.line_offset = 5566;
+				} else {
+					img.column_offset = header.image_navigation->column_offset;
+					img.line_offset = header.image_navigation->line_offset;
+				}
 				img.x0 = 1;
 				img.y0 = 1;
 				bpp = header.image_structure->number_of_bits_per_pixel;
@@ -264,29 +270,29 @@ struct Decoder
 			if ((size_t)idx >= segnames.size())
 				segnames.resize(idx + 1);
 			segnames[idx] = *i;
+		}
 
-			// Special handling for HRV images
-			if (hrv)
-			{
-				// HRV contains two areas: the upper and lower area.  They have the same
-				// width but different heights, and they are not horizontally aligned
-				/*
-					 cerr << " EPI: " << PRO_data.epilogue;
+		// Special handling for HRV images
+		if (hrv)
+		{
+			// HRV contains two areas: the upper and lower area.  They have the same
+			// width but different heights, and they are not horizontally aligned
+			/*
+				 cerr << " EPI: " << PRO_data.epilogue;
 
-					 cerr << "HRV: "
-					 << " LSLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
-					 << " LNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual
-					 << " LECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual
-					 << " LWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual
-					 << " USLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual
-					 << " UNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
-					 << " UECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual
-					 << " UWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual
-					 << endl;
-					 */
+				 cerr << "HRV: "
+				 << " LSLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
+				 << " LNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual
+				 << " LECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual
+				 << " LWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual
+				 << " USLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual
+				 << " UNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
+				 << " UECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual
+				 << " UWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual
+				 << endl;
+				 */
 
-				columns += UpperEastColumnActual;
-			}
+			columns += UpperEastColumnActual;
 		}
 	}
 
