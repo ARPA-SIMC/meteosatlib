@@ -74,7 +74,7 @@ void do_help(const char* argv0, ostream& out)
       << "  --netcdf         Convert to NetCDF" << endl
       << "  --netcdf24       Convert to NetCDF" << endl
 #endif
-      << "  --area='line,col,height,width' Crop the source image(s) to the given area" << endl;
+      << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl;
 }
 void usage(char *pname)
 {
@@ -185,9 +185,9 @@ int main( int argc, char* argv[] )
 				break;
 #endif
 			case 'a':
-				if (sscanf(optarg, "%d,%d,%d,%d", &ay,&ax,&ah,&aw) != 4)
+				if (sscanf(optarg, "%d,%d,%d,%d", &ax,&aw,&ay,&ah) != 4)
 				{
-					cerr << "Area value should be in the format line,col,height,width" << endl;
+					cerr << "Area value should be in the format x,dx,y,dy" << endl;
 					do_help(argv[0], cerr);
 					return 1;
 				}
