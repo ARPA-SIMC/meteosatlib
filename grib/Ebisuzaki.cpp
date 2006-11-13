@@ -5525,8 +5525,8 @@ unsigned char *mk_GDS(unsigned char *gds, ...)
         i = va_arg(ap, int);
         j = va_arg(ap, int);
         k = (j >= 0) ? j : (-j) | (1U << 15);
-        gds[i] =   (j >>  8) & 255;
-        gds[i+1] = (j      ) & 255;
+        gds[i] =   (k >>  8) & 255;
+        gds[i+1] = (k      ) & 255;
         break;
 
       case WGRIB_ENCODE_3BYTES:
