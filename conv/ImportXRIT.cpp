@@ -493,8 +493,11 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	img->x0 += x;
 	img->y0 += y;
+#if 0
+	Column offset and line offset should not be affected by cropping
 	img->column_offset -= x;
 	img->line_offset -= y;
+#endif
 
 	// TODO
 #if 0
