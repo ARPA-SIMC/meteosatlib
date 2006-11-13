@@ -53,6 +53,12 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 12);
 	gen_ensure_equals(img.spacecraft_id, 55);
+	gen_ensure_equals(img.column_offset, 2060);
+	gen_ensure_equals(img.line_offset, 5566);
+	//gen_ensure_equals(img.column_offset, -2);
+	//gen_ensure_equals(img.line_offset, 462);
+	//gen_ensure_equals(img.column_offset, 2060 - (100 + 2064));
+	//gen_ensure_equals(img.line_offset, 5566 - 5500);
 }
 
 static void checkFullImageData(Image& img)
@@ -63,10 +69,6 @@ static void checkFullImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 11136);
 	gen_ensure_equals(img.x0, 1);
 	gen_ensure_equals(img.y0, 1);
-	gen_ensure_equals(img.column_offset, 2060);
-	gen_ensure_equals(img.line_offset, 5566);
-	//gen_ensure_equals(img.column_offset, -2);
-	//gen_ensure_equals(img.line_offset, 462);
 	gen_ensure_equals(img.data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img.data->scaled(10, 10), 0); // unverified
 	gen_ensure_similar(img.data->scaled(356 + 2064, 5569),  9.4077949523, 0.001); // unverified
@@ -88,10 +90,6 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 300);
 	gen_ensure_equals(img.x0, 101 + 2064);
 	gen_ensure_equals(img.y0, 5501);
-	gen_ensure_equals(img.column_offset, 2060);
-	gen_ensure_equals(img.line_offset, 5566);
-	//gen_ensure_equals(img.column_offset, 2060 - (100 + 2064));
-	//gen_ensure_equals(img.line_offset, 5566 - 5500);
 	gen_ensure_equals(img.data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img.data->scaled(10, 10), 0); // unverified
 	gen_ensure_similar(img.data->scaled(256, 69),  9.40779495239, 0.01); // unverified

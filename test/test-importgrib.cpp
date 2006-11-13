@@ -53,6 +53,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.spacecraft_id, 55);
 	gen_ensure_equals(img.column_factor, Image::columnFactorFromSeviriDX(3608));
 	gen_ensure_equals(img.line_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_equals(img.column_offset, 1856);
+	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_unknown_channel_20060426_1945");
 }
 
@@ -64,8 +66,6 @@ static void checkFullImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 700);
 	gen_ensure_equals(img.x0, 1500);
 	gen_ensure_equals(img.y0, 200);
-	gen_ensure_equals(img.column_offset, 1856);
-	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_similar(img.data->scaled(0, 0), 97.7, 0.001);
 	gen_ensure_similar(img.data->scaled(10, 10), 98.1, 0.001);
 }
@@ -78,8 +78,6 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 50);
 	gen_ensure_equals(img.x0, 1600);
 	gen_ensure_equals(img.y0, 300);
-	gen_ensure_equals(img.column_offset, 1756);
-	gen_ensure_equals(img.line_offset, 1756);
 	gen_ensure_equals(img.data->scaled(0, 0), 100.50f);
 	gen_ensure_equals(img.data->scaled(10, 10), 97.800003f);
 }

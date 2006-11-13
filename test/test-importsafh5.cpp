@@ -50,6 +50,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure(p != 0);
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 546);
+	gen_ensure_equals(img.column_offset, 357);
+	gen_ensure_equals(img.line_offset, 1657);
 	gen_ensure_equals(img.spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_unknown_channel_20051205_0615");
 }
@@ -62,8 +64,6 @@ static void checkFullImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 700);
 	gen_ensure_equals(img.x0, 1500);
 	gen_ensure_equals(img.y0, 200);
-	gen_ensure_equals(img.column_offset, 357);
-	gen_ensure_equals(img.line_offset, 1657);
 	gen_ensure_equals(img.data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img.data->scaled(10, 10), 0.0f);
 	gen_ensure_equals(img.data->scaled(516, 54), 3);
@@ -77,8 +77,6 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 50);
 	gen_ensure_equals(img.x0, 1600);
 	gen_ensure_equals(img.y0, 250);
-	gen_ensure_equals(img.column_offset, 257);
-	gen_ensure_equals(img.line_offset, 1607);
 	gen_ensure_equals(img.data->scaled(0, 0), 0.0f);
 	gen_ensure_equals(img.data->scaled(10, 10), 0.0f);
 	gen_ensure_equals(img.data->scaled(416, 4), 3);

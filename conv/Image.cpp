@@ -54,8 +54,11 @@ void Image::crop(int x, int y, int width, int height)
 	data->crop(x, y, width, height);
 	x0 += x;
 	y0 += y;
+#if 0
+	Column offset and line offset should not be affected by cropping
 	column_offset -= x;
 	line_offset -= y;
+#endif
 }
 
 void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
