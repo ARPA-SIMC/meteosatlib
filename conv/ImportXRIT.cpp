@@ -250,8 +250,10 @@ struct Decoder
 				swapY = header.image_navigation->line_scaling_factor < 0;
 				img.column_factor = abs(header.image_navigation->column_scaling_factor);
 				img.line_factor = abs(header.image_navigation->line_scaling_factor);
-				img.column_offset = header.image_navigation->column_offset;
-				img.line_offset = header.image_navigation->line_offset;
+				//img.column_offset = header.image_navigation->column_offset;
+				//img.line_offset = header.image_navigation->line_offset;
+				img.column_offset = 5566;
+				img.line_offset = 5566;
 				img.x0 = 1;
 				img.y0 = 1;
 				bpp = header.image_structure->number_of_bits_per_pixel;
