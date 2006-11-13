@@ -24,6 +24,7 @@ struct XRITImportOptions
   void ensureComplete() const;
 
   std::string prologueFile() const;
+  std::string epilogueFile() const;
   std::vector<std::string> segmentFiles() const;
 };
 

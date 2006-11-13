@@ -135,6 +135,32 @@ std::string XRITImportOptions::prologueFile() const
   return res;
 }
 
+std::string XRITImportOptions::epilogueFile() const
+{
+  std::string filename = directory
+		       + PATH_SEPARATOR
+					 + resolution
+		       + "-???-??????-"
+					 + underscoreit(productid1, 12) + "-"
+					 + underscoreit("_", 9) + "-"
+					 + "EPI______-"
+					 + timing
+					 + "-__";
+
+  glob_t globbuf;
+  globbuf.gl_offs = 1;
+
+  if ((glob(filename.c_str(), GLOB_DOOFFS, NULL, &globbuf)) != 0)
+    throw std::runtime_error("No such file(s)");
+
+  if (globbuf.gl_pathc > 1)
+    throw std::runtime_error("Non univoque prologue file.... Do not trust calibration.");
+
+	string res(globbuf.gl_pathv[1]);
+  globfree(&globbuf);
+  return res;
+}
+
 std::vector<std::string> XRITImportOptions::segmentFiles() const
 {
   string filename = directory
@@ -161,6 +187,17 @@ std::vector<std::string> XRITImportOptions::segmentFiles() const
 
 struct Decoder
 {
+	/*
+	 * FIXME: I don't know how to read the epilogue: I'll have to hardcode the
+	 * values I'd have read from it
+	 */
+	static const int LowerEastColumnActual = 1;
+	static const int LowerNorthLineActual = 8064;
+	static const int LowerWestColumnActual = 5568;
+	static const int UpperEastColumnActual = 2064;
+	static const int UpperSouthLineActual = 8065;
+	static const int UpperWestColumnActual = 7631;
+
 	const XRITImportOptions& opts;
 	std::vector<string> segnames;
 	int seglines;
@@ -170,6 +207,9 @@ struct Decoder
 	int bpp;
 	MSG_data* data;
 	int cur_data;
+	bool swapX;
+	bool swapY;
+	bool hrv;
 
 	Decoder(const XRITImportOptions& opts, Image& img)
 		: opts(opts), seglines(0), columns(0), lines(0), npixperseg(0), data(0), cur_data(-1)
@@ -189,6 +229,7 @@ struct Decoder
 			if (header.segment_id->data_field_format == MSG_NO_FORMAT)
 				throw std::runtime_error("Product dumped in binary format.");
 
+			// Read common info just once from a random segment
 			if (npixperseg == 0)
 			{
 				int totalsegs = header.segment_id->planned_end_segment_sequence_number;
@@ -202,9 +243,13 @@ struct Decoder
 				// Image metadata
 				img.proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
 				img.channel_id = header.segment_id->spectral_channel_id;
+				hrv = img.channel_id == MSG_SEVIRI_1_5_HRV;
 				img.spacecraft_id = Image::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
-				img.column_factor = -header.image_navigation->column_scaling_factor;
-				img.line_factor = -header.image_navigation->line_scaling_factor;
+				// See if the image needs to be rotated
+				swapX = header.image_navigation->column_scaling_factor < 0;
+				swapY = header.image_navigation->line_scaling_factor < 0;
+				img.column_factor = abs(header.image_navigation->column_scaling_factor);
+				img.line_factor = abs(header.image_navigation->line_scaling_factor);
 				img.column_offset = header.image_navigation->column_offset;
 				img.line_offset = header.image_navigation->line_offset;
 				img.x0 = 1;
@@ -217,6 +262,29 @@ struct Decoder
 			if ((size_t)idx >= segnames.size())
 				segnames.resize(idx + 1);
 			segnames[idx] = *i;
+
+			// Special handling for HRV images
+			if (hrv)
+			{
+				// HRV contains two areas: the upper and lower area.  They have the same
+				// width but different heights, and they are not horizontally aligned
+				/*
+					 cerr << " EPI: " << PRO_data.epilogue;
+
+					 cerr << "HRV: "
+					 << " LSLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
+					 << " LNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual
+					 << " LECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual
+					 << " LWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual
+					 << " USLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual
+					 << " UNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
+					 << " UECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual
+					 << " UWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual
+					 << endl;
+					 */
+
+				columns += UpperEastColumnActual;
+			}
 		}
 	}
 
@@ -254,9 +322,27 @@ struct Decoder
 
 	MSG_SAMPLE get(size_t x, size_t y)
 	{
-		// Rotate by 180deg
-		x = columns - x;
-		y = lines - y;
+		// Rotate if needed
+		if (swapX) x = columns - x;
+		if (swapY) y = lines - y;
+
+		if (hrv)
+		{
+			// Check if we are in the shifted HRV upper area
+			if (y >= UpperSouthLineActual)
+			{
+				if (x < UpperEastColumnActual)
+					return 0;
+				if (x > UpperWestColumnActual)
+					return 0;
+				x -= UpperEastColumnActual;
+			} else {
+				if (x < LowerEastColumnActual)
+					return 0;
+				if (x > LowerWestColumnActual)
+					return 0;
+			}
+		}
 
 		// Absolute position in image data
 		size_t pos = y * columns + x;
@@ -294,6 +380,14 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	hrit.close();
 
+	/*
+	hrit.open(opts.epilogueFile().c_str(), (std::ios::binary | std::ios::in));
+	if (hrit.fail())
+		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
+	PRO_data.read_from(hrit, PRO_head);
+	hrit.close();
+	*/
+
 	size_t x = 0;
 	size_t y = 0;
 	size_t width = d.columns;
@@ -325,18 +419,65 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			base = 145.0;
 			break;
 	}
+
 	// Perform calibration and copy the data to the result image
-	auto_ptr< ImageDataWithPixelsPrescaled<float> > data(new ImageDataWithPixelsPrescaled<float>(width, height));
-	data->missing = 0.0;
-	for (size_t iy = 0; iy < height; ++iy)
-		for (size_t ix = 0; ix < width; ++ix)
-		{
-			MSG_SAMPLE sample = d.get(x + ix, y + iy);
-			if (sample > 0)
-				data->pixels[iy*width+ix] = cal[sample] - base;
-			else
-				data->pixels[iy*width+ix] = 0.0;
-		}
+	auto_ptr< ImageDataWithPixelsPrescaled<float> > data;
+	if (img->channel_id == MSG_SEVIRI_1_5_HRV)
+	{
+		// HRV contains two areas: the upper and lower area.  They have the same
+		// width but different heights, and they are not horizontally aligned
+		/*
+		 * FIXME: I don't know how to read the epilogue: I'll have to hardcode the
+		 * values I'd have read from it
+		cerr << " EPI: " << PRO_data.epilogue;
+
+		cerr << "HRV: "
+				 << " LSLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
+				 << " LNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual
+				 << " LECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual
+				 << " LWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual
+				 << " USLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual
+				 << " UNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
+				 << " UECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual
+				 << " UWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual
+				 << endl;
+		 */
+		const int UpperEastColumnActual = 2064;
+
+		/*
+		HRV channel
+			COFF = (5567 − LowerEastColumnActual) / UpperEastColumnActual
+			LOFF = 5566 − (k − 1) ⋅ NL
+			dove LowerEastColumnActual = 1
+		*/
+
+
+
+		data.reset(new ImageDataWithPixelsPrescaled<float>(width, height));
+		data->missing = 0.0;
+		for (size_t iy = 0; iy < height; ++iy)
+			for (size_t ix = 0; ix < width; ++ix)
+			{
+				MSG_SAMPLE sample = d.get(x + ix, y + iy);
+				if (sample > 0)
+					data->pixels[iy*width+ix] = cal[sample] - base;
+				else
+					data->pixels[iy*width+ix] = 0.0;
+			}
+	} else {
+		// Non-HRV are just an image
+		data.reset(new ImageDataWithPixelsPrescaled<float>(width, height));
+		data->missing = 0.0;
+		for (size_t iy = 0; iy < height; ++iy)
+			for (size_t ix = 0; ix < width; ++ix)
+			{
+				MSG_SAMPLE sample = d.get(x + ix, y + iy);
+				if (sample > 0)
+					data->pixels[iy*width+ix] = cal[sample] - base;
+				else
+					data->pixels[iy*width+ix] = 0.0;
+			}
+	}
   delete [ ] cal;
 
 	img->setData(data.release());
