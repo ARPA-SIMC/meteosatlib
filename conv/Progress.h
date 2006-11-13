@@ -2,7 +2,7 @@
 #define MSAT_PROGRESS_H
 
 #include <string>
-#include <vector>
+#include <ostream>
 
 namespace msat {
 
@@ -45,6 +45,19 @@ public:
 	void activity(const std::string& str, int perc = -1, int tot = -1);
 };
 
+class StreamProgressHandler : public ProgressHandler
+{
+	std::ostream& out;
+	int indent;
+
+	void outputIndent();
+
+public:
+	StreamProgressHandler(std::ostream& out) : out(out), indent(0) {}
+	void activity(const std::string& str, int perc = -1, int tot = -1);
+	void pushTask(const std::string& desc);
+	void popTask();
+};
 
 }
 
