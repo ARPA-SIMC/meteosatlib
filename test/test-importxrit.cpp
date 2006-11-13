@@ -59,7 +59,7 @@ static void checkFullImageData(Image& img)
 {
 	checkGeneralImageData(img);
 
-	gen_ensure_equals(img.data->columns, 5568);
+	gen_ensure_equals(img.data->columns, 7632);
 	gen_ensure_equals(img.data->lines, 11136);
 	gen_ensure_equals(img.x0, 1);
 	gen_ensure_equals(img.y0, 1);
@@ -69,15 +69,15 @@ static void checkFullImageData(Image& img)
 	//gen_ensure_equals(img.line_offset, 462);
 	gen_ensure_equals(img.data->scaled(0, 0), 0); // unverified
 	gen_ensure_equals(img.data->scaled(10, 10), 0); // unverified
-	gen_ensure_similar(img.data->scaled(356, 5569),  9.4077949523, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(357, 5569),  7.2958407402, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(358, 5569),  5.7278747558, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(214, 5570), 12.2877311706, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(215, 5570), 10.8157634735, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(216, 5570), 11.0077600479, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(466, 5571),  7.4878363609, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(467, 5571),  8.3198184967, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(468, 5571),  8.8318071365, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(356 + 2064, 5569),  9.4077949523, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(357 + 2064, 5569),  7.2958407402, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(358 + 2064, 5569),  5.7278747558, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(214 + 2064, 5570), 12.2877311706, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(215 + 2064, 5570), 10.8157634735, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(216 + 2064, 5570), 11.0077600479, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(466 + 2064, 5571),  7.4878363609, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(467 + 2064, 5571),  8.3198184967, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(468 + 2064, 5571),  8.8318071365, 0.001); // unverified
 }
 
 static void checkCroppedImageData(Image& img)
@@ -86,7 +86,7 @@ static void checkCroppedImageData(Image& img)
 
 	gen_ensure_equals(img.data->columns, 400);
 	gen_ensure_equals(img.data->lines, 300);
-	gen_ensure_equals(img.x0, 101);
+	gen_ensure_equals(img.x0, 101 + 2064);
 	gen_ensure_equals(img.y0, 5501);
 	gen_ensure_equals(img.column_offset, -102);
 	gen_ensure_equals(img.line_offset, -5038);
@@ -166,7 +166,7 @@ void to::test<3>()
 	opts.subarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
-	opts.AreaPixStart = 100;
+	opts.AreaPixStart = 100 + 2064;
 	opts.AreaNpix = 400;
 
 	std::auto_ptr<Image> img = importXRIT(opts);
@@ -234,7 +234,7 @@ void to::test<5>()
 	opts.subarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
-	opts.AreaPixStart = 100;
+	opts.AreaPixStart = 100 + 2064;
 	opts.AreaNpix = 400;
 
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
@@ -305,7 +305,7 @@ void to::test<7>()
 	opts.subarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
-	opts.AreaPixStart = 100;
+	opts.AreaPixStart = 100 + 2064;
 	opts.AreaNpix = 400;
 
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
@@ -376,7 +376,7 @@ void to::test<9>()
 	opts.subarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
-	opts.AreaPixStart = 100;
+	opts.AreaPixStart = 100 + 2064;
 	opts.AreaNpix = 400;
 
 	std::auto_ptr<Image> imgorig = importXRIT(opts);

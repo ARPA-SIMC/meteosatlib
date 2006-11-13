@@ -326,6 +326,8 @@ struct Decoder
 		if (swapX) x = columns - x;
 		if (swapY) y = lines - y;
 
+		// Absolute position in image data
+		size_t pos;
 		if (hrv)
 		{
 			// Check if we are in the shifted HRV upper area
@@ -342,10 +344,9 @@ struct Decoder
 				if (x > LowerWestColumnActual)
 					return 0;
 			}
-		}
-
-		// Absolute position in image data
-		size_t pos = y * columns + x;
+			pos = y * (columns - UpperEastColumnActual) + x;
+		} else
+			pos = y * columns + x;
 
 		// Segment number where is the pixel
 		size_t segno = pos / npixperseg;
