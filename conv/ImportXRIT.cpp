@@ -194,17 +194,17 @@ std::string XRITImportOptions::toString() const
 		  <<       " res: " << resolution
 			<<     " prod1: " << productid1
 			<<     " prod2: " << productid2
-			<<    " timing: " << timing;
+			<<      " time: " << timing;
 	if (pixelSubarea)
 	{
 		str
-			<< " pixelarea: " << AreaLinStart << "," << AreaPixStart
+			<<      " area: " << AreaLinStart << "," << AreaPixStart
 			<<                " + " << AreaNlin << "," << AreaNpix;
 	}
 	if (coordSubarea)
 	{
 		str
-			<< " coordarea: lat " << AreaLatMin << "-" << AreaLatMax << " lon " << AreaLonMin << "-" << AreaLonMax;
+			<<      " area: lat " << AreaLatMin << ".." << AreaLatMax << " lon " << AreaLonMin << ".." << AreaLonMax;
 	}
 	return str.str();
 }
@@ -403,6 +403,19 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   std::auto_ptr<Image> img(new Image);
 
 	img->quality = opts.resolution[0];
+	img->addToHistory("Imported from HRIT " + opts.resolution + ' ' + opts.productid1 + ' ' + opts.productid2 + ' ' + opts.timing);
+	if (opts.pixelSubarea)
+	{
+		std::stringstream str;
+		str << "Cropped area: " << opts.AreaLinStart << "," << opts.AreaPixStart << " + " << opts.AreaNlin << "," << opts.AreaNpix;
+		img->addToHistory(str.str());
+	}
+	if (opts.coordSubarea)
+	{
+		std::stringstream str;
+		str << "Cropped area: lat " << opts.AreaLatMin << ".." << opts.AreaLatMax << " lon " << opts.AreaLonMin << ".." << opts.AreaLonMax;
+		img->addToHistory(str.str());
+	}
 
 	Decoder d(opts, *img, p);
 

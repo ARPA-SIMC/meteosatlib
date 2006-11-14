@@ -68,6 +68,14 @@ void Image::addToHistory(const std::string& event)
 		history += ", " + event;
 }
 
+std::string Image::historyPlusEvent(const std::string& event) const
+{
+	if (history.empty())
+		return event;
+	else
+		return history + ", " + event;
+}
+
 void Image::crop(int x, int y, int width, int height)
 {
 	data->crop(x, y, width, height);
@@ -78,6 +86,10 @@ void Image::crop(int x, int y, int width, int height)
 	column_offset -= x;
 	line_offset -= y;
 #endif
+
+	std::stringstream str;
+	str << "Cropped subarea " << x << "," << y << " " << width << "x" << height;
+	addToHistory(str.str());
 }
 
 void Image::cropByCoords(double latmin, double latmax, double lonmin, double lonmax)
@@ -89,11 +101,18 @@ void Image::cropByCoords(double latmin, double latmax, double lonmin, double lon
 	coordsToPixels(latmax, lonmax, x1, y1);
 
 	// Crop using the bounding box for the 2 coordinates
-	crop(
-		x = x < x1 ? x : x1,
-		y = y < y1 ? y : y1,
-		x > x1 ? x-x1 : x1-x,
-		y > y1 ? y-y1 : y1-y);
+	size_t crop_x = x = x < x1 ? x : x1;
+	size_t crop_y = y = y < y1 ? y : y1;
+	size_t crop_w = x > x1 ? x-x1 : x1-x;
+	size_t crop_h = y > y1 ? y-y1 : y1-y;
+
+	data->crop(crop_x, crop_y, crop_w, crop_h);
+	x0 += crop_x;
+	y0 += crop_y;
+
+	std::stringstream str;
+	str << "Cropped subarea lat " << latmin << "-" << latmax << " lon " << lonmin << "-" << lonmax;
+	addToHistory(str.str());
 }
 
 void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const

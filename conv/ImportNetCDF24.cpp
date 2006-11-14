@@ -169,6 +169,8 @@ public:
 
 			ProgressTask p1(string("Reading NetCDF24 variable ") + var->name());
 
+			img->addToHistory("Imported from NetCDF24 " + img->defaultFilename() + " variable " + var->name());
+
 			switch (var->type())
 			{
 				case ncByte:   readData<ncbyte>(*var, *img); img->data->scalesToInt = true;  break;

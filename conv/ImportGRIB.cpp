@@ -191,6 +191,7 @@ public:
 		{
 			auto_ptr<Image> img = importGrib(m);
 			img->setQualityFromPathname(filename);
+			img->addToHistory("Imported from GRIB " + img->defaultFilename());
 			cropIfNeeded(*img);
 			output.processImage(img);
 			++count;

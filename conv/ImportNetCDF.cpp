@@ -43,11 +43,6 @@
 
 #include "NetCDFUtils.h"
 
-#define TITLE "Observation File from MSG-SEVIRI"
-#define INSTITUTION "HIMET"
-#define TYPE "Obs file"
-#define HIMET_VERSION 0.0
-
 #define PATH_SEPARATOR "/"
 // For windows use #define PATH_SEPARATOR "\"
 
@@ -211,6 +206,8 @@ class NetCDFImageImporter : public ImageImporter
 #define GETDEF(type, name, def) \
 		((a = ncf.get_att(name)) != NULL ? a->as_##type(0) : def)
 
+		img.history = GET(string, "title");
+
 		stmp = GET(string, "Satellite");
 		if (stmp == "MSG1")
 			img.spacecraft_id = 55;
@@ -301,6 +298,7 @@ public:
 			auto_ptr<Image> img(new Image);
 			readHeader(*img);
 			img->setQualityFromPathname(filename);
+			img->addToHistory("Imported from NetCDF " + img->defaultFilename());
 
 			NcVar* var = ncf.get_var(i);
 			if (string(var->name()) == "time")

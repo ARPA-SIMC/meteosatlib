@@ -123,6 +123,9 @@ public:
 	/// Add an event to the image history
 	void addToHistory(const std::string& event);
 
+	/// Get the image history, with the given event appended.
+	std::string historyPlusEvent(const std::string& event) const;
+
 	/// Horizontal pixel resolution at nadir point
 	double pixelHSize() const;
 
