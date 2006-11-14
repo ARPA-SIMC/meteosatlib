@@ -316,8 +316,7 @@ public:
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
 			computeBPP(*img->data);
-			if (shouldCrop())
-				img->crop(cropX, cropY, cropWidth, cropHeight);
+			cropIfNeeded(*img);
 			output.processImage(img);
 		}
 	}

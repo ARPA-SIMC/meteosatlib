@@ -61,7 +61,23 @@ void Image::crop(int x, int y, int width, int height)
 #endif
 }
 
-void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
+void Image::cropByCoords(double latmin, double latmax, double lonmin, double lonmax)
+{
+	size_t x, y, x1, y1;
+
+	// Convert to pixel coordinates
+	coordsToPixels(latmin, lonmin, x, y);
+	coordsToPixels(latmax, lonmax, x1, y1);
+
+	// Crop using the bounding box for the 2 coordinates
+	crop(
+		x = x < x1 ? x : x1,
+		y = y < y1 ? y : y1,
+		x > x1 ? x-x1 : x1-x,
+		y > y1 ? y-y1 : y1-y);
+}
+
+void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 {
   double column, line;
 
@@ -70,8 +86,8 @@ void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
 
 	//cerr << "  toProjected: " << p.x << "," << p.y << endl;
 
-  x = (int)rint((double) -column_offset + METEOSAT_IMAGE_NCOLUMNS / 2 + p.x * column_factor * exp2(-16) - 1.0);
-  y = (int)rint((double) -line_offset   + METEOSAT_IMAGE_NLINES / 2   + p.y * line_factor   * exp2(-16) - 1.0);
+  x = (int)rint((double) column_offset + p.x * column_factor * exp2(-16)) - x0;
+  y = (int)rint((double) line_offset   + p.y * line_factor   * exp2(-16)) - y0;
 }
 
 double Image::pixelHSize() const

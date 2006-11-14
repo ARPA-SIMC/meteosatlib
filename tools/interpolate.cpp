@@ -166,7 +166,7 @@ int main( int argc, char* argv[] )
 		for (ImageVector::const_iterator i = imgs.begin();
 					i != imgs.end(); ++i)
 		{
-			int x, y;
+			size_t x, y;
 			(*i)->coordsToPixels(lat, lon, x, y);
 			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
 			if (x < 0 || x >= (*i)->data->columns || y < 0 || y >= (*i)->data->lines)

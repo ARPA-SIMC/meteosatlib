@@ -237,7 +237,7 @@ dba_err interpolate(poptContext optCon, dba_db db, OUT consume)
 		for (ImageVector::const_iterator i = imgs.begin();
 					i != imgs.end(); ++i)
 		{
-			int x, y;
+			size_t x, y;
 			int channel = (*i)->channel_id;
 			ChannelTab::const_iterator c = satinfo.find(channel);
 			if (c == satinfo.end())
@@ -253,7 +253,7 @@ dba_err interpolate(poptContext optCon, dba_db db, OUT consume)
 
 			(*i)->coordsToPixels(lat, lon, x, y);
 			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
-			if (x >= 0 && x < (*i)->data->columns && y >= 0 && y < (*i)->data->lines)
+			if (x < (*i)->data->columns && y < (*i)->data->lines)
 			{
 				dba_var var;
 				DBA_RUN_OR_RETURN(dba_var_create_local(c->second.var, &var));

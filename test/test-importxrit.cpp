@@ -122,7 +122,7 @@ void to::test<2>()
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
-	opts.subarea = false;
+	opts.pixelSubarea = false;
 	//int AreaLinStart, AreaNlin, AreaPixStart, AreaNpix;
 
 	std::auto_ptr<Image> img = importXRIT(opts);
@@ -161,7 +161,7 @@ void to::test<3>()
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
-	opts.subarea = true;
+	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
 	opts.AreaPixStart = 100 + 2064;
@@ -229,7 +229,7 @@ void to::test<5>()
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
-	opts.subarea = true;
+	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
 	opts.AreaPixStart = 100 + 2064;
@@ -300,7 +300,7 @@ void to::test<7>()
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
-	opts.subarea = true;
+	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
 	opts.AreaPixStart = 100 + 2064;
@@ -371,7 +371,7 @@ void to::test<9>()
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
 	opts.timing = "200604261945";
-	opts.subarea = true;
+	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
 	opts.AreaPixStart = 100 + 2064;

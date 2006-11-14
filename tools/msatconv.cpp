@@ -75,7 +75,8 @@ void do_help(const char* argv0, ostream& out)
       << "  --netcdf         Convert to NetCDF" << endl
       << "  --netcdf24       Convert to NetCDF" << endl
 #endif
-      << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl;
+      << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl
+      << "  --Area='latmin,latmax,lonmin,lonmax' Crop the source image(s) to the given coordinates" << endl;
 }
 void usage(char *pname)
 {
@@ -148,6 +149,7 @@ int main( int argc, char* argv[] )
 	// Defaults to view
   Action action = VIEW;
 	int ax = 0, ay = 0, aw = 0, ah = 0;
+	double latmin = 1000, latmax = 1000, lonmin = 1000, lonmax = 1000;
 
   static struct option longopts[] = {
     { "help",	0, NULL, 'H' },
@@ -159,6 +161,7 @@ int main( int argc, char* argv[] )
 		{ "netcdf24",	0, NULL, '2' },
 #endif
 		{ "area", 1, 0, 'a' },
+		{ "Area", 1, 0, 'A' },
   };
 
   bool done = false;
@@ -189,6 +192,14 @@ int main( int argc, char* argv[] )
 				if (sscanf(optarg, "%d,%d,%d,%d", &ax,&aw,&ay,&ah) != 4)
 				{
 					cerr << "Area value should be in the format x,dx,y,dy" << endl;
+					do_help(argv[0], cerr);
+					return 1;
+				}
+				break;
+			case 'A':
+				if (sscanf(optarg, "%lf,%lf,%lf,%lf", &latmin,&latmax,&lonmin,&lonmax) != 4)
+				{
+					cerr << "Area value should be in the format latmin,latmax,lonmin,lonmax" << endl;
 					do_help(argv[0], cerr);
 					return 1;
 				}
@@ -225,6 +236,10 @@ int main( int argc, char* argv[] )
 			importer->cropY = ay;
 			importer->cropWidth = aw;
 			importer->cropHeight = ah;
+			importer->cropLatMin = latmin;
+			importer->cropLatMax = latmax;
+			importer->cropLonMin = lonmin;
+			importer->cropLonMax = lonmax;
 			std::auto_ptr<ImageConsumer> consumer = getExporter(action);
 			importer->read(*consumer);
 		}

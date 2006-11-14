@@ -28,6 +28,7 @@
 #include <proj/Geos.h>
 #include <stdexcept>
 #include <fstream>
+#include <sstream>
 #include <hrit/MSG_HRIT.h>
 #include <glob.h>
 
@@ -184,6 +185,28 @@ std::vector<std::string> XRITImportOptions::segmentFiles() const
 		res.push_back(globbuf.gl_pathv[i+1]);
   globfree(&globbuf);
 	return res;
+}
+
+std::string XRITImportOptions::toString() const
+{
+	std::stringstream str;
+	str <<        "dir: " << directory
+		  <<       " res: " << resolution
+			<<     " prod1: " << productid1
+			<<     " prod2: " << productid2
+			<<    " timing: " << timing;
+	if (pixelSubarea)
+	{
+		str
+			<< " pixelarea: " << AreaLinStart << "," << AreaPixStart
+			<<                " + " << AreaNlin << "," << AreaNpix;
+	}
+	if (coordSubarea)
+	{
+		str
+			<< " coordarea: lat " << AreaLatMin << "-" << AreaLatMax << " lon " << AreaLonMin << "-" << AreaLonMax;
+	}
+	return str.str();
 }
 
 struct Decoder
@@ -375,11 +398,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 {
 	opts.ensureComplete();
 
-	ProgressTask p("Reading HRIT from " + opts.directory
-			                     + " res: " + opts.resolution
-									       + " prod1: " + opts.productid1
-									       + " prod2: " + opts.productid2
-									      + " timing: " + opts.timing);
+	ProgressTask p("Reading HRIT from " + opts.toString());
 
   std::auto_ptr<Image> img(new Image);
 
@@ -414,12 +433,31 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	size_t height = d.lines;
 
   // Slice the subarea if needed
-  if (opts.subarea)
+  if (opts.pixelSubarea)
 	{
+		// Slice to the given pixel coordinates
 		x = opts.AreaPixStart;
 		y = opts.AreaLinStart;
 		width = opts.AreaNpix;
 		height = opts.AreaNlin;
+		std::stringstream str;
+		str << "Import limited to " << x << "," << y << " " << width << "x" << height;
+		p.activity(str.str());
+	}
+	if (opts.coordSubarea)
+	{
+		size_t x1, y1;
+		// Convert to pixel coordinates
+		img->coordsToPixels(opts.AreaLatMin, opts.AreaLonMin, x, y);
+		img->coordsToPixels(opts.AreaLatMax, opts.AreaLonMax, x1, y1);
+		// Slice to the bounding box for the 2 coordinates
+		width = x > x1 ? x-x1 : x1-x;
+		height = y > y1 ? y-y1 : y1-y;
+		x = x < x1 ? x : x1;
+		y = y < y1 ? y : y1;
+		std::stringstream str;
+		str << "Import limited to " << x << "," << y << " " << width << "x" << height;
+		p.activity(str.str());
 	}
 
 	// Final, calibrated image
@@ -427,18 +465,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   // Get calibration values
   float *cal = PRO_data.prologue->radiometric_proc.get_calibration(
 								img->channel_id, d.bpp);
-	float base;
-	switch (img->channel_id)
-	{
-  	case MSG_SEVIRI_1_5_VIS_0_6:
-  	case MSG_SEVIRI_1_5_VIS_0_8:
-  	case MSG_SEVIRI_1_5_HRV:
-			base = 0.0;
-			break;
-		default:
-			base = 145.0;
-			break;
-	}
 
 	// Perform calibration and copy the data to the result image
 	auto_ptr< ImageDataWithPixelsPrescaled<float> > data;
@@ -471,8 +497,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			dove LowerEastColumnActual = 1
 		*/
 
-
-
 		data.reset(new ImageDataWithPixelsPrescaled<float>(width, height));
 		data->missing = 0.0;
 		for (size_t iy = 0; iy < height; ++iy)
@@ -480,7 +504,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			{
 				MSG_SAMPLE sample = d.get(x + ix, y + iy);
 				if (sample > 0)
-					data->pixels[iy*width+ix] = cal[sample] - base;
+					data->pixels[iy*width+ix] = cal[sample];
 				else
 					data->pixels[iy*width+ix] = 0.0;
 			}
@@ -493,7 +517,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			{
 				MSG_SAMPLE sample = d.get(x + ix, y + iy);
 				if (sample > 0)
-					data->pixels[iy*width+ix] = cal[sample] - base;
+					data->pixels[iy*width+ix] = cal[sample];
 				else
 					data->pixels[iy*width+ix] = 0.0;
 			}
@@ -570,13 +594,19 @@ public:
 
 	virtual void read(ImageConsumer& output)
 	{
-		if (shouldCrop())
+		if (cropWidth != 0 && cropHeight != 0)
 		{
-			opts.subarea = true;
+			opts.pixelSubarea = true;
 			opts.AreaPixStart = cropX;
 			opts.AreaLinStart = cropY;
 			opts.AreaNpix = cropWidth;
 			opts.AreaNlin = cropHeight;
+		} else if (cropLatMin != 1000 && cropLatMax != 1000 && cropLonMin != 1000 && cropLonMax != 1000) {
+			opts.coordSubarea = true;
+			opts.AreaLatMin = cropLatMin;
+			opts.AreaLatMax = cropLatMax;
+			opts.AreaLonMin = cropLonMin;
+			opts.AreaLonMax = cropLonMax;
 		}
 		std::auto_ptr<Image> img = importXRIT(opts);
 		output.processImage(img);

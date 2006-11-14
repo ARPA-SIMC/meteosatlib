@@ -66,15 +66,17 @@ template<> template<>
 void to::test<2>()
 {
 	Image img;
-	img.column_factor = 13642337;
-	img.line_factor = 13642337;
-	img.column_offset = 1500;
-	img.line_offset = 200;
+	img.x0 = 0;
+	img.y0 = 0;
+	img.column_factor = 40927014;
+	img.line_factor = 40927014;
+	img.column_offset = 5566;
+	img.line_offset = 5566;
 	img.proj.reset(new proj::Geos(0.0, ORBIT_RADIUS));
-	int x, y;
+	size_t x, y;
 	img.coordsToPixels(45, 10, x, y);
-	gen_ensure_equals(x, 603);
-	gen_ensure_equals(y, 243);
+	gen_ensure_equals(x, 6310u);
+	gen_ensure_equals(y, 1330u);
 
 #if 0
 	// Print some points to see how the mapping goes

@@ -201,8 +201,7 @@ public:
 			if (c != "IMAGE")
 				continue;
 			std::auto_ptr<Image> img = ImportSAFH5(group, name);
-			if (shouldCrop())
-				img->crop(cropX, cropY, cropWidth, cropHeight);
+			cropIfNeeded(*img);
 			output.processImage(img);
 		}
 	}

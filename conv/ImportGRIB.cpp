@@ -190,8 +190,7 @@ public:
 		while (gf.ReadMessage(m) == 0)
 		{
 			auto_ptr<Image> img = importGrib(m);
-			if (shouldCrop())
-				img->crop(cropX, cropY, cropWidth, cropHeight);
+			cropIfNeeded(*img);
 			output.processImage(img);
 			++count;
 		}

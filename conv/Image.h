@@ -135,13 +135,19 @@ public:
 	void setData(ImageData* data);
 
 	/// Return the nearest pixel coordinates to the given geographical place
-	void coordsToPixels(double lat, double lon, int& x, int& y) const;
+	void coordsToPixels(double lat, double lon, size_t& x, size_t& y) const;
 
 	/**
-	 * Crop the image to the given rectangle specified in coordinates relative
-	 * to the image itself
+	 * Crop the image to the given rectangle specified in pixel coordinates
+	 * relative to the image itself
 	 */
 	void crop(int x, int y, int width, int height);
+
+	/**
+	 * Crop the image to the minimum rectangle of pixels containing the area
+	 * defined with the given geographical coordinates
+	 */
+	void cropByCoords(double latmin, double latmax, double lonmin, double lonmax);
 
 	/**
 	 * Compute a meaningful default file name (without extension) that can be
@@ -293,11 +299,20 @@ struct ImageConsumer
 struct ImageImporter
 {
 	int cropX, cropY, cropWidth, cropHeight;
+	double cropLatMin, cropLonMin, cropLatMax, cropLonMax;
 
-	ImageImporter() : cropX(0), cropY(0), cropWidth(0), cropHeight(0) {}
+	ImageImporter() :
+		cropX(0), cropY(0), cropWidth(0), cropHeight(0),
+		cropLatMin(1000), cropLatMax(1000), cropLonMin(1000), cropLonMax(1000) {}
 	virtual ~ImageImporter() {}
 
-	bool shouldCrop() const { return cropWidth != 0 && cropHeight != 0; }
+	void cropIfNeeded(Image& img)
+	{
+		if (cropWidth != 0 && cropHeight != 0)
+			img.crop(cropX, cropY, cropWidth, cropHeight);
+		else if (cropLatMin != 1000 && cropLatMax != 1000 && cropLonMin != 1000 && cropLonMax != 1000)
+			img.cropByCoords(cropLatMin, cropLatMax, cropLonMin, cropLonMax);
+	}
 
 	virtual void read(ImageConsumer& output) = 0;
 };
