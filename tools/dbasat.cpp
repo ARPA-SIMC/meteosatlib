@@ -105,15 +105,8 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 	return std::auto_ptr<ImageImporter>();
 }
 
-
-static dba_err read_files(poptContext optCon, ImageVector& imgs)
+static dba_err fileNames(poptContext optCon, std::vector<std::string>& names)
 {
-	// Default cropping parameters (all zeroes mean "no cropping")
-	int ax = 0, ay = 0, aw = 0, ah = 0;
-	if (op_area[0] != 0)
-		if (sscanf(optarg, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
-			dba_cmdline_error(optCon, "area parameter should be in the format x,y,width,height");
-
 	// Get the file names and read the images
 	while (1)
 	{
@@ -121,29 +114,58 @@ static dba_err read_files(poptContext optCon, ImageVector& imgs)
 		if (arg == NULL) break;
 		// Stop processing files when a query parameter is found
 		if (strchr(arg, '=') != NULL) break;
+		names.push_back(arg);
+		// Consume the argument if it was processed
+		poptGetArg(optCon);
+	}
+	return dba_error_ok();
+}
 
+template<typename COLL>
+static dba_err read_files(const COLL& names, dba_record query, ImageVector& imgs)
+{
+	// Default cropping parameters (all zeroes mean "no cropping")
+	int ax = 0, ay = 0, aw = 0, ah = 0;
+	if (op_area[0] != 0)
+		if (sscanf(op_area, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
+			dba_error_consistency("area parameter should be in the format x,y,width,height");
+
+	double latmin = 1000, lonmin = 1000, latmax = 1000, lonmax = 1000;
+	if (dba_record_key_peek(query, DBA_KEY_LATMIN) != NULL)
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LATMIN, &latmin));
+	if (dba_record_key_peek(query, DBA_KEY_LATMAX) != NULL)
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LATMAX, &latmax));
+	if (dba_record_key_peek(query, DBA_KEY_LONMIN) != NULL)
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LONMIN, &lonmin));
+	if (dba_record_key_peek(query, DBA_KEY_LONMAX) != NULL)
+		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LONMAX, &lonmax));
+
+	// Get the file names and read the images
+	for (typename COLL::const_iterator i = names.begin(); i != names.end(); ++i)
+	{
 		try
 		{
-			std::auto_ptr<ImageImporter> importer = getImporter(arg);
+			std::auto_ptr<ImageImporter> importer = getImporter(*i);
 			if (!importer.get())
 			{
-				cerr << "No importer found for " << arg << ": ignoring." << endl;
+				cerr << "No importer found for " << *i << ": ignoring." << endl;
 				continue;
 			}
 			importer->cropX = ax;
 			importer->cropY = ay;
 			importer->cropWidth = aw;
 			importer->cropHeight = ah;
+			importer->cropLatMin = latmin;
+			importer->cropLatMax = latmax;
+			importer->cropLonMin = lonmin;
+			importer->cropLonMax = lonmax;
 			importer->read(imgs);
 		}
 		catch (std::exception& e)
 		{
-			cerr << "Importing " << arg << " failed: ignoring." << endl;
+			cerr << "Importing " << *i << " failed: ignoring." << endl;
 			continue;
 		}
-
-		// Consume the argument if it was processed
-		poptGetArg(optCon);
 	}
 	return dba_error_ok();
 }
@@ -203,16 +225,19 @@ dba_err interpolate(poptContext optCon, dba_db db, OUT consume)
 	ChannelTab satinfo;
 	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
 
-	// Read the input data
-	ImageVector imgs;
-	DBA_RUN_OR_RETURN(read_files(optCon, imgs));
+	// Read the names of the input files
+	vector<string> names;
+	DBA_RUN_OR_RETURN(fileNames(optCon, names));
 
-	if (imgs.empty())
-		dba_cmdline_error(optCon, "No valid input files found");
-
-	/* Create the query */
+	/* Create the query from the command line */
 	DBA_RUN_OR_RETURN(dba_record_create(&query));
 	DBA_RUN_OR_RETURN(dba_cmdline_get_query(optCon, query));
+
+	// Read the input data
+	ImageVector imgs;
+	DBA_RUN_OR_RETURN(read_files(names, query, imgs));
+	if (imgs.empty())
+		dba_cmdline_error(optCon, "No valid input files found");
 
 	// Connect the database and start the query
 	DBA_RUN_OR_RETURN(dba_db_ana_query(db, query, &cursor, &count));
