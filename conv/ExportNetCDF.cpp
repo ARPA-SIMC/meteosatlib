@@ -61,7 +61,7 @@ namespace msat {
 void ExportNetCDF(const Image& img, const std::string& fileName)
 {
   // Get the channel name
-  string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id);
+  string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
 
   // Change sensitive characters into underscores
   for (string::iterator i = channelstring.begin();
