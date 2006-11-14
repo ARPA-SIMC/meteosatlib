@@ -25,7 +25,7 @@
 //  
 //---------------------------------------------------------------------------
 
-//#include "../config.h"
+#include <config.h>
 
 #include <conv/ExportNetCDF.h>
 
@@ -42,16 +42,8 @@
 #define TITLE "SAFNWP Processed File from MSG-SEVIRI"
 #define INSTITUTION "ARPA-SIM"
 #define TYPE "Processed Products"
-#define ARPA_VERSION 0.0
 
 using namespace std;
-
-#if 0
-#include <set>
-#include <string>
-#include <vector>
-#include <stdexcept>
-#endif
 
 namespace msat {
 
@@ -115,7 +107,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(ncf, "title", TITLE);
   ncfAddAttr(ncf, "Institution", INSTITUTION);
   ncfAddAttr(ncf, "Type", TYPE);
-  ncfAddAttr(ncf, "Version", ARPA_VERSION);
+  ncfAddAttr(ncf, "Version", PACKAGE_VERSION);
   ncfAddAttr(ncf, "Conventions", "COARDS");
   ncfAddAttr(ncf, "history", "Created from SAF HDF5 data");
 
