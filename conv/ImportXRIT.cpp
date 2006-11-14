@@ -466,62 +466,26 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   float *cal = PRO_data.prologue->radiometric_proc.get_calibration(
 								img->channel_id, d.bpp);
 
+#if 0
+	for (int i = 0; i < 256; ++i)
+		cerr << "cal["<<i<<"] " << cal[i] << endl;
+#endif
+
 	// Perform calibration and copy the data to the result image
 	auto_ptr< ImageDataWithPixelsPrescaled<float> > data;
-	if (img->channel_id == MSG_SEVIRI_1_5_HRV)
-	{
-		// HRV contains two areas: the upper and lower area.  They have the same
-		// width but different heights, and they are not horizontally aligned
-		/*
-		 * FIXME: I don't know how to read the epilogue: I'll have to hardcode the
-		 * values I'd have read from it
-		cerr << " EPI: " << PRO_data.epilogue;
-
-		cerr << "HRV: "
-				 << " LSLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
-				 << " LNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual
-				 << " LECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual
-				 << " LWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual
-				 << " USLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual
-				 << " UNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
-				 << " UECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual
-				 << " UWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual
-				 << endl;
-		 */
-		const int UpperEastColumnActual = 2064;
-
-		/*
-		HRV channel
-			COFF = (5567 − LowerEastColumnActual) / UpperEastColumnActual
-			LOFF = 5566 − (k − 1) ⋅ NL
-			dove LowerEastColumnActual = 1
-		*/
-
-		data.reset(new ImageDataWithPixelsPrescaled<float>(width, height));
-		data->missing = 0.0;
-		for (size_t iy = 0; iy < height; ++iy)
-			for (size_t ix = 0; ix < width; ++ix)
-			{
-				MSG_SAMPLE sample = d.get(x + ix, y + iy);
-				if (sample > 0)
-					data->pixels[iy*width+ix] = cal[sample];
-				else
-					data->pixels[iy*width+ix] = 0.0;
-			}
-	} else {
-		// Non-HRV are just an image
-		data.reset(new ImageDataWithPixelsPrescaled<float>(width, height));
-		data->missing = 0.0;
-		for (size_t iy = 0; iy < height; ++iy)
-			for (size_t ix = 0; ix < width; ++ix)
-			{
-				MSG_SAMPLE sample = d.get(x + ix, y + iy);
-				if (sample > 0)
-					data->pixels[iy*width+ix] = cal[sample];
-				else
-					data->pixels[iy*width+ix] = 0.0;
-			}
-	}
+	data.reset(new ImageDataWithPixelsPrescaled<float>(width, height));
+	data->missing = 0.0;
+	for (size_t iy = 0; iy < height; ++iy)
+		for (size_t ix = 0; ix < width; ++ix)
+		{
+			MSG_SAMPLE sample = d.get(x + ix, y + iy);
+			// To avoid spurious data, negative values after calibration are
+			// converted to missing values
+			if (sample > 0 && cal[sample] >= 0)
+				data->pixels[iy*width+ix] = cal[sample];
+			else
+				data->pixels[iy*width+ix] = 0.0;
+		}
   delete [ ] cal;
 
 	img->setData(data.release());
