@@ -49,6 +49,25 @@ void Image::setData(ImageData* data)
 	this->data = data;
 }
 
+void Image::setQualityFromPathname(const std::string& pathname)
+{
+	size_t pos = pathname.rfind('/');
+	if (pos == string::npos)
+		pos = 1;
+	else
+		pos += 1;
+	if (pos < pathname.size() && pathname[pos] == '_')
+		quality = pathname[pos-1];
+}
+
+void Image::addToHistory(const std::string& event)
+{
+	if (history.empty())
+		history = event;
+	else
+		history += ", " + event;
+}
+
 void Image::crop(int x, int y, int width, int height)
 {
 	data->crop(x, y, width, height);

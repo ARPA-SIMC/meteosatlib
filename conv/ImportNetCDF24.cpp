@@ -159,6 +159,7 @@ public:
 		{
 			auto_ptr<Image> img(new Image);
 			readHeader(*img);
+			img->setQualityFromPathname(filename);
 
 			NcVar* var = ncf.get_var(i);
 			if (string(var->name()) == "Projection")

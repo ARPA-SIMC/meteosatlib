@@ -102,12 +102,26 @@ public:
 	 */
 	char quality;
 
+	/**
+	 * History of this image, as comma-separated descriptions of events,
+	 * earliest first
+	 */
+	std::string history;
+
 	// Image data
 	ImageData* data;
 
 	Image() : data(0), quality('_') {}
 	~Image();
 
+	/**
+	 * Set the quality character using the first letters of the file name
+	 * pointed by the given pathname
+	 */
+	void setQualityFromPathname(const std::string& pathname);
+
+	/// Add an event to the image history
+	void addToHistory(const std::string& event);
 
 	/// Horizontal pixel resolution at nadir point
 	double pixelHSize() const;
