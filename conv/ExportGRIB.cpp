@@ -27,6 +27,7 @@
 
 #include "ExportGRIB.h"
 
+#include <conv/Progress.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
 #include <grib/GRIB.h>
@@ -69,6 +70,8 @@ namespace msat {
 //
 void ExportGRIB(const Image& img, GRIB_FILE& gf)
 {
+	ProgressTask p("Exporting GRIB");
+
   //
   // Extract data out of HDF5_source
   // 
@@ -135,11 +138,15 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 	// When the original value was a float value, we can read the number of
 	// significant digits from a table indexed by channels
 
-  // Get the calibrated image
-  float *fvals = img.data->allScaled();
-
   f.set_table(GRIB_CENTER, GRIB_SUBCENTER, GRIB_TABLE, GRIB_PROCESS);
-  f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, FILL_VALUE, FILL_VALUE);
+
+  // Get the calibrated image
+	p.activity("Computing calibrated image");
+  float *fvals = img.data->allScaled();
+	p.activity("Handing over calibrated image to GRIB encoder");
+  f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, img.data->missingValue, img.data->missingValue);
+  delete [ ] fvals;
+
   f.set_scale(img.decimalDigitsOfScaledValues());
 
 #if LOCALDEF == 3
@@ -183,14 +190,14 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 #endif
 
   // Write output values
+	p.activity("Putting all the components together");
   m.set_time(t);
   m.set_grid(grid);
   m.set_level(l);
   m.set_field(f);
 
+	p.activity("Writing message");
   gf.WriteMessage(m);
-
-  delete [ ] fvals;
 }
 
 
