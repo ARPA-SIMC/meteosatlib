@@ -22,6 +22,7 @@ noinst_HEADERS = \
     ExportGRIB.h \
     ExportNetCDF.h \
     ExportNetCDF24.h \
+    ExportImage.h \
     ImportGRIB.h \
     ImportSAFH5.h \
     ImportNetCDF.h \
@@ -54,6 +55,11 @@ endif
 if HDF5
 libconv_la_SOURCES += SAFH5Utils.cpp ImportSAFH5.cpp
 libconv_la_LIBADD += -lhdf5_cpp
+endif
+
+if HAVE_MAGICK
+libconv_la_SOURCES += ExportImage.cpp
+libconv_la_LIBADD += -lMagick++
 endif
 
 MAINTAINERCLEANFILES = \

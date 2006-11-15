@@ -37,6 +37,10 @@
 #include <conv/ExportNetCDF24.h>
 #include <conv/Progress.h>
 
+#ifdef HAVE_MAGICKPP
+#include <conv/ExportImage.h>
+#endif
+
 #include <set>
 #include <string>
 #include <vector>
@@ -68,12 +72,17 @@ void do_help(const char* argv0, ostream& out)
 #endif
       << "Options are:" << endl
       << "  --help           Print this help message" << endl
+      << "  -q,--quiet       Work silently" << endl;
       << "  --view           View the contents of a file" << endl
       << "  --dump           View the contents of a file, including the pixel data" << endl
       << "  --grib           Convert to GRIB" << endl
 #ifdef HAVE_HDF5
       << "  --netcdf         Convert to NetCDF" << endl
       << "  --netcdf24       Convert to NetCDF" << endl
+#endif
+#ifdef HAVE_MAGICKPP
+      << "  --jpg            Convert to JPEG" << endl
+      << "  --display        Display the image on a X11 window" << endl
 #endif
       << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl
       << "  --Area='latmin,latmax,lonmin,lonmax' Crop the source image(s) to the given coordinates" << endl;
@@ -91,9 +100,12 @@ void usage(char *pname)
   return;
 }
 
-enum Action { VIEW, DUMP, GRIB,
+enum Action { VIEW, DUMP, GRIB
 #ifdef HAVE_NETCDF
-	NETCDF, NETCDF24
+	, NETCDF, NETCDF24
+#endif
+#ifdef HAVE_MAGICKPP
+	, JPG, DISPLAY
 #endif
 };
 
@@ -137,6 +149,10 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 		case NETCDF: return createNetCDFExporter();
 		case NETCDF24: return createNetCDF24Exporter();
 #endif
+#ifdef HAVE_MAGICKPP
+		case JPG: return createImageExporter("jpg");
+		case DISPLAY: return createImageDisplayer();
+#endif
 	}
 }
 
@@ -150,9 +166,11 @@ int main( int argc, char* argv[] )
   Action action = VIEW;
 	int ax = 0, ay = 0, aw = 0, ah = 0;
 	double latmin = 1000, latmax = 1000, lonmin = 1000, lonmax = 1000;
+	bool quiet = false;
 
   static struct option longopts[] = {
     { "help",	0, NULL, 'H' },
+    { "quiet", 0, NULL, 'q' },
 		{ "view",	0, NULL, 'V' },
 		{ "dump",	0, NULL, 'D' },
 		{ "grib",	0, NULL, 'G' },
@@ -160,17 +178,24 @@ int main( int argc, char* argv[] )
 		{ "netcdf",	0, NULL, 'N' },
 		{ "netcdf24",	0, NULL, '2' },
 #endif
+#ifdef HAVE_MAGICKPP
+		{ "jpg",	0, NULL, 'j' },
+		{ "display",	0, NULL, 'd' },
+#endif
 		{ "area", 1, 0, 'a' },
 		{ "Area", 1, 0, 'A' },
   };
 
   bool done = false;
   while (!done) {
-    int c = getopt_long(argc, argv, "i:", longopts, (int*)0);
+    int c = getopt_long(argc, argv, "q", longopts, (int*)0);
     switch (c) {
       case 'H':	// --help
 				do_help(argv[0], cout);
 				return 0;
+			case 'q': // -q,--quiet
+				quiet = true;
+				break;
       case 'V': // --view
 				action = VIEW;
 				break;
@@ -186,6 +211,14 @@ int main( int argc, char* argv[] )
 				break;
       case '2': // --netcdf24
 				action = NETCDF24;
+				break;
+#endif
+#ifdef HAVE_MAGICKPP
+			case 'j': // --jpg
+				action = JPG;
+				break;
+			case 'd': // --display
+				action = DISPLAY;
 				break;
 #endif
 			case 'a':
@@ -220,7 +253,8 @@ int main( int argc, char* argv[] )
     return 1;
   }
 
-	Progress::get().setHandler(new StreamProgressHandler(cerr));
+	if (!quiet)
+		Progress::get().setHandler(new StreamProgressHandler(cerr));
 
   try
   {

@@ -124,7 +124,9 @@ dnl --------------------------------------------------------------------
 dnl Checks for header files.
 
 AC_CHECK_HEADER([Magick++.h],
-    [],
+    [
+     	AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
+    ],
     [
     if test "$enable_hrit" == "yes"; then
         enable_hrit="no"
