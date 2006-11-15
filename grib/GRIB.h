@@ -993,6 +993,15 @@ class GRIB_FIELD {
     void set_field(int varcode, float *values, size_t size,
                    float undef_high, float undef_low);
 
+    /// @brief Set field from a float values array, avoiding copying the array by taking ownership of its memory allocation
+    /// @param varcode: Parameter code
+    /// @param values: Allocated array filled with parameter values
+    /// @param size: Size of the previous array
+    /// @param undef_high: High mark for undefined value in encoding
+    /// @param undef_low: Low mark for undefined value in encoding
+    void set_field_nocopy(int varcode, float *values, size_t size,
+                   float undef_high, float undef_low);
+
     /// @brief Add local definitions (PDS reserved originating center)
     /// @param noctets: Number of bytes
     /// @param octets: Local definition

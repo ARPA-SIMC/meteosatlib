@@ -1664,6 +1664,22 @@ void GRIB_FIELD::set_field(int v, float *values, size_t s, float uh, float ul)
   return;
 }
 
+void GRIB_FIELD::set_field_nocopy(int v, float *values, size_t s, float uh, float ul)
+{
+  varcode = v;
+  varname = (Parm_Table(center, subcenter, table, process) + varcode)->name;
+  vardesc = (Parm_Table(center, subcenter, table, process) + varcode)->comment;
+  size_t indx0 = vardesc.find_first_of('[', 0);
+  size_t indx1 = vardesc.find_first_of(']', 0);
+  varunit = vardesc.substr(indx0+1,indx1-indx0-1);
+  if (vals) delete [ ] vals;
+  size = s;
+  vals = values;
+  undef_high = uh;
+  undef_low = ul;
+  return;
+}
+
 void GRIB_FIELD::add_local_def(int noctets, unsigned char *octets)
 {
   nmorepds = noctets;

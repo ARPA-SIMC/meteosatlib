@@ -144,8 +144,8 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 	p.activity("Computing calibrated image");
   float *fvals = img.data->allScaled();
 	p.activity("Handing over calibrated image to GRIB encoder");
-  f.set_field(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, img.data->missingValue, img.data->missingValue);
-  delete [ ] fvals;
+  f.set_field_nocopy(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, img.data->missingValue, img.data->missingValue);
+  //delete [ ] fvals;
 
   f.set_scale(img.decimalDigitsOfScaledValues());
 
