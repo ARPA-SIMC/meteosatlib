@@ -39,7 +39,6 @@
 
 #include "NetCDFUtils.h"
 
-#define TITLE "SAFNWP Processed File from MSG-SEVIRI"
 #define INSTITUTION "ARPA-SIM"
 #define TYPE "Processed Products"
 
