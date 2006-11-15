@@ -111,7 +111,7 @@ public:
 	// Image data
 	ImageData* data;
 
-	Image() : data(0), quality('_') {}
+	Image() : quality('_'), data(0) {}
 	~Image();
 
 	/**
@@ -320,7 +320,7 @@ struct ImageImporter
 
 	ImageImporter() :
 		cropX(0), cropY(0), cropWidth(0), cropHeight(0),
-		cropLatMin(1000), cropLatMax(1000), cropLonMin(1000), cropLonMax(1000) {}
+		cropLatMin(1000), cropLonMin(1000), cropLatMax(1000), cropLonMax(1000) {}
 	virtual ~ImageImporter() {}
 
 	void cropIfNeeded(Image& img)
@@ -336,6 +336,9 @@ struct ImageImporter
 
 struct ImageVector : public std::vector<Image*>, ImageConsumer
 {
+	ImageVector() {}
+	// Convenience constructor to automatically fill in using an importer
+	ImageVector(ImageImporter& imp) { imp.read(*this); }
 	virtual ~ImageVector();
 	virtual void processImage(std::auto_ptr<Image> image)
 	{

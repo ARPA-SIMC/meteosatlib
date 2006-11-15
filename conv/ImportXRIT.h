@@ -14,13 +14,8 @@ struct XRITImportOptions
   std::string productid1;
   std::string productid2;
   std::string timing;
-  bool pixelSubarea;
-  bool coordSubarea;
-  int AreaLinStart, AreaNlin, AreaPixStart, AreaNpix;
-  double AreaLatMin, AreaLatMax, AreaLonMin, AreaLonMax;
 
-  XRITImportOptions() :
-    directory("."), pixelSubarea(false), coordSubarea(false) {}
+  XRITImportOptions() : directory(".") {}
   XRITImportOptions(const std::string& filename);
 
   void ensureComplete() const;

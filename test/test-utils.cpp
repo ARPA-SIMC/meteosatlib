@@ -123,9 +123,7 @@ std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile)
 		return std::auto_ptr<Image>();
 
 	// Reread the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter(file.name()));
-	ImageVector imgs;
-	imp->read(imgs);
+	ImageVector imgs(*createGribImporter(file.name()));
 	if (imgs.empty())
 		return std::auto_ptr<Image>();
 	return imgs.shift();
@@ -140,7 +138,7 @@ std::auto_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile)
 	// Write the NetCDF24
 	ExportNetCDF(img, file.name());
 
-	// Reread the grib
+	// Reread the NetCDF24
 	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(file.name()));
 	ImageVector imgs;
 	imp->read(imgs);
@@ -158,7 +156,7 @@ std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFil
 	// Write the NetCDF24
 	ExportNetCDF24(img, file.name());
 
-	// Reread the grib
+	// Reread the NetCDF24
 	std::auto_ptr<ImageImporter> imp(createNetCDF24Importer(file.name()));
 	ImageVector imgs;
 	imp->read(imgs);

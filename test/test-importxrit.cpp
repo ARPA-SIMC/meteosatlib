@@ -69,14 +69,14 @@ static void checkFullImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 11136);
 	gen_ensure_equals(img.x0, 1);
 	gen_ensure_equals(img.y0, 1);
-	gen_ensure_equals(img.data->scaled(0, 0), 0);
-	gen_ensure_equals(img.data->scaled(10, 10), 0);
+	gen_ensure_equals(img.data->scaled(0, 0), img.data->missingValue);
+	gen_ensure_equals(img.data->scaled(10, 10), img.data->missingValue);
 	gen_ensure_similar(img.data->scaled(2540, 2950), 6.07987, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2550, 2970), 6.27186, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2560, 2990), 4.73590, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled(2570, 3010), 0,       0.001); // unverified
-	gen_ensure_similar(img.data->scaled(2580, 3030), 0,       0.001); // unverified
-	gen_ensure_similar(img.data->scaled(2590, 3050), 0,       0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2570, 3010), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2580, 3030), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2590, 3050), img.data->missingValue, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2600, 3070), 5.79187, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2610, 3090), 5.05589, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2620, 3110), 4.57590, 0.001); // unverified
@@ -84,22 +84,18 @@ static void checkFullImageData(Image& img)
 	gen_ensure_similar(img.data->scaled(2640, 3150), 5.27988, 0.001); // unverified
 }
 
-static void setSource(XRITImportOptions& opts)
+static std::auto_ptr<ImageImporter> importer()
 {
-	opts.directory = "data";
-	opts.resolution = "H";
-	opts.productid1 = "MSG1";
-	opts.productid2 = "HRV";
-	opts.timing = "200611141200";
-	opts.pixelSubarea = false;
+	return createXRITImporter("data/H:MSG1:HRV:200611141200");
 }
-static void setCrop(XRITImportOptions& opts)
+static std::auto_ptr<ImageImporter> croppedImporter()
 {
-	opts.pixelSubarea = true;
-	opts.AreaLinStart = 2950;
-	opts.AreaNlin = 300;
-	opts.AreaPixStart = 2540;
-	opts.AreaNpix = 150;
+	std::auto_ptr<ImageImporter> imp = importer();
+	imp->cropX = 2540;
+	imp->cropY = 2950;
+	imp->cropWidth = 150;
+	imp->cropHeight = 300;
+	return imp;
 }
 
 static void checkCroppedImageData(Image& img)
@@ -113,9 +109,9 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_similar(img.data->scaled(  0,   0), 6.07987, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 10,  20), 6.27186, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 20,  40), 4.73590, 0.001); // unverified
-	gen_ensure_similar(img.data->scaled( 30,  60), 0,       0.001); // unverified
-	gen_ensure_similar(img.data->scaled( 40,  80), 0,       0.001); // unverified
-	gen_ensure_similar(img.data->scaled( 50, 100), 0,       0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 30,  60), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 40,  80), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 50, 100), img.data->missingValue, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 60, 120), 5.79187, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 70, 140), 5.05589, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 80, 160), 4.57590, 0.001); // unverified
@@ -136,10 +132,9 @@ void to::test<1>()
 template<> template<>
 void to::test<2>()
 {
-	XRITImportOptions opts;
-	setSource(opts);
-
-	std::auto_ptr<Image> img = importXRIT(opts);
+	ImageVector imgs(*importer());
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> img = imgs.shift();
 
 	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
@@ -169,11 +164,9 @@ void to::test<2>()
 template<> template<>
 void to::test<3>()
 {
-	XRITImportOptions opts;
-	setSource(opts);
-	setCrop(opts);
-
-	std::auto_ptr<Image> img = importXRIT(opts);
+	ImageVector imgs(*croppedImporter());
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> img = imgs.shift();
 
 	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
@@ -197,10 +190,9 @@ void to::test<4>()
 #if PERFORM_SLOW_TESTS
 	-- Temporarily disabled as it currently uses too much ram
 
-	XRITImportOptions opts;
-	setSource(opts);
-	std::auto_ptr<Image> img = importXRIT(opts);
-	img = recodeThroughGrib(*img);
+	ImageVector imgs(*importer());
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
@@ -224,12 +216,11 @@ void to::test<4>()
 template<> template<>
 void to::test<5>()
 {
-	XRITImportOptions opts;
-	setSource(opts);
-	setCrop(opts);
+	ImageVector imgs(*croppedImporter());
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> origimg = imgs.shift();
 
-	std::auto_ptr<Image> imgorig = importXRIT(opts);
-	std::auto_ptr<Image> img = recodeThroughGrib(*imgorig);
+	std::auto_ptr<Image> img = recodeThroughGrib(*origimg);
 
 	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
@@ -237,15 +228,16 @@ void to::test<5>()
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
 	gen_ensure_equals(img->data->slope, 0.01);
-	gen_ensure_equals(img->data->offset, -3.3);
-	gen_ensure_equals(img->data->bpp, 10); // unverified
+	//gen_ensure_equals(img->data->offset, -3.3f);
+	gen_ensure_similar(img->data->offset, -3.3, 0.00001);
+	gen_ensure_equals(img->data->bpp, 9); // unverified
 	gen_ensure_equals(img->data->scalesToInt, true);
 
 	test_tag("croppedXRITRecodedGrib");
 	checkCroppedImageData(*img);
 	test_untag();
 
-	gen_ensure_imagedata_similar(*img->data, *imgorig->data, 0.01);
+	gen_ensure_imagedata_similar(*img->data, *origimg->data, 0.01);
 }
 
 // Import a full XRIT product and pass it from netcdf24
@@ -282,12 +274,9 @@ void to::test<6>()
 template<> template<>
 void to::test<7>()
 {
-	XRITImportOptions opts;
-	setSource(opts);
-	setCrop(opts);
-
-	std::auto_ptr<Image> imgorig = importXRIT(opts);
-	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgorig);
+	ImageVector imgs(*croppedImporter());
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
 
 	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
@@ -303,7 +292,7 @@ void to::test<7>()
 	checkCroppedImageData(*img);
 	test_untag();
 
-	gen_ensure_imagedata_similar(*img->data, *imgorig->data, 0.0001);
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 // Import a full XRIT product and pass it from netcdf
@@ -340,12 +329,9 @@ void to::test<8>()
 template<> template<>
 void to::test<9>()
 {
-	XRITImportOptions opts;
-	setSource(opts);
-	setCrop(opts);
-
-	std::auto_ptr<Image> imgorig = importXRIT(opts);
-	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgorig);
+	ImageVector imgs(*croppedImporter());
+	gen_ensure_equals(imgs.size(), 1u);
+	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
 
 	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
@@ -361,7 +347,7 @@ void to::test<9>()
 	checkCroppedImageData(*img);
 	test_untag();
 
-	gen_ensure_imagedata_similar(*img->data, *imgorig->data, 0.0001);
+	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 }
 

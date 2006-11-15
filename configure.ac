@@ -254,6 +254,10 @@ AM_CONDITIONAL([HDF5], [test x"$enable_hdf5" = x"yes"])
 AM_CONDITIONAL([DBALLE], [test x"$enable_dballe" = x"yes"])
 
 dnl --------------------------------------------------------------------
+dnl Extra warnings are good
+CXXFLAGS="-Wall $CXXFLAGS"
+
+dnl --------------------------------------------------------------------
 dnl Create output files.
 
 AC_CONFIG_FILES([
