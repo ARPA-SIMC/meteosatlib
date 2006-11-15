@@ -65,7 +65,7 @@ static void checkFullImageData(Image& img)
 {
 	checkGeneralImageData(img);
 
-	gen_ensure_equals(img.data->columns, 7632);
+	gen_ensure_equals(img.data->columns, 7622);
 	gen_ensure_equals(img.data->lines, 11136);
 	gen_ensure_equals(img.x0, 1);
 	gen_ensure_equals(img.y0, 1);
@@ -108,7 +108,7 @@ static void checkCroppedImageData(Image& img)
 template<> template<>
 void to::test<1>()
 {
-	gen_ensure(isXRIT("data/H:MSG1:HRV:200604261945"));
+	gen_ensure(isXRIT("data/H:MSG1:HRV:200611141200"));
 	gen_ensure(!isXRIT("data/H:MSG1:HRV"));
 }
 
@@ -121,13 +121,13 @@ void to::test<2>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.pixelSubarea = false;
 	//int AreaLinStart, AreaNlin, AreaPixStart, AreaNpix;
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
-	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -160,7 +160,7 @@ void to::test<3>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
@@ -169,7 +169,7 @@ void to::test<3>()
 
 	std::auto_ptr<Image> img = importXRIT(opts);
 
-	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -196,12 +196,12 @@ void to::test<4>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.subarea = false;
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughGrib(*img);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
@@ -228,7 +228,7 @@ void to::test<5>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
@@ -238,7 +238,7 @@ void to::test<5>()
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgorig);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
@@ -267,12 +267,12 @@ void to::test<6>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.subarea = false;
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughNetCDF24(*img);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -299,7 +299,7 @@ void to::test<7>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
@@ -309,7 +309,7 @@ void to::test<7>()
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgorig);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
@@ -338,12 +338,12 @@ void to::test<8>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.subarea = false;
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughNetCDF(*img);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -370,7 +370,7 @@ void to::test<9>()
 	opts.resolution = "H";
 	opts.productid1 = "MSG1";
 	opts.productid2 = "HRV";
-	opts.timing = "200604261945";
+	opts.timing = "200611141200";
 	opts.pixelSubarea = true;
 	opts.AreaLinStart = 5500;
 	opts.AreaNlin = 300;
@@ -380,7 +380,7 @@ void to::test<9>()
 	std::auto_ptr<Image> imgorig = importXRIT(opts);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgorig);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20060426_1945");
+	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
