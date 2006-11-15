@@ -124,8 +124,11 @@ void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 
 	//cerr << "  toProjected: " << p.x << "," << p.y << endl;
 
-  x = (int)rint((double) column_offset + p.x * column_factor * exp2(-16)) - x0;
-  y = (int)rint((double) line_offset   + p.y * line_factor   * exp2(-16)) - y0;
+	int dx = (int)rint((double) column_offset + p.x * column_factor * exp2(-16)) - x0;
+	int dy = (int)rint((double) line_offset   + p.y * line_factor   * exp2(-16)) - y0;
+
+  x = dx < 0 ? 0 : (unsigned)dx;
+  y = dy < 0 ? 0 : (unsigned)dy;
 }
 
 double Image::pixelHSize() const
