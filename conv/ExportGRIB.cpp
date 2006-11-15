@@ -91,10 +91,12 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 #endif
 
   GRIB_MESSAGE m;
-  GRIB_GRID grid;
-  GRIB_LEVEL l;
-  GRIB_TIME t;
-  GRIB_FIELD f;
+
+	// Access the fields of m directly, to avoid a copy at m.set_* time
+  GRIB_GRID& grid = m.grid;
+  GRIB_LEVEL& l = m.level;
+  GRIB_TIME& t = m.gtime;
+  GRIB_FIELD& f = m.field;
 
   t.set(img.year, img.month, img.day, img.hour, img.minute,
         GRIB_TIMEUNIT_MINUTE, GRIB_TIMERANGE_FORECAST_AT_REFTIME_PLUS_P1,
@@ -143,7 +145,6 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   // Get the calibrated image
 	p.activity("Computing calibrated image");
   float *fvals = img.data->allScaled();
-	p.activity("Handing over calibrated image to GRIB encoder");
   f.set_field_nocopy(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, img.data->missingValue, img.data->missingValue);
   //delete [ ] fvals;
 
@@ -189,13 +190,16 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 #endif
 #endif
 
-  // Write output values
+#if 0
+	// Avoid copying all these members, since we set directly the ones in m
 	p.activity("Putting all the components together");
   m.set_time(t);
   m.set_grid(grid);
   m.set_level(l);
   m.set_field(f);
+#endif
 
+  // Write output values
 	p.activity("Writing message");
   gf.WriteMessage(m);
 }
