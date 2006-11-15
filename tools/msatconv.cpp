@@ -72,7 +72,7 @@ void do_help(const char* argv0, ostream& out)
 #endif
       << "Options are:" << endl
       << "  --help           Print this help message" << endl
-      << "  -q,--quiet       Work silently" << endl;
+      << "  -q,--quiet       Work silently" << endl
       << "  --view           View the contents of a file" << endl
       << "  --dump           View the contents of a file, including the pixel data" << endl
       << "  --grib           Convert to GRIB" << endl
@@ -184,6 +184,7 @@ int main( int argc, char* argv[] )
 #endif
 		{ "area", 1, 0, 'a' },
 		{ "Area", 1, 0, 'A' },
+		{ 0, 0, 0, 0 },
   };
 
   bool done = false;
