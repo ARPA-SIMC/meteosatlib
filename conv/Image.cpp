@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <limits>
 #include <math.h>
 #include <limits.h>
 #include <proj/const.h>
@@ -375,7 +376,7 @@ std::string Image::defaultFilename() const
 //
 
 ImageData::ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0),
-	              scalesToInt(false), missingValue(FP_NAN) {}
+	              scalesToInt(false), missingValue(std::numeric_limits<float>::min()) {}
 
 float* ImageData::allScaled() const
 {

@@ -73,14 +73,32 @@ void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageDa
 	}
 	for (size_t y = 0; y < expected.lines; ++y)
 		for (size_t x = 0; x < expected.columns; ++x)
-			if( actual.scaled(x,y) <= expected.scaled(x,y) - delta ||
-			    expected.scaled(x,y) + delta <= actual.scaled(x,y) )
+		{
+			float v1 = actual.scaled(x,y);
+			float v2 = expected.scaled(x,y);
+			if (v1 == actual.missingValue && v2 == expected.missingValue)
+				continue;
+			if (v1 == actual.missingValue && v2 != expected.missingValue)
 			{
 				std::stringstream ss;
 				ss << "at position " << x << "," << y << ": expected "
-				   << expected.scaled(x,y) << " actual " << actual.scaled(x,y);
+				   << v2 << " actual missing";
 				throw failure(__ensure_errmsg(file, line, ss.str()));
 			}
+			if (v1 != actual.missingValue && v2 == expected.missingValue)
+			{
+				std::stringstream ss;
+				ss << "at position " << x << "," << y << ": expected missing actual " << v1;
+				throw failure(__ensure_errmsg(file, line, ss.str()));
+			}
+			if (v1 <= v2 - delta || v2 + delta <= v1)
+			{
+				std::stringstream ss;
+				ss << "at position " << x << "," << y << ": expected "
+				   << v2 << " actual " << v1;
+				throw failure(__ensure_errmsg(file, line, ss.str()));
+			}
+		}
 }
 
 TempTestFile::TempTestFile(bool leave) : leave(leave)
