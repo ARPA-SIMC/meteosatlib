@@ -169,8 +169,6 @@ public:
 
 			ProgressTask p1(string("Reading NetCDF24 variable ") + var->name());
 
-			img->addToHistory("Imported from NetCDF24 " + img->defaultFilename() + " variable " + var->name());
-
 			switch (var->type())
 			{
 				case ncByte:   readData<ncbyte>(*var, *img); img->data->scalesToInt = true;  break;
@@ -180,6 +178,7 @@ public:
 				case ncFloat:  readData<float>(*var, *img);  img->data->scalesToInt = false; break;
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
+			img->addToHistory("Imported from NetCDF24 " + img->defaultFilename() + " variable " + var->name());
 			computeBPP(*img->data);
 			cropIfNeeded(*img);
 			output.processImage(img);
