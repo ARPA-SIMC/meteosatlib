@@ -28,6 +28,7 @@
 #include <config.h>
 
 #include <conv/ExportImage.h>
+#include <conv/ImportXRIT.h>
 #include <conv/Progress.h>
 
 #include <Magick++.h>
@@ -89,6 +90,18 @@ static std::auto_ptr<Magick::Image> imageToMagick(ProgressTask& p, const Image& 
 	{
 		p.activity("Creating image");
 		image.reset(new Magick::Image(img.data->columns, img.data->lines, "I", Magick::IntegerPixel, i->pixels));
+		p.activity("Normalising image");
+		image->normalize();
+	}
+	else if (HRITImageData* i = dynamic_cast< HRITImageData* >(img.data))
+	{
+		p.activity("Creating image");
+		unsigned short* pixels = new unsigned short[img.data->columns * img.data->lines];
+		for (size_t y = 0; y < img.data->lines; ++y)
+			for (size_t x = 0; x < img.data->columns; ++x)
+				pixels[y*img.data->columns+x] = i->sample(x, y);
+		image.reset(new Magick::Image(img.data->columns, img.data->lines, "I", Magick::ShortPixel, pixels));
+		delete[] pixels;
 		p.activity("Normalising image");
 		image->normalize();
 	}

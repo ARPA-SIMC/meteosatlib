@@ -198,186 +198,125 @@ std::string XRITImportOptions::toString() const
 	return str.str();
 }
 
-/**
- * ImageData implementation that reads data directly from the HRIT file on
- * disk, keeping in memory not more than one segment at a time
- */
-struct HRITImageData : public ImageData
+HRITImageData::~HRITImageData()
 {
-	/// HRV parameters used to locate the two image parts
-	int LowerEastColumnActual;
-	int LowerNorthLineActual;
-	int LowerWestColumnActual;
-	int UpperEastColumnActual;
-	int UpperSouthLineActual;
-	int UpperWestColumnActual;
+	if (m_segment) delete m_segment;
+	if (calibration) delete[] calibration;
+}
 
-	/// Number of pixels in every segment
-	size_t npixperseg;
-
-	/// True if the image needs to be swapped horizontally
-	bool swapX;
-
-	/// True if the image needs to be swapped vertically
-	bool swapY;
-
-	/// True if the image is an HRV image divided in two parts
-	bool hrv;
-
-	/// Pathnames of the segment files, indexed with their index
-	std::vector<string> segnames;
-
-	/// Cached segment
-	mutable MSG_data* m_segment;
-
-	/// Index of the currently cached segment
-	mutable int m_segment_idx;
-
-	/// Calibration vector
-	float* calibration;
-
-	/// Number of columns in the uncropped image
-	size_t origColumns;
-
-	/// Number of lines in the uncropped image
-	size_t origLines;
-
-	/// Cropping edges
-	int cropX, cropY;
-
-	HRITImageData() : npixperseg(0), m_segment(0), m_segment_idx(-1), calibration(0), cropX(0), cropY(0) {}
-  virtual ~HRITImageData()
+MSG_data* HRITImageData::segment(size_t idx) const
+{
+	if ((int)idx != m_segment_idx)
 	{
+		// Delete old segment if any
 		if (m_segment) delete m_segment;
-		if (calibration) delete[] calibration;
+		m_segment = 0;
+		m_segment_idx = 0;
+		if (idx >= segnames.size()) return 0;
+		if (segnames[idx].empty()) return m_segment;
+
+		ProgressTask p("Reading segment " + segnames[idx]);
+		std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
+		if (hrit.fail())
+			throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
+		MSG_header header;
+		header.read_from(hrit);
+		if (header.segment_id->data_field_format == MSG_NO_FORMAT)
+			throw std::runtime_error("Product dumped in binary format.");
+		m_segment = new MSG_data;
+		m_segment->read_from(hrit, header);
+		hrit.close( );
+
+		m_segment_idx = idx;
 	}
+	return m_segment;
+}
 
-	/**
-	 * Return the MSG_data corresponding to the segment with the given index.
-	 *
-	 * The pointer could be invalidated by another call to segment()
-	 */
-	MSG_data* segment(size_t idx) const
+MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
+{
+	// Shift and cut the area according to cropping
+	if (x >= columns) return 0;
+	if (y >= lines) return 0;
+	x += cropX;
+	y += cropY;
+
+	// Rotate if needed
+	if (swapX) x = origColumns - x - 1;
+	if (swapY) y = origLines - y - 1;
+
+	// Absolute position in image data
+	size_t pos;
+	if (hrv)
 	{
-		if ((int)idx != m_segment_idx)
+		// Check if we are in the shifted HRV upper area
+		// FIXME: the '-1' should not be there, but if I take it out I see one
+		//        line badly offset
+		if (y >= UpperSouthLineActual - 1)
 		{
-			// Delete old segment if any
-			if (m_segment) delete m_segment;
-			m_segment = 0;
-			m_segment_idx = 0;
-			if (idx >= segnames.size()) return 0;
-			if (segnames[idx].empty()) return m_segment;
-
-			ProgressTask p("Reading segment " + segnames[idx]);
-			std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
-			if (hrit.fail())
-				throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
-			MSG_header header;
-			header.read_from(hrit);
-			if (header.segment_id->data_field_format == MSG_NO_FORMAT)
-				throw std::runtime_error("Product dumped in binary format.");
-			m_segment = new MSG_data;
-			m_segment->read_from(hrit, header);
-			hrit.close( );
-
-			m_segment_idx = idx;
+			if (x < UpperEastColumnActual)
+				return 0;
+			if (x > UpperWestColumnActual)
+				return 0;
+			x -= UpperEastColumnActual;
+		} else {
+			if (x < LowerEastColumnActual)
+				return 0;
+			if (x > LowerWestColumnActual)
+				return 0;
+			x -= LowerEastColumnActual;
 		}
-		return m_segment;
-	}
+		pos = y * (origColumns - UpperEastColumnActual - 1) + x;
+	} else
+		pos = y * origColumns + x;
 
-	/// Get an unscaled sample from the given coordinates in the normalised image
-	MSG_SAMPLE sample(size_t x, size_t y) const
-	{
-		// Shift and cut the area according to cropping
-		if (x >= columns) return 0;
-		if (y >= lines) return 0;
-		x += cropX;
-		y += cropY;
+	// Segment number where is the pixel
+	size_t segno = pos / npixperseg;
+	MSG_data* d = segment(segno);
+	if (d == 0) return 0;
 
-		// Rotate if needed
-		if (swapX) x = origColumns - x - 1;
-		if (swapY) y = origLines - y - 1;
+	// Offset of the pixel in the segment
+	size_t segoff = pos - (segno * npixperseg);
+	return d->image->data[segoff];
+}
 
-		// Absolute position in image data
-		size_t pos;
-		if (hrv)
-		{
-			// Check if we are in the shifted HRV upper area
-			// FIXME: the '-1' should not be there, but if I take it out I see one
-			//        line badly offset
-			if (y >= UpperSouthLineActual - 1)
-			{
-				if (x < UpperEastColumnActual)
-					return 0;
-				if (x > UpperWestColumnActual)
-					return 0;
-				x -= UpperEastColumnActual;
-			} else {
-				if (x < LowerEastColumnActual)
-					return 0;
-				if (x > LowerWestColumnActual)
-					return 0;
-				x -= LowerEastColumnActual;
-			}
-			pos = y * (origColumns - UpperEastColumnActual - 1) + x;
-		} else
-			pos = y * origColumns + x;
+float HRITImageData::scaled(int column, int line) const
+{
+	// Get the wanted sample
+	MSG_SAMPLE s = sample(column, line);
 
-		// Segment number where is the pixel
-		size_t segno = pos / npixperseg;
-		MSG_data* d = segment(segno);
-		if (d == 0) return 0;
+	// Perform calibration
 
-		// Offset of the pixel in the segment
-		size_t segoff = pos - (segno * npixperseg);
-		return d->image->data[segoff];
-	}
+	// To avoid spurious data, negative values after calibration are
+	// converted to missing values
+	if (s > 0 && calibration[s] >= 0)
+		return calibration[s];
+	else
+		return missingValue;
+}
 
-  /// Image sample as physical value (already scaled with slope and offset)
-  float scaled(int column, int line) const
-	{
-		// Get the wanted sample
-		MSG_SAMPLE s = sample(column, line);
+int HRITImageData::scaledToInt(int column, int line) const
+{
+	if (!this->scalesToInt)
+		throw std::runtime_error("Image samples cannot be scaled to int");
+	return sample(column, line);
+}
 
-		// Perform calibration
+int HRITImageData::unscaledMissingValue() const
+{
+	if (!this->scalesToInt)
+		throw std::runtime_error("Image samples cannot be scaled to int");
+	// HRIT samples have 0 as missing value
+	return 0;
+}
 
-		// To avoid spurious data, negative values after calibration are
-		// converted to missing values
-		if (s > 0 && calibration[s] >= 0)
-			return calibration[s];
-		else
-			return missingValue;
-	}
-
-	/// Image sample scaled to int using slope and offset.
-	/// The function throws if scalesToInt is false.
-	virtual int scaledToInt(int column, int line) const
-	{
-		if (!this->scalesToInt)
-			throw std::runtime_error("Image samples cannot be scaled to int");
-		return sample(column, line);
-	}
-
-	/// Value used to represent a missing value in the unscaled int
-	/// data, if available
-	virtual int unscaledMissingValue() const
-	{
-		if (!this->scalesToInt)
-			throw std::runtime_error("Image samples cannot be scaled to int");
-		// HRIT samples have 0 as missing value
-		return 0;
-	}
-
-	/// Crop the image to the given rectangle
-	virtual void crop(int x, int y, int width, int height)
-	{
-		// Virtual cropping: we just limit the area of the image we read
-		cropX += x;
-		cropY += y;
-		columns = width;
-		lines = height;
-	}
-};
+void HRITImageData::crop(int x, int y, int width, int height)
+{
+	// Virtual cropping: we just limit the area of the image we read
+	cropX += x;
+	cropY += y;
+	columns = width;
+	lines = height;
+}
 
 
 std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
