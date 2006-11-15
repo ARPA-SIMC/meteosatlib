@@ -539,7 +539,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			if (sample > 0 && cal[sample] >= 0)
 				data->pixels[iy*width+ix] = cal[sample];
 			else
-				data->pixels[iy*width+ix] = 0.0;
+				data->pixels[iy*width+ix] = data->missingValue;
 		}
   delete [ ] cal;
 

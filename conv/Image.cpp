@@ -376,7 +376,7 @@ std::string Image::defaultFilename() const
 //
 
 ImageData::ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0),
-	              scalesToInt(false), missingValue(std::numeric_limits<float>::min()) {}
+	              scalesToInt(false), missingValue(std::numeric_limits<float>::max()) {}
 
 float* ImageData::allScaled() const
 {
