@@ -1812,6 +1812,8 @@ void GRIB_MESSAGE::Encode( )
   }
 
   int mask_nxny = field.size;
+  // This copy is needed because mk_BMS modifies the input by removing the
+  // missing values
   float *tocomp = new float[field.size];
   memcpy(tocomp, field.vals, field.size*sizeof(float));
 
