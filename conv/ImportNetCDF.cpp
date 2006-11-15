@@ -298,7 +298,6 @@ public:
 			auto_ptr<Image> img(new Image);
 			readHeader(*img);
 			img->setQualityFromPathname(filename);
-			img->addToHistory("Imported from NetCDF " + img->defaultFilename());
 
 			NcVar* var = ncf.get_var(i);
 			if (string(var->name()) == "time")
@@ -314,6 +313,7 @@ public:
 				case ncFloat:  readData<float>(*var, *img);  img->data->scalesToInt = false; break;
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
+			img->addToHistory("Imported from NetCDF " + img->defaultFilename());
 			computeBPP(*img->data);
 			cropIfNeeded(*img);
 			output.processImage(img);
