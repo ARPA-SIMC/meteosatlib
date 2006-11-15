@@ -211,16 +211,13 @@ std::string XRITImportOptions::toString() const
 
 struct Decoder
 {
-	/*
-	 * FIXME: I don't know how to read the epilogue: I'll have to hardcode the
-	 * values I'd have read from it
-	 */
-	static const int LowerEastColumnActual = 1;
-	static const int LowerNorthLineActual = 8064;
-	static const int LowerWestColumnActual = 5568;
-	static const int UpperEastColumnActual = 2064;
-	static const int UpperSouthLineActual = 8065;
-	static const int UpperWestColumnActual = 7631;
+	/// HRIT HRV parameters used to locate the two image parts
+	int LowerEastColumnActual;
+	int LowerNorthLineActual;
+	int LowerWestColumnActual;
+	int UpperEastColumnActual;
+	int UpperSouthLineActual;
+	int UpperWestColumnActual;
 
 	ProgressTask& p;
 	const XRITImportOptions& opts;
@@ -239,6 +236,38 @@ struct Decoder
 	Decoder(const XRITImportOptions& opts, Image& img, ProgressTask& p)
 		: p(p), opts(opts), seglines(0), columns(0), lines(0), npixperseg(0), data(0), cur_data(-1)
 	{
+		MSG_header EPI_head;
+		MSG_data EPI_data;
+		p.activity("Reading epilogue " + opts.epilogueFile());
+		std::ifstream hrit(opts.epilogueFile().c_str(), (std::ios::binary | std::ios::in));
+		if (hrit.fail())
+			throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
+		EPI_head.read_from(hrit);
+		EPI_data.read_from(hrit, EPI_head);
+		hrit.close();
+
+		// Subtracting one because they start from 1 instead of 0
+		LowerEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual - 1;
+		LowerNorthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual - 1;
+		LowerWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual - 1;
+		//<< " LSLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
+		UpperEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual - 1;
+		UpperSouthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual - 1;
+		UpperWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual - 1;
+		//<< " UNLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
+
+#if 0
+		cerr << " LSLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual - 1
+			   << " LNLA: " << LowerNorthLineActual
+			   << " LECA: " << LowerEastColumnActual
+			   << " LWCA: " << LowerWestColumnActual
+			   << " USLA: " << UpperSouthLineActual
+			   << " UNLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual - 1
+			   << " UECA: " << UpperEastColumnActual
+			   << " UWCA: " << UpperWestColumnActual
+			   << endl;
+#endif
+
 		// Sort the segment names by their index
 		vector<string> segfiles = opts.segmentFiles();
 		for (vector<string>::const_iterator i = segfiles.begin();
@@ -296,29 +325,38 @@ struct Decoder
 			if ((size_t)idx >= segnames.size())
 				segnames.resize(idx + 1);
 			segnames[idx] = *i;
+
+#if 0
+			// Print the data of the holey segment
+			if (idx == 17)
+			{
+				std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
+				if (hrit.fail())
+					throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
+				MSG_header header;
+				header.read_from(hrit);
+				if (header.segment_id->data_field_format == MSG_NO_FORMAT)
+					throw std::runtime_error("Product dumped in binary format.");
+				MSG_data d;
+				d.read_from(hrit, header);
+				hrit.close( );
+				for (int i = 0; i < npixperseg; ++i)
+				{
+					cout << " " << d.image->data[i];
+					if ((i % columns) == 0)
+						cout << endl;
+				}
+				cout << endl;
+			}
+#endif
 		}
 
 		// Special handling for HRV images
 		if (hrv)
 		{
-			// HRV contains two areas: the upper and lower area.  They have the same
-			// width but different heights, and they are not horizontally aligned
-			/*
-				 cerr << " EPI: " << PRO_data.epilogue;
-
-				 cerr << "HRV: "
-				 << " LSLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
-				 << " LNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual
-				 << " LECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual
-				 << " LWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual
-				 << " USLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual
-				 << " UNLA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
-				 << " UECA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual
-				 << " UWCA: " << PRO_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual
-				 << endl;
-				 */
-
-			columns += UpperEastColumnActual;
+			// Widen the image to include both image parts, placed in their right
+			// position
+			columns += UpperEastColumnActual + 1;
 		}
 	}
 
@@ -357,29 +395,38 @@ struct Decoder
 
 	MSG_SAMPLE get(size_t x, size_t y)
 	{
+		//bool debug = x == 3000;
+		//bool shift;
+		//size_t ypre = y;
+
 		// Rotate if needed
-		if (swapX) x = columns - x;
-		if (swapY) y = lines - y;
+		if (swapX) x = columns - x - 1;
+		if (swapY) y = lines - y - 1;
 
 		// Absolute position in image data
 		size_t pos;
 		if (hrv)
 		{
 			// Check if we are in the shifted HRV upper area
-			if (y >= UpperSouthLineActual)
+			// FIXME: the '-1' should not be there, but if I take it out I see one
+			//        line badly offset
+			if (y >= UpperSouthLineActual - 1)
 			{
 				if (x < UpperEastColumnActual)
 					return 0;
 				if (x > UpperWestColumnActual)
 					return 0;
+				//shift = true;
 				x -= UpperEastColumnActual;
 			} else {
 				if (x < LowerEastColumnActual)
 					return 0;
 				if (x > LowerWestColumnActual)
 					return 0;
+				//shift = false;
+				x -= LowerEastColumnActual;
 			}
-			pos = y * (columns - UpperEastColumnActual) + x;
+			pos = y * (columns - UpperEastColumnActual - 1) + x;
 		} else
 			pos = y * columns + x;
 
@@ -390,6 +437,7 @@ struct Decoder
 
 		// Offset of the pixel in the segment
 		size_t segoff = pos - (segno * npixperseg);
+		//if (debug) cerr << "Ypre: " << ypre << " post: " << x << "," << y << " shift: " << shift << " seg " << segno << " val " << d->image->data[segoff] << endl;
 		return d->image->data[segoff];
 	}
 };
@@ -432,14 +480,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	hrit.close();
 
-	/*
-	hrit.open(opts.epilogueFile().c_str(), (std::ios::binary | std::ios::in));
-	if (hrit.fail())
-		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
-	PRO_data.read_from(hrit, PRO_head);
-	hrit.close();
-	*/
-
 	size_t x = 0;
 	size_t y = 0;
 	size_t width = d.columns;
@@ -468,6 +508,8 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 		height = y > y1 ? y-y1 : y1-y;
 		x = x < x1 ? x : x1;
 		y = y < y1 ? y : y1;
+		if (x + width >= d.columns) width = d.columns - x - 1;
+		if (y + height >= d.lines) height = d.lines - y - 1;
 		std::stringstream str;
 		str << "Import limited to " << x << "," << y << " " << width << "x" << height;
 		p.activity(str.str());
@@ -511,19 +553,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	img->line_offset -= y;
 #endif
 
-	// TODO
-#if 0
-  char *channelstring = strdup(MSG_channel_name((t_enum_MSG_spacecraft) pds.spc,
-                               pds.chn).c_str( ));
-  char *channel = chname(channelstring, strlen(channelstring) + 1);
-
-  // Build up output Grib file name and open it
-  sprintf( GribName, "%s_%4d%02d%02d_%02d%02d.grb", channel,
-           tmtime->tm_year + 1900, tmtime->tm_mon + 1, tmtime->tm_mday,
-	   tmtime->tm_hour, tmtime->tm_min );
-#endif
-	//img->name = "" /* TODO */;
-
 	double slope;
 	double offset;
   PRO_data.prologue->radiometric_proc.get_slope_offset(
@@ -542,23 +571,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
   // FIXME: and this? pds.sh = header[0].image_navigation->satellite_h;
 
-	/* FIXME: and this?
-  int fakechan = 0;
-  float abase = 145.0;
-  if (pds.chn == MSG_SEVIRI_1_5_VIS_0_6) { fakechan = 10; abase = 0.0; }
-  if (pds.chn == MSG_SEVIRI_1_5_VIS_0_8) { fakechan = 11; abase = 0.0; }
-  if (pds.chn == MSG_SEVIRI_1_5_HRV)     { fakechan = 12; abase = 0.0; }
-  if (pds.chn == MSG_SEVIRI_1_5_IR_1_6)   fakechan = 0;
-  if (pds.chn == MSG_SEVIRI_1_5_IR_3_9)   fakechan = 1;
-  if (pds.chn == MSG_SEVIRI_1_5_IR_8_7)   fakechan = 2;
-  if (pds.chn == MSG_SEVIRI_1_5_IR_9_7)   fakechan = 3;
-  if (pds.chn == MSG_SEVIRI_1_5_IR_10_8)  fakechan = 4;
-  if (pds.chn == MSG_SEVIRI_1_5_IR_12_0)  fakechan = 5;
-  if (pds.chn == MSG_SEVIRI_1_5_IR_13_4)  fakechan = 6;
-  if (pds.chn == MSG_SEVIRI_1_5_WV_6_2)   fakechan = 20;
-  if (pds.chn == MSG_SEVIRI_1_5_WV_7_3)   fakechan = 21;
-  fakechan = pds.chn;
-	*/
   return img;
 }
 
