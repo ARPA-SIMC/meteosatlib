@@ -1727,7 +1727,18 @@ int GRIB_MESSAGE::Decode(unsigned char *msg, size_t msgsize)
     pnt += BMS_LEN(bms);
   }
   bds = pnt;
-  pnt += BDS_LEN(bds);
+
+#ifdef ECMWF_NIGHTMARE_HACK
+	if (msgsize > 0x800000)
+	{
+		// When the hack is on, then the bds length will contain just the length of
+		// the padding.  The real bds length will then become:
+		//   length of the message - length of section 5 - start of bts - padding value (what is encoded as length)
+		size_t sec4len = msgsize - 4 - (bds-message) - BDS_LEN(bds);
+		pnt += sec4len + BDS_LEN(bds);
+	} else
+#endif
+		pnt += BDS_LEN(bds);
 
 #if 0
   if (memcmp(pnt, "7777", 4) != 0)
@@ -2189,6 +2200,8 @@ int GRIB_FILE::ReadMessage(GRIB_MESSAGE &message)
   if (msg[4] & 0x80)
   {
     reclen = (((msg[4] & 0x7f)<<16) + (msg[5]<<8) + msg[6]) * 120;
+    // TODO: length of section 4 becomes this value minus the start minus the
+    // lenght value (padding) minus length of section 5
   } else
 #endif
     reclen = (msg[4]<<16) + (msg[5]<<8) + msg[6];
