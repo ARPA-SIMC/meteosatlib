@@ -264,7 +264,7 @@ AC_CONFIG_FILES([
     Makefile
     decompress/Makefile
     examples/Makefile
-    conv/Makefile
+    msat/Makefile
     grib/Makefile
     iniparser/Makefile
     images/Makefile

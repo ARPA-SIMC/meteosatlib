@@ -77,7 +77,7 @@ std::string Image::historyPlusEvent(const std::string& event) const
 		return history + ", " + event;
 }
 
-void Image::crop(int x, int y, int width, int height)
+void Image::crop(size_t x, size_t y, size_t width, size_t height)
 {
 	data->crop(x, y, width, height);
 	x0 += x;
@@ -118,8 +118,6 @@ void Image::cropByCoords(double latmin, double latmax, double lonmin, double lon
 
 void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 {
-  double column, line;
-
 	proj::ProjectedPoint p;
 	proj->mapToProjected(proj::MapPoint(lat, lon), p);
 
@@ -259,7 +257,6 @@ time_t Image::forecastSeconds2000() const
 {
 	const time_t s_epoch_2000 = 946684800;
 	struct tm itm;
-	time_t ttm;
 
 	bzero(&itm, sizeof(struct tm));
 	itm.tm_year = year - 1900;
@@ -286,7 +283,7 @@ time_t Image::forecastSeconds2000() const
 
 int Image::decimalDigitsOfScaledValues() const
 {
-	if (channel_id < channel_info_size)
+	if (channel_id >= 0 && (size_t)channel_id < channel_info_size)
 		// When it's a known channel, se can use our internal table
 		return channelInfo[channel_id].decimalDigits;
 	else if (data->scalesToInt)
@@ -377,8 +374,8 @@ ImageData::ImageData() : columns(0), lines(0), slope(1), offset(0), bpp(0),
 float* ImageData::allScaled() const
 {
 	float* res = new float[lines * columns];
-	for (int y = 0; y < lines; ++y)
-		for (int x = 0; x < columns; ++x)
+	for (size_t y = 0; y < lines; ++y)
+		for (size_t x = 0; x < columns; ++x)
 			res[y * columns + x] = scaled(x, y);
 	return res;
 }
@@ -427,8 +424,8 @@ public:
 		if (withContents)
 		{
 			cout << "Coord\tUnscaled\tScaled" << endl;
-			for (int l = 0; l < img->data->lines; ++l)
-				for (int c = 0; c < img->data->lines; ++c)
+			for (size_t l = 0; l < img->data->lines; ++l)
+				for (size_t c = 0; c < img->data->lines; ++c)
 					cout << c << "x" << l << '\t' << '\t' << img->data->scaled(c, l) << endl;
 		}
   }

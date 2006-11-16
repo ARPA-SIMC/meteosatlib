@@ -28,7 +28,7 @@
 
 #include "config.h"
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
 
@@ -40,8 +40,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <conv/Image.tcc>
-#include <conv/Progress.h>
+#include <msat/Image.tcc>
+#include <msat/Progress.h>
 
 #define TITLE "Observation File from MSG-SEVIRI"
 #define INSTITUTION "HIMET"
@@ -73,7 +73,7 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 	// Handle missing values
 	res->missing = m.field.undef_high;
 	res->missingValue = res->missing;
-	for (size_t i = 0; i < m.grid.nxny; ++i)
+	for (int i = 0; i < m.grid.nxny; ++i)
 		if (res->pixels[i] >= m.field.undef_low && res->pixels[i] <= m.field.undef_high)
 			res->pixels[i] = res->missing;
 

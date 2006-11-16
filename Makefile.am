@@ -30,7 +30,7 @@ DIST_SUBDIRS = \
 SUBDIRS = . \
     proj \
     grib \
-    conv \
+    msat \
     images \
     tools \
     test

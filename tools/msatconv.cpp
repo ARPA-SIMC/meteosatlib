@@ -27,18 +27,18 @@
 
 #include <config.h>
 
-#include <conv/ImportGRIB.h>
-#include <conv/ImportSAFH5.h>
-#include <conv/ImportNetCDF.h>
-#include <conv/ImportNetCDF24.h>
-#include <conv/ImportXRIT.h>
-#include <conv/ExportGRIB.h>
-#include <conv/ExportNetCDF.h>
-#include <conv/ExportNetCDF24.h>
-#include <conv/Progress.h>
+#include <msat/ImportGRIB.h>
+#include <msat/ImportSAFH5.h>
+#include <msat/ImportNetCDF.h>
+#include <msat/ImportNetCDF24.h>
+#include <msat/ImportXRIT.h>
+#include <msat/ExportGRIB.h>
+#include <msat/ExportNetCDF.h>
+#include <msat/ExportNetCDF24.h>
+#include <msat/Progress.h>
 
 #ifdef HAVE_MAGICKPP
-#include <conv/ExportImage.h>
+#include <msat/ExportImage.h>
 #endif
 
 #include <set>
@@ -51,8 +51,6 @@
 
 using namespace std;
 using namespace msat;
-
-static char rcs_id_string[] = "$Id$";
 
 void do_help(const char* argv0, ostream& out)
 {
@@ -154,6 +152,7 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 		case DISPLAY: return createImageDisplayer();
 #endif
 	}
+	return auto_ptr<ImageConsumer>(0);
 }
 
 /* ************************************************************************* */

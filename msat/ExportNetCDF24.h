@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 //
-//  File        :   GRIBExport.h
-//  Description :   Write a GRIB using an ImageData structure
+//  File        :   ExportNetCDF.cpp
+//  Description :   Export data from an ImageData into a NetCDF file
 //  Project     :   ?
 //  Author      :   Enrico Zini (for ARPA SIM Emilia Romagna)
 //  Source      :   derived from SAFH5CT2NetCDF.cpp by Le Duc, as modified by
@@ -25,22 +25,20 @@
 //  
 //---------------------------------------------------------------------------
 
-#ifndef MLIB_GRIBEXPORT_H
-#define MLIB_GRIBEXPORT_H
+#ifndef MLIB_EXPORT_NETCDF24_H
+#define MLIB_EXPORT_NETCDF24_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <string>
 #include <memory>
 
-class GRIB_FILE;
-
 namespace msat {
 
-/// Export data from an ImageData into a GRIB_FILE
-void ExportGRIB(const Image& img, GRIB_FILE& gf);
+/// Export data from an ImageData to a NetCDF file
+void ExportNetCDF24(const Image& img, const std::string& fileName);
 
 // Use a factory method, so that we don't have to include the GRIB headers here
-std::auto_ptr<ImageConsumer> createGribExporter();
+std::auto_ptr<ImageConsumer> createNetCDF24Exporter();
 
 }
 

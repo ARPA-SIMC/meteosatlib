@@ -1,13 +1,13 @@
 //---------------------------------------------------------------------------
 //
-//  File        :   ExportNetCDF.cpp
-//  Description :   Export data from an ImageData into a NetCDF file
+//  File        :   GRIBExport.h
+//  Description :   Write a GRIB using an ImageData structure
 //  Project     :   ?
 //  Author      :   Enrico Zini (for ARPA SIM Emilia Romagna)
 //  Source      :   derived from SAFH5CT2NetCDF.cpp by Le Duc, as modified by
 //                  Francesca Di Giuseppe and from XRIT2Grib.cpp by Graziano
 //                  Giuliani (Lamma Regione Toscana)
-//  RCS ID      :   $Id: /local/meteosatlib/conv/ExportNetCDF.h 1746 2006-09-19T13:53:30.396225Z enrico  $
+//  RCS ID      :   $Id$
 //
 //  This program is free software; you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -25,26 +25,22 @@
 //  
 //---------------------------------------------------------------------------
 
-#ifndef MLIB_EXPORT_IMAGE_H
-#define MLIB_EXPORT_IMAGE_H
+#ifndef MLIB_GRIBEXPORT_H
+#define MLIB_GRIBEXPORT_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <string>
 #include <memory>
 
+class GRIB_FILE;
+
 namespace msat {
 
-/// Export data from an ImageData to an image file
-void ExportImage(const Image& img, const std::string& fileName);
-
-/// Display an image on screen
-void DisplayImage(const Image& img);
+/// Export data from an ImageData into a GRIB_FILE
+void ExportGRIB(const Image& img, GRIB_FILE& gf);
 
 // Use a factory method, so that we don't have to include the GRIB headers here
-std::auto_ptr<ImageConsumer> createImageExporter(const std::string& format = std::string("jpg"));
-
-// Use a factory method, so that we don't have to include the GRIB headers here
-std::auto_ptr<ImageConsumer> createImageDisplayer();
+std::auto_ptr<ImageConsumer> createGribExporter();
 
 }
 

@@ -80,6 +80,7 @@ static inline Sample getMissing()
 
 struct NcEncoder
 {
+	virtual ~NcEncoder() {}
 	virtual NcType getType() = 0;
 	virtual void setData(NcVar& var, const Image& img) = 0;
 };

@@ -32,34 +32,34 @@ noinst_HEADERS = \
     SAFH5Utils.h \
     Progress.h
 
-noinst_LTLIBRARIES = libconv.la
-libconv_la_SOURCES = \
+noinst_LTLIBRARIES = libmsat.la
+libmsat_la_SOURCES = \
     Image.cpp \
     ImportGRIB.cpp \
     ExportGRIB.cpp \
     Progress.cpp
-libconv_la_LIBADD = \
+libmsat_la_LIBADD = \
     ../proj/libproj.la \
     ../grib/libgrib.la
 
 if HRIT
-libconv_la_SOURCES += ImportXRIT.cpp
-libconv_la_LIBADD += ../hrit/libhrit.la
+libmsat_la_SOURCES += ImportXRIT.cpp
+libmsat_la_LIBADD += ../hrit/libhrit.la
 endif
 
 if HAVE_NETCDF
-libconv_la_SOURCES += ImportNetCDF.cpp ExportNetCDF.cpp ImportNetCDF24.cpp ExportNetCDF24.cpp
-libconv_la_LIBADD += -lnetcdf_c++ -lnetcdf
+libmsat_la_SOURCES += ImportNetCDF.cpp ExportNetCDF.cpp ImportNetCDF24.cpp ExportNetCDF24.cpp
+libmsat_la_LIBADD += -lnetcdf_c++ -lnetcdf
 endif
 
 if HDF5
-libconv_la_SOURCES += SAFH5Utils.cpp ImportSAFH5.cpp
-libconv_la_LIBADD += -lhdf5_cpp
+libmsat_la_SOURCES += SAFH5Utils.cpp ImportSAFH5.cpp
+libmsat_la_LIBADD += -lhdf5_cpp
 endif
 
 if HAVE_MAGICK
-libconv_la_SOURCES += ExportImage.cpp
-libconv_la_LIBADD += -lMagick++
+libmsat_la_SOURCES += ExportImage.cpp
+libmsat_la_LIBADD += -lMagick++
 endif
 
 MAINTAINERCLEANFILES = \

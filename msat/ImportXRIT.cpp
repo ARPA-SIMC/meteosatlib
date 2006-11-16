@@ -23,7 +23,7 @@
 //  
 //---------------------------------------------------------------------------
 
-#include <conv/ImportXRIT.h>
+#include <msat/ImportXRIT.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
 #include <stdexcept>
@@ -32,8 +32,8 @@
 #include <hrit/MSG_HRIT.h>
 #include <glob.h>
 
-#include <conv/Image.tcc>
-#include <conv/Progress.h>
+#include <msat/Image.tcc>
+#include <msat/Progress.h>
 
 using namespace std;
 
@@ -309,7 +309,7 @@ int HRITImageData::unscaledMissingValue() const
 	return 0;
 }
 
-void HRITImageData::crop(int x, int y, int width, int height)
+void HRITImageData::crop(size_t x, size_t y, size_t width, size_t height)
 {
 	// Virtual cropping: we just limit the area of the image we read
 	cropX += x;

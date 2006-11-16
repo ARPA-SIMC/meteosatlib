@@ -33,7 +33,7 @@
 
 #include <netcdfcpp.h>
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
 #include <grib/GRIB.h>
@@ -41,8 +41,8 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <conv/Image.tcc>
-#include <conv/Progress.h>
+#include <msat/Image.tcc>
+#include <msat/Progress.h>
 
 #include "NetCDFUtils.h"
 

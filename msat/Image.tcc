@@ -41,7 +41,7 @@ int ImageDataWithPixels<EL>::unscaledMissingValue() const
 }
 
 template<typename EL>
-void ImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
+void ImageDataWithPixels<EL>::crop(size_t x, size_t y, size_t width, size_t height)
 {
 	using namespace std;
 	// Consistency checks
@@ -52,7 +52,7 @@ void ImageDataWithPixels<EL>::crop(int x, int y, int width, int height)
 
 	size_t newsize = width * height;
 	Sample *newpix = new Sample[newsize];
-	for (int i = 0; i < height; ++i)
+	for (size_t i = 0; i < height; ++i)
 		memcpy(newpix + i * width, pixels + (y + i) * columns + x, width * sizeof(Sample));
 	delete [ ] pixels;
 	pixels = newpix;

@@ -20,7 +20,7 @@
  */
 
 #include "tut.h"
-#include <conv/Image.h>
+#include <msat/Image.h>
 
 #define TESTGRP(name) \
 typedef test_group<name ## _shar> tg; \

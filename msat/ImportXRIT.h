@@ -1,7 +1,7 @@
 #ifndef MSATLIB_XRIT_IMPORT_H
 #define MSATLIB_XRIT_IMPORT_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <hrit/MSG_data_image.h>
 #include <memory>
 #include <vector>
@@ -33,12 +33,12 @@ struct XRITImportOptions
 struct HRITImageData : public ImageData
 {
   /// HRV parameters used to locate the two image parts
-  int LowerEastColumnActual;
-  int LowerNorthLineActual;
-  int LowerWestColumnActual;
-  int UpperEastColumnActual;
-  int UpperSouthLineActual;
-  int UpperWestColumnActual;
+  size_t LowerEastColumnActual;
+  size_t LowerNorthLineActual;
+  size_t LowerWestColumnActual;
+  size_t UpperEastColumnActual;
+  size_t UpperSouthLineActual;
+  size_t UpperWestColumnActual;
 
   /// Number of pixels in every segment
   size_t npixperseg;
@@ -98,7 +98,7 @@ struct HRITImageData : public ImageData
   virtual int unscaledMissingValue() const;
 
   /// Crop the image to the given rectangle
-  virtual void crop(int x, int y, int width, int height);
+  virtual void crop(size_t x, size_t y, size_t width, size_t height);
 };
 
 bool isXRIT(const std::string& filename);

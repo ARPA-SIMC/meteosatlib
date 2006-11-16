@@ -31,15 +31,15 @@
 
 #include <netcdfcpp.h>
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
 
 #include <sstream>
 #include <stdexcept>
 
-#include <conv/Image.tcc>
-#include <conv/Progress.h>
+#include <msat/Image.tcc>
+#include <msat/Progress.h>
 
 #include "NetCDFUtils.h"
 
@@ -196,7 +196,6 @@ class NetCDFImageImporter : public ImageImporter
 	void readHeader(Image& img)
 	{
 		NcAtt* a;
-		int tmp;
 		float ftmp;
 		std::string stmp;
 
@@ -306,6 +305,7 @@ public:
 
 			switch (var->type())
 			{
+				case ncNoType: throw std::runtime_error("The NetCDF data has values with unknown type");
 				case ncByte:   readData<ncbyte>(*var, *img); img->data->scalesToInt = true;  break;
 				case ncChar:   readData<char>(*var, *img);   img->data->scalesToInt = true;  break;
 				case ncShort:  readData<short>(*var, *img);  img->data->scalesToInt = true;  break;

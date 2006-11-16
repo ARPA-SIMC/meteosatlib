@@ -19,16 +19,16 @@
 bin_PROGRAMS = msatconv interpolate
 
 msatconv_SOURCES = msatconv.cpp
-msatconv_LDADD = ../conv/libconv.la 
+msatconv_LDADD = ../msat/libmsat.la 
 
 interpolate_SOURCES = interpolate.cpp
-interpolate_LDADD = ../conv/libconv.la 
+interpolate_LDADD = ../msat/libmsat.la 
 
 if DBALLE
 bin_PROGRAMS += dbasat
 
 dbasat_SOURCES = dbasat.cpp
-dbasat_LDADD = ../conv/libconv.la $(LIBDBALLE_LIBS)
+dbasat_LDADD = ../msat/libmsat.la $(LIBDBALLE_LIBS)
 dbasat_INCLUDES = $(LIBDBALLE_CFLAGS)
 endif
 

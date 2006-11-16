@@ -27,7 +27,7 @@
 
 //#include "../config.h"
 
-#include <conv/ExportNetCDF24.h>
+#include <msat/ExportNetCDF24.h>
 #include <proj/Geos.h>
 #include <grib/GRIB.h>
 

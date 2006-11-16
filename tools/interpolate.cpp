@@ -24,11 +24,11 @@
 
 #include <config.h>
 
-#include <conv/ImportGRIB.h>
-#include <conv/ImportSAFH5.h>
-#include <conv/ImportNetCDF.h>
-#include <conv/ImportNetCDF24.h>
-#include <conv/ImportXRIT.h>
+#include <msat/ImportGRIB.h>
+#include <msat/ImportSAFH5.h>
+#include <msat/ImportNetCDF.h>
+#include <msat/ImportNetCDF24.h>
+#include <msat/ImportXRIT.h>
 
 #include <set>
 #include <string>
@@ -40,8 +40,6 @@
 
 using namespace std;
 using namespace msat;
-
-static char rcs_id_string[] = "$Id: /local/meteosatlib/tools/msatconv.cpp 1879 2006-10-11T15:01:33.022993Z enrico  $";
 
 void do_help(const char* argv0, ostream& out)
 {
@@ -170,7 +168,7 @@ int main( int argc, char* argv[] )
 			(*i)->coordsToPixels(lat, lon, x, y);
 			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
 			if (x < 0 || x >= (*i)->data->columns || y < 0 || y >= (*i)->data->lines)
-				fprintf(stdout, ",", lat, lon);
+				fprintf(stdout, ",");
 			else
 				fprintf(stdout, ",%f", (*i)->data->scaled(x, y));
 		}

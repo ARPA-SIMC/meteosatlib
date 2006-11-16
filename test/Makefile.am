@@ -28,9 +28,9 @@ noinst_HEADERS = \
 	tut_restartable.h
 
 msatlib_test_CPPFLAGS = \
-	-I$(top_srcdir)/conv
+	-I$(top_srcdir)/msat
 msatlib_test_LDADD = \
-	../conv/libconv.la
+	../msat/libmsat.la
 msatlib_test_SOURCES = \
 	tut-main.cpp \
 	test-utils.cpp \

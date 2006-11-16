@@ -158,7 +158,7 @@ public:
 	 * Crop the image to the given rectangle specified in pixel coordinates
 	 * relative to the image itself
 	 */
-	void crop(int x, int y, int width, int height);
+	void crop(size_t x, size_t y, size_t width, size_t height);
 
 	/**
 	 * Crop the image to the minimum rectangle of pixels containing the area
@@ -239,7 +239,7 @@ struct ImageData
 	virtual float* allScaled() const;
 
 	/// Crop the image to the given rectangle
-	virtual void crop(int x, int y, int width, int height) = 0;
+	virtual void crop(size_t x, size_t y, size_t width, size_t height) = 0;
 };
 
 // Container for image data, which can be used with different sample sizes
@@ -287,7 +287,7 @@ public:
 	}
 
 	// Throw away all the samples outside of a given area
-	void crop(int x, int y, int width, int height);
+	void crop(size_t x, size_t y, size_t width, size_t height);
 };
 
 // Container for image data, which can be used with different sample sizes

@@ -12,8 +12,8 @@
 #include <proj/const.h>
 #include <proj/Geos.h>
 
-#include <conv/Image.tcc>
-#include <conv/Progress.h>
+#include <msat/Image.tcc>
+#include <msat/Progress.h>
 
 using namespace H5;
 using namespace std;

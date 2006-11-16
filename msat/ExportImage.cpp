@@ -27,9 +27,9 @@
 
 #include <config.h>
 
-#include <conv/ExportImage.h>
-#include <conv/ImportXRIT.h>
-#include <conv/Progress.h>
+#include <msat/ExportImage.h>
+#include <msat/ImportXRIT.h>
+#include <msat/Progress.h>
 
 #include <Magick++.h>
 

@@ -1,7 +1,7 @@
 #ifndef MSATLIB_HDF5_IMPORT_H
 #define MSATLIB_HDF5_IMPORT_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <memory>
 
 namespace H5 {

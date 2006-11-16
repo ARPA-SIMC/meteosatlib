@@ -1,7 +1,7 @@
 #ifndef MSATLIB_NETCDF_IMPORT_H
 #define MSATLIB_NETCDF_IMPORT_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <memory>
 
 namespace msat {

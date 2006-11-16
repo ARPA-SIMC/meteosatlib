@@ -25,20 +25,20 @@
 //  
 //---------------------------------------------------------------------------
 
-#ifndef MLIB_EXPORT_NETCDF24_H
-#define MLIB_EXPORT_NETCDF24_H
+#ifndef MLIB_EXPORT_NETCDF_H
+#define MLIB_EXPORT_NETCDF_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <string>
 #include <memory>
 
 namespace msat {
 
 /// Export data from an ImageData to a NetCDF file
-void ExportNetCDF24(const Image& img, const std::string& fileName);
+void ExportNetCDF(const Image& img, const std::string& fileName);
 
 // Use a factory method, so that we don't have to include the GRIB headers here
-std::auto_ptr<ImageConsumer> createNetCDF24Exporter();
+std::auto_ptr<ImageConsumer> createNetCDFExporter();
 
 }
 

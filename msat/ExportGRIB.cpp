@@ -27,15 +27,13 @@
 
 #include "ExportGRIB.h"
 
-#include <conv/Progress.h>
+#include <msat/Progress.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
 #include <grib/GRIB.h>
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
-
-static char rcs_id_string[] = "$Id$";
 
 #define FILL_VALUE         9.999E-20
 //#define GRIB_CENTER        98	// ARPA SIM

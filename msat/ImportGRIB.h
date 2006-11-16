@@ -1,7 +1,7 @@
 #ifndef MSATLIB_GRIB_IMPORT_H
 #define MSATLIB_GRIB_IMPORT_H
 
-#include <conv/Image.h>
+#include <msat/Image.h>
 #include <memory>
 
 namespace msat {

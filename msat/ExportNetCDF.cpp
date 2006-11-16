@@ -27,7 +27,7 @@
 
 #include <config.h>
 
-#include <conv/ExportNetCDF.h>
+#include <msat/ExportNetCDF.h>
 
 #include <netcdfcpp.h>
 
