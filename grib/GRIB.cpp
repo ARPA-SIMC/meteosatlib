@@ -1729,9 +1729,17 @@ int GRIB_MESSAGE::Decode(unsigned char *msg, size_t msgsize)
   bds = pnt;
   pnt += BDS_LEN(bds);
 
+#if 0
+  if (memcmp(pnt, "7777", 4) != 0)
+  {
+    std::cerr << "GRIB message does not end in 7777 but in " << pnt[0] << pnt[1] << pnt[2] << pnt[3] << std::endl;
+    return -1;
+  }
+#endif
+
   if ((size_t) (pnt-message+4) != reclen)
   {
-    std::cerr << "Message GRIB lenght is inconsistent" << std::endl;
+    std::cerr << "Message GRIB lenght is inconsistent (" << (size_t)(pnt-message+4) << "!=" << reclen << ")" << std::endl;
     return -1;
   }
 
@@ -2177,7 +2185,14 @@ int GRIB_FILE::ReadMessage(GRIB_MESSAGE &message)
 
   unsigned char *msg = data+pos;
 
-  reclen = (msg[4]<<16) + (msg[5]<<8) + msg[6];
+#ifdef ECMWF_NIGHTMARE_HACK
+  if (msg[4] & 0x80)
+  {
+    reclen = (((msg[4] & 0x7f)<<16) + (msg[5]<<8) + msg[6]) * 120;
+  } else
+#endif
+    reclen = (msg[4]<<16) + (msg[5]<<8) + msg[6];
+
 
   if (msg[7] != 1)
   {
