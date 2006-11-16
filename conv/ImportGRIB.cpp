@@ -72,6 +72,7 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 
 	// Handle missing values
 	res->missing = m.field.undef_high;
+	res->missingValue = res->missing;
 	for (size_t i = 0; i < m.grid.nxny; ++i)
 		if (res->pixels[i] >= m.field.undef_low && res->pixels[i] <= m.field.undef_high)
 			res->pixels[i] = res->missing;
