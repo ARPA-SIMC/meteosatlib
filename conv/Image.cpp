@@ -286,7 +286,10 @@ time_t Image::forecastSeconds2000() const
 
 int Image::decimalDigitsOfScaledValues() const
 {
-	if (data->scalesToInt)
+	if (channel_id < channel_info_size)
+		// When it's a known channel, se can use our internal table
+		return channelInfo[channel_id].decimalDigits;
+	else if (data->scalesToInt)
 	{
 		// When the original value was an integer value, we can compute the log10
 		// of the scaling factor, add 1 if the scaling factor is not a direct power
@@ -298,16 +301,9 @@ int Image::decimalDigitsOfScaledValues() const
 		else
 			return res + 1;
 	} else {
-		// When the original value was a float value, we can read the number of
-		// significant digits from a table indexed by channels
-
-		if (channel_id >= channel_info_size)
-		{
-			stringstream str;
-			str << "no information found for channel " << channel_id;
-			throw std::runtime_error(str.str());
-		}
-		return channelInfo[channel_id].decimalDigits;
+		stringstream str;
+		str << "no information found for channel " << channel_id;
+		throw std::runtime_error(str.str());
 	}
 }
 

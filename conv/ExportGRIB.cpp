@@ -33,6 +33,7 @@
 #include <grib/GRIB.h>
 #include <cmath>
 #include <stdexcept>
+#include <iostream>
 
 static char rcs_id_string[] = "$Id$";
 
@@ -148,6 +149,7 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
   f.set_field_nocopy(GRIB_PARAMETER_IMG_D, fvals, img.data->lines * img.data->columns, img.data->missingValue, img.data->missingValue);
   //delete [ ] fvals;
 
+	//std::cerr << "Digits: " << img.decimalDigitsOfScaledValues() << std::endl;
   f.set_scale(img.decimalDigitsOfScaledValues());
 
 #if LOCALDEF == 3
