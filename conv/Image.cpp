@@ -20,18 +20,18 @@ static struct ChannelInfo {
 	size_t decimalDigits;
 } channelInfo[] = {
 	{ 2 },	//  0		FIXME: unverified
-	{ 2 },	//  1		FIXME: unverified
-	{ 2 },	//  2		FIXME: unverified
-	{ 2 },	//  3		FIXME: unverified
-	{ 2 },	//  4		FIXME: unverified
-	{ 2 },	//  5		FIXME: unverified
-	{ 2 },	//  6		FIXME: unverified
-	{ 2 },	//  7		FIXME: unverified
-	{ 2 },	//  8		FIXME: unverified
-	{ 2 },	//  9		FIXME: unverified
-	{ 2 },	// 10		FIXME: unverified
-	{ 2 },	// 11		FIXME: unverified
-	{ 2 },	// 12		FIXME: unverified
+	{ 4 },	//  1
+	{ 4 },	//  2
+	{ 4 },	//  3
+	{ 2 },	//  4
+	{ 2 },	//  5
+	{ 2 },	//  6
+	{ 2 },	//  7
+	{ 2 },	//  8
+	{ 2 },	//  9
+	{ 2 },	// 10
+	{ 2 },	// 11
+	{ 4 },	// 12
 };
 
 static const size_t channel_info_size = sizeof(channelInfo) / sizeof(struct ChannelInfo);
