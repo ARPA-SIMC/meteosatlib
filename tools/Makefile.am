@@ -18,6 +18,8 @@
 
 bin_PROGRAMS = msatconv interpolate
 
+noinst_PROGRAMS = msatconv
+
 msatconv_SOURCES = msatconv.cpp
 msatconv_LDADD = ../msat/libmsat.la 
 

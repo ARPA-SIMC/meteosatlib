@@ -18,7 +18,9 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-noinst_HEADERS = \
+gribincludedir=$(includedir)/meteosatlib/grib
+
+dist_gribinclude_HEADERS = \
     Ebisuzaki.h \
     GRIB.h
 

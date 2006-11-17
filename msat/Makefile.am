@@ -17,7 +17,9 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-noinst_HEADERS = \
+msatincludedir=$(includedir)/meteosatlib/msat
+
+dist_msatinclude_HEADERS = \
     Image.h \
     ExportGRIB.h \
     ExportNetCDF.h \

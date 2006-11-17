@@ -17,7 +17,9 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-noinst_HEADERS = \
+projincludedir=$(includedir)/meteosatlib/proj
+
+dist_projinclude_HEADERS = \
     const.h \
     Points.h \
     Projection.h \
