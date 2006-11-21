@@ -55,7 +55,9 @@ static const char* op_dsn = "test";
 static const char* op_user = "";
 static const char* op_pass = "";
 static const char* op_area = "";
+static const char* op_step = "";
 static const char* op_satinfo = DEFAULT_SATINFO;
+static const char* op_ident = "";
 static int op_overwrite = 0;
 int op_verbose = 0;
 
@@ -379,6 +381,141 @@ dba_err do_import(poptContext optCon)
 	return dba_error_ok();
 }
 
+dba_err do_importgrid(poptContext optCon)
+{
+	const char* action;
+	/* Throw away the command name */
+	action = poptGetArg(optCon);
+
+	// Read the coordinates and steps
+	double latmin, latmax, lonmin, lonmax;
+	double latstep, lonstep;
+	if (op_area[0] == 0)
+		dba_cmdline_error(optCon, "you need to specify --area=latmin,latmax,lonmin,lonmax");
+	if (sscanf(op_area, "%lf,%lf,%lf,%lf", &latmin,&latmax,&lonmin,&lonmax) != 4)
+		dba_cmdline_error(optCon, "area parameter should be in the format latmin,latmax,lonmin,lonmax");
+	if (op_step[0] == 0)
+		dba_cmdline_error(optCon, "you need to specify --step=latstep,lonstep");
+	if (sscanf(op_step, "%lf,%lf", &latstep,&lonstep) != 2)
+		dba_cmdline_error(optCon, "step parameter should be in the format latstep,lonstep");
+	if (op_ident[0] == 0)
+		dba_cmdline_error(optCon, "you need to specify --ident=pseudoana-id");
+
+	DBA_RUN_OR_RETURN(dba_init());
+	dba_db db;
+	DBA_RUN_OR_RETURN(create_dba_db(&db));
+
+	dba_record data;
+	DBA_RUN_OR_RETURN(dba_record_create(&data));
+
+	//Importer consumer(db, op_overwrite != 0);
+	//DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
+
+	ChannelTab satinfo;
+	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
+
+	// Read the names of the input files
+	vector<string> names;
+	DBA_RUN_OR_RETURN(fileNames(optCon, names));
+
+	// Read the images
+	size_t processed = 0;
+	set<int> warned;
+	for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i)
+	{
+		// Read the image
+		ImageVector imgs;
+		try
+		{
+			std::auto_ptr<ImageImporter> importer = getImporter(*i);
+			if (!importer.get())
+			{
+				cerr << "No importer found for " << *i << ": ignoring." << endl;
+				continue;
+			}
+			importer->cropLatMin = latmin;
+			importer->cropLatMax = latmax;
+			importer->cropLonMin = lonmin;
+			importer->cropLonMax = lonmax;
+			importer->read(imgs);
+		}
+		catch (std::exception& e)
+		{
+			cerr << "Importing " << *i << " failed: ignoring." << endl;
+			continue;
+		}
+
+		// Import the data
+		for (ImageVector::const_iterator iterimg = imgs.begin(); iterimg != imgs.end(); ++iterimg)
+		{
+			// Get the mapping data for the channel
+			Image& img = **iterimg;
+			ChannelTab::const_iterator citer = satinfo.find(img.channel_id);
+			if (citer == satinfo.end())
+			{
+				if (warned.find(img.channel_id) == warned.end())
+				{
+					fprintf(stderr, "No channel information for channel %d in %s: skipping image.\n",
+							img.channel_id, op_satinfo);
+					warned.insert(img.channel_id);
+				}
+				continue;
+			}
+			const ChannelInfo& c = citer->second;
+
+			// Prepare the new input record
+			dba_record_clear(data);
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_YEAR, img.year));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MONTH, img.month));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_DAY, img.day));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_HOUR, img.hour));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MIN, img.minute));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_SEC, 0));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_LEVELTYPE, c.ltype));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L1, c.l1));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L2, c.l2));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_PINDICATOR, c.pind));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P1, c.p1));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P2, c.p2));
+			DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_REP_MEMO, c.rep.c_str()));
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MOBILE, 1));
+			DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_IDENT, op_ident));
+
+			// TODO: should we use an ident?
+			//DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_IDENT, c.rep.c_str()));
+
+			// Sample the points at the given intervals and insert them
+			for (double lat = latmin; lat < latmax; lat += latstep)
+				for (double lon = lonmin; lon < lonmax; lon += lonstep)
+				{
+					size_t x, y;
+					img.coordsToPixels(lat, lon, x, y);
+					//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
+
+					if (x < img.data->columns && y < img.data->lines)
+					{
+						DBA_RUN_OR_RETURN(dba_record_key_setd(data, DBA_KEY_LAT, lat));
+						DBA_RUN_OR_RETURN(dba_record_key_setd(data, DBA_KEY_LON, lon));
+						DBA_RUN_OR_RETURN(dba_record_var_setd(data, c.var, img.data->scaled(x, y)));
+						DBA_RUN_OR_RETURN(dba_db_insert(db, data, op_overwrite ? 1 : 0, 1, NULL, NULL));
+						//dba_record_print(data, stdout);
+						//cout << "---------------------" << endl;
+					}
+				}
+		}
+		++processed;
+	}
+
+	if (processed == 0)
+		dba_cmdline_error(optCon, "No valid input files found");
+
+	dba_record_delete(data);
+	dba_db_delete(db);
+	dba_shutdown();
+
+	return dba_error_ok();
+}
+
 
 
 static struct tool_desc dbasat;
@@ -398,10 +535,20 @@ struct poptOption dbasat_import_options[] = {
 	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "read only the given subarea (in pixels) of the images (format: x,y,w,h)" },
 	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
 	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
-	{ "overwrite", 'f', POPT_ARG_NONE, &op_overwrite, 0,
-		"overwrite existing data" },
-	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0,
-		"Options used to connect to the database" },
+	{ "overwrite", 'f', POPT_ARG_NONE, &op_overwrite, 0, "overwrite existing data" },
+	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0, "Options used to connect to the database" },
+	POPT_TABLEEND
+};
+
+struct poptOption dbasat_importgrid_options[] = {
+	{ "help", '?', 0, 0, 1, "print an help message" },
+	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "import the given subarea (in coordinates) of the images (format: latmin,latmax,lonmin,lonmax)" },
+	{ "step", 's', POPT_ARG_STRING, &op_step, 0, "distance (in degrees) between the sampled points (format: latstep,lonstep)" },
+	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
+	{ "ident", 'i', POPT_ARG_STRING, &op_ident, 0, "pseudoana identifier to use on import" },
+	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
+	{ "overwrite", 'f', POPT_ARG_NONE, &op_overwrite, 0, "overwrite existing data" },
+	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0, "Options used to connect to the database" },
 	POPT_TABLEEND
 };
 
@@ -422,7 +569,7 @@ static void init()
 		", NetCDF, NetCDF24"
 #endif
 		" format.";
-	dbasat.ops = (struct op_dispatch_table*)calloc(3, sizeof(struct op_dispatch_table));
+	dbasat.ops = (struct op_dispatch_table*)calloc(4, sizeof(struct op_dispatch_table));
 
 	dbasat.ops[0].func = do_dump;
 	dbasat.ops[0].aliases[0] = "dump";
@@ -444,11 +591,18 @@ static void init()
 		"complete list.";
 	dbasat.ops[1].optable = dbasat_import_options;
 
-	dbasat.ops[2].func = NULL;
-	dbasat.ops[2].usage = NULL;
-	dbasat.ops[2].desc = NULL;
+	dbasat.ops[2].func = do_importgrid;
+	dbasat.ops[2].aliases[0] = "importgrid";
+	dbasat.ops[2].usage = "importgrid --area=latmin,latmax,lonmin,lonmax --step=latstep,lonstep --ident=ident [options] [file1 [file2...]]";
+	dbasat.ops[2].desc = "Import satellite data taken at regular intervals";
 	dbasat.ops[2].longdesc = NULL;
-	dbasat.ops[2].optable = NULL;
+	dbasat.ops[2].optable = dbasat_importgrid_options;
+
+	dbasat.ops[3].func = NULL;
+	dbasat.ops[3].usage = NULL;
+	dbasat.ops[3].desc = NULL;
+	dbasat.ops[3].longdesc = NULL;
+	dbasat.ops[3].optable = NULL;
 };
 
 int main (int argc, const char* argv[])
