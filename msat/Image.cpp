@@ -102,10 +102,14 @@ void Image::cropByCoords(double latmin, double latmax, double lonmin, double lon
 	coordsToPixels(latmax, lonmax, x1, y1);
 
 	// Crop using the bounding box for the 2 coordinates
-	size_t crop_x = x = x < x1 ? x : x1;
-	size_t crop_y = y = y < y1 ? y : y1;
+	size_t crop_x = x < x1 ? x : x1;
+	size_t crop_y = y < y1 ? y : y1;
 	size_t crop_w = x > x1 ? x-x1 : x1-x;
 	size_t crop_h = y > y1 ? y-y1 : y1-y;
+
+//	cerr << "CROP lat " << latmin << "-" << latmax << " lon " << lonmin << "-" << lonmax << endl;
+//	cerr << "  converted to " << x << "," << y << " " << x1 << "," << y1 << endl;
+//	cerr << "  bounding box " << crop_x << "," << crop_y << " " << crop_w << "x" << crop_h << endl;
 
 	data->crop(crop_x, crop_y, crop_w, crop_h);
 	x0 += crop_x;
@@ -121,10 +125,12 @@ void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 	proj::ProjectedPoint p;
 	proj->mapToProjected(proj::MapPoint(lat, lon), p);
 
-	//cerr << "  toProjected: " << p.x << "," << p.y << endl;
+//	cerr << "  coordsToPixels: " << lat << "," << lon << " -> " << p.x << "," << p.y << endl;
 
 	int dx = (int)rint((double) column_offset + p.x * column_factor * exp2(-16)) - x0;
 	int dy = (int)rint((double) line_offset   + p.y * line_factor   * exp2(-16)) - y0;
+
+//	cerr << "    to pixels: " << dx << "," << dy << endl;
 
   x = dx < 0 ? 0 : (unsigned)dx;
   y = dy < 0 ? 0 : (unsigned)dy;
