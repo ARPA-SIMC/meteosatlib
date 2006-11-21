@@ -83,7 +83,8 @@ void do_help(const char* argv0, ostream& out)
       << "  --display        Display the image on a X11 window" << endl
 #endif
       << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl
-      << "  --Area='latmin,latmax,lonmin,lonmax' Crop the source image(s) to the given coordinates" << endl;
+      << "  --Area='latmin,latmax,lonmin,lonmax' Crop the source image(s) to the given coordinates" << endl
+      << "  --around='lat,lon,lath,lonw' Create an image centered at the given location and with the given width and height" << endl;
 }
 void usage(char *pname)
 {
@@ -183,6 +184,7 @@ int main( int argc, char* argv[] )
 #endif
 		{ "area", 1, 0, 'a' },
 		{ "Area", 1, 0, 'A' },
+		{ "around", 1, 0, 'C' },
 		{ 0, 0, 0, 0 },
   };
 
@@ -237,6 +239,20 @@ int main( int argc, char* argv[] )
 					return 1;
 				}
 				break;
+			case 'C': {
+				double lat, lon, h, w;
+				if (sscanf(optarg, "%lf,%lf,%lf,%lf", &lat,&lon,&h,&w) != 4)
+				{
+					cerr << "around value should be in the format lat,lon,lath,lonw" << endl;
+					do_help(argv[0], cerr);
+					return 1;
+				}
+				latmin = lat - h/2;
+				lonmin = lon - w/2;
+				latmax = lat + h/2;
+				lonmax = lon + w/2;
+				break;
+			}
       case -1:
 				done = true;
 				break;
