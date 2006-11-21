@@ -93,18 +93,12 @@ struct NcEncoderImpl : public NcEncoder
 	{
 		Sample* pixels = new Sample[img.data->columns * img.data->lines];
 		int missing = img.data->unscaledMissingValue();
-		Sample encodedMissing = getMissing<Sample>();
-		ncfAddAttr(var, "missing_value", encodedMissing);
+		//Sample encodedMissing = getMissing<Sample>();
+		ncfAddAttr(var, "missing_value", missing);
 
 		for (size_t y = 0; y < img.data->lines; ++y)
 			for (size_t x = 0; x < img.data->columns; ++x)
-			{
-				int unscaled = img.data->scaledToInt(x, y);
-				if (unscaled == missing)
-					pixels[y * img.data->columns + x] = encodedMissing;
-				else
-					pixels[y * img.data->columns + x] = unscaled;
-			}
+				pixels[y * img.data->columns + x] = img.data->scaledToInt(x, y);
 
 		if (!var.put(pixels, 1, img.data->lines, img.data->columns))
 			throw std::runtime_error("writing image values failed");
@@ -160,6 +154,8 @@ void decodeMissing(const NcVar& var, ImageDataWithPixels<Sample>& img)
 	NcAtt* attrMissing = getAttrIfExists(var, "missing_value");
 	if (attrMissing != NULL)
 		img.missing = getAttribute<Sample>(*attrMissing);
+	else
+		img.missing = getMissing<Sample>();
 }
 
 template<typename Sample>
@@ -181,9 +177,6 @@ static ImageData* acquireImage(const NcVar& var)
 	}
 
 	std::auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
-#warning should this not be stored in / read from the NetCDF file itself?
-	res->missing = getMissing<Sample>();
-
 	decodeMissing(var, *res);
 
 	if (!var.get(res->pixels, 1, res->lines, res->columns))

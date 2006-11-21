@@ -80,7 +80,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(ncf, "Time", reftime);
   ncfAddAttr(ncf, "Area_Name", "SpaceView");
   char projname[16];
-  sprintf(projname, "GEOS(%3.1f)", 0);
+  sprintf(projname, "GEOS(%3.1f)", 0.0);
   //sprintf(projname, "GEOS(%3.1f)", pds.sublon);
   ncfAddAttr(ncf, "Projection", projname);
   ncfAddAttr(ncf, "Columns", 3712);

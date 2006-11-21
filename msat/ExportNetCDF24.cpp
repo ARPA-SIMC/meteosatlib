@@ -158,6 +158,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
 		ncfAddAttr(*ivar, "add_offset", 0.0);
 		ncfAddAttr(*ivar, "scale_factor", 1.0);
+		ncfAddAttr(*ivar, "missing_value", img.data->missingValue);
 		ncfAddAttr(*ivar, "channel", img.channel_id);
 		ncfAddAttr(*ivar, "channelName",
 				MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id).c_str());
