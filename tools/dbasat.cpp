@@ -59,6 +59,7 @@ static const char* op_step = "";
 static const char* op_satinfo = DEFAULT_SATINFO;
 static const char* op_ident = "";
 static int op_overwrite = 0;
+static int op_dump = 0;
 int op_verbose = 0;
 
 struct poptOption dbTable[] = {
@@ -107,71 +108,6 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 	return std::auto_ptr<ImageImporter>();
 }
 
-static dba_err fileNames(poptContext optCon, std::vector<std::string>& names)
-{
-	// Get the file names and read the images
-	while (1)
-	{
-		const char* arg = poptPeekArg(optCon);
-		if (arg == NULL) break;
-		// Stop processing files when a query parameter is found
-		if (strchr(arg, '=') != NULL) break;
-		names.push_back(arg);
-		// Consume the argument if it was processed
-		poptGetArg(optCon);
-	}
-	return dba_error_ok();
-}
-
-template<typename COLL>
-static dba_err read_files(const COLL& names, dba_record query, ImageVector& imgs)
-{
-	// Default cropping parameters (all zeroes mean "no cropping")
-	int ax = 0, ay = 0, aw = 0, ah = 0;
-	if (op_area[0] != 0)
-		if (sscanf(op_area, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
-			dba_error_consistency("area parameter should be in the format x,y,width,height");
-
-	double latmin = 1000, lonmin = 1000, latmax = 1000, lonmax = 1000;
-	if (dba_record_key_peek(query, DBA_KEY_LATMIN) != NULL)
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LATMIN, &latmin));
-	if (dba_record_key_peek(query, DBA_KEY_LATMAX) != NULL)
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LATMAX, &latmax));
-	if (dba_record_key_peek(query, DBA_KEY_LONMIN) != NULL)
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LONMIN, &lonmin));
-	if (dba_record_key_peek(query, DBA_KEY_LONMAX) != NULL)
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LONMAX, &lonmax));
-
-	// Get the file names and read the images
-	for (typename COLL::const_iterator i = names.begin(); i != names.end(); ++i)
-	{
-		try
-		{
-			std::auto_ptr<ImageImporter> importer = getImporter(*i);
-			if (!importer.get())
-			{
-				cerr << "No importer found for " << *i << ": ignoring." << endl;
-				continue;
-			}
-			importer->cropX = ax;
-			importer->cropY = ay;
-			importer->cropWidth = aw;
-			importer->cropHeight = ah;
-			importer->cropLatMin = latmin;
-			importer->cropLatMax = latmax;
-			importer->cropLonMin = lonmin;
-			importer->cropLonMax = lonmax;
-			importer->read(imgs);
-		}
-		catch (std::exception& e)
-		{
-			cerr << "Importing " << *i << " failed: ignoring." << endl;
-			continue;
-		}
-	}
-	return dba_error_ok();
-}
-
 struct ChannelInfo
 {
 	dba_varcode var;
@@ -217,147 +153,369 @@ struct ChannelTab : public std::map<int, ChannelInfo>
 	}
 };
 
-template<typename OUT>
-dba_err interpolate(poptContext optCon, dba_db db, OUT consume)
+struct Processor
 {
-	int count, i;
-	dba_record query, result;
-	dba_db_cursor cursor;
-
+	std::vector<std::string> fileNames;
 	ChannelTab satinfo;
-	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
-
-	// Read the names of the input files
-	vector<string> names;
-	DBA_RUN_OR_RETURN(fileNames(optCon, names));
-
-	/* Create the query from the command line */
-	DBA_RUN_OR_RETURN(dba_record_create(&query));
-	DBA_RUN_OR_RETURN(dba_cmdline_get_query(optCon, query));
-
-	// Read the input data
-	ImageVector imgs;
-	DBA_RUN_OR_RETURN(read_files(names, query, imgs));
-	if (imgs.empty())
-		dba_cmdline_error(optCon, "No valid input files found");
-
-	// Connect the database and start the query
-	DBA_RUN_OR_RETURN(dba_db_ana_query(db, query, &cursor, &count));
-	DBA_RUN_OR_RETURN(dba_record_create(&result));
-
-	// Read the stations from the database and print the corresponding image
-	// values
 	set<int> warned;
-	for (i = 0; ; ++i)
+	dba_db db;
+	size_t processed;
+
+	Processor() : db(0), processed(0) {}
+	virtual ~Processor()
 	{
-		int has_data;
-		DBA_RUN_OR_RETURN(dba_db_cursor_next(cursor, &has_data));
-		if (!has_data)
-			break;
-		dba_record_clear(result);
-		DBA_RUN_OR_RETURN(dba_db_cursor_to_record(cursor, result));
-
-		double lat, lon;
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(result, DBA_KEY_LAT, &lat));
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(result, DBA_KEY_LON, &lon));
-
-		for (ImageVector::const_iterator i = imgs.begin();
-					i != imgs.end(); ++i)
-		{
-			size_t x, y;
-			int channel = (*i)->channel_id;
-			ChannelTab::const_iterator c = satinfo.find(channel);
-			if (c == satinfo.end())
-			{
-				if (warned.find(channel) == warned.end())
-				{
-					fprintf(stderr, "No channel information for channel %d in %s: skipping image.\n",
-							channel, op_satinfo);
-					warned.insert(channel);
-				}
-				continue;
-			}
-
-			(*i)->coordsToPixels(lat, lon, x, y);
-			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
-			if (x < (*i)->data->columns && y < (*i)->data->lines)
-			{
-				dba_var var;
-				DBA_RUN_OR_RETURN(dba_var_create_local(c->second.var, &var));
-				DBA_RUN_OR_RETURN(dba_var_setd(var, (*i)->data->scaled(x, y)));
-				DBA_RUN_OR_RETURN(consume(result, var, **i, c->second));
-				dba_var_delete(var);
-			}
-		}
+		if (db)
+			dba_db_delete(db);
+		dba_shutdown();
 	}
 
-	dba_record_delete(result);
-	dba_record_delete(query);
-	return dba_error_ok();
-}
-
-struct Dumper
-{
-	dba_err operator()(dba_record ana, dba_var var, const Image& img, const ChannelInfo& c)
+	virtual dba_err parseCommandline(poptContext optCon)
 	{
-		double lat, lon;
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LAT, &lat));
-		DBA_RUN_OR_RETURN(dba_record_key_enqd(ana, DBA_KEY_LON, &lon));
-		fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d", lat, lon,
-				img.year, img.month, img.day, img.hour, img.minute,
-				c.ltype, c.l1, c.l2, c.pind, c.p1, c.p2);
-		dba_var_print(var, stdout);
+		DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
+
+		// Get the file names of the images to read
+		while (1)
+		{
+			const char* arg = poptPeekArg(optCon);
+			if (arg == NULL) break;
+			// Stop processing files when a query parameter is found
+			if (strchr(arg, '=') != NULL) break;
+			fileNames.push_back(arg);
+			// Consume the argument if it was processed
+			poptGetArg(optCon);
+		}
+
+		if (fileNames.empty())
+			dba_cmdline_error(optCon, "No files given in the commandline");
+
+		return dba_error_ok();
+	}
+
+	const ChannelInfo* getChannelInfo(int channel)
+	{
+		ChannelTab::const_iterator citer = satinfo.find(channel);
+		if (citer == satinfo.end())
+		{
+			if (warned.find(channel) == warned.end())
+			{
+				fprintf(stderr, "No channel information for channel %d in %s: skipping image.\n",
+						channel, op_satinfo);
+				warned.insert(channel);
+			}
+			return 0;
+		}
+		return &(citer->second);
+	}
+
+	virtual std::auto_ptr<ImageImporter> getImporter(const std::string& name)
+	{
+		return ::getImporter(name);
+	}
+
+	virtual dba_err handleImage(Image& img) = 0;
+
+	virtual dba_err handleFile(const std::string& name)
+	{
+		// Read the image
+		ImageVector imgs;
+		try
+		{
+			std::auto_ptr<ImageImporter> importer = getImporter(name);
+			if (!importer.get())
+			{
+				cerr << "No importer found for " << name << ": ignoring." << endl;
+				return dba_error_ok();
+			}
+			importer->read(imgs);
+		}
+		catch (std::exception& e)
+		{
+			cerr << "Importing " << name << " failed: ignoring." << endl;
+			return dba_error_ok();
+		}
+
+		// Import the data
+		for (ImageVector::const_iterator iterimg = imgs.begin(); iterimg != imgs.end(); ++iterimg)
+		{
+			DBA_RUN_OR_RETURN(handleImage(**iterimg));
+		}
+		return dba_error_ok();
+	}
+
+	virtual dba_err init(poptContext optCon)
+	{
+		DBA_RUN_OR_RETURN(parseCommandline(optCon));
+		DBA_RUN_OR_RETURN(create_dba_db(&db));
+		return dba_error_ok();
+	}
+
+	virtual dba_err process(poptContext optCon)
+	{
+		// Read the images
+		for (vector<string>::const_iterator i = fileNames.begin(); i != fileNames.end(); ++i)
+			DBA_RUN_OR_RETURN(handleFile(*i));
+
+		if (processed == 0)
+			dba_cmdline_error(optCon, "No valid input files found");
+
 		return dba_error_ok();
 	}
 };
 
-dba_err do_dump(poptContext optCon)
+struct Station
 {
-	const char* action;
-	/* Throw away the command name */
-	action = poptGetArg(optCon);
+	double lat;
+	double lon;
+	int id;
+	Station() {}
+	Station(double lat, double lon, int ident) : lat(lat), lon(lon), id(id) {}
+};
 
-	DBA_RUN_OR_RETURN(dba_init());
-	dba_db db;
-	DBA_RUN_OR_RETURN(create_dba_db(&db));
-
-	Dumper consumer;
-	DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
-
-	dba_db_delete(db);
-	dba_shutdown();
-
-	return dba_error_ok();
-}
-
-struct Importer
+struct InterpolateProcessor : public Processor
 {
-	dba_db db;
-	bool overwrite;
+	dba_record query, data;
+	int ax, ay, aw, ah;
+	double latmin, latmax, lonmin, lonmax;
+	std::vector<Station> stations;
+	bool dump;
 
-	Importer(dba_db db, bool overwrite) : db(db), overwrite(overwrite) {}
+	InterpolateProcessor() :
+		query(0), data(0),
+		ax(0), ay(0), aw(0), ah(0),
+		latmin(1000), latmax(1000), lonmin(1000), lonmax(1000), dump(false) {}
 
-	dba_err operator()(dba_record ana, dba_var var, const Image& img, const ChannelInfo& c)
+	virtual ~InterpolateProcessor()
 	{
-		dba_record_clear_vars(ana);
+		if (query)
+			dba_record_delete(query);
+		if (data)
+			dba_record_delete(data);
+	}
+
+	virtual dba_err parseCommandline(poptContext optCon)
+	{
+		DBA_RUN_OR_RETURN(Processor::parseCommandline(optCon));
+
+		// Default cropping parameters (all zeroes mean "no cropping")
+		if (op_area[0] != 0)
+			if (sscanf(op_area, "%d,%d,%d,%d", &ax,&ay,&aw,&ah) != 4)
+				dba_cmdline_error(optCon, "area parameter should be in the format x,y,width,height");
+
+		DBA_RUN_OR_RETURN(dba_cmdline_get_query(optCon, query));
+
+		// Read the coordinates
+		if (dba_record_key_peek(query, DBA_KEY_LATMIN) != NULL)
+			DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LATMIN, &latmin));
+		if (dba_record_key_peek(query, DBA_KEY_LATMAX) != NULL)
+			DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LATMAX, &latmax));
+		if (dba_record_key_peek(query, DBA_KEY_LONMIN) != NULL)
+			DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LONMIN, &lonmin));
+		if (dba_record_key_peek(query, DBA_KEY_LONMAX) != NULL)
+			DBA_RUN_OR_RETURN(dba_record_key_enqd(query, DBA_KEY_LONMAX, &lonmax));
+
+		return dba_error_ok();
+	}
+
+	virtual std::auto_ptr<ImageImporter> getImporter(const std::string& name)
+	{
+		std::auto_ptr<ImageImporter> importer = Processor::getImporter(name);
+		if (importer.get())
+		{
+			importer->cropX = ax;
+			importer->cropY = ay;
+			importer->cropWidth = aw;
+			importer->cropHeight = ah;
+			importer->cropLatMin = latmin;
+			importer->cropLatMax = latmax;
+			importer->cropLonMin = lonmin;
+			importer->cropLonMax = lonmax;
+		}
+		return importer;
+	}
+
+	virtual dba_err init(poptContext optCon)
+	{
+		dba_record result;
+		dba_db_cursor cursor;
+
+		DBA_RUN_OR_RETURN(dba_record_create(&query));
+		DBA_RUN_OR_RETURN(dba_record_create(&data));
+
+		DBA_RUN_OR_RETURN(Processor::init(optCon));
+
+		// Connect the database and start the query
+		int count;
+		DBA_RUN_OR_RETURN(dba_db_ana_query(db, query, &cursor, &count));
+		DBA_RUN_OR_RETURN(dba_record_create(&result));
+
+		// Retrieve the station list from the database
+		while (true)
+		{
+			int has_data;
+			DBA_RUN_OR_RETURN(dba_db_cursor_next(cursor, &has_data));
+			if (!has_data)
+				break;
+			dba_record_clear(result);
+			DBA_RUN_OR_RETURN(dba_db_cursor_to_record(cursor, result));
+
+			Station s;
+			DBA_RUN_OR_RETURN(dba_record_key_enqd(result, DBA_KEY_LAT, &(s.lat)));
+			DBA_RUN_OR_RETURN(dba_record_key_enqd(result, DBA_KEY_LON, &(s.lon)));
+			DBA_RUN_OR_RETURN(dba_record_key_enqi(result, DBA_KEY_ANA_ID, &(s.id)));
+			stations.push_back(s);
+		}
+
+		dba_record_delete(result);
+		return dba_error_ok();
+	}
+
+	virtual dba_err handleImage(Image& img)
+	{
+		const ChannelInfo* c = getChannelInfo(img.channel_id);
+		if (!c) return dba_error_ok();
+
+		// Prepare the common parts of the input record
+		dba_record_clear(data);
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_YEAR, img.year));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MONTH, img.month));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_DAY, img.day));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_HOUR, img.hour));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MIN, img.minute));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_SEC, 0));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_LEVELTYPE, c->ltype));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L1, c->l1));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L2, c->l2));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_PINDICATOR, c->pind));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P1, c->p1));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P2, c->p2));
+		DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_REP_MEMO, c->rep.c_str()));
+
+		for (vector<Station>::const_iterator i = stations.begin();
+				i != stations.end(); ++i)
+		{
+			size_t x, y;
+			img.coordsToPixels(i->lat, i->lon, x, y);
+			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
+			if (x >= img.data->columns || y >= img.data->lines) continue;
+
+			double val = img.data->scaled(x, y);
+			if (val == img.data->missingValue) continue;
+
+			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_ANA_ID, i->id));
+			DBA_RUN_OR_RETURN(dba_record_var_setd(data, c->var, val));
+			if (dump)
+			{
+				fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d B%02d%03d %f\n", i->lat, i->lon,
+						img.year, img.month, img.day, img.hour, img.minute,
+						c->ltype, c->l1, c->l2, c->pind, c->p1, c->p2, DBA_VAR_X(c->var), DBA_VAR_Y(c->var), val);
+			} else
+				DBA_RUN_OR_RETURN(dba_db_insert(db, data, op_overwrite ? 1 : 0, 0, NULL, NULL));
+		}
+		++processed;
+		return dba_error_ok();
+	}
+};
+
+struct GridImporter : public Processor
+{
+	dba_record data;
+	double latmin, latmax, lonmin, lonmax;
+	double latstep, lonstep;
+	bool dump;
+
+	GridImporter() : data(0), dump(false) {}
+
+	~GridImporter()
+	{
+		if (data)
+			dba_record_delete(data);
+	}
+
+	virtual dba_err parseCommandline(poptContext optCon)
+	{
+		// Read the coordinates and steps
+		if (op_area[0] == 0)
+			dba_cmdline_error(optCon, "you need to specify --area=latmin,latmax,lonmin,lonmax");
+		if (sscanf(op_area, "%lf,%lf,%lf,%lf", &latmin,&latmax,&lonmin,&lonmax) != 4)
+			dba_cmdline_error(optCon, "area parameter should be in the format latmin,latmax,lonmin,lonmax");
+		if (op_step[0] == 0)
+			dba_cmdline_error(optCon, "you need to specify --step=latstep,lonstep");
+		if (sscanf(op_step, "%lf,%lf", &latstep,&lonstep) != 2)
+			dba_cmdline_error(optCon, "step parameter should be in the format latstep,lonstep");
+		if (op_ident[0] == 0)
+			dba_cmdline_error(optCon, "you need to specify --ident=pseudoana-id");
+
+		return Processor::parseCommandline(optCon);
+	}
+
+	virtual std::auto_ptr<ImageImporter> getImporter(const std::string& name)
+	{
+		std::auto_ptr<ImageImporter> importer = Processor::getImporter(name);
+		if (importer.get())
+		{
+			importer->cropLatMin = latmin;
+			importer->cropLatMax = latmax;
+			importer->cropLonMin = lonmin;
+			importer->cropLonMax = lonmax;
+		}
+		return importer;
+	}
+
+	virtual dba_err handleImage(Image& img)
+	{
+		// Get the mapping data for the channel
+		const ChannelInfo* c = getChannelInfo(img.channel_id);
+		if (!c) return dba_error_ok();
+
 		// Prepare the new input record
-		DBA_RUN_OR_RETURN(dba_record_var_set_direct(ana, var));
-		DBA_RUN_OR_RETURN(dba_record_key_unset(ana, DBA_KEY_CONTEXT_ID));
-		DBA_RUN_OR_RETURN(dba_record_key_unset(ana, DBA_KEY_REP_COD));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_YEAR, img.year));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_MONTH, img.month));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_DAY, img.day));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_HOUR, img.hour));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_MIN, img.minute));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_SEC, 0));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_LEVELTYPE, c.ltype));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_L1, c.l1));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_L2, c.l2));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_PINDICATOR, c.pind));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_P1, c.p1));
-		DBA_RUN_OR_RETURN(dba_record_key_seti(ana, DBA_KEY_P2, c.p2));
-		DBA_RUN_OR_RETURN(dba_record_key_setc(ana, DBA_KEY_REP_MEMO, c.rep.c_str()));
-		DBA_RUN_OR_RETURN(dba_db_insert(db, ana, overwrite ? 1 : 0, 0, NULL, NULL));
+		dba_record_clear(data);
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_YEAR, img.year));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MONTH, img.month));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_DAY, img.day));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_HOUR, img.hour));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MIN, img.minute));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_SEC, 0));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_LEVELTYPE, c->ltype));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L1, c->l1));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L2, c->l2));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_PINDICATOR, c->pind));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P1, c->p1));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P2, c->p2));
+		DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_REP_MEMO, c->rep.c_str()));
+		DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MOBILE, 1));
+		DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_IDENT, op_ident));
+
+		// Sample the points at the given intervals and insert them
+		for (double lat = latmin; lat <= latmax; lat += latstep)
+			for (double lon = lonmin; lon <= lonmax; lon += lonstep)
+			{
+				size_t x, y;
+				img.coordsToPixels(lat, lon, x, y);
+				//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
+
+				if (x >= img.data->columns || y >= img.data->lines) continue;
+
+				double val = img.data->scaled(x, y);
+				if (val == img.data->missingValue) continue;
+
+				DBA_RUN_OR_RETURN(dba_record_key_setd(data, DBA_KEY_LAT, lat));
+				DBA_RUN_OR_RETURN(dba_record_key_setd(data, DBA_KEY_LON, lon));
+				DBA_RUN_OR_RETURN(dba_record_var_setd(data, c->var, val));
+				if (dump)
+					fprintf(stdout, "%f,%f: %04d-%02d-%02d %02d:%02d %d,%d,%d %d,%d,%d B%02d%03d %f\n", lat, lon,
+							img.year, img.month, img.day, img.hour, img.minute,
+							c->ltype, c->l1, c->l2, c->pind, c->p1, c->p2, DBA_VAR_X(c->var), DBA_VAR_Y(c->var), val);
+				else
+					DBA_RUN_OR_RETURN(dba_db_insert(db, data, op_overwrite ? 1 : 0, 1, NULL, NULL));
+			}
+		++processed;
+		return dba_error_ok();
+	}
+
+	virtual dba_err init(poptContext optCon)
+	{
+		DBA_RUN_OR_RETURN(Processor::init(optCon));
+		DBA_RUN_OR_RETURN(dba_record_create(&data));
 		return dba_error_ok();
 	}
 };
@@ -368,14 +526,14 @@ dba_err do_import(poptContext optCon)
 	/* Throw away the command name */
 	action = poptGetArg(optCon);
 
+	//Importer consumer(db, op_overwrite != 0);
+	//DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
+
 	DBA_RUN_OR_RETURN(dba_init());
-	dba_db db;
-	DBA_RUN_OR_RETURN(create_dba_db(&db));
-
-	Importer consumer(db, op_overwrite != 0);
-	DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
-
-	dba_db_delete(db);
+	InterpolateProcessor processor;
+	processor.dump = op_dump != 0;
+	DBA_RUN_OR_RETURN(processor.init(optCon));
+	DBA_RUN_OR_RETURN(processor.process(optCon));
 	dba_shutdown();
 
 	return dba_error_ok();
@@ -387,130 +545,11 @@ dba_err do_importgrid(poptContext optCon)
 	/* Throw away the command name */
 	action = poptGetArg(optCon);
 
-	// Read the coordinates and steps
-	double latmin, latmax, lonmin, lonmax;
-	double latstep, lonstep;
-	if (op_area[0] == 0)
-		dba_cmdline_error(optCon, "you need to specify --area=latmin,latmax,lonmin,lonmax");
-	if (sscanf(op_area, "%lf,%lf,%lf,%lf", &latmin,&latmax,&lonmin,&lonmax) != 4)
-		dba_cmdline_error(optCon, "area parameter should be in the format latmin,latmax,lonmin,lonmax");
-	if (op_step[0] == 0)
-		dba_cmdline_error(optCon, "you need to specify --step=latstep,lonstep");
-	if (sscanf(op_step, "%lf,%lf", &latstep,&lonstep) != 2)
-		dba_cmdline_error(optCon, "step parameter should be in the format latstep,lonstep");
-	if (op_ident[0] == 0)
-		dba_cmdline_error(optCon, "you need to specify --ident=pseudoana-id");
-
 	DBA_RUN_OR_RETURN(dba_init());
-	dba_db db;
-	DBA_RUN_OR_RETURN(create_dba_db(&db));
-
-	dba_record data;
-	DBA_RUN_OR_RETURN(dba_record_create(&data));
-
-	//Importer consumer(db, op_overwrite != 0);
-	//DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
-
-	ChannelTab satinfo;
-	DBA_RUN_OR_RETURN(satinfo.read(op_satinfo));
-
-	// Read the names of the input files
-	vector<string> names;
-	DBA_RUN_OR_RETURN(fileNames(optCon, names));
-
-	// Read the images
-	size_t processed = 0;
-	set<int> warned;
-	for (vector<string>::const_iterator i = names.begin(); i != names.end(); ++i)
-	{
-		// Read the image
-		ImageVector imgs;
-		try
-		{
-			std::auto_ptr<ImageImporter> importer = getImporter(*i);
-			if (!importer.get())
-			{
-				cerr << "No importer found for " << *i << ": ignoring." << endl;
-				continue;
-			}
-			importer->cropLatMin = latmin;
-			importer->cropLatMax = latmax;
-			importer->cropLonMin = lonmin;
-			importer->cropLonMax = lonmax;
-			importer->read(imgs);
-		}
-		catch (std::exception& e)
-		{
-			cerr << "Importing " << *i << " failed: ignoring." << endl;
-			continue;
-		}
-
-		// Import the data
-		for (ImageVector::const_iterator iterimg = imgs.begin(); iterimg != imgs.end(); ++iterimg)
-		{
-			// Get the mapping data for the channel
-			Image& img = **iterimg;
-			ChannelTab::const_iterator citer = satinfo.find(img.channel_id);
-			if (citer == satinfo.end())
-			{
-				if (warned.find(img.channel_id) == warned.end())
-				{
-					fprintf(stderr, "No channel information for channel %d in %s: skipping image.\n",
-							img.channel_id, op_satinfo);
-					warned.insert(img.channel_id);
-				}
-				continue;
-			}
-			const ChannelInfo& c = citer->second;
-
-			// Prepare the new input record
-			dba_record_clear(data);
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_YEAR, img.year));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MONTH, img.month));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_DAY, img.day));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_HOUR, img.hour));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MIN, img.minute));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_SEC, 0));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_LEVELTYPE, c.ltype));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L1, c.l1));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_L2, c.l2));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_PINDICATOR, c.pind));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P1, c.p1));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_P2, c.p2));
-			DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_REP_MEMO, c.rep.c_str()));
-			DBA_RUN_OR_RETURN(dba_record_key_seti(data, DBA_KEY_MOBILE, 1));
-			DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_IDENT, op_ident));
-
-			// TODO: should we use an ident?
-			//DBA_RUN_OR_RETURN(dba_record_key_setc(data, DBA_KEY_IDENT, c.rep.c_str()));
-
-			// Sample the points at the given intervals and insert them
-			for (double lat = latmin; lat < latmax; lat += latstep)
-				for (double lon = lonmin; lon < lonmax; lon += lonstep)
-				{
-					size_t x, y;
-					img.coordsToPixels(lat, lon, x, y);
-					//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
-
-					if (x < img.data->columns && y < img.data->lines)
-					{
-						DBA_RUN_OR_RETURN(dba_record_key_setd(data, DBA_KEY_LAT, lat));
-						DBA_RUN_OR_RETURN(dba_record_key_setd(data, DBA_KEY_LON, lon));
-						DBA_RUN_OR_RETURN(dba_record_var_setd(data, c.var, img.data->scaled(x, y)));
-						DBA_RUN_OR_RETURN(dba_db_insert(db, data, op_overwrite ? 1 : 0, 1, NULL, NULL));
-						//dba_record_print(data, stdout);
-						//cout << "---------------------" << endl;
-					}
-				}
-		}
-		++processed;
-	}
-
-	if (processed == 0)
-		dba_cmdline_error(optCon, "No valid input files found");
-
-	dba_record_delete(data);
-	dba_db_delete(db);
+	GridImporter processor;
+	processor.dump = op_dump != 0;
+	DBA_RUN_OR_RETURN(processor.init(optCon));
+	DBA_RUN_OR_RETURN(processor.process(optCon));
 	dba_shutdown();
 
 	return dba_error_ok();
@@ -520,20 +559,11 @@ dba_err do_importgrid(poptContext optCon)
 
 static struct tool_desc dbasat;
 
-struct poptOption dbasat_dump_options[] = {
-	{ "help", '?', 0, 0, 1, "print an help message" },
-	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "read only the given subarea (in pixels) of the images (format: x,y,w,h)" },
-	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
-	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
-	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0,
-		"Options used to connect to the database" },
-	POPT_TABLEEND
-};
-
 struct poptOption dbasat_import_options[] = {
 	{ "help", '?', 0, 0, 1, "print an help message" },
 	{ "area", 'a', POPT_ARG_STRING, &op_area, 0, "read only the given subarea (in pixels) of the images (format: x,y,w,h)" },
 	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
+	{ "dump", 0, POPT_ARG_NONE, &op_dump, 0, "do not insert data in the database, but dump the results on standard output" },
 	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
 	{ "overwrite", 'f', POPT_ARG_NONE, &op_overwrite, 0, "overwrite existing data" },
 	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0, "Options used to connect to the database" },
@@ -546,6 +576,7 @@ struct poptOption dbasat_importgrid_options[] = {
 	{ "step", 's', POPT_ARG_STRING, &op_step, 0, "distance (in degrees) between the sampled points (format: latstep,lonstep)" },
 	{ "satinfo", 0, POPT_ARG_STRING, &op_satinfo, 0, "pathname of the .csv file mapping satellite channels to DB-ALLe variable information (default: " DEFAULT_SATINFO ")" },
 	{ "ident", 'i', POPT_ARG_STRING, &op_ident, 0, "pseudoana identifier to use on import" },
+	{ "dump", 0, POPT_ARG_NONE, &op_dump, 0, "do not insert data in the database, but dump the results on standard output" },
 	{ "verbose", 0, POPT_ARG_NONE, &op_verbose, 0, "verbose output" },
 	{ "overwrite", 'f', POPT_ARG_NONE, &op_overwrite, 0, "overwrite existing data" },
 	{ NULL, 0, POPT_ARG_INCLUDE_TABLE, &dbTable, 0, "Options used to connect to the database" },
@@ -569,40 +600,30 @@ static void init()
 		", NetCDF, NetCDF24"
 #endif
 		" format.";
-	dbasat.ops = (struct op_dispatch_table*)calloc(4, sizeof(struct op_dispatch_table));
+	dbasat.ops = (struct op_dispatch_table*)calloc(3, sizeof(struct op_dispatch_table));
 
-	dbasat.ops[0].func = do_dump;
-	dbasat.ops[0].aliases[0] = "dump";
-	dbasat.ops[0].usage = "dump [options] [file1 [file2...]] [queryparm1=val1 [queryparm2=val2 [...]]]";
-	dbasat.ops[0].desc = "Dump satellite data from the stations found in the database matching the given query";
+	dbasat.ops[0].func = do_import;
+	dbasat.ops[0].aliases[0] = "import";
+	dbasat.ops[0].usage = "import [options] [file1 [file2...]] [queryparm1=val1 [queryparm2=val2 [...]]]";
+	dbasat.ops[0].desc = "Import satellite data corresponding to the stations found in the database matching the given query";
 	dbasat.ops[0].longdesc = "Query parameters are the same of the Fortran API. "
 		"Please see the section \"Input and output parameters -- For data "
 		"related action routines\" of the Fortran API documentation for a "
 		"complete list.";
-	dbasat.ops[0].optable = dbasat_dump_options;
+	dbasat.ops[0].optable = dbasat_import_options;
 
-	dbasat.ops[1].func = do_import;
-	dbasat.ops[1].aliases[0] = "import";
-	dbasat.ops[1].usage = "import [options] [file1 [file2...]] [queryparm1=val1 [queryparm2=val2 [...]]]";
-	dbasat.ops[1].desc = "Import satellite data corresponding to the stations found in the database matching the given query";
-	dbasat.ops[1].longdesc = "Query parameters are the same of the Fortran API. "
-		"Please see the section \"Input and output parameters -- For data "
-		"related action routines\" of the Fortran API documentation for a "
-		"complete list.";
-	dbasat.ops[1].optable = dbasat_import_options;
+	dbasat.ops[1].func = do_importgrid;
+	dbasat.ops[1].aliases[0] = "importgrid";
+	dbasat.ops[1].usage = "importgrid --area=latmin,latmax,lonmin,lonmax --step=latstep,lonstep --ident=ident [options] [file1 [file2...]]";
+	dbasat.ops[1].desc = "Import satellite data taken at regular intervals";
+	dbasat.ops[1].longdesc = NULL;
+	dbasat.ops[1].optable = dbasat_importgrid_options;
 
-	dbasat.ops[2].func = do_importgrid;
-	dbasat.ops[2].aliases[0] = "importgrid";
-	dbasat.ops[2].usage = "importgrid --area=latmin,latmax,lonmin,lonmax --step=latstep,lonstep --ident=ident [options] [file1 [file2...]]";
-	dbasat.ops[2].desc = "Import satellite data taken at regular intervals";
+	dbasat.ops[2].func = NULL;
+	dbasat.ops[2].usage = NULL;
+	dbasat.ops[2].desc = NULL;
 	dbasat.ops[2].longdesc = NULL;
-	dbasat.ops[2].optable = dbasat_importgrid_options;
-
-	dbasat.ops[3].func = NULL;
-	dbasat.ops[3].usage = NULL;
-	dbasat.ops[3].desc = NULL;
-	dbasat.ops[3].longdesc = NULL;
-	dbasat.ops[3].optable = NULL;
+	dbasat.ops[2].optable = NULL;
 };
 
 int main (int argc, const char* argv[])
