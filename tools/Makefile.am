@@ -16,12 +16,12 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-bin_PROGRAMS = msatconv interpolate
+bin_PROGRAMS = msat interpolate
 
-noinst_PROGRAMS = msatconv
+noinst_PROGRAMS = msat
 
-msatconv_SOURCES = msatconv.cpp
-msatconv_LDADD = ../msat/libmsat.la 
+msat_SOURCES = msat.cpp
+msat_LDADD = ../msat/libmsat.la 
 
 interpolate_SOURCES = interpolate.cpp
 interpolate_LDADD = ../msat/libmsat.la 
