@@ -1,3 +1,23 @@
+Release 0.5  : (22/11/2006)
+
+  * Enrico Zini, Wed Nov 22, 2006
+
+  - Added the msat library, that implements a satellite image abstraction
+    independent from the encoding format.  Msat features include:
+     - importers and exporter for anything that is supported by meteosatlib,
+       allowing conversions to/from any of them.
+     - georeferentiation of image data
+     - extracting subareas both in pixels and in coordinates
+     - export to any image format supported by Magick++
+     - preview of the cropping results directly on X11
+     - commandline tool 'msat' to take advantage of these functions
+  - Imports large GRIB files
+  - Imports SAF images
+  - Added support for grib-style NetCDF24 image format.
+  - Imports HRIT HRV files, with correct placement of the two sub-images they
+    contain
+  - Imports selected image data into DB-All.e
+
 Release 0.4.1  : (03/01/2006)
 
   * Graziano Giuliani, Tue Jan  3 2006
