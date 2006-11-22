@@ -17,6 +17,7 @@
 ##
 
 bin_PROGRAMS = msat interpolate
+man_MANS = 
 
 noinst_PROGRAMS = msat
 
@@ -28,10 +29,14 @@ interpolate_LDADD = ../msat/libmsat.la
 
 if DBALLE
 bin_PROGRAMS += dbasat
+man_MANS += dbasat.1
 
 dbasat_SOURCES = dbasat.cpp
 dbasat_LDADD = ../msat/libmsat.la $(LIBDBALLE_LIBS)
 dbasat_INCLUDES = $(LIBDBALLE_CFLAGS)
+
+dbasat.1: dbasat
+	./$< help manpage > $@ || rm $@
 endif
 
 MAINTAINERCLEANFILES = \
