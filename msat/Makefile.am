@@ -18,9 +18,14 @@
 ##
 
 msatincludedir=$(includedir)/msat
-projincludedir=$(includedir)/msat/proj
 
-dist_msatinclude_HEADERS = \
+nobase_dist_msatinclude_HEADERS = \
+    proj/const.h \
+    proj/Geos.h \
+    proj/Mercator.h \
+    proj/Points.h \
+    proj/Polar.h \
+    proj/Projection.h \
     Image.h \
     ExportGRIB.h \
     ExportNetCDF.h \
@@ -34,14 +39,6 @@ dist_msatinclude_HEADERS = \
     NetCDFUtils.h \
     SAFH5Utils.h \
     Progress.h
-
-dist_projinclude_HEADERS = \
-    proj/const.h \
-    proj/Geos.h \
-    proj/Mercator.h \
-    proj/Points.h \
-    proj/Polar.h \
-    proj/Projection.h
 
 noinst_LTLIBRARIES = libmsat.la
 libmsat_la_SOURCES = \
