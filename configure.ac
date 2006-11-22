@@ -280,7 +280,6 @@ AC_CONFIG_FILES([
     omtp-ids/examples/Makefile
     openmtp/Makefile
     openmtp/examples/Makefile
-    proj/Makefile
     thornsds_db1/Makefile
     thornsds_db1/examples/Makefile
     test/Makefile

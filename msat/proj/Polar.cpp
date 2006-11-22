@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 //
-//  File        : Proj_Mercator.h
-//  Description : Mapping Algorithms interface - Mercator Projecton
+//  File        : Proj_Polar.cpp
+//  Description : Mapping Algorithms interface - Polar Projection
 //  Project     : CETEMPS 2003
 //  Author      : Graziano Giuliani (CETEMPS - University of L'Aquila
 //  References  : LRIT/HRIT GLobal Specification par. 4.4 pag. 20-28
@@ -22,26 +22,57 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //---------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#include <msat/proj/Polar.h>
+#include <string.h>
+#include <cmath>
+#include <sstream>
 
-#include <proj/Projection.h>
+#ifndef DTR
+#define DTR 0.017453292
+#endif
 
-#ifndef METEOSATLIB_PROJ_MERCATOR_H
-#define METEOSATLIB_PROJ_MERCATOR_H
+#ifndef RTD
+#define RTD 57.29577951
+#endif
+
 
 namespace msat {
 namespace proj {
 
-class Mercator : public Projection
+void Polar::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
-public:
-	Mercator() {}
-	virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
-	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
-	virtual std::string format() const { return "Mercator"; }
-};
+  double sign = north ? 1.0 : -1.0;
+
+  double a = tan((DTR*(90.0 - sign * m.lat)) * 0.5);
+  p.x = a * sin(DTR*(m.lon - longitude));
+  p.y = a * cos(DTR*(m.lon - longitude));
+}
+
+static double signum(double x)
+{
+  if (x >= 0.0) return 1.0;
+  else return -1.0;
+}
+
+void Polar::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
+{
+  double sign = north ? 1.0 : -1.0;
+
+  m.lon = RTD*atan2(p.x, p.y) + longitude + \
+          sign * 90.0 * (1.0 - signum(p.y));
+  m.lat = sign * (90.0 - 2.0 * \
+          RTD*atan(sqrt(pow(p.x, 2.0) + pow(p.y, 2.0))) );
+}
+
+std::string Polar::format() const
+{
+  std::stringstream str;
+  str << "Polar(longitude: " << longitude << ", north: " << north << ")";
+  return str.str();
+}
 
 }
 }
 
 // vim:set ts=2 sw=2:
-#endif

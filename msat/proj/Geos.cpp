@@ -23,8 +23,8 @@
 //
 //---------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#include <proj/Geos.h>
-#include <proj/const.h>
+#include <msat/proj/Geos.h>
+#include <msat/proj/const.h>
 #include <string.h>
 #include <cmath>
 #include <sstream>

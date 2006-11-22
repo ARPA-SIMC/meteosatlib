@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <proj/Projection.h>
+#include <msat/proj/Projection.h>
 
 namespace msat {
 

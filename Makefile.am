@@ -28,7 +28,6 @@ DIST_SUBDIRS = \
     thornsds_db1
 
 SUBDIRS = . \
-    proj \
     grib \
     msat \
     images \

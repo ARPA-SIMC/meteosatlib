@@ -17,7 +17,8 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-msatincludedir=$(includedir)/meteosatlib/msat
+msatincludedir=$(includedir)/msat
+projincludedir=$(includedir)/msat/proj
 
 dist_msatinclude_HEADERS = \
     Image.h \
@@ -34,14 +35,24 @@ dist_msatinclude_HEADERS = \
     SAFH5Utils.h \
     Progress.h
 
+dist_projinclude_HEADERS = \
+    proj/const.h \
+    proj/Geos.h \
+    proj/Mercator.h \
+    proj/Points.h \
+    proj/Polar.h \
+    proj/Projection.h
+
 noinst_LTLIBRARIES = libmsat.la
 libmsat_la_SOURCES = \
+    proj/Polar.cpp \
+    proj/Geos.cpp \
+    proj/Mercator.cpp \
     Image.cpp \
     ImportGRIB.cpp \
     ExportGRIB.cpp \
     Progress.cpp
 libmsat_la_LIBADD = \
-    ../proj/libproj.la \
     ../grib/libgrib.la
 
 if HRIT

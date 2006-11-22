@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 //
-//  File        : Proj_Polar.cpp
-//  Description : Mapping Algorithms interface - Polar Projection
+//  File        : Proj_Mercator.cpp
+//  Description : Mapping Algorithms interface - Mercator Projection
 //  Project     : CETEMPS 2003
 //  Author      : Graziano Giuliani (CETEMPS - University of L'Aquila
 //  References  : LRIT/HRIT GLobal Specification par. 4.4 pag. 20-28
@@ -22,54 +22,24 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //---------------------------------------------------------------------------
+//
 //-----------------------------------------------------------------------------
-#include <proj/Polar.h>
-#include <string.h>
+#include <msat/proj/Mercator.h>
 #include <cmath>
-#include <sstream>
-
-#ifndef DTR
-#define DTR 0.017453292
-#endif
-
-#ifndef RTD
-#define RTD 57.29577951
-#endif
-
 
 namespace msat {
 namespace proj {
 
-void Polar::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
+void Mercator::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
-  double sign = north ? 1.0 : -1.0;
-
-  double a = tan((DTR*(90.0 - sign * m.lat)) * 0.5);
-  p.x = a * sin(DTR*(m.lon - longitude));
-  p.y = a * cos(DTR*(m.lon - longitude));
+  p.x = m.lon / 180.0;
+  p.y = M_1_PI * log(tan((M_PI/360)*(90.0-m.lat)));
 }
 
-static double signum(double x)
+void Mercator::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
 {
-  if (x >= 0.0) return 1.0;
-  else return -1.0;
-}
-
-void Polar::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
-{
-  double sign = north ? 1.0 : -1.0;
-
-  m.lon = RTD*atan2(p.x, p.y) + longitude + \
-          sign * 90.0 * (1.0 - signum(p.y));
-  m.lat = sign * (90.0 - 2.0 * \
-          RTD*atan(sqrt(pow(p.x, 2.0) + pow(p.y, 2.0))) );
-}
-
-std::string Polar::format() const
-{
-  std::stringstream str;
-  str << "Polar(longitude: " << longitude << ", north: " << north << ")";
-  return str.str();
+  m.lon = 180.0 * p.x;
+  m.lat  = 90.0 - (360/M_PI) * atan(exp(p.y * M_PI));
 }
 
 }

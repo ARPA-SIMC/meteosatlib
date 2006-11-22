@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 //
-//  File        : Projection.h
-//  Description : Mapping Algorithms interface - Projection ADC
+//  File        : Proj_Mercator.h
+//  Description : Mapping Algorithms interface - Mercator Projecton
 //  Project     : CETEMPS 2003
 //  Author      : Graziano Giuliani (CETEMPS - University of L'Aquila
 //  References  : LRIT/HRIT GLobal Specification par. 4.4 pag. 20-28
@@ -23,32 +23,25 @@
 //
 //---------------------------------------------------------------------------
 
-#include <proj/Points.h> 
-#include <string>
+#include <msat/proj/Projection.h>
 
-#ifndef METEOSATLIB_PROJ_PROJECTION_H
-#define METEOSATLIB_PROJ_PROJECTION_H
-
-#if 0
-typedef struct {
-  double Longitude;
-  double OrbitRadius;
-  BOOL   ifNorth;
-} ProjectionParameters;
-#endif
+#ifndef METEOSATLIB_PROJ_MERCATOR_H
+#define METEOSATLIB_PROJ_MERCATOR_H
 
 namespace msat {
 namespace proj {
 
-struct Projection
+class Mercator : public Projection
 {
-    virtual ~Projection() { }
-    virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const = 0;
-    virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const = 0;
-    virtual std::string format() const = 0;
+public:
+	Mercator() {}
+	virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
+	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
+	virtual std::string format() const { return "Mercator"; }
 };
 
 }
 }
 
+// vim:set ts=2 sw=2:
 #endif
