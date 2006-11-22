@@ -1,3 +1,54 @@
+Wed Nov 22 12:07:30 2006 Enrico Zini <enrico@enricozini.org>
+
+	* Version 0.5
+
+HRIT:
+ * Very fast and memory-friendly image data access in msat::Image.
+ * Implemented recomposition of the HRV image in msat::Image.
+
+GRIB:
+ * Added support for correctly reading GRIB files encoded with the ECMWF
+   Nightmare Hack for large files.
+ * Use the local definition 24 for the PDS.
+ * Removed redundant extended PDS.
+ * Refined georeferentiation constants to get rid of a shift in the output
+   image.
+
+NetCDF:
+ * Explicitly encode the value used for missing value.
+ * Implemented tracking of the full image processing history.
+
+SAF:
+ * Added support for importing SAF H5 images:
+   http://www.meteorologie.eu.org/RDT/doc/SAF-NWC-IOP-INM-SW-ICD-3_v1.2.pdf
+
+NetCDF24:
+ * Added support for importing and exporting NetCDF24, a dialect of NetCDF
+   that organises data in a way similar to a GRIB file.
+
+msat::Image:
+ * Created msat library, which implements an encoding-independent satellite
+   Image abstraction.
+ * Imports from HRIT, GRIB, NetCDF, NetCDF24, SAF.
+ * Exports to GRIB, NetCDF, NetCDF24.
+ * Implemented crop and rotation.
+ * Implemented georeferentiation of image data.
+ * Implemented croping an area specified by its coordinates.
+ * Implemented exporting as an image file using Magick++.
+ * Implemented displaying on X11 via Magick++.
+ * Implemented various unit tests.
+ 
+msat:
+ * Created commandline tool using the msat library to convert to/from any
+   format supported, extract subareas, display a preview of the results on
+   X11.
+
+DB-All.e:
+ * Added dbasat tool to import data from an image into DB-All.e:
+   http://www.smr.arpa.emr.it/software/DBalle.html
+   both as a regular grid and as points corresponding to stations already in
+   DB-All.e.
+
 Tue Jan  3 12:25:30 2006 Graziano Giuliani <giuliani@lamma.rete.toscana.it>
 
 	* Version 0.4.1
