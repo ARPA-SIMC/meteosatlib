@@ -318,43 +318,93 @@ static void escape(std::string& str)
 			*i = '_';
 }
 
+// Reimplemented here to be able to link without libhrit in case it's disabled
+std::string Image::spacecraftName(int hritID)
+{
+  switch (hritID)
+  {
+    case MSG_NO_SPACECRAFT: return "Non Spacecraft";
+    case MSG_METOP_1: return "METOP1";
+    case MSG_METOP_2: return "METOP2";
+    case MSG_METOP_3: return "METOP3";
+    case MSG_METEOSAT_3: return "METEOSAT3";
+    case MSG_METEOSAT_4: return "METEOSAT4";
+    case MSG_METEOSAT_5: return "METEOSAT5";
+    case MSG_METEOSAT_6: return "METEOSAT6";
+    case MSG_MTP_1: return "MTP1";
+    case MSG_MTP_2: return "MTP2";
+    case MSG_MSG_1: return "MSG1";
+    case MSG_MSG_2: return "MSG2";
+    case MSG_MSG_3: return "MSG3";
+    case MSG_MSG_4: return "MSG4";
+    case MSG_NOAA_12: return "NOAA12";
+    case MSG_NOAA_13: return "NOAA13";
+    case MSG_NOAA_14: return "NOAA14";
+    case MSG_NOAA_15: return "NOAA15";
+    case MSG_GOES_7: return "GOES7";
+    case MSG_GOES_8: return "GOES8";
+    case MSG_GOES_9: return "GOES9";
+    case MSG_GOES_10: return "GOES10";
+    case MSG_GOES_11: return "GOES11";
+    case MSG_GOES_12: return "GOES12";
+    case MSG_GOMS_1: return "GOMS1";
+    case MSG_GOMS_2: return "GOMS2";
+    case MSG_GOMS_3: return "GOMS3";
+    case MSG_GMS_4: return "GMS4";
+    case MSG_GMS_5: return "GMS5";
+    case MSG_GMS_6: return "GMS6";
+    case MSG_MTSAT_1: return "MTSAT1";
+    case MSG_MTSAT_2: return "MTSAT2";
+  }
+	return "unknown";
+}
+
+// Reimplemented here to be able to link without libhrit in case it's disabled
+std::string Image::sensorName(int hritSpacecraftID)
+{
+	switch (hritSpacecraftID)
+	{
+		case MSG_MSG_1: return "Seviri";
+		default: return "unknown";
+	}
+}
+
+// Reimplemented here to be able to link without libhrit in case it's disabled
+std::string Image::channelName(int hritSpacecraftID, int channelID)
+{
+	if (hritSpacecraftID == MSG_MSG_1)
+	{
+		switch (channelID)
+		{
+			case MSG_SEVIRI_NO_CHANNEL:		return "no-channel";
+			case MSG_SEVIRI_1_5_VIS_0_6:	return "VIS006";
+			case MSG_SEVIRI_1_5_VIS_0_8:	return "VIS008";
+			case MSG_SEVIRI_1_5_IR_1_6:		return "IR_016";
+			case MSG_SEVIRI_1_5_IR_3_9:		return "IR_039";
+			case MSG_SEVIRI_1_5_WV_6_2:		return "WV_062";
+			case MSG_SEVIRI_1_5_WV_7_3:		return "WV_073";
+			case MSG_SEVIRI_1_5_IR_8_7:		return "IR_087";
+			case MSG_SEVIRI_1_5_IR_9_7:		return "IR_097";
+			case MSG_SEVIRI_1_5_IR_10_8:	return "IR_108";
+			case MSG_SEVIRI_1_5_IR_12_0:	return "IR_120";
+			case MSG_SEVIRI_1_5_IR_13_4:	return "IR_134";
+			case MSG_SEVIRI_1_5_HRV:			return "HRV";
+		}
+	}
+	return "unknown";
+}
+
 std::string Image::defaultFilename() const
 {
 	t_enum_MSG_spacecraft sc = (t_enum_MSG_spacecraft)spacecraftIDToHRIT(spacecraft_id);
 	// Get the string describing the spacecraft
-	std::string spacecraft = MSG_spacecraft_name(sc);
+	std::string spacecraft = spacecraftName(sc);
 
 	// Get the string describing the sensor
-	std::string sensor;
+	std::string sensor = sensorName(sc);
 
 	// Get the string describing the channel
-	std::string channel;
-	if (sc == MSG_MSG_1)
-	{
-		sensor = "Seviri";
-		switch (channel_id)
-		{
-			case MSG_SEVIRI_NO_CHANNEL:		channel = "no-channel"; break;
-			case MSG_SEVIRI_1_5_VIS_0_6:	channel = "VIS006"; break;
-			case MSG_SEVIRI_1_5_VIS_0_8:	channel = "VIS008"; break;
-			case MSG_SEVIRI_1_5_IR_1_6:		channel = "IR_016"; break;
-			case MSG_SEVIRI_1_5_IR_3_9:		channel = "IR_039"; break;
-			case MSG_SEVIRI_1_5_WV_6_2:		channel = "WV_062"; break;
-			case MSG_SEVIRI_1_5_WV_7_3:		channel = "WV_073"; break;
-			case MSG_SEVIRI_1_5_IR_8_7:		channel = "IR_087"; break;
-			case MSG_SEVIRI_1_5_IR_9_7:		channel = "IR_097"; break;
-			case MSG_SEVIRI_1_5_IR_10_8:	channel = "IR_108"; break;
-			case MSG_SEVIRI_1_5_IR_12_0:	channel = "IR_120"; break;
-			case MSG_SEVIRI_1_5_IR_13_4:	channel = "IR_134"; break;
-			case MSG_SEVIRI_1_5_HRV:			channel = "HRV"; break;
-			default: channel = "unknown"; break;
-		}
-	}
-	else
-	{
-		sensor = "unknown";
-		channel = "unknown";
-	}
+	std::string channel = channelName(sc, channel_id);
 
 	escape(spacecraft);
 	escape(sensor);

@@ -190,6 +190,15 @@ public:
 	/// Convert the spacecraft ID as in WMO Common code table C-5 to the value
 	/// used by HRIT
 	static int spacecraftIDToHRIT(int id);
+
+	/// Get the spacecraft name from the given HRIT satellite ID
+	static std::string spacecraftName(int hritID);
+
+	/// Get the sensor name from the given HRIT satellite ID
+	static std::string sensorName(int hritSpacecraftID);
+
+	/// Get the channel name from the given HRIT satellite ID and channel ID
+	static std::string channelName(int hritSpacecraftID, int channelID);
 };
 
 /// Interface for image data of various types

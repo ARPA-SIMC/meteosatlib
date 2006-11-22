@@ -34,9 +34,6 @@
 #include <sstream>
 #include <stdexcept>
 
-// For MSG_channel_name
-#include <hrit/MSG_HRIT.h>
-
 #include "NetCDFUtils.h"
 
 #define INSTITUTION "ARPA-SIM"
@@ -52,7 +49,7 @@ namespace msat {
 void ExportNetCDF(const Image& img, const std::string& fileName)
 {
   // Get the channel name
-  string channelstring = MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
+  string channelstring = Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
 
   // Change sensitive characters into underscores
   for (string::iterator i = channelstring.begin();
@@ -71,7 +68,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   // Add Global Attributes
   //cerr << "global." << endl;
 
-  ncfAddAttr(ncf, "Satellite", MSG_spacecraft_name((t_enum_MSG_spacecraft)Image::spacecraftIDToHRIT(img.spacecraft_id)).c_str());
+  ncfAddAttr(ncf, "Satellite", Image::spacecraftName(Image::spacecraftIDToHRIT(img.spacecraft_id)).c_str());
   char reftime[64];
   sprintf(reftime, "%04d-%02d-%02d %02d:%02d:00 UTC",
            img.year, img.month, img.day, img.hour, img.minute);

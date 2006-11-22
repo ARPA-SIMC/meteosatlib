@@ -27,6 +27,7 @@ nobase_dist_msatinclude_HEADERS = \
     proj/Polar.h \
     proj/Projection.h \
     Image.h \
+    Image.tcc \
     ExportGRIB.h \
     ExportNetCDF.h \
     ExportNetCDF24.h \

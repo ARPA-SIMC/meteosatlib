@@ -93,6 +93,7 @@ static std::auto_ptr<Magick::Image> imageToMagick(ProgressTask& p, const Image& 
 		p.activity("Normalising image");
 		image->normalize();
 	}
+#ifdef HAVE_HRIT
 	else if (HRITImageData* i = dynamic_cast< HRITImageData* >(img.data))
 	{
 		p.activity("Creating image");
@@ -105,6 +106,7 @@ static std::auto_ptr<Magick::Image> imageToMagick(ProgressTask& p, const Image& 
 		p.activity("Normalising image");
 		image->normalize();
 	}
+#endif
 #if 0
 	else if (ImageDataWithPixels<int>* i = dynamic_cast< ImageDataWithPixels<int>* >(img.data))
 	{

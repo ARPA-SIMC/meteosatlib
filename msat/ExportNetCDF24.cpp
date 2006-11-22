@@ -36,9 +36,6 @@
 #include <sstream>
 #include <stdexcept>
 
-// For MSG_channel_name
-#include <hrit/MSG_HRIT.h>
-
 #include <proj/const.h>
 #include "NetCDFUtils.h"
 
@@ -144,7 +141,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*ivar, "scale_factor", img.data->slope);
 		ncfAddAttr(*ivar, "channel", img.channel_id);
 		ncfAddAttr(*ivar, "channelName",
-				MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id).c_str());
+				Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id).c_str());
 
 		if (img.channel_id > 3 && img.channel_id < 12)
 			ivar->add_att("units", "K");
@@ -160,8 +157,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*ivar, "scale_factor", 1.0);
 		ncfAddAttr(*ivar, "missing_value", img.data->missingValue);
 		ncfAddAttr(*ivar, "channel", img.channel_id);
-		ncfAddAttr(*ivar, "channelName",
-				MSG_channel_name((t_enum_MSG_spacecraft)img.spacecraft_id, img.channel_id).c_str());
+		ncfAddAttr(*ivar, "channelName", Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id).c_str());
 
 		if (img.channel_id > 3 && img.channel_id < 12)
 			ivar->add_att("units", "K");
