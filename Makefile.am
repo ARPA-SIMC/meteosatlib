@@ -25,7 +25,12 @@ DIST_SUBDIRS = \
     msg-native \
     omtp-ids \
     openmtp \
-    thornsds_db1
+    thornsds_db1 \
+    grib \
+    msat \
+    images \
+    tools \
+    test
 
 SUBDIRS = . \
     grib \

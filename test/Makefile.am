@@ -25,7 +25,8 @@ noinst_PROGRAMS = $(test_bin)
 noinst_HEADERS = \
 	tut.h \
 	tut_reporter.h \
-	tut_restartable.h
+	tut_restartable.h \
+	test_utils.h
 
 msatlib_test_CPPFLAGS = \
 	-I$(top_srcdir)/msat
@@ -52,6 +53,8 @@ endif
 
 MAINTAINERCLEANFILES = \
     Makefile.in
+
+EXTRA_DIST = data
 
 ## vim:syn=automake:
 ## -fin-
