@@ -26,7 +26,7 @@ noinst_HEADERS = \
 	tut.h \
 	tut_reporter.h \
 	tut_restartable.h \
-	test_utils.h
+	test-utils.h
 
 msatlib_test_CPPFLAGS = \
 	-I$(top_srcdir)/msat

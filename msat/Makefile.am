@@ -40,7 +40,7 @@ nobase_dist_msatinclude_HEADERS = \
     SAFH5Utils.h \
     Progress.h
 
-noinst_LTLIBRARIES = libmsat.la
+lib_LTLIBRARIES = libmsat.la
 libmsat_la_SOURCES = \
     proj/Polar.cpp \
     proj/Geos.cpp \

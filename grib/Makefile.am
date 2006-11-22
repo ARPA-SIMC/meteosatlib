@@ -18,7 +18,7 @@
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 ##
 
-gribincludedir=$(includedir)/meteosatlib/grib
+gribincludedir=$(includedir)/grib
 
 dist_gribinclude_HEADERS = \
     Ebisuzaki.h \
@@ -27,7 +27,7 @@ dist_gribinclude_HEADERS = \
 dist_noinst_DATA = \
     gribtab
 
-noinst_LTLIBRARIES = libgrib.la
+lib_LTLIBRARIES = libgrib.la
 libgrib_la_SOURCES = Ebisuzaki.cpp GRIB.cpp
 
 MAINTAINERCLEANFILES = \
