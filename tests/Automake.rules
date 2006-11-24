@@ -1,0 +1,74 @@
+## $Id$
+## Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software Foundation,
+## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+## Include this file in the top-level Makefile with an include
+## directive.
+
+check_PROGRAMS += \
+    tests/msatlib_test
+dist_check_SCRIPTS += \
+    tests/msatlib_test_wrap
+TESTS += \
+    $(dist_check_SCRIPTS)
+
+check:
+
+noinst_PROGRAMS += \
+    $(test_bin)
+
+noinst_HEADERS += \
+    tests/tut.h \
+    tests/tut_reporter.h \
+    tests/tut_restartable.h \
+    tests/test-utils.h
+
+dist_noinst_DATA += \
+    tests/data/H-000-MSG1__-MSG1________-_________-EPI______-200611141200-__ \
+    tests/data/H-000-MSG1__-MSG1________-HRV______-000018___-200611141200-C_ \
+    tests/data/H-000-MSG1__-MSG1________-_________-PRO______-200611141200-__ \
+    tests/data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc \
+    tests/data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb \
+    tests/data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5
+
+tests_msatlib_test_CPPFLAGS = \
+    -I$(top_srcdir)/msat
+tests_msatlib_test_LDADD = \
+    msat/libmsat.la
+tests_msatlib_test_SOURCES = \
+    tests/tut-main.cpp \
+    tests/test-utils.cpp \
+    tests/test-proj.cpp \
+    tests/test-importgrib.cpp \
+    tests/test-image.cpp
+
+if HRIT
+tests_msatlib_test_SOURCES += \
+    tests/test-importxrit.cpp
+endif
+
+if HAVE_NETCDF
+tests_msatlib_test_SOURCES += \
+    tests/test-importnetcdf.cpp
+endif
+
+if HDF5
+tests_msatlib_test_SOURCES += \
+    tests/test-importsafh5.cpp
+endif
+
+## -fin-
+## vim:syn=automake:

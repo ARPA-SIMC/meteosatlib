@@ -28,8 +28,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <Ebisuzaki.h>
-#include <GRIB.h>
+#include "Ebisuzaki.h"
+#include "GRIB.h"
 
 #include <iostream>
 #include <sstream>

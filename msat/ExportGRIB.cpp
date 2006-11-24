@@ -28,8 +28,8 @@
 #include "ExportGRIB.h"
 
 #include <msat/Progress.h>
-#include <proj/const.h>
-#include <proj/Geos.h>
+#include "proj/const.h"
+#include "proj/Geos.h"
 #include <grib/GRIB.h>
 #include <cmath>
 #include <stdexcept>

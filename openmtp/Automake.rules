@@ -1,7 +1,5 @@
-## Subdir -- Include this file in the toplevel Makefile with an include
-## directive
 ## $Id$
-## Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+## Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -17,23 +15,18 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-openmtp_lib = \
-    openmtp/libopenmtp.la
-
-openmtp_bin = \
-    openmtp/examples/OpenMTP_info
-
-openmtp/all: \
-    $(openmtp_lib) \
-    $(openmtp_bin)
+## Include this file in the top-level Makefile with an include
+## directive.
 
 lib_LTLIBRARIES += \
-    $(openmtp_lib)
+    openmtp/libopenmtp.la
 
 bin_PROGRAMS += \
-    $(openmtp_bin)
+    openmtp/examples/OpenMTP_info
 
-nobase_include_HEADERS += \
+openmtp_includedir = \
+    $(includedir)/openmtp
+openmtp_include_HEADERS = \
     openmtp/OpenMTP_ascii_header.h \
     openmtp/OpenMTP_binary_header.h \
     openmtp/OpenMTP.h \

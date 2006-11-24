@@ -15,15 +15,43 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-## Process this file with automake to produce Makefile.in.
+## Include this file in the top-level Makefile with an include
+## directive.
 
-DIST_SUBDIRS = \
-    examples
+bin_PROGRAMS += \
+    tools/interpolate \
+    tools/msat
 
-all clean:
-	@cd $(top_builddir) && $(MAKE) $(MFLAGS) $@
+noinst_PROGRAMS += \
+    tools/msat
 
-MAINTAINERCLEANFILES = \
-    Makefile.in
+tools_msat_LDADD = \
+    msat/libmsat.la
+tools_msat_SOURCES = \
+    tools/msat.cpp
+
+tools_interpolate_LDADD = \
+    msat/libmsat.la
+tools_interpolate_SOURCES = \
+    tools/interpolate.cpp
+
+if DBALLE
+bin_PROGRAMS += \
+    tools/dbasat
+man_MANS += \
+    tools/dbasat.1
+
+tools_dbasat_INCLUDES = \
+    $(LIBDBALLE_CFLAGS)
+tools_dbasat_LDADD = \
+    msat/libmsat.la \
+    $(LIBDBALLE_LIBS)
+tools_dbasat_SOURCES = \
+    tools/dbasat.cpp
+
+tools_dbasat.1: tools/dbasat
+	./tools/dbasat help manpage > tools/dbasat.1 || rm tools/dbasat.1
+endif
 
 ## -fin-
+## vim:syn=automake:

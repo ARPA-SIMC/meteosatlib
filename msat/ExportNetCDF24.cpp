@@ -28,7 +28,7 @@
 //#include "../config.h"
 
 #include <msat/ExportNetCDF24.h>
-#include <proj/Geos.h>
+#include "proj/Geos.h"
 #include <grib/GRIB.h>
 
 #include <netcdfcpp.h>
@@ -36,7 +36,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <proj/const.h>
+#include "proj/const.h"
 #include "NetCDFUtils.h"
 
 using namespace std;

@@ -1,5 +1,3 @@
-## Subdir -- Include this file in the toplevel Makefile with an include
-## directive
 ## $Id$
 ## Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
 ##
@@ -17,26 +15,21 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-omtp_ids_lib = \
+## Include this file in the top-level Makefile with an include
+## directive.
+
+lib_LTLIBRARIES += \
     omtp-ids/libomtp-ids.la
 
-omtp_ids_bin = \
+bin_PROGRAMS += \
     omtp-ids/examples/OpenMTP-IDS_debug \
     omtp-ids/examples/OpenMTP-IDS_sector \
     omtp-ids/examples/OpenMTP-IDS_to_pgm \
     omtp-ids/examples/OpenMTP-IDS_write
 
-omtp-ids/all : \
-    $(omtp_ids_lib) \
-    $(omtp_ids_bin)
-
-lib_LTLIBRARIES += \
-    $(omtp_ids_lib)
-
-bin_PROGRAMS += \
-    $(omtp_ids_bin)
-
-nobase_include_HEADERS += \
+omtp_ids_includedir = \
+    $(includedir)/omtp-ids
+omtp_ids_include_HEADERS = \
     omtp-ids/Constants.hh \
     omtp-ids/FileHeader.hh \
     omtp-ids/LineHeader.hh \

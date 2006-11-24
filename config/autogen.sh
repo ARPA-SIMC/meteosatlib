@@ -1,6 +1,6 @@
 #! /bin/sh -ex
 # $Id$
-# Copyright (C) 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+# Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-#
-#
+
 # Use this script to generate the configure script required to configure
 # and build this package.
 #
@@ -27,15 +26,9 @@
 #
 # You need to have automake, autoconf and (possibly) libtool installed.
 
-# find config directory
-cfgaux=`dirname $0`
-test $cfgaux = . && cfgaux=`pwd`
-cfgaux=`basename $cfgaux`
-
-aclocal -I $cfgaux
-libtoolize --force
-autoheader
-automake --add-missing
-autoconf
+autoreconf \
+    --install \
+    --symlink \
+    --verbose
 
 # -fin-

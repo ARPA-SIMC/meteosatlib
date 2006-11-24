@@ -34,8 +34,8 @@
 #include <netcdfcpp.h>
 
 #include <msat/Image.h>
-#include <proj/const.h>
-#include <proj/Geos.h>
+#include "proj/const.h"
+#include "proj/Geos.h"
 #include <grib/GRIB.h>
 
 #include <sstream>

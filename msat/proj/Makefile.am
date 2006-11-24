@@ -1,6 +1,5 @@
-## Makefile.am -- Process this file with automake to produce Makefile.in
-## $Id: /local/meteosatlib/conv/Makefile.am 1898 2006-10-12T17:29:20.474497Z enrico  $
-## Copyright (C) 2006 Enrico Zini <enrico@enricozini.org>
+## $Id: Makefile.am 15 2006-08-02 09:18:59Z dsmaartens $
+## Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,26 +14,15 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-##
 
-projincludedir=$(includedir)/meteosatlib/proj
+## Process this file with automake to produce Makefile.in.
 
-dist_projinclude_HEADERS = \
-    const.h \
-    Points.h \
-    Projection.h \
-    Geos.h \
-    Mercator.h \
-    Polar.h
+DIST_SUBDIRS =
 
-noinst_LTLIBRARIES = libproj.la
-libproj_la_SOURCES = \
-    Geos.cpp \
-    Mercator.cpp \
-    Polar.cpp
+all clean:
+	@cd $(top_builddir) && $(MAKE) $(MFLAGS) $@
 
 MAINTAINERCLEANFILES = \
     Makefile.in
 
 ## -fin-
-## vim:syn=automake:

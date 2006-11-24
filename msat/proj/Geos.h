@@ -23,7 +23,7 @@
 //
 //---------------------------------------------------------------------------
 
-#include <proj/Projection.h>
+#include "Projection.h"
 
 #ifndef METEOSATLIB_PROJ_GEOS_H
 #define METEOSATLIB_PROJ_GEOS_H

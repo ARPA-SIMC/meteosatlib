@@ -282,7 +282,7 @@ AC_CONFIG_FILES([
     openmtp/examples/Makefile
     thornsds_db1/Makefile
     thornsds_db1/examples/Makefile
-    test/Makefile
+    tests/Makefile
     tools/Makefile
     meteosatlib.spec
 ])
@@ -291,6 +291,7 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 ===================================================
 $PACKAGE_NAME-$PACKAGE_VERSION configuration:
+AS_HELP_STRING([dballe:], [$enable_dballe])
 AS_HELP_STRING([hdf5:], [$enable_hdf5])
 AS_HELP_STRING([hri:], [$enable_hri])
 AS_HELP_STRING([hrit:], [$enable_hrit])
@@ -298,7 +299,6 @@ AS_HELP_STRING([msg-native:], [$enable_msg_native])
 AS_HELP_STRING([omtp-ids:], [$enable_omtp_ids])
 AS_HELP_STRING([openmtp:], [$enable_openmtp])
 AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
-AS_HELP_STRING([dballe:], [$enable_dballe])
 ===================================================])
 
 ## -fin-

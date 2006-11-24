@@ -30,52 +30,64 @@ DIST_SUBDIRS = \
     msat \
     images \
     tools \
-    test
+    tests
 
-SUBDIRS = . \
-    grib \
-    msat \
-    images \
-    tools \
-    test
+## using SUBDIRS is a no-no
 
-bin_PROGRAMS =
-lib_LTLIBRARIES =
-nobase_include_HEADERS =
-noinst_HEADERS =
+## variables updated by Automake.include files
 dist_noinst_DATA =
+noinst_HEADERS =
+man_MANS =
+bin_PROGRAMS =
+check_PROGRAMS =
 noinst_PROGRAMS =
-
-if HRI
-include $(srcdir)/hri/Automake.rules
-endif
+dist_check_SCRIPTS =
+lib_LTLIBRARIES =
+noinst_LTLIBRARIES =
+TESTS =
 
 if HRIT
-include $(srcdir)/decompress/Automake.rules
-include $(srcdir)/hrit/Automake.rules
-endif
-
-if MSG_NATIVE
-include $(srcdir)/msg-native/Automake.rules
-endif
-
-if OMTP_IDS
-include $(srcdir)/omtp-ids/Automake.rules
-endif
-
-if OPENMTP
-include $(srcdir)/openmtp/Automake.rules
-endif
-
-if THORNSDS_DB1
-include $(srcdir)/thornsds_db1/Automake.rules
+include decompress/Automake.rules
 endif
 
 if HAVE_NETCDF
-include $(srcdir)/examples/Automake.rules
+include examples/Automake.rules
 endif
 
-include $(srcdir)/iniparser/Automake.rules
+include grib/Automake.rules
+
+if HRI
+include hri/Automake.rules
+endif
+
+if HRIT
+include hrit/Automake.rules
+endif
+
+include images/Automake.rules
+include iniparser/Automake.rules
+
+if MSG_NATIVE
+include msg-native/Automake.rules
+endif
+
+include msat/Automake.rules
+
+if OMTP_IDS
+include omtp-ids/Automake.rules
+endif
+
+if OPENMTP
+include openmtp/Automake.rules
+endif
+
+include tests/Automake.rules
+
+if THORNSDS_DB1
+include thornsds_db1/Automake.rules
+endif
+
+include tools/Automake.rules
 
 .PHONY: dist-rpm
 dist-rpm: distcheck
@@ -83,7 +95,6 @@ dist-rpm: distcheck
 
 EXTRA_DIST = \
     $(ac_aux_dir)/autogen.sh \
-    $(ac_aux_dir)/bootstrap \
     $(ac_aux_dir)/clobber \
     $(PACKAGE_NAME).spec \
     CREDITS \

@@ -7,7 +7,7 @@
 #include <limits>
 #include <math.h>
 #include <limits.h>
-#include <proj/const.h>
+#include "proj/const.h"
 
 // For HRIT satellite IDs
 #include <hrit/MSG_spacecraft.h>

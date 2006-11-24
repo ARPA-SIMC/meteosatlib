@@ -1,0 +1,102 @@
+## $Id$
+## Copyright (C) 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 2, or (at your option)
+## any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program; if not, write to the Free Software Foundation,
+## Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+
+## Include this file in the top-level Makefile with an include
+## directive.
+
+lib_LTLIBRARIES += \
+    msat/libmsat.la
+noinst_LTLIBRARIES += \
+    msat/proj/libproj.la
+
+msat_includedir = \
+    $(includedir)/msat
+dist_msat_include_HEADERS = \
+    msat/Image.h \
+    msat/Image.tcc \
+    msat/ExportGRIB.h \
+    msat/ExportNetCDF.h \
+    msat/ExportNetCDF24.h \
+    msat/ExportImage.h \
+    msat/ImportGRIB.h \
+    msat/ImportSAFH5.h \
+    msat/ImportNetCDF.h \
+    msat/ImportNetCDF24.h \
+    msat/ImportXRIT.h \
+    msat/NetCDFUtils.h \
+    msat/SAFH5Utils.h \
+    msat/Progress.h
+
+msat_proj_includedir = \
+    $(includedir)/msat/proj
+dist_msat_proj_include_HEADERS = \
+    msat/proj/const.h \
+    msat/proj/Geos.h \
+    msat/proj/Mercator.h \
+    msat/proj/Points.h \
+    msat/proj/Polar.h \
+    msat/proj/Projection.h
+
+# CURRENT:REVISION:AGE
+# - library source changed -> inc REVISION
+# - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
+# - interfaces added -> inc AGE
+# - interfaces removed -> AGE = 0
+msat_libmsat_la_LDFLAGS = \
+    -version-info 0:0:0
+msat_libmsat_la_LIBADD = \
+    grib/libgrib.la \
+    msat/proj/libproj.la
+msat_libmsat_la_SOURCES = \
+    msat/Image.cpp \
+    msat/ImportGRIB.cpp \
+    msat/ExportGRIB.cpp \
+    msat/Progress.cpp
+
+msat_proj_libproj_la_SOURCES = \
+    msat/proj/Geos.cpp \
+    msat/proj/Mercator.cpp \
+    msat/proj/Polar.cpp
+
+if HRIT
+msat_libmsat_la_LIBADD += \
+    hrit/libhrit.la
+msat_libmsat_la_SOURCES += \
+    ImportXRIT.cpp
+endif
+
+if HAVE_NETCDF
+msat_libmsat_la_LIBADD += \
+    -lnetcdf_c++ \
+    -lnetcdf
+msat_libmsat_la_SOURCES += \
+    msat/ImportNetCDF.cpp \
+    msat/ExportNetCDF.cpp \
+    msat/ImportNetCDF24.cpp \
+    msat/ExportNetCDF24.cpp
+endif
+
+if HDF5
+msat_libmsat_la_LIBADD += \
+    -lhdf5_cpp
+msat_libmsat_la_SOURCES += \
+    msat/SAFH5Utils.cpp \
+    msat/ImportSAFH5.cpp
+endif
+
+## -fin-
+## vim:syn=automake:
