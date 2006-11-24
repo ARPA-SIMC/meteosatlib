@@ -76,7 +76,7 @@ if HRIT
 msat_libmsat_la_LIBADD += \
     hrit/libhrit.la
 msat_libmsat_la_SOURCES += \
-    ImportXRIT.cpp
+    msat/ImportXRIT.cpp
 endif
 
 if HAVE_NETCDF
