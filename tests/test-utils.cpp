@@ -22,6 +22,7 @@
 #include "test-utils.h"
 
 #include <unistd.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <pwd.h>
 #include <grib/GRIB.h>
@@ -103,7 +104,8 @@ void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageDa
 
 TempTestFile::TempTestFile(bool leave) : leave(leave)
 {
-	char* pn = tempnam("data/", "test");
+	::mkdir(WORK_DIR, 0755);
+	char* pn = tempnam(WORK_DIR, "test");
 	pathname = pn;
 	free(pn);
 }
