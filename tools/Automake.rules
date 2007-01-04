@@ -41,12 +41,17 @@ bin_PROGRAMS += \
 man_MANS += \
     tools/dbasat.1
 
+noinst_HEADERS += \
+    tools/cmdline.h
+
 tools_dbasat_INCLUDES = \
-    $(LIBDBALLE_CFLAGS)
+    $(LIBDBALLE_DB_CFLAGS)
 tools_dbasat_LDADD = \
     msat/libmsat.la \
-    $(LIBDBALLE_LIBS)
+    $(LIBDBALLE_DB_LIBS) \
+    -lpopt
 tools_dbasat_SOURCES = \
+    tools/cmdline.c \
     tools/dbasat.cpp
 
 tools_dbasat.1: tools/dbasat

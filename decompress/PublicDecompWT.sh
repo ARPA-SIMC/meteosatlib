@@ -46,7 +46,7 @@ then
   echo "Error in EUMETSAT Sources."
   exit 1
 fi
-CPPFLAGS="-O2 -Wall -pedantic -Wno-long-long " make
+CPPFLAGS="-O2 -Wall -pedantic -Wno-long-long -fPIC " make
 if [ $? -ne 0 ]
 then
   echo "Error Compiling EUMETSAT Sources."
@@ -59,7 +59,7 @@ then
   echo "Error in EUMETSAT Sources."
   exit 1
 fi
-CPPFLAGS="-O2 -Wall -pedantic -Wno-long-long " make
+CPPFLAGS="-O2 -Wall -pedantic -Wno-long-long -fPIC " make
 if [ $? -ne 0 ]
 then
   echo "Error Compiling EUMETSAT Sources."

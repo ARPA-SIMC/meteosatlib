@@ -167,14 +167,23 @@ AC_CHECK_HEADER([H5Cpp.h],
 ])
 
 if test "$enable_dballe" == "yes"; then
-	PKG_CHECK_EXISTS(libdballe, [
-		PKG_CHECK_MODULES(LIBDBALLE, libdballe)
-		AC_SUBST(LIBDBALLE_CFLAGS)
-		AC_SUBST(LIBDBALLE_LIBS)
-		enabl_dballe="yes"
+	PKG_CHECK_EXISTS(libdballe-db, [
+		PKG_CHECK_MODULES(LIBDBALLE_DB, libdballe-db)
+		AC_SUBST(LIBDBALLE_DB_CFLAGS)
+		AC_SUBST(LIBDBALLE_DB_LIBS)
 	],[
-		AC_MSG_WARN("*** dballe support disabled")
-		enabl_dballe="no"
+		AC_MSG_WARN("*** libdballe-db not found: dballe support disabled")
+		enable_dballe="no"
+	])
+fi
+if test "$enable_dballe" == "yes"; then
+	AC_CHECK_HEADER([popt.h],
+	    [],
+	    [
+	    if test "$enable_hdf5" == "yes"; then
+		AC_MSG_WARN("*** libpopt not found: dballe support disabled")
+		enable_dballe="no"
+	    fi
 	])
 fi
 

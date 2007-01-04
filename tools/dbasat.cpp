@@ -31,9 +31,8 @@
 #include <msat/ImportNetCDF24.h>
 #include <msat/ImportXRIT.h>
 
-#include <dballe/init.h>
-#include <dballe/cmdline.h>
-#include <dballe/db/dba_db.h>
+#include "cmdline.h"
+#include <dballe/db/db.h>
 #include <dballe/core/csv.h>
 
 #include <string>
@@ -166,7 +165,6 @@ struct Processor
 	{
 		if (db)
 			dba_db_delete(db);
-		dba_shutdown();
 	}
 
 	virtual dba_err parseCommandline(poptContext optCon)
@@ -529,12 +527,10 @@ dba_err do_import(poptContext optCon)
 	//Importer consumer(db, op_overwrite != 0);
 	//DBA_RUN_OR_RETURN(interpolate(optCon, db, consumer));
 
-	DBA_RUN_OR_RETURN(dba_init());
 	InterpolateProcessor processor;
 	processor.dump = op_dump != 0;
 	DBA_RUN_OR_RETURN(processor.init(optCon));
 	DBA_RUN_OR_RETURN(processor.process(optCon));
-	dba_shutdown();
 
 	return dba_error_ok();
 }
@@ -545,12 +541,10 @@ dba_err do_importgrid(poptContext optCon)
 	/* Throw away the command name */
 	action = poptGetArg(optCon);
 
-	DBA_RUN_OR_RETURN(dba_init());
 	GridImporter processor;
 	processor.dump = op_dump != 0;
 	DBA_RUN_OR_RETURN(processor.init(optCon));
 	DBA_RUN_OR_RETURN(processor.process(optCon));
-	dba_shutdown();
 
 	return dba_error_ok();
 }

@@ -31,6 +31,7 @@
 
 // PROJECT INCLUDES
 //
+#include <config.h>
 
 // LOCAL INCLUDES
 //
