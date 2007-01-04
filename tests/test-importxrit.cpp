@@ -86,7 +86,7 @@ static void checkFullImageData(Image& img)
 
 static std::auto_ptr<ImageImporter> importer()
 {
-	return createXRITImporter("data/H:MSG1:HRV:200611141200");
+	return createXRITImporter(DATA_DIR "/H:MSG1:HRV:200611141200");
 }
 static std::auto_ptr<ImageImporter> croppedImporter()
 {
@@ -124,8 +124,8 @@ static void checkCroppedImageData(Image& img)
 template<> template<>
 void to::test<1>()
 {
-	gen_ensure(isXRIT("data/H:MSG1:HRV:200611141200"));
-	gen_ensure(!isXRIT("data/H:MSG1:HRV"));
+	gen_ensure(isXRIT(DATA_DIR "/H:MSG1:HRV:200611141200"));
+	gen_ensure(!isXRIT(DATA_DIR "/H:MSG1:HRV"));
 }
 
 // Import a full XRIT product

@@ -46,8 +46,13 @@ dist_noinst_DATA += \
 
 tests_msatlib_test_CPPFLAGS = \
     -I$(top_srcdir)/msat
+
+# Linking libgrib.la here shouldn't be needed since libmsat.la does it, but
+# otherwise it fails for reason I haven't yet managed to explain --Enrico
 tests_msatlib_test_LDADD = \
+    grib/libgrib.la \
     msat/libmsat.la
+
 tests_msatlib_test_SOURCES = \
     tests/tut-main.cpp \
     tests/test-utils.cpp \
@@ -69,6 +74,10 @@ if HDF5
 tests_msatlib_test_SOURCES += \
     tests/test-importsafh5.cpp
 endif
+
+INCLUDES = \
+    -DDATA_DIR=\"`pwd`/$(top_srcdir)/tests/data\" \
+    -DWORK_DIR=\"`pwd`/$(top_builddir)/tests/work/\"
 
 ## -fin-
 ## vim:syn=automake:

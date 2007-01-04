@@ -86,15 +86,15 @@ static void checkCroppedImageData(Image& img)
 template<> template<>
 void to::test<1>()
 {
-	gen_ensure(isSAFH5("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	gen_ensure(!isSAFH5("data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
+	gen_ensure(isSAFH5(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	gen_ensure(!isSAFH5(DATA_DIR "/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
 }
 
 // Import a full SAFH5 product
 template<> template<>
 void to::test<2>()
 {
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	ImageVector imgs;
 	imp->read(imgs);
 
@@ -117,7 +117,7 @@ void to::test<2>()
 template<> template<>
 void to::test<3>()
 {
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
 	imp->cropY = 50;
 	imp->cropWidth = 500;
@@ -145,7 +145,7 @@ template<> template<>
 void to::test<4>()
 {
 	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);
@@ -170,7 +170,7 @@ template<> template<>
 void to::test<5>()
 {
 	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
 	imp->cropY = 50;
 	imp->cropWidth = 500;
@@ -199,7 +199,7 @@ template<> template<>
 void to::test<6>()
 {
 	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);
@@ -224,7 +224,7 @@ template<> template<>
 void to::test<7>()
 {
 	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
 	imp->cropY = 50;
 	imp->cropWidth = 500;
@@ -253,7 +253,7 @@ template<> template<>
 void to::test<8>()
 {
 	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);
@@ -278,7 +278,7 @@ template<> template<>
 void to::test<9>()
 {
 	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer("data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
 	imp->cropX = 100;
 	imp->cropY = 50;
 	imp->cropWidth = 500;

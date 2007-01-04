@@ -86,15 +86,15 @@ static void checkCroppedImageData(Image& img)
 template<> template<>
 void to::test<1>()
 {
-	gen_ensure(isGrib("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	gen_ensure(!isGrib("data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
+	gen_ensure(isGrib(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	gen_ensure(!isGrib(DATA_DIR "/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
 }
 
 // Import a full Grib product
 template<> template<>
 void to::test<2>()
 {
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	ImageVector imgs;
 	imp->read(imgs);
 
@@ -115,7 +115,7 @@ void to::test<2>()
 template<> template<>
 void to::test<3>()
 {
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	imp->cropX = 100;
 	imp->cropY = 100;
 	imp->cropWidth = 200;
@@ -141,7 +141,7 @@ template<> template<>
 void to::test<4>()
 {
 	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -164,7 +164,7 @@ template<> template<>
 void to::test<5>()
 {
 	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	imp->cropX = 100;
 	imp->cropY = 100;
 	imp->cropWidth = 200;
@@ -191,7 +191,7 @@ template<> template<>
 void to::test<6>()
 {
 	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -214,7 +214,7 @@ template<> template<>
 void to::test<7>()
 {
 	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	imp->cropX = 100;
 	imp->cropY = 100;
 	imp->cropWidth = 200;
@@ -241,7 +241,7 @@ template<> template<>
 void to::test<8>()
 {
 	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -264,7 +264,7 @@ template<> template<>
 void to::test<9>()
 {
 	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter("data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
+	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
 	imp->cropX = 100;
 	imp->cropY = 100;
 	imp->cropWidth = 200;
