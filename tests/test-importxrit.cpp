@@ -227,7 +227,7 @@ void to::test<5>()
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
 	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
-	gen_ensure_equals(img->data->slope, 0.0001);
+	gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
 	//gen_ensure_equals(img->data->offset, -3.3f);
 	gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
 	gen_ensure_equals(img->data->bpp, 16); // unverified

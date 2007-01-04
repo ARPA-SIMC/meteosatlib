@@ -148,8 +148,8 @@ void to::test<4>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->data->slope, 0.01);
-	gen_ensure_equals(img->data->offset, -1);
+	gen_ensure_similar(img->data->slope, 0.01, 0.0001);
+	gen_ensure_similar(img->data->offset, -1, 0.0001);
 	gen_ensure_equals(img->data->bpp, 15);
 	gen_ensure_equals(img->data->scalesToInt, true);
 
@@ -175,8 +175,8 @@ void to::test<5>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->data->slope, 0.01);
-	gen_ensure_equals(img->data->offset, -247.6);
+	gen_ensure_similar(img->data->slope, 0.01, 0.0001);
+	gen_ensure_similar(img->data->offset, -247.6, 0.00001);
 	gen_ensure_equals(img->data->bpp, 12);
 	gen_ensure_equals(img->data->scalesToInt, true);
 

@@ -175,7 +175,7 @@ void to::test<5>()
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_equals(img->data->offset, -91);
+	gen_ensure_similar(img->data->offset, -91, 0.001);
 	gen_ensure_equals(img->data->bpp, 8);
 	gen_ensure_equals(img->data->scalesToInt, true);
 
