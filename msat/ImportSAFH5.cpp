@@ -9,11 +9,11 @@
 
 #include <math.h>
 
-#include <proj/const.h>
-#include <proj/Geos.h>
+#include "proj/const.h"
+#include "proj/Geos.h"
 
-#include <msat/Image.tcc>
-#include <msat/Progress.h>
+#include "msat/Image.tcc"
+#include "msat/Progress.h"
 
 using namespace H5;
 using namespace std;

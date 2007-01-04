@@ -23,9 +23,9 @@
 //  
 //---------------------------------------------------------------------------
 
-#include <msat/ImportXRIT.h>
-#include <proj/const.h>
-#include <proj/Geos.h>
+#include "msat/ImportXRIT.h"
+#include "proj/const.h"
+#include "proj/Geos.h"
 #include <stdexcept>
 #include <fstream>
 #include <sstream>

@@ -98,5 +98,12 @@ msat_libmsat_la_SOURCES += \
     msat/ImportSAFH5.cpp
 endif
 
+if HAVE_MAGICK
+msat_libmsat_la_LIBADD += \
+    -lMagick++
+msat_libmsat_la_SOURCES += \
+    msat/ExportImage.cpp
+endif
+
 ## -fin-
 ## vim:syn=automake:
