@@ -37,7 +37,7 @@ tools_interpolate_SOURCES = \
 
 man_MANS += tools/msat.1
 
-EXTRA_DIST += tools/msat.1
+EXTRA_DIST += tools/msat.1 tools/regenerate-msat-manpage
 
 ## -fin-
 ## vim:syn=automake:
