@@ -241,7 +241,7 @@ dnl Extra warnings are good
 CXXFLAGS="-Wall $CXXFLAGS"
 
 dnl --------------------------------------------------------------------
-dnl Substitution variables for the .pc.in
+dnl Substitution variables for the .pc.in files
 
 if test x"$enable_hrit" = x"yes"; then
 	PC_MSAT_REQS="$PC_MSAT_REQS libhrit"
