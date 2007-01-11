@@ -80,6 +80,7 @@ void do_help(const char* argv0, ostream& out)
 #endif
 #ifdef HAVE_MAGICKPP
       << "  --jpg            Convert to JPEG" << endl
+      << "  --png            Convert to PNG" << endl
       << "  --display        Display the image on a X11 window" << endl
 #endif
       << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl
@@ -104,7 +105,7 @@ enum Action { VIEW, DUMP, GRIB
 	, NETCDF, NETCDF24
 #endif
 #ifdef HAVE_MAGICKPP
-	, JPG, DISPLAY
+	, JPG, PNG, DISPLAY
 #endif
 };
 
@@ -150,6 +151,7 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 #endif
 #ifdef HAVE_MAGICKPP
 		case JPG: return createImageExporter("jpg");
+		case PNG: return createImageExporter("png");
 		case DISPLAY: return createImageDisplayer();
 #endif
 	}
@@ -180,6 +182,7 @@ int main( int argc, char* argv[] )
 #endif
 #ifdef HAVE_MAGICKPP
 		{ "jpg",	0, NULL, 'j' },
+		{ "png",	0, NULL, 'p' },
 		{ "display",	0, NULL, 'd' },
 #endif
 		{ "area", 1, 0, 'a' },
@@ -218,6 +221,9 @@ int main( int argc, char* argv[] )
 #ifdef HAVE_MAGICKPP
 			case 'j': // --jpg
 				action = JPG;
+				break;
+			case 'p': // --png
+				action = PNG;
 				break;
 			case 'd': // --display
 				action = DISPLAY;
