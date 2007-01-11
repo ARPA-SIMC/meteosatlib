@@ -30,7 +30,7 @@ AC_SUBST([ac_aux_dir])
 AM_INIT_AUTOMAKE([subdir-objects])
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
-AM_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER([config.h msat/config.h])
 
 dnl --------------------------------------------------------------------
 dnl Compile time options.
@@ -121,6 +121,7 @@ dnl Checks for header files.
 AC_CHECK_HEADER([Magick++.h],
     [
      	AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
+     	AC_DEFINE([MSAT_HAVE_MAGICKPP], 1, [Magick++ functions are available])
     ],
     [
     if test "$enable_hrit" == "yes"; then
@@ -136,6 +137,7 @@ AC_CHECK_HEADER([Magick++.h],
 AC_CHECK_HEADER([netcdfcpp.h],
     [
      	AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
+     	AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
     ],
     [
     if test "$enable_hri" == "yes"; then
@@ -195,7 +197,7 @@ if test x"$enable_hrit" == x"yes"; then
     if test x"$enable_hrit" == x"yes"; then
         make_hrit=hrit/Subdir.mk
         make_decompress=decompress/Subdir.mk
-	AC_DEFINE([HAVE_HRIT], 1, [XRIT functions are available])
+	AC_DEFINE([MSAT_HAVE_HRIT], 1, [XRIT functions are available])
     fi
 fi
 
@@ -220,7 +222,7 @@ if test x"$enable_hdf5" == x"yes"; then
         enable_hdf5="no"
         AC_MSG_WARN("*** hdf5 support disabled")
     else
-	AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
+	AC_DEFINE([MSAT_HAVE_HDF5], 1, [HDF5 functions are available])
     fi
 fi
 
