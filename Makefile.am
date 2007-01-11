@@ -99,8 +99,8 @@ EXTRA_DIST = \
     $(PACKAGE_NAME).spec \
     CREDITS \
     PublicDecompWT_LICENSE \
-    meteosatlib.m4 \
-    meteosatlib.pc.in
+    libmsat.m4 \
+    libmsat.pc.in
 
 AUX_DIST = \
     $(ac_aux_dir)/compile \
@@ -124,9 +124,9 @@ MAINTAINERCLEANFILES = \
     $(AUX_DIST)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = meteosatlib.pc
+pkgconfig_DATA = libmsat.pc
 
 m4dir = $(datadir)/aclocal
-m4_DATA = meteosatlib.m4
+m4_DATA = libmsat.m4
 
 ## -fin-

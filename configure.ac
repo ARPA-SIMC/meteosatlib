@@ -241,6 +241,18 @@ dnl Extra warnings are good
 CXXFLAGS="-Wall $CXXFLAGS"
 
 dnl --------------------------------------------------------------------
+dnl Substitution variables for the .pc.in
+
+if test x"$enable_hrit" = x"yes"; then
+	PC_MSAT_REQS="$PC_MSAT_REQS libhrit"
+	PC_MSAT_LIBS="$PC_MSAT_LIBS -lhrit"
+fi
+
+AC_SUBST(PC_MSAT_REQS)
+AC_SUBST(PC_MSAT_LIBS)
+
+
+dnl --------------------------------------------------------------------
 dnl Create output files.
 
 AC_CONFIG_FILES([
@@ -266,7 +278,7 @@ AC_CONFIG_FILES([
     tests/Makefile
     tools/Makefile
     meteosatlib.spec
-    meteosatlib.pc
+    libmsat.pc
 ])
 AC_OUTPUT
 

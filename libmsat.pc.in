@@ -3,8 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: meteosatlib
+Name: libmsat
 Description: Read, write, convert and process georeferentiated raster images
+Requires: @PC_MSAT_REQS@
 Version: @VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lmsat
+Libs: -L${libdir} -lmsat @PC_MSAT_LIBS@
