@@ -16,7 +16,7 @@ Release 0.5  : (22/11/2006)
   - Added support for grib-style NetCDF24 image format.
   - Imports HRIT HRV files, with correct placement of the two sub-images they
     contain
-  - Imports selected image data into DB-All.e
+  - Compiles and tests fine on amd64
 
 Release 0.4.1  : (03/01/2006)
 
