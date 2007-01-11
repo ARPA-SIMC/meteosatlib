@@ -100,7 +100,11 @@ EXTRA_DIST = \
     CREDITS \
     PublicDecompWT_LICENSE \
     libmsat.m4 \
-    libmsat.pc.in
+    libmsat.pc.in \
+    libhrit.m4 \
+    libhrit.pc.in \
+    libgrib.m4 \
+    libgrib.pc.in
 
 AUX_DIST = \
     $(ac_aux_dir)/compile \
@@ -124,10 +128,10 @@ MAINTAINERCLEANFILES = \
     $(AUX_DIST)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libmsat.pc
+pkgconfig_DATA = libmsat.pc libgrib.pc
 
 m4dir = $(datadir)/aclocal
-m4_DATA = libmsat.m4
+m4_DATA = libmsat.m4 libgrib.m4
 
 if HRIT
 pkgconfig_DATA += libhrit.pc

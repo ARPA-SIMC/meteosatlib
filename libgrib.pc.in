@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libhrit
-Description: Read HRIT satellite image files
+Name: libgrib
+Description: Read and write GRIB satellite image files
 Version: @VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lhrit
+Libs: -L${libdir} -lgrib

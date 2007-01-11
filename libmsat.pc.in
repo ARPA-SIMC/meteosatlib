@@ -8,4 +8,4 @@ Description: Read, write, convert and process georeferentiated raster images
 Requires: @PC_MSAT_REQS@
 Version: @VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lmsat @PC_MSAT_LIBS@
+Libs: -L${libdir} -lmsat -lgrib @PC_MSAT_LIBS@

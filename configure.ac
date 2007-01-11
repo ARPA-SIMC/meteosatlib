@@ -248,6 +248,25 @@ if test x"$enable_hrit" = x"yes"; then
 	PC_MSAT_LIBS="$PC_MSAT_LIBS -lhrit"
 fi
 
+if test x"$have_libnetcdf" = x"yes"; then
+	# FIXME: there seems to be no way to tell users of the .pc.in that they
+	# need the netcdf libraries, as netcdf does not package .pc files.  Are
+	# there better ways of handling this?
+	PC_MSAT_LIBS="$PC_MSAT_LIBS -lnetcdf_c++ -lnetcdf"
+fi
+
+if test x"$enable_hdf5" = x"yes"; then
+	# FIXME: there seems to be no way to tell users of the .pc.in that they
+	# need the hdf5_cpp library, as libhdf5 does not package .pc files.  Are
+	# there better ways of handling this?
+	PC_MSAT_LIBS="$PC_MSAT_LIBS -lhdf5_cpp"
+fi
+
+if test x"$have_libmagick" = x"yes"; then
+	PC_MSAT_REQS="$PC_MSAT_REQS ImageMagick++"
+	PC_MSAT_LIBS="$PC_MSAT_LIBS -lMagick++"
+fi
+
 AC_SUBST(PC_MSAT_REQS)
 AC_SUBST(PC_MSAT_LIBS)
 
@@ -280,6 +299,7 @@ AC_CONFIG_FILES([
     meteosatlib.spec
     libmsat.pc
     libhrit.pc
+    libgrib.pc
 ])
 AC_OUTPUT
 
