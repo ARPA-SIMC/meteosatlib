@@ -129,4 +129,9 @@ pkgconfig_DATA = libmsat.pc
 m4dir = $(datadir)/aclocal
 m4_DATA = libmsat.m4
 
+if HRIT
+pkgconfig_DATA += libhrit.pc
+m4_DATA += libhrit.m4
+endif
+
 ## -fin-

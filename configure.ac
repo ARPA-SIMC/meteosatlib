@@ -279,6 +279,7 @@ AC_CONFIG_FILES([
     tools/Makefile
     meteosatlib.spec
     libmsat.pc
+    libhrit.pc
 ])
 AC_OUTPUT
 
