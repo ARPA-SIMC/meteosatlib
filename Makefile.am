@@ -98,7 +98,9 @@ EXTRA_DIST = \
     $(ac_aux_dir)/clobber \
     $(PACKAGE_NAME).spec \
     CREDITS \
-    PublicDecompWT_LICENSE
+    PublicDecompWT_LICENSE \
+    meteosatlib.m4 \
+    meteosatlib.pc.in
 
 AUX_DIST = \
     $(ac_aux_dir)/compile \
@@ -120,5 +122,11 @@ MAINTAINERCLEANFILES = \
     configure \
     Makefile.in \
     $(AUX_DIST)
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = meteosatlib.pc
+
+m4dir = $(datadir)/aclocal
+m4_DATA = meteosatlib.m4
 
 ## -fin-

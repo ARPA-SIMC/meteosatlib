@@ -35,28 +35,5 @@ tools_interpolate_LDADD = \
 tools_interpolate_SOURCES = \
     tools/interpolate.cpp
 
-if DBALLE
-bin_PROGRAMS += \
-    tools/dbasat
-man_MANS += \
-    tools/dbasat.1
-
-noinst_HEADERS += \
-    tools/cmdline.h
-
-tools_dbasat_INCLUDES = \
-    $(LIBDBALLE_DB_CFLAGS)
-tools_dbasat_LDADD = \
-    msat/libmsat.la \
-    $(LIBDBALLE_DB_LIBS) \
-    -lpopt
-tools_dbasat_SOURCES = \
-    tools/cmdline.c \
-    tools/dbasat.cpp
-
-tools_dbasat.1: tools/dbasat
-	./tools/dbasat help manpage > tools/dbasat.1 || rm tools/dbasat.1
-endif
-
 ## -fin-
 ## vim:syn=automake:

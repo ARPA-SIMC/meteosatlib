@@ -77,12 +77,6 @@ AC_ARG_ENABLE([hdf5],
         [disable hdf5 support])],
     [],
     [enable_hdf5="yes"])
-AC_ARG_ENABLE([dballe],
-    [AS_HELP_STRING(
-        [--disable-dballe],
-        [disable dballe support])],
-    [],
-    [enable_dballe="yes"])
 
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
@@ -167,28 +161,6 @@ AC_CHECK_HEADER([H5Cpp.h],
     fi
 ])
 
-if test "$enable_dballe" == "yes"; then
-	PKG_CHECK_EXISTS(libdballe-db, [
-		PKG_CHECK_MODULES(LIBDBALLE_DB, libdballe-db)
-		AC_SUBST(LIBDBALLE_DB_CFLAGS)
-		AC_SUBST(LIBDBALLE_DB_LIBS)
-	],[
-		AC_MSG_WARN("*** libdballe-db not found: dballe support disabled")
-		enable_dballe="no"
-	])
-fi
-if test "$enable_dballe" == "yes"; then
-	AC_CHECK_HEADER([popt.h],
-	    [],
-	    [
-	    if test "$enable_hdf5" == "yes"; then
-		AC_MSG_WARN("*** libpopt not found: dballe support disabled")
-		enable_dballe="no"
-	    fi
-	])
-fi
-
-
 dnl --------------------------------------------------------------------
 dnl Checks for typedefs, structures, and compiler characteristics.
 
@@ -261,7 +233,6 @@ AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
 AM_CONDITIONAL([HDF5], [test x"$enable_hdf5" = x"yes"])
-AM_CONDITIONAL([DBALLE], [test x"$enable_dballe" = x"yes"])
 
 dnl --------------------------------------------------------------------
 dnl Extra defines
@@ -295,13 +266,13 @@ AC_CONFIG_FILES([
     tests/Makefile
     tools/Makefile
     meteosatlib.spec
+    meteosatlib.pc
 ])
 AC_OUTPUT
 
 AC_MSG_NOTICE([
 ===================================================
 $PACKAGE_NAME-$PACKAGE_VERSION configuration:
-AS_HELP_STRING([dballe:], [$enable_dballe])
 AS_HELP_STRING([hdf5:], [$enable_hdf5])
 AS_HELP_STRING([hri:], [$enable_hri])
 AS_HELP_STRING([hrit:], [$enable_hrit])
