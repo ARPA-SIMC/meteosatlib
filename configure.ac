@@ -1,6 +1,7 @@
 # configure.ac -- Process this file with autoconf to produce a configure script.
 # $Id$
-# Copyright (C) 2004, 2005 Deneys S. Maartens <dsm@tlabs.ac.za>
+# Copyright (C) 2004, 2005, 2006 Deneys S. Maartens <dsm@tlabs.ac.za>
+# Modified in 2006, 2007 by Enrico Zini <enrico@enricozini.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by

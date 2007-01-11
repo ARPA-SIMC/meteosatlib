@@ -49,6 +49,9 @@ DB-All.e:
    both as a regular grid and as points corresponding to stations already in
    DB-All.e.
 
+general:
+ * Compiles and tests fine on amd64.
+
 Tue Jan  3 12:25:30 2006 Graziano Giuliani <giuliani@lamma.rete.toscana.it>
 
 	* Version 0.4.1
