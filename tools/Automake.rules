@@ -35,5 +35,9 @@ tools_interpolate_LDADD = \
 tools_interpolate_SOURCES = \
     tools/interpolate.cpp
 
+man_MANS += tools/msat.1
+
+EXTRA_DIST += tools/msat.1
+
 ## -fin-
 ## vim:syn=automake:

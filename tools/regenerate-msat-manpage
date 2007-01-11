@@ -1,0 +1,7 @@
+#!/bin/sh
+
+help2man -n "Manipulate georeferentiated raster image files" --no-info -i $0 -o msat.1 ./msat
+
+exit 0
+
+[SEE ALSO]

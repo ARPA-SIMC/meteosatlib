@@ -54,38 +54,53 @@ using namespace msat;
 
 void do_help(const char* argv0, ostream& out)
 {
-  out << "Usage: " << argv0 << " [options] file(s)..." << endl << endl
-      << "Convert meteosat image files from and to various formats." << endl << endl
-      << "Formats supported are:" << endl
-#ifdef HAVE_NETCDF
-      << "  NetCDF   Import/Export" << endl
-      << "  NetCDF24 Import/Export" << endl
-#endif
-      << "  Grib     Import/Export" << endl
+  out << "Usage: " << "msat" << " [options] file(s)..." << endl
+			<< "msat can read and write various formats of satellite images or other" << endl
+			<< "georeferentiated raster data." << endl
+			<< "Images can be displayed, cropped and converted from a format to another." << endl
+			<< endl
+			<< "Options:" << endl
+      << "  --help           Print detailed usage information." << endl
+      << "  --version        Print the program version and exit." << endl
+      << "  -q, --quiet      Work silently." << endl
+      << "  --view           View the contents of a file." << endl
+      << "  --dump           View the contents of a file, including the pixel data." << endl
+      << "  --grib           Convert to GRIB." << endl
 #ifdef HAVE_HDF5
-      << "  SAFH5    Import only" << endl
-#endif
-#ifdef HAVE_HRIT
-      << "  XRIT     Import only" << endl
-#endif
-      << "Options are:" << endl
-      << "  --help           Print this help message" << endl
-      << "  -q,--quiet       Work silently" << endl
-      << "  --view           View the contents of a file" << endl
-      << "  --dump           View the contents of a file, including the pixel data" << endl
-      << "  --grib           Convert to GRIB" << endl
-#ifdef HAVE_HDF5
-      << "  --netcdf         Convert to NetCDF" << endl
-      << "  --netcdf24       Convert to NetCDF" << endl
+      << "  --netcdf         Convert to NetCDF." << endl
+      << "  --netcdf24       Convert to NetCDF24." << endl
 #endif
 #ifdef HAVE_MAGICKPP
-      << "  --jpg            Convert to JPEG" << endl
-      << "  --png            Convert to PNG" << endl
-      << "  --display        Display the image on a X11 window" << endl
+      << "  --jpg            Convert to JPEG." << endl
+      << "  --png            Convert to PNG." << endl
+      << "  --display        Display the image on a X11 window." << endl
 #endif
-      << "  --area='x,dx,y,dy' Crop the source image(s) to the given area" << endl
-      << "  --Area='latmin,latmax,lonmin,lonmax' Crop the source image(s) to the given coordinates" << endl
-      << "  --around='lat,lon,lath,lonw' Create an image centered at the given location and with the given width and height" << endl;
+      << "  --area='x,dx,y,dy'  Crop the source image(s) to the given area." << endl
+      << "  --Area='latmin,latmax,lonmin,lonmax'  Crop the source image(s) to the given coordinates." << endl
+      << "  --around='lat,lon,lath,lonw'  Create an image centered at the given location and with the given width and height." << endl
+		  << endl
+      << "Formats supported are:"
+			<< endl
+#ifdef HAVE_NETCDF
+      << " NetCDF    Import/Export" << endl
+      << " NetCDF24  Import/Export" << endl
+#endif
+      << " Grib      Import/Export" << endl
+#ifdef HAVE_HDF5
+      << " SAFH5     Import only" << endl
+#endif
+#ifdef HAVE_HRIT
+      << " XRIT      Import only" << endl
+#endif
+			<< endl
+			<< "Examples:" << endl
+			<< endl
+			<< " $ msat --display --Area=30,60,-10,40 file.grb" << endl
+			<< " $ msat --jpg file.grb" << endl
+			<< " $ msat --grib dir/H:MSG1:HRV:200611130800" << endl
+			<< endl
+			<< "Report bugs to " << PACKAGE_BUGREPORT << endl;
+			;
 }
 void usage(char *pname)
 {
@@ -172,6 +187,7 @@ int main( int argc, char* argv[] )
 
   static struct option longopts[] = {
     { "help",	0, NULL, 'H' },
+    { "version",	0, NULL, 'v' },
     { "quiet", 0, NULL, 'q' },
 		{ "view",	0, NULL, 'V' },
 		{ "dump",	0, NULL, 'D' },
@@ -197,6 +213,9 @@ int main( int argc, char* argv[] )
     switch (c) {
       case 'H':	// --help
 				do_help(argv[0], cout);
+				return 0;
+      case 'v':	// --version
+				cout << "msat version " PACKAGE_VERSION << endl;
 				return 0;
 			case 'q': // -q,--quiet
 				quiet = true;

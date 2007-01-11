@@ -45,6 +45,7 @@ dist_check_SCRIPTS =
 lib_LTLIBRARIES =
 noinst_LTLIBRARIES =
 TESTS =
+EXTRA_DIST =
 
 if HRIT
 include decompress/Automake.rules
@@ -93,7 +94,7 @@ include tools/Automake.rules
 dist-rpm: distcheck
 	rpmbuild -ta $(distdir).tar.gz
 
-EXTRA_DIST = \
+EXTRA_DIST += \
     $(ac_aux_dir)/autogen.sh \
     $(ac_aux_dir)/clobber \
     $(PACKAGE_NAME).spec \
