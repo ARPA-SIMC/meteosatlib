@@ -197,6 +197,7 @@ if test x"$enable_hrit" == x"yes"; then
     if test x"$enable_hrit" == x"yes"; then
         make_hrit=hrit/Subdir.mk
         make_decompress=decompress/Subdir.mk
+	AC_DEFINE([HAVE_HRIT], 1, [XRIT functions are available])
 	AC_DEFINE([MSAT_HAVE_HRIT], 1, [XRIT functions are available])
     fi
 fi
@@ -222,6 +223,7 @@ if test x"$enable_hdf5" == x"yes"; then
         enable_hdf5="no"
         AC_MSG_WARN("*** hdf5 support disabled")
     else
+	AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
 	AC_DEFINE([MSAT_HAVE_HDF5], 1, [HDF5 functions are available])
     fi
 fi
