@@ -37,6 +37,7 @@ msat::Image:
  * Implemented exporting as an image file using Magick++.
  * Implemented displaying on X11 via Magick++.
  * Implemented various unit tests.
+ * Implemented support for reprojection.
  
 msat:
  * Created commandline tool using the msat library to convert to/from any

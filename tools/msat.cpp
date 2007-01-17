@@ -188,10 +188,10 @@ struct Reprojector : public ImageConsumer
 
 	virtual void processImage(std::auto_ptr<Image> image)
 	{
-		//proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(10, 50));
-		//std::auto_ptr<proj::Projection> pr(new proj::Mercator);
-		proj::MapBox box(proj::MapPoint(70,-40), proj::MapPoint(10, 40));
-		std::auto_ptr<proj::Projection> pr(new proj::Polar(20.0, true));
+		proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(10, 50));
+		std::auto_ptr<proj::Projection> pr(new proj::Mercator);
+		//proj::MapBox box(proj::MapPoint(70,-40), proj::MapPoint(10, 40));
+		//std::auto_ptr<proj::Projection> pr(new proj::Polar(20.0, true));
 		//std::auto_ptr<proj::Projection> pr(new proj::Geos(0, ORBIT_RADIUS));
 
 		std::auto_ptr<Image> projected = image->reproject(width, height, pr, box);

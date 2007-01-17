@@ -11,6 +11,7 @@ Release 0.5  : (22/11/2006)
      - export to any image format supported by Magick++
      - preview of the cropping results directly on X11
      - commandline tool 'msat' to take advantage of these functions
+     - supports reprojection
   - Imports large GRIB files
   - Imports SAF images
   - Added support for grib-style NetCDF24 image format.
