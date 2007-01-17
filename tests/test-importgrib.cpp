@@ -51,8 +51,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 2049);
 	gen_ensure_equals(img.spacecraft_id, 55);
-	gen_ensure_equals(img.column_factor, Image::columnFactorFromSeviriDX(3608));
-	gen_ensure_equals(img.line_factor, Image::columnFactorFromSeviriDX(3608));
+	gen_ensure_similar(img.column_res, Image::columnResFromSeviriDX(3608), 0.00001);
+	gen_ensure_similar(img.line_res, Image::columnResFromSeviriDX(3608), 0.00001);
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_unknown_channel_20060426_1945");

@@ -118,8 +118,8 @@ class NetCDFImageImporter : public ImageImporter
 			throw std::runtime_error(msg.str());
 		}
 
-		img.column_factor = GET(int, "Column_Scale_Factor");
-		img.line_factor = GET(int, "Line_Scale_Factor");
+		img.column_res = GET(int, "Column_Scale_Factor") * exp2(-16);
+		img.line_res = GET(int, "Line_Scale_Factor") * exp2(-16);
 		img.column_offset = GET(int, "Column_Offset");
 		img.line_offset = GET(int, "Line_Offset");
 		img.x0 = GET(int, "AreaStartPix");

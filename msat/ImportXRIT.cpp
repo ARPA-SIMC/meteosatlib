@@ -443,8 +443,12 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			// See if the image needs to be rotated
 			data->swapX = header.image_navigation->column_scaling_factor < 0;
 			data->swapY = header.image_navigation->line_scaling_factor < 0;
-			img->column_factor = abs(header.image_navigation->column_scaling_factor);
-			img->line_factor = abs(header.image_navigation->line_scaling_factor);
+		  // Horizontal scaling coefficient computed as (2**16)/delta, where delta is
+		  // size in micro Radians of one pixel
+			img->column_res = abs(header.image_navigation->column_scaling_factor) * exp2(-16);
+	    // Vertical scaling coefficient computed as (2**16)/delta, where delta is the
+	    // size in micro Radians of one pixel
+			img->line_res = abs(header.image_navigation->line_scaling_factor) * exp2(-16);
 			if (data->hrv)
 			{
 				// Since we are omitting the first (11136-7631) of the rotated image,

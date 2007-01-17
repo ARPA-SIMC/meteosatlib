@@ -124,8 +124,8 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	
 	img->channel_id = readIntAttribute(group, "SPECTRAL_CHANNEL_ID");
 	img->spacecraft_id = Image::spacecraftIDFromHRIT(readIntAttribute(group, "GP_SC_ID"));
-	img->column_factor = readIntAttribute(group, "CFAC"); 
-	img->line_factor = readIntAttribute(group, "LFAC");
+	img->column_res = readIntAttribute(group, "CFAC") * exp2(-16); 
+	img->line_res = readIntAttribute(group, "LFAC") * exp2(-16);
 	img->column_offset = readIntAttribute(group, "COFF");
 	img->line_offset = readIntAttribute(group, "LOFF");
 	img->x0 = 1856 - img->column_offset + 1;

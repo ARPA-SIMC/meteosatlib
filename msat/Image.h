@@ -82,16 +82,14 @@ public:
   int spacecraft_id;
 
 	/**
-	 * Horizontal scaling coefficient computed as (2**16)/delta, where delta is
-	 * the size in micro Radians of one pixel
+	 * Horizontal resolution: how many pixels are in one projection unit
 	 */
-  int column_factor;
+  double column_res;
 
 	/**
-	 * Vertical scaling coefficient computed as (2**16)/delta, where delta is the
-	 * size in micro Radians of one pixel
+	 * Vertical resolution: how many pixels are in one projection unit
 	 */
-  int line_factor;
+  double line_res;
 
 	/// Horizontal offset in pixels of the sub-satellite point
 	int column_offset;
@@ -142,10 +140,10 @@ public:
 	double pixelVSize() const;
 
 	/// Earth dimension scanned by Seviri in the X direction
-	int seviriDX() const { return seviriDXFromColumnFactor(column_factor); }
+	int seviriDX() const { return seviriDXFromColumnRes(column_res); }
 
 	/// Earth dimension scanned by Seviri in the Y direction
-	int seviriDY() const { return seviriDYFromLineFactor(column_factor); }
+	int seviriDY() const { return seviriDYFromLineRes(line_res); }
 
   // Get the datetime as a string
   std::string datetime() const;
@@ -193,16 +191,16 @@ public:
 #endif
 
 	/// Earth dimension scanned by Seviri in the X direction
-	static int seviriDXFromColumnFactor(int column_factor);
+	static int seviriDXFromColumnRes(double column_res);
 
 	/// Earth dimension scanned by Seviri in the Y direction
-	static int seviriDYFromLineFactor(int line_factor);
+	static int seviriDYFromLineRes(double line_res);
 
 	/// Set the column factor from a seviri DX value
-	static int columnFactorFromSeviriDX(int seviriDX);
+	static double columnResFromSeviriDX(int seviriDX);
 
 	/// Set the column factor from a seviri DY value
-	static int lineFactorFromSeviriDY(int seviriDY);
+	static double lineResFromSeviriDY(int seviriDY);
 
 	/// Convert the HRIT spacecraft ID to the ID as in WMO Common code table C-5
 	static int spacecraftIDFromHRIT(int id);

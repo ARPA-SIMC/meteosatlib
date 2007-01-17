@@ -22,6 +22,7 @@
 #include "test-utils.h"
 #include <ImportSAFH5.h>
 #include <proj/Geos.h>
+#include <math.h>
 
 using namespace msat;
 
@@ -101,8 +102,8 @@ void to::test<2>()
 	gen_ensure_equals(imgs.size(), 3u);
 	Image* img = imgs[0];
 
-	gen_ensure_equals(img->column_factor, 13642337);
-	gen_ensure_equals(img->line_factor, 13642337);
+	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
@@ -128,8 +129,8 @@ void to::test<3>()
 	gen_ensure_equals(imgs.size(), 3u);
 	Image* img = imgs[0];
 
-	gen_ensure_equals(img->column_factor, 13642337);
-	gen_ensure_equals(img->line_factor, 13642337);
+	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
@@ -151,8 +152,8 @@ void to::test<4>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
@@ -180,8 +181,8 @@ void to::test<5>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 2);
@@ -205,8 +206,8 @@ void to::test<6>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
 
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
@@ -234,8 +235,8 @@ void to::test<7>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
 
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
-	gen_ensure_equals(img->line_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)));
+	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 2);
@@ -259,8 +260,8 @@ void to::test<8>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
 
-	gen_ensure_equals(img->column_factor, 13642337);
-	gen_ensure_equals(img->line_factor, 13642337);
+	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);
@@ -288,8 +289,8 @@ void to::test<9>()
 	gen_ensure_equals(imgs.size(), 3u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
 
-	gen_ensure_equals(img->column_factor, 13642337);
-	gen_ensure_equals(img->line_factor, 13642337);
+	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);

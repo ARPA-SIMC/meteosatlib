@@ -99,8 +99,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 			img->column_offset = (int)m.grid.sp.Xp;	// probably need some (x-1)*2
 			img->line_offset = (int)m.grid.sp.Yp;		// probably need some (x-1)*2
 			img->proj.reset(new proj::Geos(m.grid.sp.lop, ORBIT_RADIUS));
-			img->column_factor = Image::columnFactorFromSeviriDX(m.grid.sp.dx);
-			img->line_factor = Image::lineFactorFromSeviriDY(m.grid.sp.dy);
+			img->column_res = Image::columnResFromSeviriDX(m.grid.sp.dx);
+			img->line_res = Image::lineResFromSeviriDY(m.grid.sp.dy);
 			break;
 		default:
 		{

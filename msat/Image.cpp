@@ -127,8 +127,8 @@ void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 
 //	cerr << "  coordsToPixels: " << lat << "," << lon << " -> " << p.x << "," << p.y << endl;
 
-	int dx = (int)rint((double)p.x * column_factor * exp2(-16)) + (column_offset - x0);
-	int dy = (int)rint((double)p.y * line_factor   * exp2(-16)) + (line_offset   - y0);
+	int dx = (int)rint((double)p.x * column_res) + (column_offset - x0);
+	int dy = (int)rint((double)p.y * line_res) + (line_offset   - y0);
 
 //	cerr << "    to pixels: " << dx << "," << dy << endl;
 
@@ -139,8 +139,8 @@ void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 void Image::pixelsToCoords(size_t x, size_t y, double& lat, double& lon) const
 {
 	proj::ProjectedPoint pp;
-	pp.x = (double)(x - (column_offset - x0)) / (column_factor*exp2(-16));
-	pp.y = (double)(y - (line_offset   - y0)) / (line_factor*exp2(-16));
+	pp.x = (double)(x - (column_offset - x0)) / column_res;
+	pp.y = (double)(y - (line_offset   - y0)) / line_res;
 	proj::MapPoint p;
 	proj->projectedToMap(pp, p);
 	lat = p.lat;
@@ -149,15 +149,15 @@ void Image::pixelsToCoords(size_t x, size_t y, double& lat, double& lon) const
 
 double Image::pixelHSize() const
 {
-	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * M_PI / 180 );
+	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_res) * M_PI / 180 );
 }
 
 double Image::pixelVSize() const
 {
-	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_factor/exp2(-16)) * M_PI / 180 );
+	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_res) * M_PI / 180 );
 }
 
-int Image::seviriDXFromColumnFactor(int column_factor)
+int Image::seviriDXFromColumnRes(double column_res)
 {
 #if 0
 	double ps = (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
@@ -165,24 +165,24 @@ int Image::seviriDXFromColumnFactor(int column_factor)
 #endif
 
 	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
-	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * column_factor * exp2(-15) * 180 / M_PI);
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * column_res * 360 / M_PI);
 }
 
-int Image::seviriDYFromLineFactor(int line_factor)
+int Image::seviriDYFromLineRes(double line_res)
 {
 	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
-	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * line_factor * exp2(-15) * 180 / M_PI);
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * line_res * 360 / M_PI);
 	//return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelVSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
 }
 
-int Image::columnFactorFromSeviriDX(int seviriDX)
+double Image::columnResFromSeviriDX(int seviriDX)
 {
-	return (int)round((double)seviriDX * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
+	return (double)seviriDX * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*360);
 }
 
-int Image::lineFactorFromSeviriDY(int seviriDY)
+double Image::lineResFromSeviriDY(int seviriDY)
 {
-	return (int)round((double)seviriDY * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*exp2(-15)*180));
+	return (double)seviriDY * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*360);
 }
 
 int Image::spacecraftIDFromHRIT(int id)
@@ -544,7 +544,7 @@ public:
 	{
 		cout << "Image " << img->datetime() << endl;
 		cout << " proj: " << img->proj->format() << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
-		cout << " size: " << img->data->columns << "x" << img->data->lines << " factor: " << img->column_factor << "x" << img->line_factor
+		cout << " size: " << img->data->columns << "x" << img->data->lines << " resolution: " << img->column_res << "x" << img->line_res
 				 << " origin: " << img->x0 << "," << img->y0 << " centre: " << img->column_offset << "," << img->line_offset
 				 << endl;
 
@@ -554,8 +554,8 @@ public:
 				 << "\t" << img->data->columns << "x" << img->data->lines << " " << img->data->bpp << "bpp"
 						" *" << img->data->slope << "+" << img->data->offset << " decdigits: " << img->decimalDigitsOfScaledValues()
 				 << " PSIZE " << img->pixelHSize() << "x" << img->pixelVSize()
-				 << " DX " << Image::seviriDXFromColumnFactor(img->column_factor)
-				 << " DY " << Image::seviriDYFromLineFactor(img->line_factor)
+				 << " DX " << img->seviriDX()
+				 << " DY " << img->seviriDY()
 				 << " CHID " << img->channel_id
 				 << " Quality " << img->quality
 				 << endl;

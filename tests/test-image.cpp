@@ -23,6 +23,7 @@
 #include <Image.h>
 #include <proj/const.h>
 #include <proj/Geos.h>
+#include <math.h>
 
 using namespace msat;
 
@@ -45,20 +46,20 @@ template<> template<>
 void to::test<1>()
 {
 	// This computation should be exact
-	gen_ensure_equals(Image::seviriDXFromColumnFactor(13642337), 3622); // Test with the real parameters
-	gen_ensure_equals(Image::seviriDYFromLineFactor(13642337), 3622); // Test with the real parameters
+	gen_ensure_equals(Image::seviriDXFromColumnRes(13642337*exp2(-16)), 3622); // Test with the real parameters
+	gen_ensure_equals(Image::seviriDYFromLineRes(13642337*exp2(-16)), 3622); // Test with the real parameters
 
 	// This computation is necessarily approximated, as we truncate significant digits
-	gen_ensure_equals(Image::columnFactorFromSeviriDX(3622), 13641224);
-	gen_ensure_equals(Image::lineFactorFromSeviriDY(3622), 13641224);
+	gen_ensure_similar(Image::columnResFromSeviriDX(3622), 13641224*exp2(-16), 0.000001);
+	gen_ensure_similar(Image::lineResFromSeviriDY(3622), 13641224*exp2(-16), 0.000001);
 
 	// This computation is necessarily approximated, as we truncate significant digits
-	gen_ensure_equals(Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(13642337)), 13641224);
-	gen_ensure_equals(Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(13642337)), 13641224);
+	gen_ensure_similar(Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))), 13641224*exp2(-16), 0.000001);
+	gen_ensure_similar(Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(13642337*exp2(-16))), 13641224*exp2(-16), 0.000001);
 
 	// This computation should be exact
-	gen_ensure_equals(Image::seviriDXFromColumnFactor(Image::columnFactorFromSeviriDX(3622)), 3622);
-	gen_ensure_equals(Image::seviriDXFromColumnFactor(Image::columnFactorFromSeviriDX(3622)), 3622);
+	gen_ensure_equals(Image::seviriDXFromColumnRes(Image::columnResFromSeviriDX(3622)), 3622);
+	gen_ensure_equals(Image::seviriDXFromColumnRes(Image::columnResFromSeviriDX(3622)), 3622);
 }
 
 // Test coordinates to point conversion
@@ -68,8 +69,8 @@ void to::test<2>()
 	Image img;
 	img.x0 = 0;
 	img.y0 = 0;
-	img.column_factor = 40927014;
-	img.line_factor = 40927014;
+	img.column_res = 40927014*exp2(-16);
+	img.line_res = 40927014*exp2(-16);
 	img.column_offset = 5566;
 	img.line_offset = 5566;
 	img.proj.reset(new proj::Geos(0.0, ORBIT_RADIUS));

@@ -119,8 +119,8 @@ class NetCDF24ImageImporter : public ImageImporter
 
 		NcVar* proj = ncf.get_var("Projection");
 		img.proj.reset(new proj::Geos(PGET(float, "Lop"), ORBIT_RADIUS));
-		img.column_factor = Image::columnFactorFromSeviriDX(PGET(int, "DX"));
-		img.line_factor = Image::lineFactorFromSeviriDY(PGET(int, "DY"));
+		img.column_res = Image::columnResFromSeviriDX(PGET(int, "DX"));
+		img.line_res = Image::lineResFromSeviriDY(PGET(int, "DY"));
 		img.column_offset =	PGET(int, "Xp");
 		img.line_offset =	PGET(int, "Yp");
 		img.x0 =	PGET(int, "X0");

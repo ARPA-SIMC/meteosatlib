@@ -90,8 +90,8 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   //if (! ncf.add_att("AreaStartLin", (int) m.grid.sp.Y0 ) ) return false;
   ncfAddAttr(ncf, "SampleX", 1.0 );
   ncfAddAttr(ncf, "SampleY", 1.0 );
-  ncfAddAttr(ncf, "Column_Scale_Factor", img.column_factor);
-  ncfAddAttr(ncf, "Line_Scale_Factor", img.line_factor);
+  ncfAddAttr(ncf, "Column_Scale_Factor", img.column_res * exp2(16));
+  ncfAddAttr(ncf, "Line_Scale_Factor", img.line_res * exp2(16));
   ncfAddAttr(ncf, "Column_Offset", img.column_offset);
   ncfAddAttr(ncf, "Line_Offset", img.line_offset);
   ncfAddAttr(ncf, "Orbit_Radius", 6610684);
