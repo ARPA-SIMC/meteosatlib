@@ -173,6 +173,24 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 	return auto_ptr<ImageConsumer>(0);
 }
 
+#include <msat/proj/Mercator.h>
+#include <msat/proj/Geos.h>
+#include <msat/proj/const.h>
+struct Reprojector : public ImageConsumer
+{
+	ImageConsumer& next;
+	Reprojector(ImageConsumer& next) : next(next) {}
+	virtual void processImage(std::auto_ptr<Image> image)
+	{
+		proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(60, 50), proj::MapPoint(10,-10), proj::MapPoint(10, 50));
+		std::auto_ptr<proj::Projection> pr(new proj::Mercator);
+		//std::auto_ptr<proj::Projection> pr(new proj::Geos(0, ORBIT_RADIUS));
+
+		std::auto_ptr<Image> projected = image->reproject(100, 100, pr, box);
+		next.processImage(projected);
+	}
+};
+
 /* ************************************************************************* */
 /* Reads Data Images, performs calibration and store output in NetCDF format */
 /* ************************************************************************* */
@@ -316,6 +334,8 @@ int main( int argc, char* argv[] )
 			importer->cropLonMin = lonmin;
 			importer->cropLonMax = lonmax;
 			std::auto_ptr<ImageConsumer> consumer = getExporter(action);
+			//Reprojector reproj(*consumer);
+			//importer->read(reproj);
 			importer->read(*consumer);
 		}
   }

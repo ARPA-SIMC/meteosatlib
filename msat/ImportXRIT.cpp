@@ -329,15 +329,19 @@ ImageData* HRITImageData::createReprojected(size_t width, size_t height, const I
 	res->missingValue = missingValue;
 	res->missing = missingValue;
 	for (size_t y = 0; y < height; ++y)
+	{
+		cout << "Line " << y << "/" << height << endl;
 		for (size_t x = 0; x < height; ++x)
 		{
-			size_t nx = 0, ny = 0;
+			int nx = 0, ny = 0;
 			mapper(x, y, nx, ny);
-			if (nx < 0 || ny < 0)
+			cout << "  map " << x << "," << y << " -> " << nx << "," << ny << endl;
+			if (nx < 0 || ny < 0 || nx > columns || ny > lines)
 				res->pixels[y*width+x] = missingValue;
 			else
 				res->pixels[y*width+x] = scaled(nx, ny);
 		}
+	}
 	return res;
 }
 #endif

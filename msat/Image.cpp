@@ -95,17 +95,22 @@ void Image::crop(size_t x, size_t y, size_t width, size_t height)
 
 void Image::cropByCoords(double latmin, double latmax, double lonmin, double lonmax)
 {
-	size_t x, y, x1, y1;
+	int x, y, x1, y1;
 
 	// Convert to pixel coordinates
 	coordsToPixels(latmin, lonmin, x, y);
 	coordsToPixels(latmax, lonmax, x1, y1);
 
+	if (x < 0) x = 0;
+	if (y < 0) y = 0;
+	if (x1 < 0) x1 = 0;
+	if (y1 < 0) y1 = 0;
+
 	// Crop using the bounding box for the 2 coordinates
-	size_t crop_x = x < x1 ? x : x1;
-	size_t crop_y = y < y1 ? y : y1;
-	size_t crop_w = x > x1 ? x-x1 : x1-x;
-	size_t crop_h = y > y1 ? y-y1 : y1-y;
+	size_t crop_x = (unsigned)(x < x1 ? x : x1);
+	size_t crop_y = (unsigned)(y < y1 ? y : y1);
+	size_t crop_w = (unsigned)(x > x1 ? x-x1 : x1-x);
+	size_t crop_h = (unsigned)(y > y1 ? y-y1 : y1-y);
 
 //	cerr << "CROP lat " << latmin << "-" << latmax << " lon " << lonmin << "-" << lonmax << endl;
 //	cerr << "  converted to " << x << "," << y << " " << x1 << "," << y1 << endl;
@@ -120,23 +125,20 @@ void Image::cropByCoords(double latmin, double latmax, double lonmin, double lon
 	addToHistory(str.str());
 }
 
-void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
+void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
 {
 	proj::ProjectedPoint p;
 	proj->mapToProjected(proj::MapPoint(lat, lon), p);
 
 //	cerr << "  coordsToPixels: " << lat << "," << lon << " -> " << p.x << "," << p.y << endl;
 
-	int dx = (int)rint((double)p.x * column_res) + (column_offset - x0);
-	int dy = (int)rint((double)p.y * line_res) + (line_offset   - y0);
+	x = (int)rint((double)p.x * column_res) + (column_offset - x0);
+	y = (int)rint((double)p.y * line_res) + (line_offset   - y0);
 
 //	cerr << "    to pixels: " << dx << "," << dy << endl;
-
-  x = dx < 0 ? 0 : (unsigned)dx;
-  y = dy < 0 ? 0 : (unsigned)dy;
 }
 
-void Image::pixelsToCoords(size_t x, size_t y, double& lat, double& lon) const
+void Image::pixelsToCoords(int x, int y, double& lat, double& lon) const
 {
 	proj::ProjectedPoint pp;
 	pp.x = (double)(x - (column_offset - x0)) / column_res;
@@ -432,7 +434,22 @@ std::string Image::defaultFilename() const
 }
 
 #ifdef EXPERIMENTAL_REPROJECTION
-std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const MapBox& box) const
+struct ReprojectMapper : public Image::PixelMapper
+{
+	const Image& src;
+	const Image& dst;
+	ReprojectMapper(const Image& src, const Image& dst) : src(src), dst(dst) {}
+	virtual ~ReprojectMapper() {}
+	virtual void operator()(size_t x, size_t y, int& nx, int& ny) const
+	{
+		double lat, lon;
+		dst.pixelsToCoords(x, y, lat, lon);
+		src.coordsToPixels(lat, lon, nx, ny);
+		cout << "  ptc map " << x << "," << y << " -> " << lat << "," << lon << " -> " << nx << "," << ny << endl;
+	}
+};
+
+std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const proj::MapBox& box) const
 {
 	std::auto_ptr<Image> res(new Image());
 
@@ -454,21 +471,44 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 	 *    -Farsi dire l'area di destinazione
 	 */
 	// Compute projected bounding box
-	ProjectedBox pbox;
-	proj.mapToProjected(box, pbox);
+	proj::ProjectedBox pbox;
+	res->proj->mapToProjected(box, pbox);
 	double px0, py0, pw, ph;
+	{
+		proj::MapBox bigbox(proj::MapPoint(90,-90), proj::MapPoint(90, 90), proj::MapPoint(-90,-90), proj::MapPoint(-90, 90));
+		proj::ProjectedBox bigpbox;
+		this->proj->mapToProjected(bigbox, bigpbox);
+		bigpbox.boundingBox(px0, py0, pw, ph);
+		cerr << "big bbox pre " << px0 << "," << py0 << " " << pw << "x" << ph << endl;
+
+		res->proj->mapToProjected(bigbox, bigpbox);
+		bigpbox.boundingBox(px0, py0, pw, ph);
+		cerr << "big bbox post" << px0 << "," << py0 << " " << pw << "x" << ph << endl;
+
+		proj::ProjectedPoint tpoint;
+		res->proj->mapToProjected(proj::MapPoint(0, -90), tpoint);
+		cerr << "left " << tpoint.x << "," << tpoint.y << endl;
+		res->proj->mapToProjected(proj::MapPoint(90, 0), tpoint);
+		cerr << "top " << tpoint.x << "," << tpoint.y << endl;
+	}
 	pbox.boundingBox(px0, py0, pw, ph);
 
-	// Compute map bounding box
-	x0 = px0 * width / projw;
-	x0 = px0 * height / projh;
-	hres = pw * width / projw;
-	vres = ph * height / projh;
-	xoffset = 0;
-	yoffset = 0;
-	if (x0 < 0) { xoffset = -x0; x0 = 0; }
-	if (y0 < 0) { yoffset = -y0; y0 = 0; }
+	cerr << "bbox " << px0 << "," << py0 << " " << pw << "x" << ph << endl;
 
+	// Compute output pixel space
+	//res->x0 = (int)rint(px0 * width / projw);  // fixme
+	//res->x0 = (int)rint(px0 * height / projh); // fixme
+	res->column_res = width / pw;
+	res->line_res   = height / ph;
+	res->x0 = (int)rint(px0 * res->column_res);
+	res->y0 = (int)rint(py0 * res->line_res);
+	res->column_offset = 0;
+	res->line_offset = 0;
+	if (res->x0 < 0) { res->column_offset = -res->x0; res->x0 = 0; }
+	if (res->y0 < 0) { res->line_offset = -res->y0; res->y0 = 0; }
+
+	cerr << "orig x0: " << x0 << " y0 " << y0 << " coff " << column_offset << " loff " << line_offset << " cres " << column_res << " lres " << line_res << endl;
+	cerr << "orig x0: " << res->x0 << " y0 " << res->y0 << " coff " << res->column_offset << " loff " << res->line_offset << " cres " << res->column_res << " lres " << res->line_res << endl;
 
 	/*
 	 *  4) Create a memory buffer for the output space
@@ -483,19 +523,11 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 	 * 13) Write the output space buffer to a file
 	 */
 
-	// FIXME: should these 6 belong in the projection?
-	res->column_factor = 0;
-	res->line_factor = 0;
-	res->column_offset = 0;
-	res->line_offset = 0;
-	res->x0 = 0;
-	res->y0 = 0;
-
 	res->quality = quality;
 	res->history = history;
 	res->addToHistory("reprojected");
 
-	//res->data = data->createReprojected(width, height, mapper);
+	res->data = data->createReprojected(width, height, ReprojectMapper(*this, *res));
 
 	// TODO: fill in res->data with data from this image
 

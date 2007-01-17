@@ -27,6 +27,9 @@
 #ifndef METEOSATLIB_PROJ_POINTS_H
 #define METEOSATLIB_PROJ_POINTS_H
 
+#define EXPERIMENTAL_REPROJECTION
+
+
 namespace msat {
 namespace proj {
 
@@ -64,7 +67,7 @@ struct Box
   Point bottomRight;
   Box() {}
   Box(const Point& topLeft, const Point& topRight, const Point& bottomLeft, const Point& bottomRight) :
-	  topLeft(topLeft), topRight(topRight) {}
+	  topLeft(topLeft), topRight(topRight),
 	  bottomLeft(bottomLeft), bottomRight(bottomRight) {}
 };
 
@@ -73,24 +76,24 @@ struct ProjectedBox : public Box<ProjectedPoint>
 {
   void boundingBox(double& x0, double& y0, double& w, double& h)
   {
-    x0 = this->topleft.x;
-    if (this->topright.x < x0) x0 = this->topright.x;
-    if (this->bottomleft.x < x0) x0 = this->bottomleft.x;
-    if (this->bottomright.x < x0) x0 = this->bottomright.x;
-    y0 = this->topleft.y;
-    if (this->topright.y < y0) y0 = this->topright.y;
-    if (this->bottomleft.y < y0) y0 = this->bottomleft.y;
-    if (this->bottomright.y < y0) y0 = this->bottomright.y;
-    int x1;
-    int y1;
+    x0 = this->topLeft.x;
+    if (this->topRight.x < x0) x0 = this->topRight.x;
+    if (this->bottomLeft.x < x0) x0 = this->bottomLeft.x;
+    if (this->bottomRight.x < x0) x0 = this->bottomRight.x;
+    y0 = this->topLeft.y;
+    if (this->topRight.y < y0) y0 = this->topRight.y;
+    if (this->bottomLeft.y < y0) y0 = this->bottomLeft.y;
+    if (this->bottomRight.y < y0) y0 = this->bottomRight.y;
+    double x1;
+    double y1;
     x1 = this->topLeft.x;
     if (this->topRight.x > x1) x1 = this->topRight.x;
     if (this->bottomLeft.x > x1) x1 = this->bottomLeft.x;
     if (this->bottomRight.x > x1) x1 = this->bottomRight.x;
-    y1 = this->topleft.y;
-    if (this->topright.y > y1) y1 = this->topright.y;
-    if (this->bottomleft.y > y1) y1 = this->bottomleft.y;
-    if (this->bottomright.y > y1) y1 = this->bottomright.y;
+    y1 = this->topLeft.y;
+    if (this->topRight.y > y1) y1 = this->topRight.y;
+    if (this->bottomLeft.y > y1) y1 = this->bottomLeft.y;
+    if (this->bottomRight.y > y1) y1 = this->bottomRight.y;
     w = x1 - x0;
     h = y1 - y0;
   }

@@ -5,8 +5,6 @@
 #include <vector>
 #include <msat/proj/Projection.h>
 
-#undef EXPERIMENTAL_REPROJECTION
-
 namespace msat {
 
 struct ImageData;
@@ -66,7 +64,7 @@ public:
 	struct PixelMapper
 	{
 		virtual ~PixelMapper() {}
-		virtual void operator()(size_t x, size_t y, size_t& nx, size_t xy) const = 0;
+		virtual void operator()(size_t x, size_t y, int& nx, int& xy) const = 0;
 	};
 
   /// Image time
@@ -159,10 +157,10 @@ public:
 	void setData(ImageData* data);
 
 	/// Return the nearest pixel coordinates to the given geographical place
-	void coordsToPixels(double lat, double lon, size_t& x, size_t& y) const;
+	void coordsToPixels(double lat, double lon, int& x, int& y) const;
 
 	/// Return the coordinates of the place corresponding to the given pixel
-	void pixelsToCoords(size_t x, size_t y, double& lat, double& lon) const;
+	void pixelsToCoords(int x, int y, double& lat, double& lon) const;
 
 	/**
 	 * Crop the image to the given rectangle specified in pixel coordinates
@@ -187,7 +185,7 @@ public:
 	 * Return a new image with the given width and height, containing the same
 	 * data of this image but using a different projection
 	 */
-	std::auto_ptr<Image> reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const MapBox& box) const;
+	std::auto_ptr<Image> reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const proj::MapBox& box) const;
 #endif
 
 	/// Earth dimension scanned by Seviri in the X direction
@@ -312,9 +310,9 @@ public:
 		for (size_t y = 0; y < height; ++y)
 			for (size_t x = 0; x < height; ++x)
 			{
-				size_t nx = 0, ny = 0;
+				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0)
+				if (nx < 0 || ny < 0 || nx > columns || nx > lines)
 					res->pixels[y*width+x] = missing;
 				else
 					res->pixels[y*width+x] = pixels[ny*columns+nx];
@@ -377,9 +375,9 @@ public:
 		for (size_t y = 0; y < height; ++y)
 			for (size_t x = 0; x < height; ++x)
 			{
-				size_t nx = 0, ny = 0;
+				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0)
+				if (nx < 0 || ny < 0 || nx > this->columns || nx > this->lines)
 					res->pixels[y*width+x] = this->missingValue;
 				else
 					res->pixels[y*width+x] = this->pixels[ny*this->columns+nx];

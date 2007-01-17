@@ -74,21 +74,24 @@ void to::test<2>()
 	img.column_offset = 5566;
 	img.line_offset = 5566;
 	img.proj.reset(new proj::Geos(0.0, ORBIT_RADIUS));
-	size_t x, y;
+	int x, y;
 	img.coordsToPixels(45, 10, x, y);
-	gen_ensure_equals(x, 6310u);
-	gen_ensure_equals(y, 1330u);
+	gen_ensure_equals(x, 6310);
+	gen_ensure_equals(y, 1330);
 
-#if 0
-	// Print some points to see how the mapping goes
-	for (int la = -90; la < 90; la += 20)
-		for (int lo = -180; lo < 180; lo += 40)
+	double nlat, nlon;
+	img.pixelsToCoords(x, y, nlat, nlon);
+	gen_ensure_similar(nlat, 45.0, 0.01);
+	gen_ensure_similar(nlon, 10.0, 0.01);
+
+	for (double la = -90; la < 90; la += 20)
+		for (double lo = -180; lo < 180; lo += 40)
 		{
-			using namespace std;
 			img.coordsToPixels(la, lo, x, y);
-			cout << x << ' ' << y << endl;
+			img.pixelsToCoords(x, y, nlat, nlon);
+			gen_ensure_similar(nlat, la, 0.01);
+			gen_ensure_similar(nlon, lo, 0.01);
 		}
-#endif
 }
 
 }

@@ -164,10 +164,10 @@ int main( int argc, char* argv[] )
 		for (ImageVector::const_iterator i = imgs.begin();
 					i != imgs.end(); ++i)
 		{
-			size_t x, y;
+			int x, y;
 			(*i)->coordsToPixels(lat, lon, x, y);
 			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
-			if (x < 0 || x >= (*i)->data->columns || y < 0 || y >= (*i)->data->lines)
+			if (x < 0 || (unsigned)x >= (*i)->data->columns || y < 0 || (unsigned)y >= (*i)->data->lines)
 				fprintf(stdout, ",");
 			else
 				fprintf(stdout, ",%f", (*i)->data->scaled(x, y));
