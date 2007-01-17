@@ -44,6 +44,7 @@ struct Projection
 {
     virtual ~Projection() { }
     virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const = 0;
+#ifdef EXPERIMENTAL_REPROJECTION
     virtual void mapToProjected(const MapBox& m, ProjectedBox& p) const
     {
 	    mapToProjected(m.topLeft, p.topLeft);
@@ -51,7 +52,9 @@ struct Projection
 	    mapToProjected(m.bottomLeft, p.bottomLeft);
 	    mapToProjected(m.bottomRight, p.bottomRight);
     }
+#endif
     virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const = 0;
+#ifdef EXPERIMENTAL_REPROJECTION
     virtual void projectedToMap(const ProjectedBox& p, MapBox& m) const
     {
 	    projectedToMap(p.topLeft, m.topLeft);
@@ -59,6 +62,7 @@ struct Projection
 	    projectedToMap(p.bottomLeft, m.bottomLeft);
 	    projectedToMap(p.bottomRight, m.bottomRight);
     }
+#endif
     virtual std::string format() const = 0;
 };
 

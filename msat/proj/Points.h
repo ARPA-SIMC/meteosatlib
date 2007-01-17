@@ -54,6 +54,7 @@ struct MapPoint
   MapPoint(const double& lat, const double& lon) : lat(lat), lon(lon) {}
 };
 
+#ifdef EXPERIMENTAL_REPROJECTION
 template<typename Point>
 struct Box
 {
@@ -95,6 +96,7 @@ struct ProjectedBox : public Box<ProjectedPoint>
   }
 };
 typedef Box<MapPoint> MapBox;
+#endif
 
 }
 }
