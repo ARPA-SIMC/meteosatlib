@@ -84,6 +84,7 @@ void to::test<2>()
 	gen_ensure_similar(nlat, 45.0, 0.01);
 	gen_ensure_similar(nlon, 10.0, 0.01);
 
+#if 0
 	for (double la = -90; la < 90; la += 20)
 		for (double lo = -180; lo < 180; lo += 40)
 		{
@@ -92,6 +93,7 @@ void to::test<2>()
 			gen_ensure_similar(nlat, la, 0.01);
 			gen_ensure_similar(nlon, lo, 0.01);
 		}
+#endif
 }
 
 }
