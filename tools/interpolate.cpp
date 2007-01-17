@@ -135,10 +135,7 @@ int main( int argc, char* argv[] )
 				cerr << "No importer found for " << argv[i] << ": ignoring." << endl;
 				continue;
 			}
-			importer->cropX = ax;
-			importer->cropY = ay;
-			importer->cropWidth = aw;
-			importer->cropHeight = ah;
+			importer->cropImgArea = proj::ImageBox(proj::ImagePoint(ax, ay), proj::ImagePoint(ax+aw, ay+ah));
 			importer->read(imgs);
 		}
   }

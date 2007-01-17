@@ -77,8 +77,10 @@ std::string Image::historyPlusEvent(const std::string& event) const
 		return history + ", " + event;
 }
 
-void Image::crop(size_t x, size_t y, size_t width, size_t height)
+void Image::crop(const proj::ImageBox& area)
 {
+	int x, y, width, height;
+	area.boundingBox(x, y, width, height);
 	data->crop(x, y, width, height);
 	x0 += x;
 	y0 += y;
@@ -89,15 +91,17 @@ void Image::crop(size_t x, size_t y, size_t width, size_t height)
 #endif
 
 	std::stringstream str;
-	str << "Cropped subarea " << x << "," << y << " " << width << "x" << height;
+//	str << "Cropped subarea " << x << "," << y << " " << width << "x" << height;
 	addToHistory(str.str());
 }
 
-void Image::cropByCoords(double latmin, double latmax, double lonmin, double lonmax)
+void Image::cropByCoords(const proj::MapBox& area)
 {
-	int x, y, x1, y1;
+	double latmin, latmax, lonmin, lonmax;
+	area.boundingBox(latmin, latmax, lonmin, lonmax);
 
 	// Convert to pixel coordinates
+	int x, y, x1, y1;
 	coordsToPixels(latmin, lonmin, x, y);
 	coordsToPixels(latmax, lonmax, x1, y1);
 
@@ -445,7 +449,7 @@ struct ReprojectMapper : public Image::PixelMapper
 		double lat, lon;
 		dst.pixelsToCoords(x, y, lat, lon);
 		src.coordsToPixels(lat, lon, nx, ny);
-		cout << "  ptc map " << x << "," << y << " -> " << lat << "," << lon << " -> " << nx << "," << ny << endl;
+		//cout << "  ptc map " << x << "," << y << " -> " << lat << "," << lon << " -> " << nx << "," << ny << endl;
 	}
 };
 
@@ -474,6 +478,7 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 	proj::ProjectedBox pbox;
 	res->proj->mapToProjected(box, pbox);
 	double px0, py0, pw, ph;
+#if 0
 	{
 		proj::MapBox bigbox(proj::MapPoint(90,-90), proj::MapPoint(90, 90), proj::MapPoint(-90,-90), proj::MapPoint(-90, 90));
 		proj::ProjectedBox bigpbox;
@@ -491,9 +496,10 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 		res->proj->mapToProjected(proj::MapPoint(90, 0), tpoint);
 		cerr << "top " << tpoint.x << "," << tpoint.y << endl;
 	}
+#endif
 	pbox.boundingBox(px0, py0, pw, ph);
 
-	cerr << "bbox " << px0 << "," << py0 << " " << pw << "x" << ph << endl;
+	//cerr << "bbox " << px0 << "," << py0 << " " << pw << "x" << ph << endl;
 
 	// Compute output pixel space
 	//res->x0 = (int)rint(px0 * width / projw);  // fixme
@@ -507,8 +513,8 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 	if (res->x0 < 0) { res->column_offset = -res->x0; res->x0 = 0; }
 	if (res->y0 < 0) { res->line_offset = -res->y0; res->y0 = 0; }
 
-	cerr << "orig x0: " << x0 << " y0 " << y0 << " coff " << column_offset << " loff " << line_offset << " cres " << column_res << " lres " << line_res << endl;
-	cerr << "orig x0: " << res->x0 << " y0 " << res->y0 << " coff " << res->column_offset << " loff " << res->line_offset << " cres " << res->column_res << " lres " << res->line_res << endl;
+	//cerr << "orig x0: " << x0 << " y0 " << y0 << " coff " << column_offset << " loff " << line_offset << " cres " << column_res << " lres " << line_res << endl;
+	//cerr << "orig x0: " << res->x0 << " y0 " << res->y0 << " coff " << res->column_offset << " loff " << res->line_offset << " cres " << res->column_res << " lres " << res->line_res << endl;
 
 	/*
 	 *  4) Create a memory buffer for the output space

@@ -92,10 +92,7 @@ static std::auto_ptr<ImageImporter> importer()
 static std::auto_ptr<ImageImporter> croppedImporter()
 {
 	std::auto_ptr<ImageImporter> imp = importer();
-	imp->cropX = 2540;
-	imp->cropY = 2950;
-	imp->cropWidth = 150;
-	imp->cropHeight = 300;
+	imp->cropImgArea = proj::ImageBox(proj::ImagePoint(2540, 2950), proj::ImagePoint(2540+150, 2950+300));
 	return imp;
 }
 

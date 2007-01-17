@@ -39,6 +39,8 @@ struct importnetcdf_shar
 };
 TESTGRP(importnetcdf);
 
+proj::ImageBox ncCropArea(proj::ImagePoint(100, 100), proj::ImagePoint(100+200, 100+50));
+
 static void checkGeneralImageData(Image& img)
 {
 	gen_ensure_equals(img.year, 2005);
@@ -117,10 +119,7 @@ template<> template<>
 void to::test<3>()
 {
 	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = ncCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 
@@ -166,10 +165,7 @@ void to::test<5>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = ncCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -216,10 +212,7 @@ void to::test<7>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = ncCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -266,10 +259,7 @@ void to::test<9>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = ncCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);

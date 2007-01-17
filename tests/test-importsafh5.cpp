@@ -83,6 +83,8 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_equals(img.data->scaled(416, 4), 3);
 }
 
+proj::ImageBox safCropArea(proj::ImagePoint(100, 50), proj::ImagePoint(100+500, 50+50));
+
 // Test the isSAFH5 function
 template<> template<>
 void to::test<1>()
@@ -119,10 +121,7 @@ template<> template<>
 void to::test<3>()
 {
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropX = 100;
-	imp->cropY = 50;
-	imp->cropWidth = 500;
-	imp->cropHeight = 50;
+	imp->cropImgArea = safCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 
@@ -172,10 +171,7 @@ void to::test<5>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropX = 100;
-	imp->cropY = 50;
-	imp->cropWidth = 500;
-	imp->cropHeight = 50;
+	imp->cropImgArea = safCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);
@@ -226,10 +222,7 @@ void to::test<7>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropX = 100;
-	imp->cropY = 50;
-	imp->cropWidth = 500;
-	imp->cropHeight = 50;
+	imp->cropImgArea = safCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);
@@ -280,10 +273,7 @@ void to::test<9>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropX = 100;
-	imp->cropY = 50;
-	imp->cropWidth = 500;
-	imp->cropHeight = 50;
+	imp->cropImgArea = safCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 3u);

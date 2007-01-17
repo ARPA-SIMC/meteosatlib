@@ -166,13 +166,13 @@ public:
 	 * Crop the image to the given rectangle specified in pixel coordinates
 	 * relative to the image itself
 	 */
-	void crop(size_t x, size_t y, size_t width, size_t height);
+	void crop(const proj::ImageBox& area);
 
 	/**
 	 * Crop the image to the minimum rectangle of pixels containing the area
 	 * defined with the given geographical coordinates
 	 */
-	void cropByCoords(double latmin, double latmax, double lonmin, double lonmax);
+	void cropByCoords(const proj::MapBox& area);
 
 	/**
 	 * Compute a meaningful default file name (without extension) that can be
@@ -396,20 +396,18 @@ struct ImageConsumer
 
 struct ImageImporter
 {
-	int cropX, cropY, cropWidth, cropHeight;
-	double cropLatMin, cropLonMin, cropLatMax, cropLonMax;
+	proj::ImageBox cropImgArea;
+	proj::MapBox cropGeoArea;
 
-	ImageImporter() :
-		cropX(0), cropY(0), cropWidth(0), cropHeight(0),
-		cropLatMin(1000), cropLonMin(1000), cropLatMax(1000), cropLonMax(1000) {}
+	ImageImporter() {}
 	virtual ~ImageImporter() {}
 
 	void cropIfNeeded(Image& img)
 	{
-		if (cropWidth != 0 && cropHeight != 0)
-			img.crop(cropX, cropY, cropWidth, cropHeight);
-		else if (cropLatMin != 1000 && cropLatMax != 1000 && cropLonMin != 1000 && cropLonMax != 1000)
-			img.cropByCoords(cropLatMin, cropLatMax, cropLonMin, cropLonMax);
+		if (cropImgArea.isNonZero())
+			img.crop(cropImgArea);
+		else if (cropGeoArea.isNonZero())
+			img.cropByCoords(cropGeoArea);
 	}
 
 	virtual void read(ImageConsumer& output) = 0;

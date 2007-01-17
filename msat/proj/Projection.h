@@ -48,8 +48,6 @@ struct Projection
     virtual void mapToProjected(const MapBox& m, ProjectedBox& p) const
     {
 	    mapToProjected(m.topLeft, p.topLeft);
-	    mapToProjected(m.topRight, p.topRight);
-	    mapToProjected(m.bottomLeft, p.bottomLeft);
 	    mapToProjected(m.bottomRight, p.bottomRight);
     }
 #endif
@@ -58,8 +56,6 @@ struct Projection
     virtual void projectedToMap(const ProjectedBox& p, MapBox& m) const
     {
 	    projectedToMap(p.topLeft, m.topLeft);
-	    projectedToMap(p.topRight, m.topRight);
-	    projectedToMap(p.bottomLeft, m.bottomLeft);
 	    projectedToMap(p.bottomRight, m.bottomRight);
     }
 #endif

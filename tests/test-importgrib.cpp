@@ -82,6 +82,8 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_equals(img.data->scaled(10, 10), 97.800003f);
 }
 
+proj::ImageBox gribCropArea(proj::ImagePoint(100, 100), proj::ImagePoint(100+200, 100+50));
+
 // Test the isGrib function
 template<> template<>
 void to::test<1>()
@@ -116,10 +118,7 @@ template<> template<>
 void to::test<3>()
 {
 	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = gribCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 
@@ -165,10 +164,7 @@ void to::test<5>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = gribCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -215,10 +211,7 @@ void to::test<7>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = gribCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);
@@ -265,10 +258,7 @@ void to::test<9>()
 {
 	// Read and crop the grib
 	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	imp->cropX = 100;
-	imp->cropY = 100;
-	imp->cropWidth = 200;
-	imp->cropHeight = 50;
+	imp->cropImgArea = gribCropArea;
 	ImageVector imgs;
 	imp->read(imgs);
 	gen_ensure_equals(imgs.size(), 1u);

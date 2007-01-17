@@ -200,36 +200,64 @@ std::string XRITImportOptions::toString() const
 
 HRITImageData::~HRITImageData()
 {
-	if (m_segment) delete m_segment;
+	// Delete the segment cache
+	//if (m_segment) delete m_segment;
+	for (std::deque<scache>::iterator i = segcache.begin();
+			 i != segcache.end(); ++i)
+		delete i->segment;
 	if (calibration) delete[] calibration;
 }
 
 MSG_data* HRITImageData::segment(size_t idx) const
 {
-	if ((int)idx != m_segment_idx)
+	// Check to see if the segment we need is the current one
+	if (segcache.empty() || segcache.begin()->segno != idx)
 	{
-		// Delete old segment if any
-		if (m_segment) delete m_segment;
-		m_segment = 0;
-		m_segment_idx = 0;
-		if (idx >= segnames.size()) return 0;
-		if (segnames[idx].empty()) return m_segment;
+		// If not, check to see if we can find the segment in the cache
+		std::deque<scache>::iterator i = segcache.begin();
+		for ( ; i != segcache.end(); ++i)
+			if (i->segno == idx)
+				break;
+		if (i == segcache.end())
+		{
+			// Not in cache: we need to load it
 
-		ProgressTask p("Reading segment " + segnames[idx]);
-		std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
-		if (hrit.fail())
-			throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
-		MSG_header header;
-		header.read_from(hrit);
-		if (header.segment_id->data_field_format == MSG_NO_FORMAT)
-			throw std::runtime_error("Product dumped in binary format.");
-		m_segment = new MSG_data;
-		m_segment->read_from(hrit, header);
-		hrit.close( );
+			// Do not load missing segments
+			if (idx >= segnames.size()) return 0;
+			if (segnames[idx].empty()) return 0;
 
-		m_segment_idx = idx;
+			// Remove the last recently used if the cache is full
+			if (segcache.size() == 10)
+			{
+				delete segcache.rbegin()->segment;
+				segcache.pop_back();
+			}
+
+			// Load the segment
+			ProgressTask p("Reading segment " + segnames[idx]);
+			std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
+			if (hrit.fail())
+				throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
+			MSG_header header;
+			header.read_from(hrit);
+			if (header.segment_id->data_field_format == MSG_NO_FORMAT)
+				throw std::runtime_error("Product dumped in binary format.");
+			scache new_scache;
+			new_scache.segment = new MSG_data;
+			new_scache.segment->read_from(hrit, header);
+			new_scache.segno = idx;
+			hrit.close();
+
+			// Put it in the front
+			segcache.push_front(new_scache);
+		} else {
+			// The segment is in the cache: bring it to the front
+			scache tmp = *i;
+			segcache.erase(i);
+			segcache.push_front(tmp);
+		}
 	}
-	return m_segment;
+	return segcache.begin()->segment;
 }
 
 MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
@@ -330,12 +358,12 @@ ImageData* HRITImageData::createReprojected(size_t width, size_t height, const I
 	res->missing = missingValue;
 	for (size_t y = 0; y < height; ++y)
 	{
-		cout << "Line " << y << "/" << height << endl;
+		//cout << "Line " << y << "/" << height << endl;
 		for (size_t x = 0; x < height; ++x)
 		{
 			int nx = 0, ny = 0;
 			mapper(x, y, nx, ny);
-			cout << "  map " << x << "," << y << " -> " << nx << "," << ny << endl;
+			//cout << "  map " << x << "," << y << " -> " << nx << "," << ny << endl;
 			if (nx < 0 || ny < 0 || nx > columns || ny > lines)
 				res->pixels[y*width+x] = missingValue;
 			else

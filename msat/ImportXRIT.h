@@ -5,6 +5,7 @@
 #include <hrit/MSG_data_image.h>
 #include <memory>
 #include <vector>
+#include <deque>
 
 struct MSG_data;
 
@@ -55,11 +56,21 @@ struct HRITImageData : public ImageData
   /// Pathnames of the segment files, indexed with their index
   std::vector<std::string> segnames;
 
+	struct scache
+	{
+		MSG_data* segment;
+		int segno;
+	};
+	/// Segment cache
+	mutable std::deque<scache> segcache;
+
+#if 0
   /// Cached segment
   mutable MSG_data* m_segment;
 
   /// Index of the currently cached segment
   mutable int m_segment_idx;
+#endif
 
   /// Calibration vector
   float* calibration;
@@ -73,7 +84,7 @@ struct HRITImageData : public ImageData
   /// Cropping edges
   int cropX, cropY;
 
-  HRITImageData() : npixperseg(0), m_segment(0), m_segment_idx(-1), calibration(0), cropX(0), cropY(0) {}
+  HRITImageData() : npixperseg(0), /*m_segment(0), m_segment_idx(-1),*/ calibration(0), cropX(0), cropY(0) {}
   virtual ~HRITImageData();
 
   /**

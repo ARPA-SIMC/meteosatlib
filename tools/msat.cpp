@@ -174,19 +174,27 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 }
 
 #include <msat/proj/Mercator.h>
+#include <msat/proj/Polar.h>
 #include <msat/proj/Geos.h>
 #include <msat/proj/const.h>
 struct Reprojector : public ImageConsumer
 {
+	int width;
+	int height;
 	ImageConsumer& next;
-	Reprojector(ImageConsumer& next) : next(next) {}
+
+	Reprojector(size_t width, size_t height, ImageConsumer& next) :
+		width(width), height(height), next(next) {}
+
 	virtual void processImage(std::auto_ptr<Image> image)
 	{
-		proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(60, 50), proj::MapPoint(10,-10), proj::MapPoint(10, 50));
-		std::auto_ptr<proj::Projection> pr(new proj::Mercator);
+		//proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(10, 50));
+		//std::auto_ptr<proj::Projection> pr(new proj::Mercator);
+		proj::MapBox box(proj::MapPoint(70,-40), proj::MapPoint(10, 40));
+		std::auto_ptr<proj::Projection> pr(new proj::Polar(20.0, true));
 		//std::auto_ptr<proj::Projection> pr(new proj::Geos(0, ORBIT_RADIUS));
 
-		std::auto_ptr<Image> projected = image->reproject(100, 100, pr, box);
+		std::auto_ptr<Image> projected = image->reproject(width, height, pr, box);
 		next.processImage(projected);
 	}
 };
@@ -199,8 +207,9 @@ int main( int argc, char* argv[] )
 {
 	// Defaults to view
   Action action = VIEW;
-	int ax = 0, ay = 0, aw = 0, ah = 0;
-	double latmin = 1000, latmax = 1000, lonmin = 1000, lonmax = 1000;
+	proj::ImageBox imgArea;
+	proj::MapBox geoArea;
+	size_t newWidth = 0, newHeight = 0;
 	bool quiet = false;
 
   static struct option longopts[] = {
@@ -222,6 +231,7 @@ int main( int argc, char* argv[] )
 		{ "area", 1, 0, 'a' },
 		{ "Area", 1, 0, 'A' },
 		{ "around", 1, 0, 'C' },
+		{ "size", 1, 0, 's' },
 		{ 0, 0, 0, 0 },
   };
 
@@ -266,16 +276,24 @@ int main( int argc, char* argv[] )
 				action = DISPLAY;
 				break;
 #endif
-			case 'a':
+			case 'a': {
+				using namespace proj;
+				int ax, ay, aw, ah;
 				if (sscanf(optarg, "%d,%d,%d,%d", &ax,&aw,&ay,&ah) != 4)
 				{
 					cerr << "Area value should be in the format x,dx,y,dy" << endl;
 					do_help(argv[0], cerr);
 					return 1;
 				}
+				imgArea = ImageBox(ImagePoint(ax, ay), ImagePoint(ax+aw, ay+ah));
 				break;
+			}
 			case 'A':
-				if (sscanf(optarg, "%lf,%lf,%lf,%lf", &latmin,&latmax,&lonmin,&lonmax) != 4)
+				if (sscanf(optarg, "%lf,%lf,%lf,%lf",
+							&geoArea.bottomRight.lat,
+							&geoArea.topLeft.lat,
+							&geoArea.topLeft.lon,
+							&geoArea.bottomRight.lon) != 4)
 				{
 					cerr << "Area value should be in the format latmin,latmax,lonmin,lonmax" << endl;
 					do_help(argv[0], cerr);
@@ -290,10 +308,19 @@ int main( int argc, char* argv[] )
 					do_help(argv[0], cerr);
 					return 1;
 				}
-				latmin = lat - h/2;
-				lonmin = lon - w/2;
-				latmax = lat + h/2;
-				lonmax = lon + w/2;
+				geoArea.bottomRight.lat = lat - h/2;
+				geoArea.topLeft.lat = lat + h/2;
+				geoArea.topLeft.lon = lon - w/2;
+				geoArea.bottomRight.lon = lon + w/2;
+				break;
+			}
+			case 's': {
+				if (sscanf(optarg, "%zd,%zd", &newWidth,&newHeight) != 2)
+				{
+					cerr << "size value should be in the format width,height" << endl;
+					do_help(argv[0], cerr);
+					return 1;
+				}
 				break;
 			}
       case -1:
@@ -325,18 +352,15 @@ int main( int argc, char* argv[] )
 				cerr << "No importer found for " << argv[i] << ": ignoring." << endl;
 				continue;
 			}
-			importer->cropX = ax;
-			importer->cropY = ay;
-			importer->cropWidth = aw;
-			importer->cropHeight = ah;
-			importer->cropLatMin = latmin;
-			importer->cropLatMax = latmax;
-			importer->cropLonMin = lonmin;
-			importer->cropLonMax = lonmax;
+			importer->cropImgArea = imgArea;
+			importer->cropGeoArea = geoArea;
 			std::auto_ptr<ImageConsumer> consumer = getExporter(action);
-			//Reprojector reproj(*consumer);
-			//importer->read(reproj);
-			importer->read(*consumer);
+			if (newWidth != 0 && newHeight != 0)
+			{
+				Reprojector reproj(newWidth, newHeight, *consumer);
+				importer->read(reproj);
+			} else
+				importer->read(*consumer);
 		}
   }
   catch (std::exception& e)
