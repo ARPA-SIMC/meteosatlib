@@ -44,7 +44,21 @@ struct Projection
 {
     virtual ~Projection() { }
     virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const = 0;
+    virtual void mapToProjected(const MapBox& m, ProjectedBox& p) const
+    {
+	    mapToProjected(m.topLeft, p.topLeft);
+	    mapToProjected(m.topRight, p.topRight);
+	    mapToProjected(m.bottomLeft, p.bottomLeft);
+	    mapToProjected(m.bottomRight, p.bottomRight);
+    }
     virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const = 0;
+    virtual void projectedToMap(const ProjectedBox& p, MapBox& m) const
+    {
+	    projectedToMap(p.topLeft, m.topLeft);
+	    projectedToMap(p.topRight, m.topRight);
+	    projectedToMap(p.bottomLeft, m.bottomLeft);
+	    projectedToMap(p.bottomRight, m.bottomRight);
+    }
     virtual std::string format() const = 0;
 };
 

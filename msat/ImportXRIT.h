@@ -89,6 +89,14 @@ struct HRITImageData : public ImageData
   /// Image sample as physical value (already scaled with slope and offset)
   float scaled(int column, int line) const;
 
+#ifdef EXPERIMENTAL_REPROJECTION
+	/**
+	 * Create a new image with the given size using the same kind of image data
+	 * as this one.  The new image will be initialized with all missing values.
+	 */
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper);
+#endif
+
   /// Image sample scaled to int using slope and offset.
   /// The function throws if scalesToInt is false.
   virtual int scaledToInt(int column, int line) const;

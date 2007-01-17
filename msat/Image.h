@@ -5,6 +5,8 @@
 #include <vector>
 #include <msat/proj/Projection.h>
 
+#undef EXPERIMENTAL_REPROJECTION
+
 namespace msat {
 
 struct ImageData;
@@ -60,6 +62,13 @@ private:
 #endif
 
 public:
+	/// Functor interface for mapping pixels between two images
+	struct PixelMapper
+	{
+		virtual ~PixelMapper() {}
+		virtual void operator()(size_t x, size_t y, size_t& nx, size_t xy) const = 0;
+	};
+
   /// Image time
   int year, month, day, hour, minute;
 
@@ -154,6 +163,9 @@ public:
 	/// Return the nearest pixel coordinates to the given geographical place
 	void coordsToPixels(double lat, double lon, size_t& x, size_t& y) const;
 
+	/// Return the coordinates of the place corresponding to the given pixel
+	void pixelsToCoords(size_t x, size_t y, double& lat, double& lon) const;
+
 	/**
 	 * Crop the image to the given rectangle specified in pixel coordinates
 	 * relative to the image itself
@@ -171,6 +183,14 @@ public:
 	 * used to store this image
 	 */
 	std::string defaultFilename() const;
+
+#ifdef EXPERIMENTAL_REPROJECTION
+	/**
+	 * Return a new image with the given width and height, containing the same
+	 * data of this image but using a different projection
+	 */
+	std::auto_ptr<Image> reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const MapBox& box) const;
+#endif
 
 	/// Earth dimension scanned by Seviri in the X direction
 	static int seviriDXFromColumnFactor(int column_factor);
@@ -233,6 +253,14 @@ struct ImageData
 	/// Value used to represent a missing value in the scaled data
 	float missingValue;
 
+#ifdef EXPERIMENTAL_REPROJECTION
+	/**
+	 * Create a new image with the given size using the same kind of image data
+	 * as this one.  The new image will be initialized with all missing values.
+	 */
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) = 0;
+#endif
+
   /// Image sample as physical value (already scaled with slope and offset)
   virtual float scaled(int column, int line) const = 0;
 
@@ -272,6 +300,30 @@ public:
     if (pixels)
       delete[] pixels;
   }
+
+#ifdef EXPERIMENTAL_REPROJECTION
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper)
+	{
+		ImageDataWithPixels<EL>* res(new ImageDataWithPixels<EL>(width, height));
+		res->slope = slope;
+		res->offset = offset;
+		res->bpp = bpp;
+		res->scalesToInt = scalesToInt;
+		res->missingValue = missingValue;
+		res->missing = missing;
+		for (size_t y = 0; y < height; ++y)
+			for (size_t x = 0; x < height; ++x)
+			{
+				size_t nx = 0, ny = 0;
+				mapper(x, y, nx, ny);
+				if (nx < 0 || ny < 0)
+					res->pixels[y*width+x] = missing;
+				else
+					res->pixels[y*width+x] = pixels[ny*columns+nx];
+			}
+		return res;
+	}
+#endif
 
   virtual float scaled(int column, int line) const
   {
@@ -313,6 +365,30 @@ public:
   }
 
 	virtual int scaledToInt(int column, int line) const;
+
+#ifdef EXPERIMENTAL_REPROJECTION
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper)
+	{
+		ImageDataWithPixelsPrescaled<EL>* res(new ImageDataWithPixelsPrescaled<EL>(width, height));
+		res->slope = this->slope;
+		res->offset = this->offset;
+		res->bpp = this->bpp;
+		res->scalesToInt = this->scalesToInt;
+		res->missingValue = this->missingValue;
+		res->missing = this->missing;
+		for (size_t y = 0; y < height; ++y)
+			for (size_t x = 0; x < height; ++x)
+			{
+				size_t nx = 0, ny = 0;
+				mapper(x, y, nx, ny);
+				if (nx < 0 || ny < 0)
+					res->pixels[y*width+x] = this->missingValue;
+				else
+					res->pixels[y*width+x] = this->pixels[ny*this->columns+nx];
+			}
+		return res;
+	}
+#endif
 };
 
 

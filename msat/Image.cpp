@@ -127,13 +127,24 @@ void Image::coordsToPixels(double lat, double lon, size_t& x, size_t& y) const
 
 //	cerr << "  coordsToPixels: " << lat << "," << lon << " -> " << p.x << "," << p.y << endl;
 
-	int dx = (int)rint((double) column_offset + p.x * column_factor * exp2(-16)) - x0;
-	int dy = (int)rint((double) line_offset   + p.y * line_factor   * exp2(-16)) - y0;
+	int dx = (int)rint((double)p.x * column_factor * exp2(-16)) + (column_offset - x0);
+	int dy = (int)rint((double)p.y * line_factor   * exp2(-16)) + (line_offset   - y0);
 
 //	cerr << "    to pixels: " << dx << "," << dy << endl;
 
   x = dx < 0 ? 0 : (unsigned)dx;
   y = dy < 0 ? 0 : (unsigned)dy;
+}
+
+void Image::pixelsToCoords(size_t x, size_t y, double& lat, double& lon) const
+{
+	proj::ProjectedPoint pp;
+	pp.x = (double)(x - (column_offset - x0)) / (column_factor*exp2(-16));
+	pp.y = (double)(y - (line_offset   - y0)) / (line_factor*exp2(-16));
+	proj::MapPoint p;
+	proj->projectedToMap(pp, p);
+	lat = p.lat;
+	lon = p.lon;
 }
 
 double Image::pixelHSize() const
@@ -419,6 +430,78 @@ std::string Image::defaultFilename() const
 	else
 		return string() + quality + "_" + spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
 }
+
+#ifdef EXPERIMENTAL_REPROJECTION
+std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const MapBox& box) const
+{
+	std::auto_ptr<Image> res(new Image());
+
+	res->year = year;
+	res->month = month;
+	res->day = day;
+	res->hour = hour;
+	res->minute = minute;
+	res->proj = proj;
+	res->channel_id = channel_id;
+	res->spacecraft_id = spacecraft_id;
+
+	/* From http://lists.maptools.org/pipermail/gdal-dev/2006-June/009157.html
+	 *  1) Read in the image into a memory buffer (input space)
+	 *  2) Get the current map projection information (Projection, datum, Upper left corner projection parameters, size of pixel in X and Y)
+	 *  3) Frame your output space
+	 *     - Calculate the output space upper left and lower right values
+	 *        - Lat, Lon, projection x/y, output space pixel size
+	 *    -Farsi dire l'area di destinazione
+	 */
+	// Compute projected bounding box
+	ProjectedBox pbox;
+	proj.mapToProjected(box, pbox);
+	double px0, py0, pw, ph;
+	pbox.boundingBox(px0, py0, pw, ph);
+
+	// Compute map bounding box
+	x0 = px0 * width / projw;
+	x0 = px0 * height / projh;
+	hres = pw * width / projw;
+	vres = ph * height / projh;
+	xoffset = 0;
+	yoffset = 0;
+	if (x0 < 0) { xoffset = -x0; x0 = 0; }
+	if (y0 < 0) { yoffset = -y0; y0 = 0; }
+
+
+	/*
+	 *  4) Create a memory buffer for the output space
+	 *  5) For each pixel in the output space
+	 *  6) Find the projection x/y using the pixel size and offset of the pixel from the upper left corner
+	 *  7) Convert output space projection x/y to lat, lon using GCTP (inverse projection)
+	 *  8) Convert lat, lon to input space projection x/y using forward projection routine in GCTP
+	 *  9) Convert projection x/y into line, sample (row, column)
+	 * 10) Resample DN values in input space near the calculated input space line, sample
+	 * 11) Place resampled DN value into the output space at current pixel location (line, sample)
+	 * 12) Get next output pixel location (back to step 5)
+	 * 13) Write the output space buffer to a file
+	 */
+
+	// FIXME: should these 6 belong in the projection?
+	res->column_factor = 0;
+	res->line_factor = 0;
+	res->column_offset = 0;
+	res->line_offset = 0;
+	res->x0 = 0;
+	res->y0 = 0;
+
+	res->quality = quality;
+	res->history = history;
+	res->addToHistory("reprojected");
+
+	//res->data = data->createReprojected(width, height, mapper);
+
+	// TODO: fill in res->data with data from this image
+
+	return res;
+}
+#endif
 
 //
 // ImageData
