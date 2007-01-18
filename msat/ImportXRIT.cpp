@@ -227,7 +227,7 @@ MSG_data* HRITImageData::segment(size_t idx) const
 			if (segnames[idx].empty()) return 0;
 
 			// Remove the last recently used if the cache is full
-			if (segcache.size() == 10)
+			if (segcache.size() == 2)
 			{
 				delete segcache.rbegin()->segment;
 				segcache.pop_back();
@@ -346,8 +346,27 @@ void HRITImageData::crop(size_t x, size_t y, size_t width, size_t height)
 	lines = height;
 }
 
+ImageData* HRITImageData::createResampled(size_t width, size_t height) const
+{
+	ImageDataWithPixels<float>* res(new ImageDataWithPixelsPrescaled<float>(width, height));
+	res->slope = slope;
+	res->offset = offset;
+	res->bpp = bpp;
+	res->scalesToInt = scalesToInt;
+	res->missingValue = missingValue;
+	res->missing = missingValue;
+	for (size_t y = 0; y < height; ++y)
+		for (size_t x = 0; x < height; ++x)
+		{
+			size_t nx = x * this->columns / width;
+			size_t ny = y * this->lines / height;
+			res->pixels[y*width+x] = scaled(nx, ny);
+		}
+	return res;
+}
+
 #ifdef EXPERIMENTAL_REPROJECTION
-ImageData* HRITImageData::createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper)
+ImageData* HRITImageData::createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const
 {
 	ImageDataWithPixels<float>* res(new ImageDataWithPixelsPrescaled<float>(width, height));
 	res->slope = slope;
@@ -364,7 +383,7 @@ ImageData* HRITImageData::createReprojected(size_t width, size_t height, const I
 			int nx = 0, ny = 0;
 			mapper(x, y, nx, ny);
 			//cout << "  map " << x << "," << y << " -> " << nx << "," << ny << endl;
-			if (nx < 0 || ny < 0 || nx > columns || ny > lines)
+			if (nx < 0 || ny < 0 || (unsigned)nx > columns || (unsigned)ny > lines)
 				res->pixels[y*width+x] = missingValue;
 			else
 				res->pixels[y*width+x] = scaled(nx, ny);

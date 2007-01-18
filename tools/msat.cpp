@@ -199,6 +199,22 @@ struct Reprojector : public ImageConsumer
 	}
 };
 
+struct Resampler : public ImageConsumer
+{
+	int width;
+	int height;
+	ImageConsumer& next;
+
+	Resampler(size_t width, size_t height, ImageConsumer& next) :
+		width(width), height(height), next(next) {}
+
+	virtual void processImage(std::auto_ptr<Image> image)
+	{
+		std::auto_ptr<Image> rescaled = image->rescaled(width, height);
+		next.processImage(rescaled);
+	}
+};
+
 /* ************************************************************************* */
 /* Reads Data Images, performs calibration and store output in NetCDF format */
 /* ************************************************************************* */
@@ -231,7 +247,7 @@ int main( int argc, char* argv[] )
 		{ "area", 1, 0, 'a' },
 		{ "Area", 1, 0, 'A' },
 		{ "around", 1, 0, 'C' },
-		{ "size", 1, 0, 's' },
+		{ "resize", 1, 0, 'r' },
 		{ 0, 0, 0, 0 },
   };
 
@@ -314,7 +330,7 @@ int main( int argc, char* argv[] )
 				geoArea.bottomRight.lon = lon + w/2;
 				break;
 			}
-			case 's': {
+			case 'r': {
 				if (sscanf(optarg, "%zd,%zd", &newWidth,&newHeight) != 2)
 				{
 					cerr << "size value should be in the format width,height" << endl;
@@ -357,8 +373,10 @@ int main( int argc, char* argv[] )
 			std::auto_ptr<ImageConsumer> consumer = getExporter(action);
 			if (newWidth != 0 && newHeight != 0)
 			{
-				Reprojector reproj(newWidth, newHeight, *consumer);
-				importer->read(reproj);
+				//Reprojector reproj(newWidth, newHeight, *consumer);
+				//importer->read(reproj);
+				Resampler resampler(newWidth, newHeight, *consumer);
+				importer->read(resampler);
 			} else
 				importer->read(*consumer);
 		}

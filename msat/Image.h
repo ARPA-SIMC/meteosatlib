@@ -180,6 +180,11 @@ public:
 	 */
 	std::string defaultFilename() const;
 
+	/**
+	 * Return a new image scaled to the given width and height
+	 */
+	std::auto_ptr<Image> rescaled(size_t width, size_t height) const;
+
 #ifdef EXPERIMENTAL_REPROJECTION
 	/**
 	 * Return a new image with the given width and height, containing the same
@@ -249,12 +254,13 @@ struct ImageData
 	/// Value used to represent a missing value in the scaled data
 	float missingValue;
 
+	virtual ImageData* createResampled(size_t width, size_t height) const = 0;
 #ifdef EXPERIMENTAL_REPROJECTION
 	/**
 	 * Create a new image with the given size using the same kind of image data
 	 * as this one.  The new image will be initialized with all missing values.
 	 */
-	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) = 0;
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const = 0;
 #endif
 
   /// Image sample as physical value (already scaled with slope and offset)
@@ -297,8 +303,27 @@ public:
       delete[] pixels;
   }
 
+	virtual ImageData* createResampled(size_t width, size_t height) const
+	{
+		ImageDataWithPixels<EL>* res(new ImageDataWithPixels<EL>(width, height));
+		res->slope = slope;
+		res->offset = offset;
+		res->bpp = bpp;
+		res->scalesToInt = scalesToInt;
+		res->missingValue = missingValue;
+		res->missing = missing;
+		for (size_t y = 0; y < height; ++y)
+			for (size_t x = 0; x < height; ++x)
+			{
+				size_t nx = x * this->columns / width;
+				size_t ny = y * this->lines   / height;
+				res->pixels[y*width+x] = pixels[ny*columns+nx];
+			}
+		return res;
+	}
+
 #ifdef EXPERIMENTAL_REPROJECTION
-	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper)
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const
 	{
 		ImageDataWithPixels<EL>* res(new ImageDataWithPixels<EL>(width, height));
 		res->slope = slope;
@@ -312,7 +337,7 @@ public:
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0 || nx > columns || nx > lines)
+				if (nx < 0 || ny < 0 || (unsigned)nx > columns || (unsigned)nx > lines)
 					res->pixels[y*width+x] = missing;
 				else
 					res->pixels[y*width+x] = pixels[ny*columns+nx];
@@ -362,8 +387,27 @@ public:
 
 	virtual int scaledToInt(int column, int line) const;
 
+	virtual ImageData* createResampled(size_t width, size_t height) const
+	{
+		ImageDataWithPixelsPrescaled<EL>* res(new ImageDataWithPixelsPrescaled<EL>(width, height));
+		res->slope = this->slope;
+		res->offset = this->offset;
+		res->bpp = this->bpp;
+		res->scalesToInt = this->scalesToInt;
+		res->missingValue = this->missingValue;
+		res->missing = this->missing;
+		for (size_t y = 0; y < height; ++y)
+			for (size_t x = 0; x < height; ++x)
+			{
+				size_t nx = x * this->columns / width;
+				size_t ny = y * this->lines   / height;
+				res->pixels[y*width+x] = this->pixels[ny*this->columns+nx];
+			}
+		return res;
+	}
+
 #ifdef EXPERIMENTAL_REPROJECTION
-	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper)
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const
 	{
 		ImageDataWithPixelsPrescaled<EL>* res(new ImageDataWithPixelsPrescaled<EL>(width, height));
 		res->slope = this->slope;
@@ -377,7 +421,7 @@ public:
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0 || nx > this->columns || nx > this->lines)
+				if (nx < 0 || ny < 0 || (unsigned)nx > this->columns || (unsigned)nx > this->lines)
 					res->pixels[y*width+x] = this->missingValue;
 				else
 					res->pixels[y*width+x] = this->pixels[ny*this->columns+nx];

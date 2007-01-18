@@ -437,6 +437,38 @@ std::string Image::defaultFilename() const
 		return string() + quality + "_" + spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
 }
 
+std::auto_ptr<Image> Image::rescaled(size_t width, size_t height) const
+{
+	std::auto_ptr<Image> res(new Image());
+
+	res->year = year;
+	res->month = month;
+	res->day = day;
+	res->hour = hour;
+	res->minute = minute;
+	res->proj.reset(proj->clone());
+	res->channel_id = channel_id;
+	res->spacecraft_id = spacecraft_id;
+
+	// Compute output pixel space
+	res->column_res = column_res * width / data->columns;
+	res->line_res   = line_res * height / data->lines;
+	res->x0 = x0 * width / data->columns;
+	res->y0 = y0 * height / data->lines;
+	res->column_offset = column_offset * width / data->columns;
+	res->line_offset = line_offset * height / data->lines;
+
+	res->quality = quality;
+	res->history = history;
+	std::stringstream str;
+	str << "scaled to " << width << "x" << height;
+	res->addToHistory(str.str());
+
+	res->data = data->createResampled(width, height);
+
+	return res;
+}
+
 #ifdef EXPERIMENTAL_REPROJECTION
 struct ReprojectMapper : public Image::PixelMapper
 {
@@ -472,51 +504,6 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 	 *  3) Frame your output space
 	 *     - Calculate the output space upper left and lower right values
 	 *        - Lat, Lon, projection x/y, output space pixel size
-	 *    -Farsi dire l'area di destinazione
-	 */
-	// Compute projected bounding box
-	proj::ProjectedBox pbox;
-	res->proj->mapToProjected(box, pbox);
-	double px0, py0, pw, ph;
-#if 0
-	{
-		proj::MapBox bigbox(proj::MapPoint(90,-90), proj::MapPoint(90, 90), proj::MapPoint(-90,-90), proj::MapPoint(-90, 90));
-		proj::ProjectedBox bigpbox;
-		this->proj->mapToProjected(bigbox, bigpbox);
-		bigpbox.boundingBox(px0, py0, pw, ph);
-		cerr << "big bbox pre " << px0 << "," << py0 << " " << pw << "x" << ph << endl;
-
-		res->proj->mapToProjected(bigbox, bigpbox);
-		bigpbox.boundingBox(px0, py0, pw, ph);
-		cerr << "big bbox post" << px0 << "," << py0 << " " << pw << "x" << ph << endl;
-
-		proj::ProjectedPoint tpoint;
-		res->proj->mapToProjected(proj::MapPoint(0, -90), tpoint);
-		cerr << "left " << tpoint.x << "," << tpoint.y << endl;
-		res->proj->mapToProjected(proj::MapPoint(90, 0), tpoint);
-		cerr << "top " << tpoint.x << "," << tpoint.y << endl;
-	}
-#endif
-	pbox.boundingBox(px0, py0, pw, ph);
-
-	//cerr << "bbox " << px0 << "," << py0 << " " << pw << "x" << ph << endl;
-
-	// Compute output pixel space
-	//res->x0 = (int)rint(px0 * width / projw);  // fixme
-	//res->x0 = (int)rint(px0 * height / projh); // fixme
-	res->column_res = width / pw;
-	res->line_res   = height / ph;
-	res->x0 = (int)rint(px0 * res->column_res);
-	res->y0 = (int)rint(py0 * res->line_res);
-	res->column_offset = 0;
-	res->line_offset = 0;
-	if (res->x0 < 0) { res->column_offset = -res->x0; res->x0 = 0; }
-	if (res->y0 < 0) { res->line_offset = -res->y0; res->y0 = 0; }
-
-	//cerr << "orig x0: " << x0 << " y0 " << y0 << " coff " << column_offset << " loff " << line_offset << " cres " << column_res << " lres " << line_res << endl;
-	//cerr << "orig x0: " << res->x0 << " y0 " << res->y0 << " coff " << res->column_offset << " loff " << res->line_offset << " cres " << res->column_res << " lres " << res->line_res << endl;
-
-	/*
 	 *  4) Create a memory buffer for the output space
 	 *  5) For each pixel in the output space
 	 *  6) Find the projection x/y using the pixel size and offset of the pixel from the upper left corner
@@ -529,13 +516,27 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 	 * 13) Write the output space buffer to a file
 	 */
 
+	// Compute projected bounding box
+	proj::ProjectedBox pbox;
+	res->proj->mapToProjected(box, pbox);
+	double px0, py0, pw, ph;
+	pbox.boundingBox(px0, py0, pw, ph);
+
+	// Compute output pixel space
+	res->column_res = width / pw;
+	res->line_res   = height / ph;
+	res->x0 = (int)rint(px0 * res->column_res);
+	res->y0 = (int)rint(py0 * res->line_res);
+	res->column_offset = 0;
+	res->line_offset = 0;
+	if (res->x0 < 0) { res->column_offset = -res->x0; res->x0 = 0; }
+	if (res->y0 < 0) { res->line_offset = -res->y0; res->y0 = 0; }
+
 	res->quality = quality;
 	res->history = history;
-	res->addToHistory("reprojected");
+	res->addToHistory("reprojected to " + res->proj->format());
 
 	res->data = data->createReprojected(width, height, ReprojectMapper(*this, *res));
-
-	// TODO: fill in res->data with data from this image
 
 	return res;
 }

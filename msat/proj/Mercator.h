@@ -38,6 +38,7 @@ public:
 	virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
 	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
 	virtual std::string format() const { return "Mercator"; }
+	Projection* clone() const { return new Mercator(); }
 };
 
 }

@@ -60,6 +60,7 @@ struct Projection
     }
 #endif
     virtual std::string format() const = 0;
+    virtual Projection* clone() const = 0;
 };
 
 }

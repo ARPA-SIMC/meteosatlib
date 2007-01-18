@@ -59,7 +59,7 @@ struct HRITImageData : public ImageData
 	struct scache
 	{
 		MSG_data* segment;
-		int segno;
+		size_t segno;
 	};
 	/// Segment cache
 	mutable std::deque<scache> segcache;
@@ -92,12 +92,13 @@ struct HRITImageData : public ImageData
   /// Image sample as physical value (already scaled with slope and offset)
   float scaled(int column, int line) const;
 
+	virtual ImageData* createResampled(size_t width, size_t height) const;
 #ifdef EXPERIMENTAL_REPROJECTION
 	/**
 	 * Create a new image with the given size using the same kind of image data
 	 * as this one.  The new image will be initialized with all missing values.
 	 */
-	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper);
+	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const;
 #endif
 
   /// Image sample scaled to int using slope and offset.
