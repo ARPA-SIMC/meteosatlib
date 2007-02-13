@@ -94,7 +94,7 @@ endif
 
 if HDF5
 msat_libmsat_la_LIBADD += \
-    -lhdf5_cpp
+    -lhdf5_cpp -lhdf5
 msat_libmsat_la_SOURCES += \
     msat/SAFH5Utils.cpp \
     msat/ImportSAFH5.cpp
