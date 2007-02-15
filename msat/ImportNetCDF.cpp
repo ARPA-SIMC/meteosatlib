@@ -125,11 +125,11 @@ class NetCDFImageImporter : public ImageImporter
 		img.x0 = GET(int, "AreaStartPix");
 		img.y0 = GET(int, "AreaStartLin");
 
-		ftmp = GETDEF(float, "Orbit_Radius", 6610684);
-		if (ftmp != 6610684)
+		ftmp = GETDEF(float, "Orbit_Radius", ORBIT_RADIUS);
+		if (ftmp != ORBIT_RADIUS)
 		{
-			cerr << "Orbit_Radius should have been 6610684 but is " << ftmp << " instead: ignoring it." << endl;
-			ftmp = 6610684;
+			cerr << "Orbit_Radius should have been " << ORBIT_RADIUS << " but is " << ftmp << " instead: ignoring it." << endl;
+			ftmp = ORBIT_RADIUS;
 		}
 
 		ftmp = GETDEF(float, "Longitude", 0);

@@ -28,6 +28,7 @@
 #include <config.h>
 
 #include <msat/ExportNetCDF.h>
+#include <msat/proj/const.h>
 
 #include <netcdfcpp.h>
 
@@ -94,7 +95,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(ncf, "Line_Scale_Factor", img.line_res * exp2(16));
   ncfAddAttr(ncf, "Column_Offset", img.column_offset);
   ncfAddAttr(ncf, "Line_Offset", img.line_offset);
-  ncfAddAttr(ncf, "Orbit_Radius", 6610684);
+  ncfAddAttr(ncf, "Orbit_Radius", ORBIT_RADIUS);
   //if (! ncf.add_att("Orbit_Radius", pds.sh) ) return false;
   ncfAddAttr(ncf, "Longitude", 0);
   //if (! ncf.add_att("Longitude", pds.sublon) ) return false;
