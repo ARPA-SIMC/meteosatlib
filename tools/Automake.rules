@@ -22,13 +22,21 @@ bin_PROGRAMS += \
     tools/interpolate \
     tools/msat
 
-noinst_PROGRAMS += \
-    tools/msat
-
 tools_msat_LDADD = \
     msat/libmsat.la
 tools_msat_SOURCES = \
     tools/msat.cpp
+
+if HAVE_NETCDF
+bin_PROGRAMS += \
+    tools/msatgmt
+tools_msatgmt_LDADD = \
+    msat/libmsat.la \
+    -lnetcdf_c++ \
+    -lnetcdf
+tools_msatgmt_SOURCES = \
+    tools/msatgmt.cpp
+endif
 
 tools_interpolate_LDADD = \
     msat/libmsat.la
