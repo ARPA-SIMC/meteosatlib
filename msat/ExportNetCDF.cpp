@@ -100,7 +100,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(ncf, "Longitude", 0);
   //if (! ncf.add_att("Longitude", pds.sublon) ) return false;
   ncfAddAttr(ncf, "NortPolar", 1);
-  ncfAddAttr(ncf, "NorthSouth", 0);
+  ncfAddAttr(ncf, "NorthSouth", img.column_res >= 0 ? 1 : 0);
   ncfAddAttr(ncf, "title", img.historyPlusEvent("Exported to NetCDF").c_str());
   ncfAddAttr(ncf, "Institution", INSTITUTION);
   ncfAddAttr(ncf, "Type", TYPE);
