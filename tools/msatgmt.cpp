@@ -302,14 +302,10 @@ void ExportGMT(const GMTExportOptions& opts, const Image& img, const std::string
 	for (int x = 0; x < opts.xsize(); ++x)
 		lons[x] = opts.lon(x);
 
-	cerr << "A1" << endl;
-
   NcDim *londim = ncf.add_dim("lon", opts.xsize());
   if (!londim->is_valid()) throw std::runtime_error("adding lon dimension failed");
   NcDim *latdim = ncf.add_dim("lat", opts.ysize());
   if (!latdim->is_valid()) throw std::runtime_error("adding lat dimension failed");
-
-	cerr << "A2" << endl;
 
   NcVar *var = ncf.add_var("lon", ncFloat, londim);
   if (!var->is_valid()) throw std::runtime_error("adding lon variable failed");
@@ -320,16 +316,12 @@ void ExportGMT(const GMTExportOptions& opts, const Image& img, const std::string
   if (!var->put(lons, opts.xsize()))
 		throw std::runtime_error("writing longitude values failed");
 
-	cerr << "A3" << endl;
-
   var = ncf.add_var("lat", ncFloat, latdim);
   if (!var->is_valid()) throw std::runtime_error("adding lat variable failed");
 	ncfAddAttr(*var, "long_name", "latitude");
 	ncfAddAttr(*var, "units", "degrees_north");
   if (!var->put(lats, opts.ysize()))
 		throw std::runtime_error("writing latitude values failed");
-
-	cerr << "A4" << endl;
 
   var = ncf.add_var(channelstring.c_str(), ncFloat, latdim, londim);
   if (!var->is_valid()) throw std::runtime_error("adding " + channelstring + " variable failed");
