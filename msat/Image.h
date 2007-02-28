@@ -108,6 +108,11 @@ public:
 	char quality;
 
 	/**
+	 * Extra name, such as product name for multi-product images
+	 */
+	std::string extraName;
+
+	/**
 	 * History of this image, as comma-separated descriptions of events,
 	 * earliest first
 	 */

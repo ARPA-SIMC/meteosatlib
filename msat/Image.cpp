@@ -372,8 +372,11 @@ std::string Image::spacecraftName(int hritID)
     case MSG_GMS_6: return "GMS6";
     case MSG_MTSAT_1: return "MTSAT1";
     case MSG_MTSAT_2: return "MTSAT2";
+		default:
+			stringstream str;
+			str << "unknown" << hritID;
+			return str.str();
   }
-	return "unknown";
 }
 
 // Reimplemented here to be able to link without libhrit in case it's disabled
@@ -382,7 +385,10 @@ std::string Image::sensorName(int hritSpacecraftID)
 	switch (hritSpacecraftID)
 	{
 		case MSG_MSG_1: return "Seviri";
-		default: return "unknown";
+		default:
+			stringstream str;
+			str << "unknown" << hritSpacecraftID;
+			return str.str();
 	}
 }
 
@@ -408,7 +414,9 @@ std::string Image::channelName(int hritSpacecraftID, int channelID)
 			case MSG_SEVIRI_1_5_HRV:			return "HRV";
 		}
 	}
-	return "unknown";
+	stringstream str;
+	str << "unknown" << hritSpacecraftID << "_" << channelID;
+	return str.str();
 }
 
 std::string Image::defaultFilename() const
@@ -431,10 +439,12 @@ std::string Image::defaultFilename() const
 	char datestring[15];
 	snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", year, month, day, hour, minute);
 
+	string extra = extraName.empty() ? "" : "-" + extraName;
+
 	if (quality == '_')
-		return spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
+		return spacecraft + "_" + sensor + "_" + channel + extra + "_channel_" + datestring;
 	else
-		return string() + quality + "_" + spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
+		return string() + quality + "_" + spacecraft + "_" + sensor + "_" + channel + extra + "_channel_" + datestring;
 }
 
 std::auto_ptr<Image> Image::rescaled(size_t width, size_t height) const
