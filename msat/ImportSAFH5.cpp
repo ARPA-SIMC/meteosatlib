@@ -126,10 +126,13 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	img->spacecraft_id = Image::spacecraftIDFromHRIT(readIntAttribute(group, "GP_SC_ID"));
 	img->column_res = readIntAttribute(group, "CFAC") * exp2(-16); 
 	img->line_res = readIntAttribute(group, "LFAC") * exp2(-16);
-	img->column_offset = readIntAttribute(group, "COFF");
-	img->line_offset = readIntAttribute(group, "LOFF");
-	img->x0 = 1856 - img->column_offset + 1;
-	img->y0 = 1856 - img->line_offset + 1;
+	// SAF COFF and LOFF represent the distance in pixels from the top-left
+	// cropped image point to the subsatellite point, increasing with increasing
+	// latitudes and increasing longitudes
+	img->column_offset = 1856;
+	img->line_offset = 1856;
+	img->x0 = 1856 - readIntAttribute(group, "COFF") + 1;
+	img->y0 = 1856 - readIntAttribute(group, "LOFF") + 1;
 	img->extraName = name;
 
   // Read image metadata

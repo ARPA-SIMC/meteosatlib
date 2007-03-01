@@ -13,7 +13,7 @@ struct SAFChannelInfo
 	int channelID;
 	float slope;
 	float offset;
-	int bpp;
+	size_t bpp;
 };
 
 std::string readStringAttribute(const H5::H5Object& dataGroup, const std::string& name);
