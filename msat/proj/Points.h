@@ -121,7 +121,7 @@ struct MapBox : public Box<MapPoint>
   }
   bool isNonZero() const
   {
-    return this->topLeft.lat != 0 && this->topLeft.lon != 0 && this->bottomRight.lat != 0 && this->bottomRight.lon != 0;
+    return this->topLeft.lat != 0 || this->topLeft.lon != 0 || this->bottomRight.lat != 0 || this->bottomRight.lon != 0;
   }
   MapBox() {}
   MapBox(const MapPoint& topLeft, const MapPoint& bottomRight) : Box<MapPoint>(topLeft, bottomRight) {}

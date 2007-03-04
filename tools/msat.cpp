@@ -35,6 +35,7 @@
 #include <msat/ExportGRIB.h>
 #include <msat/ExportNetCDF.h>
 #include <msat/ExportNetCDF24.h>
+#include <msat/ExportGDTNetCDF.h>
 #include <msat/Progress.h>
 
 #ifdef HAVE_MAGICKPP
@@ -69,6 +70,7 @@ void do_help(const char* argv0, ostream& out)
 #ifdef HAVE_HDF5
       << "  --netcdf         Convert to NetCDF." << endl
       << "  --netcdf24       Convert to NetCDF24." << endl
+      << "  --gdt            Convert to NetCDF using GDT conventions." << endl
 #endif
 #ifdef HAVE_MAGICKPP
       << "  --jpg            Convert to JPEG." << endl
@@ -82,15 +84,16 @@ void do_help(const char* argv0, ostream& out)
       << "Formats supported are:"
 			<< endl
 #ifdef HAVE_NETCDF
-      << " NetCDF    Import/Export" << endl
-      << " NetCDF24  Import/Export" << endl
+      << " NetCDF     Import/Export" << endl
+      << " NetCDF24   Import/Export" << endl
+      << " GDT/NetCDF Export only" << endl
 #endif
-      << " Grib      Import/Export" << endl
+      << " Grib       Import/Export" << endl
 #ifdef HAVE_HDF5
-      << " SAFH5     Import only" << endl
+      << " SAFH5      Import only" << endl
 #endif
 #ifdef HAVE_HRIT
-      << " XRIT      Import only" << endl
+      << " XRIT       Import only" << endl
 #endif
 			<< endl
 			<< "Examples:" << endl
@@ -117,7 +120,7 @@ void usage(char *pname)
 
 enum Action { VIEW, DUMP, GRIB
 #ifdef HAVE_NETCDF
-	, NETCDF, NETCDF24
+	, NETCDF, NETCDF24, GDT
 #endif
 #ifdef HAVE_MAGICKPP
 	, JPG, PNG, DISPLAY
@@ -163,6 +166,7 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 #ifdef HAVE_NETCDF
 		case NETCDF: return createNetCDFExporter();
 		case NETCDF24: return createNetCDF24Exporter();
+		case GDT: return createGDTNetCDFExporter();
 #endif
 #ifdef HAVE_MAGICKPP
 		case JPG: return createImageExporter("jpg");
@@ -173,27 +177,33 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 	return auto_ptr<ImageConsumer>(0);
 }
 
+#include <msat/proj/Latlon.h>
 #include <msat/proj/Mercator.h>
 #include <msat/proj/Polar.h>
 #include <msat/proj/Geos.h>
 #include <msat/proj/const.h>
 struct Reprojector : public ImageConsumer
 {
-	int width;
-	int height;
+	size_t width;
+	size_t height;
+	proj::MapBox& box;
+	proj::Projection& projection;
 	ImageConsumer& next;
 
-	Reprojector(size_t width, size_t height, ImageConsumer& next) :
-		width(width), height(height), next(next) {}
+	Reprojector(size_t width, size_t height,
+							proj::MapBox& box, proj::Projection& projection,
+							ImageConsumer& next) :
+		width(width), height(height), box(box), projection(projection), next(next) {}
 
 	virtual void processImage(std::auto_ptr<Image> image)
 	{
-		proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(10, 50));
-		std::auto_ptr<proj::Projection> pr(new proj::Mercator);
+		//proj::MapBox box(proj::MapPoint(60,-10), proj::MapPoint(10, 50));
+		//std::auto_ptr<proj::Projection> pr(new proj::Mercator);
 		//proj::MapBox box(proj::MapPoint(70,-40), proj::MapPoint(10, 40));
 		//std::auto_ptr<proj::Projection> pr(new proj::Polar(20.0, true));
 		//std::auto_ptr<proj::Projection> pr(new proj::Geos(0, ORBIT_RADIUS));
 
+		std::auto_ptr<proj::Projection> pr(projection.clone());
 		std::auto_ptr<Image> projected = image->reproject(width, height, pr, box);
 		next.processImage(projected);
 	}
@@ -223,9 +233,15 @@ int main( int argc, char* argv[] )
 {
 	// Defaults to view
   Action action = VIEW;
+	// Crop rectangle in pixels
 	proj::ImageBox imgArea;
+	// Crop rectangle in lat-lon coordinates
 	proj::MapBox geoArea;
+	// Rescaling new image width and height
 	size_t newWidth = 0, newHeight = 0;
+	// Target projection of a reprojection
+	std::auto_ptr<proj::Projection> projection;
+	// Should we be verbose?
 	bool quiet = false;
 
   static struct option longopts[] = {
@@ -238,6 +254,7 @@ int main( int argc, char* argv[] )
 #ifdef HAVE_NETCDF
 		{ "netcdf",	0, NULL, 'N' },
 		{ "netcdf24",	0, NULL, '2' },
+		{ "gdt",	0, NULL, 'g' },
 #endif
 #ifdef HAVE_MAGICKPP
 		{ "jpg",	0, NULL, 'j' },
@@ -248,12 +265,13 @@ int main( int argc, char* argv[] )
 		{ "Area", 1, 0, 'A' },
 		{ "around", 1, 0, 'C' },
 		{ "resize", 1, 0, 'r' },
+		{ "reproject", 1, 0, 'R' },
 		{ 0, 0, 0, 0 },
   };
 
   bool done = false;
   while (!done) {
-    int c = getopt_long(argc, argv, "q", longopts, (int*)0);
+    int c = getopt_long(argc, argv, "qR:", longopts, (int*)0);
     switch (c) {
       case 'H':	// --help
 				do_help(argv[0], cout);
@@ -279,6 +297,9 @@ int main( int argc, char* argv[] )
 				break;
       case '2': // --netcdf24
 				action = NETCDF24;
+				break;
+      case 'g': // --netcdf24
+				action = GDT;
 				break;
 #endif
 #ifdef HAVE_MAGICKPP
@@ -339,6 +360,50 @@ int main( int argc, char* argv[] )
 				}
 				break;
 			}
+			case 'R': {
+				// Reproject.  The reprojection specification is in optarg.
+
+				// Tokenize optarg
+				vector<string> args;
+				size_t start = 0, tend = 0, end = strlen(optarg);
+				while (start < end)
+				{
+					tend = start + strcspn(optarg+start, ":");
+					if (tend != start)
+						args.push_back(string(optarg, start, tend-start));
+					start = tend + strspn(optarg+tend, ":");
+				}
+				if (args.empty())
+					throw std::runtime_error("no projection name given to -R/--reproject");
+
+				// Get the projection name from the first element and create the
+				// reprojecting consumer
+				if (args[0] == "mercator")
+				{
+					projection.reset(new proj::Mercator);
+				} else if (args[0] == "latlon") {
+					projection.reset(new proj::Latlon);
+				} else if (args[0] == "polar") {
+					if (args.size() != 3)
+						throw std::runtime_error("polar projections is specified as polar:central meridian:N or S");
+					char ns = tolower(args[2][0]);
+					if (ns != 'n' && ns != 's')
+						throw std::runtime_error(string("the second projection parameter should be N or S, not ") + ns + " (polar projections is specified as polar:central meridian:N or S)");
+					double lon = strtod(args[1].c_str(), NULL);
+					bool north = ns == 'n';
+					projection.reset(new proj::Polar(lon, north));
+				} else if (args[0] == "geos") {
+					double sublon = 0;
+					double orbitradius = ORBIT_RADIUS;
+					if (args.size() > 1)
+						sublon = strtod(args[1].c_str(), NULL);
+					if (args.size() > 2)
+						orbitradius = strtod(args[2].c_str(), NULL);
+					projection.reset(new proj::Geos(sublon, orbitradius));
+				} else
+					throw std::runtime_error(args[0] + " is an unsupported (or misspelled) projection");
+			  break;
+		  }		
       case -1:
 				done = true;
 				break;
@@ -358,6 +423,12 @@ int main( int argc, char* argv[] )
 	if (!quiet)
 		Progress::get().setHandler(new StreamProgressHandler(cerr));
 
+	// Extra consistency checks
+	if (projection.get() != 0 && (newWidth == 0 || newHeight == 0))
+		throw std::runtime_error("when reprojecting, you need to also specify width and height with --resize");
+	if (projection.get() != 0 && !geoArea.isNonZero())
+		throw std::runtime_error("when reprojecting, you need to also specify the target area with --Area");
+
   try
   {
 		for (int i = optind; i < argc; ++i)
@@ -369,14 +440,19 @@ int main( int argc, char* argv[] )
 				continue;
 			}
 			importer->cropImgArea = imgArea;
-			importer->cropGeoArea = geoArea;
+			if (projection.get() == 0)
+				importer->cropGeoArea = geoArea;
 			std::auto_ptr<ImageConsumer> consumer = getExporter(action);
 			if (newWidth != 0 && newHeight != 0)
 			{
-				//Reprojector reproj(newWidth, newHeight, *consumer);
-				//importer->read(reproj);
-				Resampler resampler(newWidth, newHeight, *consumer);
-				importer->read(resampler);
+				if (projection.get() != 0)
+				{
+					Reprojector reproj(newWidth, newHeight, geoArea, *projection, *consumer);
+					importer->read(reproj);
+				} else {
+					Resampler resampler(newWidth, newHeight, *consumer);
+					importer->read(resampler);
+				}
 			} else
 				importer->read(*consumer);
 		}

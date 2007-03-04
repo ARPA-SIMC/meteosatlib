@@ -30,6 +30,7 @@ nodist_msat_include_HEADERS = \
 dist_msat_include_HEADERS = \
     msat/Image.h \
     msat/Image.tcc \
+    msat/ExportGDTNetCDF.h \
     msat/ExportGRIB.h \
     msat/ExportNetCDF.h \
     msat/ExportNetCDF24.h \
@@ -48,6 +49,7 @@ msat_proj_includedir = \
 dist_msat_proj_include_HEADERS = \
     msat/proj/const.h \
     msat/proj/Geos.h \
+    msat/proj/Latlon.h \
     msat/proj/Mercator.h \
     msat/proj/Points.h \
     msat/proj/Polar.h \
@@ -71,6 +73,7 @@ msat_libmsat_la_SOURCES = \
 
 msat_proj_libproj_la_SOURCES = \
     msat/proj/Geos.cpp \
+    msat/proj/Latlon.cpp \
     msat/proj/Mercator.cpp \
     msat/proj/Polar.cpp
 
@@ -89,7 +92,8 @@ msat_libmsat_la_SOURCES += \
     msat/ImportNetCDF.cpp \
     msat/ExportNetCDF.cpp \
     msat/ImportNetCDF24.cpp \
-    msat/ExportNetCDF24.cpp
+    msat/ExportNetCDF24.cpp \
+    msat/ExportGDTNetCDF.cpp
 endif
 
 if HDF5
