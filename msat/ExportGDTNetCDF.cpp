@@ -334,7 +334,7 @@ public:
 	GDTNetCDFExporter(/*const GDTExportOptions& opts*/) /*: opts(opts)*/ {}
 	virtual void processImage(auto_ptr<Image> img)
 	{
-		ExportGDTNetCDF(/*opts,*/ *img, img->defaultFilename() + ".grd");
+		ExportGDTNetCDF(/*opts,*/ *img, img->defaultFilename + ".grd");
 	}
 };
 

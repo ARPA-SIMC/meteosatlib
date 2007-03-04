@@ -176,7 +176,7 @@ void ExportImage(const Image& img, const std::string& fileName)
 
 void DisplayImage(const Image& img)
 {
-	ProgressTask p("Displaying image " + img.defaultFilename());
+	ProgressTask p("Displaying image " + img.defaultFilename);
 	auto_ptr<Magick::Image> image = imageToMagick(p, img);
 	p.activity("Displaying image");
 	image->display();
@@ -191,7 +191,7 @@ public:
 	ImageExporter(const std::string& format) : format(format) {}
 	virtual void processImage(auto_ptr<Image> img)
 	{
-		ExportImage(*img, img->defaultFilename() + "." + format);
+		ExportImage(*img, img->defaultFilename + "." + format);
 	}
 };
 

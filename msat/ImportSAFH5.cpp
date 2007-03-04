@@ -176,6 +176,18 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 			cerr << "Warning: bpp for image (" << img->data->bpp << ") is more than the usual one (" << ci->bpp << ")" << endl;
 	}
 
+
+	// Output file name should be SAF_{REGION_NAME}_{nome dataset}_{date}.nc
+	string regionName;
+	try {
+		regionName = readStringAttribute(group, "REGION_NAME");
+	} catch (...) {
+		regionName = "unknown";
+	}
+	char datestring[15];
+	snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", img->year, img->month, img->day, img->hour, img->minute);
+  img->defaultFilename = "SAF_" + regionName + "_" + name + "_" + datestring;
+
   return img;
 }
 

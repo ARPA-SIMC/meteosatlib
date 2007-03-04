@@ -159,7 +159,7 @@ class NetCDFExporter : public ImageConsumer
 public:
 	virtual void processImage(auto_ptr<Image> img)
 	{
-		ExportNetCDF(*img, img->defaultFilename() + ".nc");
+		ExportNetCDF(*img, img->defaultFilename + ".nc");
 	}
 };
 

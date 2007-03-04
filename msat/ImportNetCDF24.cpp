@@ -34,6 +34,7 @@
 #include <netcdfcpp.h>
 
 #include <msat/Image.h>
+#include <msat/ImportUtils.h>
 #include "proj/const.h"
 #include "proj/Geos.h"
 #include <grib/GRIB.h>
@@ -85,8 +86,6 @@ class NetCDF24ImageImporter : public ImageImporter
 	void readHeader(Image& img)
 	{
 		NcAtt* a;
-		int tmp;
-		float ftmp;
 		std::string stmp;
 
 #define GET(type, name) \
@@ -178,7 +177,8 @@ public:
 				case ncFloat:  readData<float>(*var, *img);  img->data->scalesToInt = false; break;
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
-			img->addToHistory("Imported from NetCDF24 " + img->defaultFilename() + " variable " + var->name());
+			img->defaultFilename = util::satelliteSingleImageFilename(*img);
+			img->addToHistory("Imported from NetCDF24 " + img->defaultFilename + " variable " + var->name());
 			computeBPP(*img->data);
 			cropIfNeeded(*img);
 			output.processImage(img);

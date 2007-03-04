@@ -24,6 +24,7 @@
 //---------------------------------------------------------------------------
 
 #include "msat/ImportXRIT.h"
+#include "msat/ImportUtils.h"
 #include "proj/const.h"
 #include "proj/Geos.h"
 #include <stdexcept>
@@ -559,6 +560,7 @@ public:
 	{
 		std::auto_ptr<Image> img = importXRIT(opts);
 		cropIfNeeded(*img);
+		img->defaultFilename = util::satelliteSingleImageFilename(*img);
 		img->addToHistory("Imported from HRIT " + opts.resolution + ' ' + opts.productid1 + ' ' + opts.productid2 + ' ' + opts.timing);
 		output.processImage(img);
 	}

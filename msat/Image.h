@@ -108,6 +108,11 @@ public:
 	char quality;
 
 	/**
+	 * Default file name (without extension) that can be used to store this image
+	 */
+	std::string defaultFilename;
+
+	/**
 	 * Extra name, such as product name for multi-product images
 	 */
 	std::string extraName;
@@ -178,12 +183,6 @@ public:
 	 * defined with the given geographical coordinates
 	 */
 	void cropByCoords(const proj::MapBox& area);
-
-	/**
-	 * Compute a meaningful default file name (without extension) that can be
-	 * used to store this image
-	 */
-	std::string defaultFilename() const;
 
 	/**
 	 * Return a new image scaled to the given width and height

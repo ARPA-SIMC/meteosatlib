@@ -40,6 +40,7 @@ dist_msat_include_HEADERS = \
     msat/ImportNetCDF.h \
     msat/ImportNetCDF24.h \
     msat/ImportXRIT.h \
+    msat/ImportUtils.h \
     msat/NetCDFUtils.h \
     msat/SAFH5Utils.h \
     msat/Progress.h
@@ -67,6 +68,7 @@ msat_libmsat_la_LIBADD = \
     msat/proj/libproj.la
 msat_libmsat_la_SOURCES = \
     msat/Image.cpp \
+    msat/ImportUtils.cpp \
     msat/ImportGRIB.cpp \
     msat/ExportGRIB.cpp \
     msat/Progress.cpp

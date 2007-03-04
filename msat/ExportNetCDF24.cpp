@@ -181,7 +181,7 @@ class NetCDF24Exporter : public ImageConsumer
 public:
 	virtual void processImage(auto_ptr<Image> img)
 	{
-		ExportNetCDF24(*img, img->defaultFilename() + ".nc");
+		ExportNetCDF24(*img, img->defaultFilename + ".nc");
 	}
 };
 

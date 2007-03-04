@@ -29,6 +29,7 @@
 #include "config.h"
 
 #include <msat/Image.h>
+#include <msat/ImportUtils.h>
 #include "proj/const.h"
 #include "proj/Geos.h"
 
@@ -167,6 +168,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 			std::cerr << "no local PDS extentions: using default satellite identifier 55." << endl;
 #endif
 
+  img->defaultFilename = util::satelliteSingleImageFilename(*img);
+
   return img;
 }
 
@@ -192,7 +195,7 @@ public:
 		{
 			auto_ptr<Image> img = importGrib(m);
 			img->setQualityFromPathname(filename);
-			img->addToHistory("Imported from GRIB " + img->defaultFilename());
+			img->addToHistory("Imported from GRIB " + img->defaultFilename);
 			cropIfNeeded(*img);
 			output.processImage(img);
 			++count;

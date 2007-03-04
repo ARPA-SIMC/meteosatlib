@@ -32,6 +32,7 @@
 #include <netcdfcpp.h>
 
 #include <msat/Image.h>
+#include <msat/ImportUtils.h>
 #include "proj/const.h"
 #include "proj/Geos.h"
 
@@ -194,7 +195,8 @@ public:
 				case ncFloat:  readData<float>(*var, *img);  img->data->scalesToInt = false; break;
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
-			img->addToHistory("Imported from NetCDF " + img->defaultFilename());
+			img->defaultFilename = util::satelliteSingleImageFilename(*img);
+			img->addToHistory("Imported from NetCDF " + img->defaultFilename);
 			computeBPP(*img->data);
 			cropIfNeeded(*img);
 			output.processImage(img);

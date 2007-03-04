@@ -223,7 +223,7 @@ public:
 	{
 		if (first)
 		{
-			std::string gribName = img->defaultFilename() + ".grb";
+			std::string gribName = img->defaultFilename + ".grb";
 			int ret = gf.OpenWrite(gribName);
 			if (ret != 0)
 				throw std::runtime_error(std::string("error writing grib file ") + gribName);
