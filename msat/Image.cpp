@@ -434,6 +434,7 @@ std::auto_ptr<Image> Image::rescaled(size_t width, size_t height) const
 
 	res->quality = quality;
 	res->history = history;
+	res->defaultFilename = defaultFilename;
 	std::stringstream str;
 	str << "scaled to " << width << "x" << height;
 	res->addToHistory(str.str());
@@ -508,6 +509,7 @@ std::auto_ptr<Image> Image::reproject(size_t width, size_t height, std::auto_ptr
 
 	res->quality = quality;
 	res->history = history;
+	res->defaultFilename = defaultFilename;
 	res->addToHistory("reprojected to " + res->proj->format());
 
 	res->data = data->createReprojected(width, height, ReprojectMapper(*this, *res));
