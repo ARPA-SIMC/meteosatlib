@@ -177,7 +177,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	}
 
 
-	// Output file name should be SAF_{REGION_NAME}_{nome dataset}_{date}.nc
+	// Output file name should be SAF_{REGION_NAME}_{nome dataset}_{date}.*
 	string regionName;
 	try {
 		regionName = readStringAttribute(group, "REGION_NAME");

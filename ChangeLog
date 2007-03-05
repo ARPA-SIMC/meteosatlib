@@ -1,3 +1,21 @@
+Mon Mar  5 12:55:30 2007 Enrico Zini <enrico@enricozini.org>
+
+MSAT:
+ * Implemented scaling of the the output image
+ * Implemented reprojecting image data using the internal projection library
+
+GDTNetCDF:
+ * Export regular latitude-longitude grid data in NetCDF using Coards and GDT
+   conventions (it allows to save data that can be read by GMT, the Generic
+   Mapping Tools)
+
+Image:
+ * Allow importers to specify the preferred default file name
+
+SAF:
+ * Set a preferred default file name with the format
+   SAF_{REGION_NAME}_{nome dataset}_{date}
+
 Wed Nov 22 12:07:30 2006 Enrico Zini <enrico@enricozini.org>
 
 	* Version 0.5
