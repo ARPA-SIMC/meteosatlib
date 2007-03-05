@@ -11,6 +11,7 @@ GDTNetCDF:
 
 Image:
  * Allow importers to specify the preferred default file name
+ * Handle regular lat-lon gridded data
 
 SAF:
  * Set a preferred default file name with the format
