@@ -64,7 +64,7 @@ static SampleOut* normalise(ProgressTask& p, SampleIn* data, SampleIn missing, s
 		if (data[i] == missing)
 			res[i] = std::numeric_limits<SampleOut>::min();
 		else
-			res[i] = static_cast<SampleOut>((data[i] - min) * std::numeric_limits<SampleOut>::max() / max);
+			res[i] = static_cast<SampleOut>((data[i] - min) * std::numeric_limits<SampleOut>::max() / (max - min));
 	}
 	return res;
 }
