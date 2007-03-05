@@ -80,8 +80,10 @@ void do_help(const char* argv0, ostream& out)
       << "  --area='x,dx,y,dy'  Crop the source image(s) to the given area." << endl
       << "  --Area='latmin,latmax,lonmin,lonmax'  Crop the source image(s) to the given coordinates." << endl
       << "  --around='lat,lon,lath,lonw'  Create an image centered at the given location and with the given width and height." << endl
+			<< "  --resize='columns,lines'  Scale the output image to the given size." << endl
+			<< "  -R,--reproject='proj:parms'  Reproject the image data (see below for the available projections)." << endl
 		  << endl
-      << "Formats supported are:"
+      << "Formats supported are:" << endl
 			<< endl
 #ifdef HAVE_NETCDF
       << " NetCDF     Import/Export" << endl
@@ -95,6 +97,13 @@ void do_help(const char* argv0, ostream& out)
 #ifdef HAVE_HRIT
       << " XRIT       Import only" << endl
 #endif
+			<< endl
+			<< "Available projections are:" << endl
+			<< endl
+			<< " mercator                          Mercator" << endl
+			<< " polar:central meridian:N or S     Polar" << endl
+			<< " geos[:subsat lon[:orbit radius]]  Geostationary view" << endl
+			<< " latlon                            Regular grid" << endl
 			<< endl
 			<< "Examples:" << endl
 			<< endl
