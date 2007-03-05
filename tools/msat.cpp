@@ -113,6 +113,8 @@ void do_help(const char* argv0, ostream& out)
 			<< " $ msat --display --Area=30,60,-10,40 file.grb" << endl
 			<< " $ msat --jpg file.grb" << endl
 			<< " $ msat --grib dir/H:MSG1:HRV:200611130800" << endl
+			<< " $ msat --png --reproject=mercator --Area=10,60,-10,40 --resize=200,200 dir/H:MSG1:HRV:200611130800" << endl
+			<< " $ msat --gdt --reproject=latlon --Area=10,60,-10,40 --resize=200,200 dir/H:MSG1:HRV:200611130800" << endl
 			<< endl
 			<< "Report bugs to " << PACKAGE_BUGREPORT << endl;
 			;
