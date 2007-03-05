@@ -31,6 +31,7 @@ dist_msat_include_HEADERS = \
     msat/Image.h \
     msat/Image.tcc \
     msat/ExportGDTNetCDF.h \
+    msat/ExportRepNetCDF.h \
     msat/ExportGRIB.h \
     msat/ExportNetCDF.h \
     msat/ExportNetCDF24.h \
@@ -95,7 +96,8 @@ msat_libmsat_la_SOURCES += \
     msat/ExportNetCDF.cpp \
     msat/ImportNetCDF24.cpp \
     msat/ExportNetCDF24.cpp \
-    msat/ExportGDTNetCDF.cpp
+    msat/ExportGDTNetCDF.cpp \
+    msat/ExportRepNetCDF.cpp
 endif
 
 if HDF5

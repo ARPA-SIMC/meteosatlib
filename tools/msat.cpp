@@ -36,6 +36,7 @@
 #include <msat/ExportNetCDF.h>
 #include <msat/ExportNetCDF24.h>
 #include <msat/ExportGDTNetCDF.h>
+#include <msat/ExportRepNetCDF.h>
 #include <msat/Progress.h>
 
 #ifdef HAVE_MAGICKPP
@@ -71,6 +72,7 @@ void do_help(const char* argv0, ostream& out)
       << "  --netcdf         Convert to NetCDF." << endl
       << "  --netcdf24       Convert to NetCDF24." << endl
       << "  --gdt            Convert to NetCDF using GDT conventions." << endl
+      << "  --repnetcdf      Convert to Met_Reproj-style NetCDF." << endl
 #endif
 #ifdef HAVE_MAGICKPP
       << "  --jpg            Convert to JPEG." << endl
@@ -89,6 +91,7 @@ void do_help(const char* argv0, ostream& out)
       << " NetCDF     Import/Export" << endl
       << " NetCDF24   Import/Export" << endl
       << " GDT/NetCDF Export only" << endl
+      << " Rep/NetCDF Export only" << endl
 #endif
       << " Grib       Import/Export" << endl
 #ifdef HAVE_HDF5
@@ -129,7 +132,7 @@ void usage(char *pname)
 
 enum Action { VIEW, DUMP, GRIB
 #ifdef HAVE_NETCDF
-	, NETCDF, NETCDF24, GDT
+	, NETCDF, NETCDF24, GDT, REPNETCDF
 #endif
 #ifdef HAVE_MAGICKPP
 	, JPG, PNG, DISPLAY
@@ -176,6 +179,7 @@ std::auto_ptr<ImageConsumer> getExporter(Action action)
 		case NETCDF: return createNetCDFExporter();
 		case NETCDF24: return createNetCDF24Exporter();
 		case GDT: return createGDTNetCDFExporter();
+		case REPNETCDF: return createRepNetCDFExporter();
 #endif
 #ifdef HAVE_MAGICKPP
 		case JPG: return createImageExporter("jpg");
@@ -264,6 +268,7 @@ int main( int argc, char* argv[] )
 		{ "netcdf",	0, NULL, 'N' },
 		{ "netcdf24",	0, NULL, '2' },
 		{ "gdt",	0, NULL, 'g' },
+		{ "repnetcdf",	0, NULL, '3' },
 #endif
 #ifdef HAVE_MAGICKPP
 		{ "jpg",	0, NULL, 'j' },
@@ -307,8 +312,11 @@ int main( int argc, char* argv[] )
       case '2': // --netcdf24
 				action = NETCDF24;
 				break;
-      case 'g': // --netcdf24
+      case 'g': // --gdt
 				action = GDT;
+				break;
+      case '3': // --repnetcdf
+				action = REPNETCDF;
 				break;
 #endif
 #ifdef HAVE_MAGICKPP

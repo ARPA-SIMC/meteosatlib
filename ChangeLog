@@ -9,6 +9,10 @@ GDTNetCDF:
    conventions (it allows to save data that can be read by GMT, the Generic
    Mapping Tools)
 
+RepNetCDF:
+ * Export regular latitude-longitude grid data in NetCDF format using the same
+   NetCDF output format as Met_Reproj
+
 Image:
  * Allow importers to specify the preferred default file name
  * Handle regular lat-lon gridded data

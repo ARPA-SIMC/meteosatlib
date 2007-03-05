@@ -341,7 +341,7 @@ public:
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0 || (unsigned)nx > columns || (unsigned)nx > lines)
+				if (nx < 0 || ny < 0 || (unsigned)nx > columns || (unsigned)ny > lines)
 					res->pixels[y*width+x] = missing;
 				else
 					res->pixels[y*width+x] = pixels[ny*columns+nx];

@@ -106,7 +106,7 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(ncf, "Type", TYPE);
   ncfAddAttr(ncf, "Version", PACKAGE_VERSION);
   ncfAddAttr(ncf, "Conventions", "COARDS");
-  ncfAddAttr(ncf, "history", "Created from SAF HDF5 data");
+  ncfAddAttr(ncf, "history", img.history.c_str());
 
   // Dimensions
   //cerr << "dimensions." << endl;
