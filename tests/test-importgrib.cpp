@@ -55,7 +55,7 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_similar(img.line_res, Image::columnResFromSeviriDX(3608), 0.00001);
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
-	gen_ensure_equals(img.defaultFilename(), "MSG1_Seviri_unknown_channel_20060426_1945");
+	gen_ensure_equals(img.defaultFilename, "MSG1_Seviri_unknown_channel_20060426_1945");
 }
 
 static void checkFullImageData(Image& img)

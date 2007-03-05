@@ -134,7 +134,7 @@ void to::test<2>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = imgs.shift();
 
-	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_res, 40927014*exp2(-16));
@@ -166,7 +166,7 @@ void to::test<3>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = imgs.shift();
 
-	gen_ensure_equals(img->defaultFilename(), "H_MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_res, 40927014*exp2(-16));
@@ -192,7 +192,7 @@ void to::test<4>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
@@ -220,7 +220,7 @@ void to::test<5>()
 
 	std::auto_ptr<Image> img = recodeThroughGrib(*origimg);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
@@ -250,7 +250,7 @@ void to::test<6>()
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughNetCDF24(*img);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -276,7 +276,7 @@ void to::test<7>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF24(*imgs[0]);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
@@ -305,7 +305,7 @@ void to::test<8>()
 	std::auto_ptr<Image> img = importXRIT(opts);
 	img = recodeThroughNetCDF(*img);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_factor, 40927014);
@@ -331,7 +331,7 @@ void to::test<9>()
 	gen_ensure_equals(imgs.size(), 1u);
 	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
 
-	gen_ensure_equals(img->defaultFilename(), "MSG1_Seviri_HRV_channel_20061114_1200");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
 	gen_ensure_equals(img->column_res, 40927014*exp2(-16));
