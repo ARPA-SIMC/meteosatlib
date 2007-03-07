@@ -30,12 +30,13 @@ namespace proj {
 
 class Latlon : public Projection
 {
+	double latmin, lonmin;
 public:
-	Latlon() {}
+	Latlon(double latmin, double lonmin) : latmin(latmin), lonmin(lonmin) {}
 	virtual void mapToProjected(const MapPoint& m, ProjectedPoint& p) const;
 	virtual void projectedToMap(const ProjectedPoint& p, MapPoint& m) const;
 	virtual std::string format() const { return "Latlon"; }
-	Projection* clone() const { return new Latlon(); }
+	Projection* clone() const { return new Latlon(latmin, lonmin); }
 };
 
 }

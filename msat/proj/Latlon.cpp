@@ -29,14 +29,14 @@ namespace proj {
 
 void Latlon::mapToProjected(const MapPoint& m, ProjectedPoint& p) const
 {
-  p.x = m.lon;
-  p.y = m.lat;
+  p.x = m.lon - lonmin;
+  p.y = m.lat - latmin;
 }
 
 void Latlon::projectedToMap(const ProjectedPoint& p, MapPoint& m) const
 {
-  m.lon = p.x;
-  m.lat = p.y;
+  m.lon = p.x + lonmin;
+  m.lat = p.y + latmin;
 }
 
 }

@@ -132,6 +132,22 @@ void usage(char *pname)
   return;
 }
 
+vector<string> split(const std::string& str, char sep)
+{
+	vector<string> res;
+
+	string::const_iterator s = str.begin();
+	for (string::const_iterator i = str.begin(); i != str.end(); ++i)
+	{
+		if (*i != sep) continue;
+		res.push_back(string(s, i));
+		s = i + 1;
+	}
+	if (s != str.end())
+			res.push_back(string(s, str.end()));
+	return res;
+}
+
 enum Action { VIEW, DUMP, GRIB
 #ifdef HAVE_NETCDF
 	, NETCDF, NETCDF24, GDT, REPNETCDF
@@ -254,6 +270,8 @@ int main( int argc, char* argv[] )
 	proj::MapBox geoArea;
 	// Rescaling new image width and height
 	size_t newWidth = 0, newHeight = 0;
+	// Reprojection description string
+	std::string projdesc;
 	// Target projection of a reprojection
 	std::auto_ptr<proj::Projection> projection;
 	// Should we be verbose?
@@ -381,46 +399,7 @@ int main( int argc, char* argv[] )
 			}
 			case 'R': {
 				// Reproject.  The reprojection specification is in optarg.
-
-				// Tokenize optarg
-				vector<string> args;
-				size_t start = 0, tend = 0, end = strlen(optarg);
-				while (start < end)
-				{
-					tend = start + strcspn(optarg+start, ":");
-					if (tend != start)
-						args.push_back(string(optarg, start, tend-start));
-					start = tend + strspn(optarg+tend, ":");
-				}
-				if (args.empty())
-					throw std::runtime_error("no projection name given to -R/--reproject");
-
-				// Get the projection name from the first element and create the
-				// reprojecting consumer
-				if (args[0] == "mercator")
-				{
-					projection.reset(new proj::Mercator);
-				} else if (args[0] == "latlon") {
-					projection.reset(new proj::Latlon);
-				} else if (args[0] == "polar") {
-					if (args.size() != 3)
-						throw std::runtime_error("polar projections is specified as polar:central meridian:N or S");
-					char ns = tolower(args[2][0]);
-					if (ns != 'n' && ns != 's')
-						throw std::runtime_error(string("the second projection parameter should be N or S, not ") + ns + " (polar projections is specified as polar:central meridian:N or S)");
-					double lon = strtod(args[1].c_str(), NULL);
-					bool north = ns == 'n';
-					projection.reset(new proj::Polar(lon, north));
-				} else if (args[0] == "geos") {
-					double sublon = 0;
-					double orbitradius = ORBIT_RADIUS;
-					if (args.size() > 1)
-						sublon = strtod(args[1].c_str(), NULL);
-					if (args.size() > 2)
-						orbitradius = strtod(args[2].c_str(), NULL);
-					projection.reset(new proj::Geos(sublon, orbitradius));
-				} else
-					throw std::runtime_error(args[0] + " is an unsupported (or misspelled) projection");
+				projdesc = optarg;
 			  break;
 		  }		
       case -1:
@@ -443,10 +422,44 @@ int main( int argc, char* argv[] )
 		Progress::get().setHandler(new StreamProgressHandler(cerr));
 
 	// Extra consistency checks
-	if (projection.get() != 0 && (newWidth == 0 || newHeight == 0))
+	if (projdesc.size() != 0 && (newWidth == 0 || newHeight == 0))
 		throw std::runtime_error("when reprojecting, you need to also specify width and height with --resize");
-	if (projection.get() != 0 && !geoArea.isNonZero())
+	if (projdesc.size() != 0 && !geoArea.isNonZero())
 		throw std::runtime_error("when reprojecting, you need to also specify the target area with --Area");
+
+	// Parse projdesc
+
+	// Tokenize projdesc
+	vector<string> args = split(projdesc, ':');
+	if (args.empty())
+		throw std::runtime_error("no projection name given to -R/--reproject");
+
+	// Get the projection name from the first element and create the
+	// reprojecting consumer
+	if (args[0] == "mercator")
+	{
+		projection.reset(new proj::Mercator);
+	} else if (args[0] == "latlon") {
+		projection.reset(new proj::Latlon(geoArea.bottomRight.lat, geoArea.topLeft.lon));
+	} else if (args[0] == "polar") {
+		if (args.size() != 3)
+			throw std::runtime_error("polar projections is specified as polar:central meridian:N or S");
+		char ns = tolower(args[2][0]);
+		if (ns != 'n' && ns != 's')
+			throw std::runtime_error(string("the second projection parameter should be N or S, not ") + ns + " (polar projections is specified as polar:central meridian:N or S)");
+		double lon = strtod(args[1].c_str(), NULL);
+		bool north = ns == 'n';
+		projection.reset(new proj::Polar(lon, north));
+	} else if (args[0] == "geos") {
+		double sublon = 0;
+		double orbitradius = ORBIT_RADIUS;
+		if (args.size() > 1)
+			sublon = strtod(args[1].c_str(), NULL);
+		if (args.size() > 2)
+			orbitradius = strtod(args[2].c_str(), NULL);
+		projection.reset(new proj::Geos(sublon, orbitradius));
+	} else
+		throw std::runtime_error(args[0] + " is an unsupported (or misspelled) projection");
 
   try
   {
