@@ -337,7 +337,7 @@ public:
 		res->missingValue = missingValue;
 		res->missing = missing;
 		for (size_t y = 0; y < height; ++y)
-			for (size_t x = 0; x < height; ++x)
+			for (size_t x = 0; x < width; ++x)
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
@@ -421,7 +421,7 @@ public:
 		res->missingValue = this->missingValue;
 		res->missing = this->missing;
 		for (size_t y = 0; y < height; ++y)
-			for (size_t x = 0; x < height; ++x)
+			for (size_t x = 0; x < width; ++x)
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
