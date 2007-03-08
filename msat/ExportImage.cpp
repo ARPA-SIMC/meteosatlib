@@ -30,6 +30,7 @@
 #include <msat/ExportImage.h>
 #include <msat/ImportXRIT.h>
 #include <msat/Progress.h>
+#include <msat/proj/Latlon.h>
 
 #include <Magick++.h>
 
@@ -133,6 +134,10 @@ static std::auto_ptr<Magick::Image> imageToMagick(ProgressTask& p, const Image& 
 	}
 	else
 		throw std::runtime_error("Trying to create an image from an unknown kind of image data");
+
+	// If the image is a regular lat-lon grid, rotate it 180degrees
+	if (dynamic_cast<proj::Latlon*>(img.proj.get()))
+		image->flip();
 
 	return image;
 }
