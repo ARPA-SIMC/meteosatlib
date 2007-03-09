@@ -1,0 +1,51 @@
+#!/bin/sh -ue
+
+## Export collimating HRV and IR_016
+tools/msat --gdt --reproject=latlon --resize=400,300 --Area=36,39,12,16.5 tmp1/H:MSG1:HRV:200611130800
+tools/msat --gdt --reproject=latlon --resize=400,300 --Area=36,39,12,16.5 tmp1/H:MSG1:IR_016:200611130800
+
+FILE1=H_MSG1_Seviri_HRV_channel_20061113_0800.grd
+FILE2=H_MSG1_Seviri_IR_016_channel_20061113_0800.grd
+OUT=testsicily.ps
+
+GMT gmtset GRID_CROSS_SIZE 1 ANNOT_FONT_SIZE_PRIMARY 10
+
+GMT psbasemap -R12/16.5/36/39 -Jm1i -B0 -P -K -U"Sicily test" > $OUT
+GMT grdimage -Q -R $FILE1 -Cenrico.cpt -J -O -K >> $OUT
+GMT pscoast -R12/16.5/36/39 -Jm1i -O -K -Bg30 -Dl -Wlightgray >> $OUT
+echo 14.25 39.2 12 0 0 CM $FILE1 | \
+	GMT pstext -J -R -O -K -N >> $OUT
+
+GMT grdimage -Q -R $FILE2 -Y5i -Cenrico.cpt -J -O -K >> $OUT
+GMT pscoast -R12/16.5/36/39 -Jm1i -O -K -Bg30 -Dl -Wlightgray >> $OUT
+echo 14.25 39.2 12 0 0 CM $FILE2 | \
+	GMT pstext -J -R -O -N >> $OUT
+
+# No -K on the last one to close the graphic context
+
+
+## Export collimating HRV and IR_016
+tools/msat --gdt --reproject=latlon --resize=400,300 --Area=23,27,32,40 tmp1/H:MSG1:HRV:200611130800
+tools/msat --gdt --reproject=latlon --resize=400,300 --Area=23,27,32,40 tmp1/H:MSG1:IR_016:200611130800
+
+FILE1=H_MSG1_Seviri_HRV_channel_20061113_0800.grd
+FILE2=H_MSG1_Seviri_IR_016_channel_20061113_0800.grd
+OUT=testredsea.ps
+
+GMT gmtset GRID_CROSS_SIZE 1 ANNOT_FONT_SIZE_PRIMARY 10
+
+GMT psbasemap -R32/40/23/27 -Jm0.8i -B0 -P -K -U"Red sea test" > $OUT
+GMT grdimage -Q -R $FILE1 -Cenrico.cpt -J -O -K >> $OUT
+GMT pscoast -R -J -O -K -Bg30 -Dl -Wlightgray -Ir >> $OUT
+echo 35 27.3 12 0 0 CM $FILE1 | \
+	GMT pstext -J -R -O -K -N >> $OUT
+
+GMT grdimage -Q -R $FILE2 -Y5i -Cenrico.cpt -J -O -K >> $OUT
+GMT pscoast -R -J -O -K -Bg30 -Dl -Wlightgray -Ir >> $OUT
+echo 35 27.3 12 0 0 CM $FILE2 | \
+	GMT pstext -J -R -O -N >> $OUT
+
+rm -f .gmtcommands4 .gmtdefaults4
+
+exit 0
+
