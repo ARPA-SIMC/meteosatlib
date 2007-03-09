@@ -294,6 +294,8 @@ MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
 				return 0;
 			x -= LowerEastColumnActual;
 		}
+		//x -= 6;
+		//y -= 2;
 		pos = y * (origColumns - UpperEastColumnActual - 1) + x;
 	} else
 		pos = y * origColumns + x;
@@ -450,6 +452,16 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	//" UNLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
 
 #if 0
+	data->LowerEastColumnActual = 1;
+	data->LowerNorthLineActual = 8064;
+	data->LowerWestColumnActual = 5568;
+	//" LSLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
+	data->UpperEastColumnActual = 2064;
+	data->UpperSouthLineActual = 8065;
+	data->UpperWestColumnActual = 7631;
+#endif
+
+#if 0
 		cerr << " LSLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual - 1
 			   << " LNLA: " << data->LowerNorthLineActual
 			   << " LECA: " << data->LowerEastColumnActual
@@ -483,6 +495,10 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			// Decoding information
 			int totalsegs = header.segment_id->planned_end_segment_sequence_number;
 			int seglines = header.image_structure->number_of_lines;
+#if 0
+			cerr << "NCOL " << header.image_structure->number_of_columns << endl; 
+			cerr << "NLIN " << header.image_structure->number_of_lines << endl; 
+#endif
 			data->origColumns = header.image_structure->number_of_columns;
 			data->origLines = seglines * totalsegs;
 			data->npixperseg = data->origColumns * seglines;
@@ -503,10 +519,19 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			img->line_res = abs(header.image_navigation->line_scaling_factor) * exp2(-16);
 			if (data->hrv)
 			{
-				// Since we are omitting the first (11136-7631) of the rotated image,
-				// we need to shift the column offset accordingly
-				img->column_offset = 5566 - (11136 - 7630);
-				img->line_offset = 5566;
+				// Since we are omitting the first (11136-UpperWestColumnActual) of the
+				// rotated image, we need to shift the column offset accordingly
+				// FIXME: don't we have a way to compute this from the HRIT data?
+				img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
+				img->line_offset = 5568;
+#if 0
+				cerr << "COFF " << header.image_navigation->column_offset << endl;
+				cerr << "LOFF " << header.image_navigation->line_offset << endl;
+				cerr << "COFF " << header.image_navigation->COFF << endl;
+				cerr << "LOFF " << header.image_navigation->LOFF << endl;
+				cerr << "cCOFF " << img->column_offset << endl;
+				cerr << "cLOFF " << img->line_offset << endl;
+#endif
 			} else {
 				img->column_offset = header.image_navigation->column_offset;
 				img->line_offset = header.image_navigation->line_offset;
