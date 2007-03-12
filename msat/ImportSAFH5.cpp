@@ -187,6 +187,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", img->year, img->month, img->day, img->hour, img->minute);
   img->defaultFilename = "SAF_" + regionName + "_" + name + "_" + datestring;
   img->shortName = name;
+  img->unit = "NUMBER";
 
   return img;
 }

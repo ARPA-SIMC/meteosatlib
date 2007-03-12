@@ -411,6 +411,30 @@ std::string Image::channelName(int hritSpacecraftID, int channelID)
 	return str.str();
 }
 
+std::string Image::channelUnit(int hritSpacecraftID, int channelID)
+{
+	if (hritSpacecraftID == MSG_MSG_1)
+	{
+		switch (channelID)
+		{
+			case MSG_SEVIRI_NO_CHANNEL:		return "unknown";
+			case MSG_SEVIRI_1_5_VIS_0_6:	return "unknown";
+			case MSG_SEVIRI_1_5_VIS_0_8:	return "unknown";
+			case MSG_SEVIRI_1_5_IR_1_6:		return "unknown";
+			case MSG_SEVIRI_1_5_IR_3_9:		return "unknown";
+			case MSG_SEVIRI_1_5_WV_6_2:		return "unknown";
+			case MSG_SEVIRI_1_5_WV_7_3:		return "unknown";
+			case MSG_SEVIRI_1_5_IR_8_7:		return "unknown";
+			case MSG_SEVIRI_1_5_IR_9_7:		return "unknown";
+			case MSG_SEVIRI_1_5_IR_10_8:	return "unknown";
+			case MSG_SEVIRI_1_5_IR_12_0:	return "unknown";
+			case MSG_SEVIRI_1_5_IR_13_4:	return "unknown";
+			case MSG_SEVIRI_1_5_HRV:			return "unknown";
+		}
+	}
+	return "unknown";
+}
+
 std::auto_ptr<Image> Image::rescaled(size_t width, size_t height) const
 {
 	std::auto_ptr<Image> res(new Image());

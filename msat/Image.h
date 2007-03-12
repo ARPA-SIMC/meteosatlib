@@ -119,7 +119,7 @@ public:
 
 	/**
 	 * Measurement units for the scaled image samples, following COARDS
-	 * conventions
+	 * conventions, or "NUMBER" for pure numbers like palette indexes.
 	 */
 	std::string unit;
 
@@ -230,6 +230,9 @@ public:
 
 	/// Get the channel name from the given HRIT satellite ID and channel ID
 	static std::string channelName(int hritSpacecraftID, int channelID);
+
+	/// Get the measure unit name from the given HRIT satellite ID and channel ID
+	static std::string channelUnit(int hritSpacecraftID, int channelID);
 };
 
 /// Interface for image data of various types

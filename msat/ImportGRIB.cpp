@@ -132,6 +132,7 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 		unsigned char* pds = m.get_pds_values(0, 12);
 		img->spacecraft_id = (int)pds[9];
 		img->channel_id = ((int)pds[10] << 8) + (int)pds[11];
+		img->unit = Image::channelUnit(img->spacecraft_id, img->channel_id);
 		delete[] pds;
 	} else {
 		std::stringstream str;

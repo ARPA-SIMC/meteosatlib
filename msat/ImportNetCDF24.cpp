@@ -141,6 +141,7 @@ class NetCDF24ImageImporter : public ImageImporter
 		img.data->slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
 		img.channel_id = ((a = var.get_att("channel")) != NULL ? a->as_int(0) :
 			throw std::runtime_error(string("could not find the 'channel' attribute in image ") + var.name()));
+		img.unit = ((a = var.get_att("units")) != NULL ? a->as_string(0) : Image::channelUnit(img.spacecraft_id, img.channel_id));
 	}
 
 public:
