@@ -44,6 +44,13 @@ std::string satelliteSingleImageFilename(const Image& img)
 		return string() + img.quality + "_" + spacecraft + "_" + sensor + "_" + channel + "_channel_" + datestring;
 }
 
+std::string satelliteSingleImageShortName(const Image& img)
+{
+	string channelstring = Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
+	escapeSpacesAndDots(channelstring);
+	return channelstring;
+}
+
 }
 }
 

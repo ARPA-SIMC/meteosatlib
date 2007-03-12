@@ -586,6 +586,7 @@ public:
 		std::auto_ptr<Image> img = importXRIT(opts);
 		cropIfNeeded(*img);
 		img->defaultFilename = util::satelliteSingleImageFilename(*img);
+		img->shortName = util::satelliteSingleImageShortName(*img);
 		img->addToHistory("Imported from HRIT " + opts.resolution + ' ' + opts.productid1 + ' ' + opts.productid2 + ' ' + opts.timing);
 		output.processImage(img);
 	}

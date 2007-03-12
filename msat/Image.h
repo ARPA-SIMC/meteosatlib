@@ -113,9 +113,15 @@ public:
 	std::string defaultFilename;
 
 	/**
-	 * Extra name, such as product name for multi-product images
+	 * Short image name, such as product name for multi-product images
 	 */
-	std::string extraName;
+	std::string shortName;
+
+	/**
+	 * Measurement units for the scaled image samples, following COARDS
+	 * conventions
+	 */
+	std::string unit;
 
 	/**
 	 * History of this image, as comma-separated descriptions of events,

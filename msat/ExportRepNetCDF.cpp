@@ -49,15 +49,6 @@ void ExportRepNetCDF(const Image& img, const std::string& fileName)
 	if (dynamic_cast<proj::Latlon*>(img.proj.get()) == 0)
 		throw std::runtime_error("image data are not in a regular latitude-longitude grid");
 
-  // Get the channel name
-  string channelstring = Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
-
-  // Change sensitive characters into underscores
-  for (string::iterator i = channelstring.begin();
-				i != channelstring.end(); ++i)
-    if (*i == ' ' || *i == '.' || *i == ',')
-      *i = '_';
-
   // Build up output NetCDF file name and open it
   NcFile ncf(fileName.c_str(), NcFile::Replace);
   if (!ncf.is_valid())
@@ -148,10 +139,10 @@ void ExportRepNetCDF(const Image& img, const std::string& fileName)
   if (!var->put(lats, ysize))
 		throw std::runtime_error("writing latitude values failed");
 
-  var = ncf.add_var(channelstring.c_str(), ncFloat, tdim, latdim, londim);
-  if (!var->is_valid()) throw std::runtime_error("adding " + channelstring + " variable failed");
+  var = ncf.add_var(img.shortName.c_str(), ncFloat, tdim, latdim, londim);
+  if (!var->is_valid()) throw std::runtime_error("adding " + img.shortName + " variable failed");
 	ncfAddAttr(*var, "axis", "TYX");
-	ncfAddAttr(*var, "long_name", channelstring.c_str());
+	ncfAddAttr(*var, "long_name", img.shortName.c_str());
   if (img.channel_id > 3 && img.channel_id < 12)
     ncfAddAttr(*var, "units", "K");
   else

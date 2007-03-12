@@ -196,6 +196,7 @@ public:
 				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
 			}
 			img->defaultFilename = util::satelliteSingleImageFilename(*img);
+			img->shortName = util::satelliteSingleImageShortName(*img);
 			img->addToHistory("Imported from NetCDF " + img->defaultFilename);
 			computeBPP(*img->data);
 			cropIfNeeded(*img);

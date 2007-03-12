@@ -169,6 +169,7 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 #endif
 
   img->defaultFilename = util::satelliteSingleImageFilename(*img);
+  img->shortName = util::satelliteSingleImageShortName(*img);
 
   return img;
 }

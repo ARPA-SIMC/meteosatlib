@@ -129,14 +129,14 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
   double atime = (double) img.forecastSeconds2000();
   if (!tvar->put(&atime, 1)) throw std::runtime_error("setting time variable failed");
 
-	stringstream channelName;
-	channelName << "Channel" << img.channel_id;
+	//stringstream channelName;
+	//channelName << "Channel" << img.channel_id;
 
 	if (img.data->scalesToInt)
 	{
 		std::auto_ptr<NcEncoder> enc = createEncoder(img.data->bpp);
-		NcVar *ivar = ncf.add_var(channelName.str().c_str(), enc->getType(), tdim, ldim, cdim);
-		if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
+		NcVar *ivar = ncf.add_var(img.shortName.c_str(), enc->getType(), tdim, ldim, cdim);
+		if (!ivar->is_valid()) throw std::runtime_error("adding " + img.shortName + " variable failed");
 		ncfAddAttr(*ivar, "add_offset", img.data->offset);
 		ncfAddAttr(*ivar, "scale_factor", img.data->slope);
 		ncfAddAttr(*ivar, "channel", img.channel_id);
@@ -151,8 +151,8 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		// Write output values
 		enc->setData(*ivar, img);
 	} else {
-		NcVar *ivar = ncf.add_var(channelName.str().c_str(), ncFloat, tdim, ldim, cdim);
-		if (!ivar->is_valid()) throw std::runtime_error("adding " + channelName.str() + " variable failed");
+		NcVar *ivar = ncf.add_var(img.shortName.c_str(), ncFloat, tdim, ldim, cdim);
+		if (!ivar->is_valid()) throw std::runtime_error("adding " + img.shortName + " variable failed");
 		ncfAddAttr(*ivar, "add_offset", 0.0);
 		ncfAddAttr(*ivar, "scale_factor", 1.0);
 		ncfAddAttr(*ivar, "missing_value", img.data->missingValue);

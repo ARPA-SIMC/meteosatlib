@@ -49,15 +49,6 @@ namespace msat {
 //
 void ExportNetCDF(const Image& img, const std::string& fileName)
 {
-  // Get the channel name
-  string channelstring = Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
-
-  // Change sensitive characters into underscores
-  for (string::iterator i = channelstring.begin();
-	i != channelstring.end(); ++i)
-    if (*i == ' ' || *i == '.' || *i == ',')
-      *i = '_';
-
   // Build up output NetCDF file name and open it
   NcFile ncf(fileName.c_str(), NcFile::Replace);
   if (!ncf.is_valid())
@@ -128,8 +119,8 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   double atime = (double) img.forecastSeconds2000();
   if (!tvar->put(&atime, 1)) throw std::runtime_error("setting time variable failed");
 
-  NcVar *ivar = ncf.add_var(channelstring.c_str(), ncFloat, tdim, ldim, cdim);
-  if (!ivar->is_valid()) throw std::runtime_error("adding " + channelstring + " variable failed");
+  NcVar *ivar = ncf.add_var(img.shortName.c_str(), ncFloat, tdim, ldim, cdim);
+  if (!ivar->is_valid()) throw std::runtime_error("adding " + img.shortName + " variable failed");
 	ncfAddAttr(*ivar, "add_offset", 0.0);
   ncfAddAttr(*ivar, "scale_factor", 1.0);
   ncfAddAttr(*ivar, "chnum", img.channel_id);

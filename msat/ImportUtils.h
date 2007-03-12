@@ -15,6 +15,9 @@ void escapeSpacesAndDots(std::string& str);
 /// Compute a default file name for a standard satellite file
 std::string satelliteSingleImageFilename(const Image& img);
 
+/// Compute a default short name for a standard satellite file
+std::string satelliteSingleImageShortName(const Image& img);
+
 }
 }
 

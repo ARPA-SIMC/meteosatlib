@@ -133,7 +133,6 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	img->line_offset = 1856;
 	img->x0 = 1856 - readIntAttribute(group, "COFF") + 1;
 	img->y0 = 1856 - readIntAttribute(group, "LOFF") + 1;
-	img->extraName = name;
 
   // Read image metadata
 
@@ -187,6 +186,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 	char datestring[15];
 	snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", img->year, img->month, img->day, img->hour, img->minute);
   img->defaultFilename = "SAF_" + regionName + "_" + name + "_" + datestring;
+  img->shortName = name;
 
   return img;
 }
