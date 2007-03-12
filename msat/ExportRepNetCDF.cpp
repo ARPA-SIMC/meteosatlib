@@ -118,9 +118,9 @@ void ExportRepNetCDF(const Image& img, const std::string& fileName)
 
   NcDim *tdim = ncf.add_dim("time");
   if (!tdim->is_valid()) throw std::runtime_error("adding time dimension failed");
-  NcDim *londim = ncf.add_dim("longitude", img.data->lines);
+  NcDim *londim = ncf.add_dim("longitude", img.data->columns);
   if (!londim->is_valid()) throw std::runtime_error("adding longitude dimension failed");
-  NcDim *latdim = ncf.add_dim("latitude", img.data->columns);
+  NcDim *latdim = ncf.add_dim("latitude", img.data->lines);
   if (!latdim->is_valid()) throw std::runtime_error("adding latitude dimension failed");
 
 
