@@ -508,7 +508,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			img->channel_id = header.segment_id->spectral_channel_id;
 			data->hrv = img->channel_id == MSG_SEVIRI_1_5_HRV;
 			img->spacecraft_id = Image::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
-			img->unit = Image::channelUnit(img->spacecraft_id, img->channel_id);
+			img->unit = Image::channelUnit(header.segment_id->spacecraft_id, img->channel_id);
 
 			// See if the image needs to be rotated
 			data->swapX = header.image_navigation->column_scaling_factor < 0;
