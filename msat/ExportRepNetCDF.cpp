@@ -143,10 +143,7 @@ void ExportRepNetCDF(const Image& img, const std::string& fileName)
   if (!var->is_valid()) throw std::runtime_error("adding " + img.shortName + " variable failed");
 	ncfAddAttr(*var, "axis", "TYX");
 	ncfAddAttr(*var, "long_name", img.shortName.c_str());
-  if (img.channel_id > 3 && img.channel_id < 12)
-    ncfAddAttr(*var, "units", "K");
-  else
-    ncfAddAttr(*var, "units", "mW m^-2 sr^-1 (cm^-1)^-1");
+	ncfAddAttr(*var, "units", img.unit.c_str());
 	ncfAddAttr(*var, "add_offset", 0.0);
   ncfAddAttr(*var, "scale_factor", 1.0);
   ncfAddAttr(*var, "chnum", img.channel_id);

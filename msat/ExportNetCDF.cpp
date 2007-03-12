@@ -124,15 +124,11 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
 	ncfAddAttr(*ivar, "add_offset", 0.0);
   ncfAddAttr(*ivar, "scale_factor", 1.0);
   ncfAddAttr(*ivar, "chnum", img.channel_id);
-
-  float *pixels = img.data->allScaled();
-  if (img.channel_id > 3 && img.channel_id < 12)
-    ivar->add_att("units", "K");
-  else
-    ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
+	ncfAddAttr(*ivar, "units", img.unit.c_str());
 
   // Write output values
   //cerr << "output." << endl;
+  float *pixels = img.data->allScaled();
   if (!ivar->put(pixels, 1, img.data->lines, img.data->columns))
 		throw std::runtime_error("writing image values failed");
 

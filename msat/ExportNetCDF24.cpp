@@ -142,11 +142,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*ivar, "channel", img.channel_id);
 		ncfAddAttr(*ivar, "channelName",
 				Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id).c_str());
-
-		if (img.channel_id > 3 && img.channel_id < 12)
-			ivar->add_att("units", "K");
-		else
-			ivar->add_att("units", "mW m^-2 sr^-1 (cm^-1)^-1");
+		ncfAddAttr(*ivar, "units", img.unit.c_str());
 
 		// Write output values
 		enc->setData(*ivar, img);
