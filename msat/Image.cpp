@@ -418,18 +418,18 @@ std::string Image::channelUnit(int hritSpacecraftID, int channelID)
 		switch (channelID)
 		{
 			case MSG_SEVIRI_NO_CHANNEL:		return "unknown";
-			case MSG_SEVIRI_1_5_VIS_0_6:	return "unknown";
-			case MSG_SEVIRI_1_5_VIS_0_8:	return "unknown";
-			case MSG_SEVIRI_1_5_IR_1_6:		return "unknown";
-			case MSG_SEVIRI_1_5_IR_3_9:		return "unknown";
-			case MSG_SEVIRI_1_5_WV_6_2:		return "unknown";
-			case MSG_SEVIRI_1_5_WV_7_3:		return "unknown";
-			case MSG_SEVIRI_1_5_IR_8_7:		return "unknown";
-			case MSG_SEVIRI_1_5_IR_9_7:		return "unknown";
-			case MSG_SEVIRI_1_5_IR_10_8:	return "unknown";
-			case MSG_SEVIRI_1_5_IR_12_0:	return "unknown";
-			case MSG_SEVIRI_1_5_IR_13_4:	return "unknown";
-			case MSG_SEVIRI_1_5_HRV:			return "unknown";
+			case MSG_SEVIRI_1_5_VIS_0_6:	return "mW m^-2 sr^-1 (cm^-1)^-1";
+			case MSG_SEVIRI_1_5_VIS_0_8:	return "mW m^-2 sr^-1 (cm^-1)^-1";
+			case MSG_SEVIRI_1_5_IR_1_6:		return "mW m^-2 sr^-1 (cm^-1)^-1";
+			case MSG_SEVIRI_1_5_IR_3_9:		return "K";
+			case MSG_SEVIRI_1_5_WV_6_2:		return "K";
+			case MSG_SEVIRI_1_5_WV_7_3:		return "K";
+			case MSG_SEVIRI_1_5_IR_8_7:		return "K";
+			case MSG_SEVIRI_1_5_IR_9_7:		return "K";
+			case MSG_SEVIRI_1_5_IR_10_8:	return "K";
+			case MSG_SEVIRI_1_5_IR_12_0:	return "K";
+			case MSG_SEVIRI_1_5_IR_13_4:	return "K";
+			case MSG_SEVIRI_1_5_HRV:			return "mW m^-2 sr^-1 (cm^-1)^-1";
 		}
 	}
 	return "unknown";
