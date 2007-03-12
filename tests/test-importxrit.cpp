@@ -54,8 +54,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 12);
 	gen_ensure_equals(img.spacecraft_id, 55);
-	gen_ensure_equals(img.column_offset, 2060);
-	gen_ensure_equals(img.line_offset, 5566);
+	gen_ensure_equals(img.column_offset, 2063);
+	gen_ensure_equals(img.line_offset, 5568);
 	//gen_ensure_equals(img.column_offset, -2);
 	//gen_ensure_equals(img.line_offset, 462);
 	//gen_ensure_equals(img.column_offset, 2060 - (100 + 2064));
