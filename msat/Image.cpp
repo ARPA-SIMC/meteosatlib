@@ -482,7 +482,7 @@ struct ReprojectMapper : public Image::PixelMapper
 		double lat, lon;
 		dst.pixelsToCoords(x, y, lat, lon);
 		src.coordsToPixels(lat, lon, nx, ny);
-		//cout << "  ptc map " << x << "," << y << " -> " << lat << "," << lon << " -> " << nx << "," << ny << endl;
+		// cerr << "  ptc map " << x << "," << y << " -> " << lat << "," << lon << " -> " << nx << "," << ny << endl;
 	}
 };
 
@@ -603,12 +603,37 @@ public:
 				 << " Quality " << img->quality
 				 << endl;
 
+		cout << "History: " << img->history << endl;
+		cout << "Short name: " << img->shortName << " unit: " << img->unit << " default filename: " << img->defaultFilename << endl;
+
 		if (withContents)
 		{
 			cout << "Coord\tUnscaled\tScaled" << endl;
 			for (size_t l = 0; l < img->data->lines; ++l)
-				for (size_t c = 0; c < img->data->lines; ++c)
-					cout << c << "x" << l << '\t' << '\t' << img->data->scaled(c, l) << endl;
+				for (size_t c = 0; c < img->data->columns; ++c)
+				{
+					cout << c << "x" << l << '\t';
+					if (img->data->scalesToInt)
+						cout << img->data->scaledToInt(c, l);
+					else
+						cout << "--";
+					cout << '\t' << img->data->scaled(c, l) << endl;
+				}
+		} else {
+			cout << "First 10 data values:" << endl;
+			cout << "Coord\tUnscaled\tScaled" << endl;
+			int todo = 10;
+			for (size_t l = 0; todo && l < img->data->lines; ++l)
+				for (size_t c = 0; todo && c < img->data->columns; ++c, --todo)
+				{
+					cout << c << "x" << l << '\t';
+					if (img->data->scalesToInt)
+						cout << img->data->scaledToInt(c, l);
+					else
+						cout << "--";
+					cout << '\t' << img->data->scaled(c, l) << endl;
+				}
+
 		}
   }
 };
