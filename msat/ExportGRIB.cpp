@@ -117,7 +117,7 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 		grid.set_spaceview(0.0, p->sublon, img.seviriDX(), img.seviriDY(),
 										img.column_offset, img.line_offset,
 										SEVIRI_ORIENTATION, SEVIRI_CAMERA_H * 1000,
-										img.x0, img.y0);
+										img.x0-1, img.y0-1);
 	} else
 		throw std::runtime_error("image has projection " + (img.proj.get() ? img.proj->format() : "(null)") + " instead of geostationary");
 

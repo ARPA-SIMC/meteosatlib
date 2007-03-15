@@ -588,7 +588,7 @@ public:
 		cout << "Image " << img->datetime() << endl;
 		cout << " proj: " << img->proj->format() << " ch.id: " << img->channel_id << " sp.id: " << img->spacecraft_id << endl;
 		cout << " size: " << img->data->columns << "x" << img->data->lines << " resolution: " << img->column_res << "x" << img->line_res
-				 << " origin: " << img->x0 << "," << img->y0 << " centre: " << img->column_offset << "," << img->line_offset
+				 << " x0: " << img->x0 << ", y0: " << img->y0 << " COFF: " << img->column_offset << ", LOFF: " << img->line_offset
 				 << endl;
 
 		cout << " Images: " << endl;
