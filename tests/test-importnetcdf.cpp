@@ -58,6 +58,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.defaultFilename, "MSG1_Seviri_IR_108_channel_20051219_1415");
+	gen_ensure_equals(img.shortName, "IR_108");
+	gen_ensure_equals(img.unit, "K");
 }
 
 static void checkFullImageData(Image& img)

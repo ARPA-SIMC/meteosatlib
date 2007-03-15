@@ -54,6 +54,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
+	gen_ensure_equals(img.shortName, "CRR");
+	gen_ensure_equals(img.unit, "");
 }
 
 static void checkFullImageData(Image& img)

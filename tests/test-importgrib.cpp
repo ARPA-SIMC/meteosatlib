@@ -56,6 +56,8 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.defaultFilename, "MSG1_Seviri_unknown321_2049_channel_20060426_1945");
+	gen_ensure_equals(img.shortName, "unknown321_2049");
+	gen_ensure_equals(img.unit, "unknown");
 }
 
 static void checkFullImageData(Image& img)

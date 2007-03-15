@@ -60,6 +60,8 @@ static void checkGeneralImageData(Image& img)
 	//gen_ensure_equals(img.line_offset, 462);
 	//gen_ensure_equals(img.column_offset, 2060 - (100 + 2064));
 	//gen_ensure_equals(img.line_offset, 5566 - 5500);
+	gen_ensure_equals(img.shortName, "HRV");
+	gen_ensure_equals(img.unit, "unknown");
 }
 
 static void checkFullImageData(Image& img)
