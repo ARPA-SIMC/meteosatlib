@@ -386,10 +386,10 @@ ImageData* HRITImageData::createReprojected(size_t width, size_t height, const I
 			int nx = 0, ny = 0;
 			mapper(x, y, nx, ny);
 			//cout << "  map " << x << "," << y << " -> " << nx << "," << ny << endl;
-			if (nx < 0 || ny < 0 || (unsigned)nx > columns || (unsigned)ny > lines)
-				res->pixels[y*width+x] = missingValue;
-			else
+			if (nx >= 0 && ny >= 0 && (unsigned)nx < columns && (unsigned)ny < lines)
 				res->pixels[y*width+x] = scaled(nx, ny);
+			else
+				res->pixels[y*width+x] = missingValue;
 		}
 	}
 	return res;

@@ -340,6 +340,7 @@ public:
 #ifdef EXPERIMENTAL_REPROJECTION
 	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const
 	{
+		//using namespace std;
 		ImageDataWithPixels<EL>* res(new ImageDataWithPixels<EL>(width, height));
 		res->slope = slope;
 		res->offset = offset;
@@ -352,10 +353,14 @@ public:
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0 || (unsigned)nx > columns || (unsigned)ny > lines)
-					res->pixels[y*width+x] = missing;
-				else
+				if (nx >= 0 && ny >= 0 && (unsigned)nx < columns && (unsigned)ny < lines)
+				{
+					//cerr << "sample is " << this->pixels[ny*this->columns+nx] << endl;
 					res->pixels[y*width+x] = pixels[ny*columns+nx];
+				} else {
+					//cerr << "sample missing" << endl;
+					res->pixels[y*width+x] = missing;
+				}
 			}
 		return res;
 	}
@@ -437,15 +442,15 @@ public:
 			{
 				int nx = 0, ny = 0;
 				mapper(x, y, nx, ny);
-				if (nx < 0 || ny < 0 || (unsigned)nx > this->columns || (unsigned)ny > this->lines)
-				{
-					//cerr << "sample missing" << endl;
-					res->pixels[y*width+x] = this->missingValue;
-				}
-				else
+				if (nx >= 0 && ny >= 0 && (unsigned)nx < this->columns && (unsigned)ny < this->lines)
 				{
 					//cerr << "sample is " << this->pixels[ny*this->columns+nx] << endl;
 					res->pixels[y*width+x] = this->pixels[ny*this->columns+nx];
+				}
+				else
+				{
+					//cerr << "sample missing" << endl;
+					res->pixels[y*width+x] = this->missingValue;
 				}
 			}
 		return res;
