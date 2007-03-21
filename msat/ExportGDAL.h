@@ -1,10 +1,7 @@
-#ifndef MSATLIB_GRIB_IMPORT_H
-#define MSATLIB_GRIB_IMPORT_H
-
 //---------------------------------------------------------------------------
 //
-//  File        :   ImportGRIB.h
-//  Description :   Read a GRIB file into a msat::Image
+//  File        :   ExportGDAL.h
+//  Description :   Export a msat::Image using GDAL
 //  Author      :   Enrico Zini (for ARPA SIM Emilia Romagna)
 //
 //  This program is free software; you can redistribute it and/or modify
@@ -23,16 +20,23 @@
 //  
 //---------------------------------------------------------------------------
 
+#ifndef MLIB_GDALEXPORT_H
+#define MLIB_GDALEXPORT_H
 
 #include <msat/Image.h>
+#include <string>
 #include <memory>
 
 namespace msat {
 
-bool isGrib(const std::string& filename);
-std::auto_ptr<ImageImporter> createGribImporter(const std::string& filename);
+/// Export data from an ImageData into a GRIB_FILE
+//void ExportGDAL(const Image& img, GRIB_FILE& gf);
+
+// Use a factory method, so that we don't have to include the GRIB headers here
+std::auto_ptr<ImageConsumer> createGDALExporter();
 
 }
 
-// vim:set sw=2:
 #endif
+
+// vim:set ts=2 sw=2:
