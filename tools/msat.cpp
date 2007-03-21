@@ -27,11 +27,13 @@
 
 #include <config.h>
 
+#include <msat/ImportGDAL.h>
 #include <msat/ImportGRIB.h>
 #include <msat/ImportSAFH5.h>
 #include <msat/ImportNetCDF.h>
 #include <msat/ImportNetCDF24.h>
 #include <msat/ImportXRIT.h>
+//#include <msat/ExportGDAL.h>
 #include <msat/ExportGRIB.h>
 #include <msat/ExportNetCDF.h>
 #include <msat/ExportNetCDF24.h>
@@ -99,6 +101,9 @@ void do_help(const char* argv0, ostream& out)
 #endif
 #ifdef HAVE_HRIT
       << " XRIT       Import only" << endl
+#endif
+#ifdef HAVE_GDAL
+      << " Any format supported by GDAL  Import only" << endl
 #endif
 			<< endl
 			<< "Available projections are:" << endl
@@ -180,6 +185,8 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 	if (isXRIT(filename))
 		return createXRITImporter(filename);
 #endif
+	if (isGDAL(filename))
+		return createGDALImporter(filename);
 	return std::auto_ptr<ImageImporter>();
 }
 

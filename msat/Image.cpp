@@ -134,12 +134,12 @@ void Image::coordsToPixels(double lat, double lon, int& x, int& y) const
 	proj::ProjectedPoint p;
 	proj->mapToProjected(proj::MapPoint(lat, lon), p);
 
-//	cerr << "  coordsToPixels: " << lat << "," << lon << " -> " << p.x << "," << p.y << endl;
+	//cerr << "  coordsToPixels: " << lat << "," << lon << " -> " << p.x << "," << p.y << endl;
 
 	x = (int)rint((double)p.x * column_res) + (column_offset - x0);
 	y = (int)rint((double)p.y * line_res) + (line_offset   - y0);
 
-//	cerr << "    to pixels: " << dx << "," << dy << endl;
+	//cerr << "    to pixels: " << x << "," << y << endl;
 }
 
 void Image::pixelsToCoords(int x, int y, double& lat, double& lon) const
@@ -147,10 +147,12 @@ void Image::pixelsToCoords(int x, int y, double& lat, double& lon) const
 	proj::ProjectedPoint pp;
 	pp.x = (double)(x - (column_offset - x0)) / column_res;
 	pp.y = (double)(y - (line_offset   - y0)) / line_res;
+	//cerr << "PTC " << x << "," << y << " -> " << pp.x << "," << pp.y << endl;
 	proj::MapPoint p;
 	proj->projectedToMap(pp, p);
 	lat = p.lat;
 	lon = p.lon;
+	//cerr << "PTC " << pp.x << "," << pp.y << " -> " << lat << "," << lon << endl;
 }
 
 double Image::pixelHSize() const
@@ -605,6 +607,12 @@ public:
 
 		cout << "History: " << img->history << endl;
 		cout << "Short name: " << img->shortName << " unit: " << img->unit << " default filename: " << img->defaultFilename << endl;
+
+		double lat, lon;
+		img->pixelsToCoords(0, 0, lat, lon);
+		cout << "Coordinates of the top left pixel " << lat << "," << lon << endl;
+		img->pixelsToCoords(img->data->columns, img->data->lines, lat, lon);
+		cout << "Coordinates of the bottom right pixel " << lat << "," << lon << endl;
 
 		if (withContents)
 		{
