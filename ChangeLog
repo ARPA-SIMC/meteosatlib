@@ -1,4 +1,21 @@
+Tue Mar 21 19:09:30 2007 Enrico Zini <enrico@enricozini.org>
+
+	* Version 0.5.2
+
+ImportGDAL:
+ * Implement import of all sorts of georeferentiated images using the GDAL
+   library
+
+Image:
+ * Bound checking fixes when reprojecting and rescaling images
+ * Added shortName and unit metadata to Image
+
+ImportXRIT:
+ * Fixed geocorrelation
+
 Mon Mar  5 12:55:30 2007 Enrico Zini <enrico@enricozini.org>
+
+	* Version 0.5.1
 
 MSAT:
  * Implemented scaling of the the output image
