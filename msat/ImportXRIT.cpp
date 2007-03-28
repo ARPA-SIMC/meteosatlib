@@ -173,7 +173,7 @@ std::vector<std::string> XRITImportOptions::segmentFiles() const
            + underscoreit(productid1, 12) + "-"
            + underscoreit(productid2, 9) + "-"
            + "0?????___" + "-"
-           + timing + "-" + "?_";
+           + timing + "-" + "C_";
 
   glob_t globbuf;
   globbuf.gl_offs = 1;
