@@ -122,8 +122,8 @@ class NetCDF24ImageImporter : public ImageImporter
 		img.line_res = Image::lineResFromSeviriDY(PGET(int, "DY"));
 		img.column_offset =	PGET(int, "Xp");
 		img.line_offset =	PGET(int, "Yp");
-		img.x0 =	PGET(int, "X0");
-		img.y0 =	PGET(int, "Y0");
+		img.x0 =	PGET(int, "X0") - 1;
+		img.y0 =	PGET(int, "Y0") - 1;
 
 #undef GET
 #undef GETDEF

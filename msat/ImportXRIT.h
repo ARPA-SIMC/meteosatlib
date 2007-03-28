@@ -33,6 +33,36 @@ struct XRITImportOptions
 
 struct HRITImageData : public ImageData
 {
+	/**
+	 * Map an area on the virtual image to an area in the real image data
+	 */
+	struct AreaMap
+	{
+		int x, y;
+		size_t width, height;
+		size_t startcolumn, startline;
+		AreaMap() : x(0), y(0), width(0), height(0), startcolumn(0), startline(0) {}
+		bool contains(size_t x, size_t y) const
+		{
+			if (this->x >= 0 && (size_t)this->x > x)
+				return false;
+			if (this->y >= 0 && (size_t)this->y > y)
+				return false;
+			return x < (size_t)(this->x + width) && y < (size_t)(this->y + height);
+		}
+		void remap(size_t x, size_t y, size_t& raw_x, size_t& raw_y) const
+		{
+			raw_x = startcolumn + x - this->x;
+			raw_y = startline + y - this->y;
+		}
+	};
+
+	/// HRV North area, or complete area for non-HRV images
+	AreaMap hrvNorth;
+	/// HRV South area
+	AreaMap hrvSouth;
+
+	/*
   /// HRV parameters used to locate the two image parts
   size_t LowerEastColumnActual;
   size_t LowerNorthLineActual;
@@ -40,6 +70,7 @@ struct HRITImageData : public ImageData
   size_t UpperEastColumnActual;
   size_t UpperSouthLineActual;
   size_t UpperWestColumnActual;
+	*/
 
   /// Number of pixels in every segment
   size_t npixperseg;

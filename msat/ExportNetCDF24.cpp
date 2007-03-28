@@ -92,8 +92,8 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*projVar, "DY", img.seviriDY());
 		ncfAddAttr(*projVar, "Xp", img.column_offset);
 		ncfAddAttr(*projVar, "Yp", img.line_offset);
-		ncfAddAttr(*projVar, "X0", img.x0);
-		ncfAddAttr(*projVar, "Y0", img.y0); 
+		ncfAddAttr(*projVar, "X0", img.x0 + 1);
+		ncfAddAttr(*projVar, "Y0", img.y0 + 1); 
 		ncfAddAttr(*projVar, "Orientation", SEVIRI_ORIENTATION);
 		ncfAddAttr(*projVar, "Nz", SEVIRI_CAMERA_H);
 	} else

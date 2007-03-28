@@ -123,8 +123,8 @@ class NetCDFImageImporter : public ImageImporter
 		img.line_res = GET(int, "Line_Scale_Factor") * exp2(-16);
 		img.column_offset = GET(int, "Column_Offset");
 		img.line_offset = GET(int, "Line_Offset");
-		img.x0 = GET(int, "AreaStartPix");
-		img.y0 = GET(int, "AreaStartLin");
+		img.x0 = GET(int, "AreaStartPix") - 1;
+		img.y0 = GET(int, "AreaStartLin") - 1;
 
 		ftmp = GETDEF(float, "Orbit_Radius", ORBIT_RADIUS);
 		if (ftmp != ORBIT_RADIUS)

@@ -36,6 +36,13 @@
 #include <msat/Image.tcc>
 #include <msat/Progress.h>
 
+namespace std {
+ostream& operator<<(ostream& out, const msat::HRITImageData::AreaMap& a)
+{
+	return out << a.x << "," << a.y << " dim: " << a.width << "," << a.height << " start: " << a.startcolumn << ", " << a.startline;
+}
+}
+
 using namespace std;
 
 #define PATH_SEPARATOR "/"
@@ -261,52 +268,54 @@ MSG_data* HRITImageData::segment(size_t idx) const
 	return segcache.begin()->segment;
 }
 
+// #define tmprintf(...) fprintf(stderr, __VA_ARGS__)
+#define tmprintf(...) do {} while(0)
+
 MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
 {
 	// Shift and cut the area according to cropping
-	if (x >= columns) return 0;
-	if (y >= lines) return 0;
+	tmprintf("%zd,%zd -> ", x, y);
 	x += cropX;
 	y += cropY;
 
-	// Rotate if needed
-	if (swapX) x = origColumns - x - 1;
-	if (swapY) y = origLines - y - 1;
+	tmprintf("%zd,%zd -> ", x, y);
 
 	// Absolute position in image data
-	size_t pos;
-	if (hrv)
+	size_t rx, ry;
+	if (hrvNorth.contains(x, y))
 	{
-		// Check if we are in the shifted HRV upper area
-		// FIXME: the '-1' should not be there, but if I take it out I see one
-		//        line badly offset
-		if (y >= UpperSouthLineActual - 1)
-		{
-			if (x < UpperEastColumnActual)
-				return 0;
-			if (x > UpperWestColumnActual)
-				return 0;
-			x -= UpperEastColumnActual;
-		} else {
-			if (x < LowerEastColumnActual)
-				return 0;
-			if (x > LowerWestColumnActual)
-				return 0;
-			x -= LowerEastColumnActual;
-		}
-		//x -= 6;
-		//y -= 2;
-		pos = y * (origColumns - UpperEastColumnActual - 1) + x;
-	} else
-		pos = y * origColumns + x;
+		hrvNorth.remap(x, y, rx, ry);
+		tmprintf("(north) -> ");
+	} else if (hrvSouth.contains(x, y)) {
+		hrvSouth.remap(x, y, rx, ry);
+		tmprintf("(south) -> ");
+	} else {
+		tmprintf("discarded.\n");
+		return 0;
+	}
+
+	tmprintf("%zd,%zd -> ", rx, ry);
+
+	// Rotate if needed
+	if (swapX) rx = origColumns - rx - 1;
+	if (swapY) ry = origLines - ry - 1;
+
+	size_t pos = ry * origColumns + rx;
+	tmprintf("%zd,%zd -> %zd -> ", rx, ry, pos);
 
 	// Segment number where is the pixel
 	size_t segno = pos / npixperseg;
+	tmprintf("seg %zd/%zd=%zd -> ", pos, npixperseg, segno);
 	MSG_data* d = segment(segno);
-	if (d == 0) return 0;
+	if (d == 0)
+	{
+		tmprintf("discarded.\n");
+		return 0;
+	}
 
 	// Offset of the pixel in the segment
 	size_t segoff = pos - (segno * npixperseg);
+	tmprintf("segoff %zd -> val %d\n", segoff, d->image->data[segoff]);
 	return d->image->data[segoff];
 }
 
@@ -441,15 +450,24 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	EPI_data.read_from(hrit, EPI_head);
 	hrit.close();
 
+  size_t LowerEastColumnActual;
+  size_t LowerSouthLineActual;
+  size_t LowerWestColumnActual;
+  size_t LowerNorthLineActual;
+  size_t UpperEastColumnActual;
+  size_t UpperSouthLineActual;
+  size_t UpperWestColumnActual;
+  size_t UpperNorthLineActual;
+
 	// Subtracting one because they start from 1 instead of 0
-	data->LowerEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual - 1;
-	data->LowerNorthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual - 1;
-	data->LowerWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual - 1;
-	//" LSLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual
-	data->UpperEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual - 1;
-	data->UpperSouthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual - 1;
-	data->UpperWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual - 1;
-	//" UNLA: " << EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual
+	LowerEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual - 1;
+	LowerNorthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual - 1;
+	LowerWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual - 1;
+	LowerSouthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual - 1;
+	UpperEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual - 1;
+	UpperSouthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual - 1;
+	UpperWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual - 1;
+	UpperNorthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual - 1;
 
 #if 0
 	data->LowerEastColumnActual = 1;
@@ -521,11 +539,26 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			img->line_res = abs(header.image_navigation->line_scaling_factor) * exp2(-16);
 			if (data->hrv)
 			{
+				data->hrvNorth.x = 11136 - UpperWestColumnActual - 1;
+				data->hrvNorth.y = 11136 - UpperNorthLineActual - 1;
+				data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
+				data->hrvNorth.height = UpperNorthLineActual - UpperSouthLineActual;
+				data->hrvNorth.startcolumn = 0;
+				data->hrvNorth.startline = 0;
+
+				data->hrvSouth.x = 11136 - LowerWestColumnActual - 1;
+				data->hrvSouth.y = 11136 - LowerNorthLineActual - 1;
+				data->hrvSouth.width = LowerWestColumnActual - LowerEastColumnActual;
+				data->hrvSouth.height = LowerNorthLineActual - LowerSouthLineActual;
+				data->hrvSouth.startcolumn = 0;
+				data->hrvSouth.startline = data->hrvNorth.height - 1;
+
 				// Since we are omitting the first (11136-UpperWestColumnActual) of the
 				// rotated image, we need to shift the column offset accordingly
 				// FIXME: don't we have a way to compute this from the HRIT data?
-				img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
-				img->line_offset = 5568;
+				//img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
+				img->column_offset = 5566;
+				img->line_offset = 5566;
 #if 0
 				cerr << "COFF " << header.image_navigation->column_offset << endl;
 				cerr << "LOFF " << header.image_navigation->line_offset << endl;
@@ -534,12 +567,26 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 				cerr << "cCOFF " << img->column_offset << endl;
 				cerr << "cLOFF " << img->line_offset << endl;
 #endif
+				data->columns = 11136;
+				data->lines = 11136;
 			} else {
-				img->column_offset = header.image_navigation->column_offset;
-				img->line_offset = header.image_navigation->line_offset;
+				data->hrvNorth.x = 1856 - header.image_navigation->column_offset;
+				data->hrvNorth.y = 1856 - header.image_navigation->line_offset;
+				data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
+				data->hrvNorth.height = data->origLines;
+				data->hrvNorth.startcolumn = 0;
+				data->hrvNorth.startline = 0;
+
+				img->column_offset = 1856;
+				img->line_offset = 1856;
+
+				// img->column_offset = header.image_navigation->column_offset;
+				// img->line_offset = header.image_navigation->line_offset;
+				data->columns = 3712;
+				data->lines = 3712;
 			}
-			img->x0 = 1;
-			img->y0 = 1;
+			img->x0 = 0;
+			img->y0 = 0;
 			data->bpp = header.image_structure->number_of_bits_per_pixel;
 		}
 
@@ -550,6 +597,10 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 		data->segnames[idx] = *i;
 	}
 
+	//cerr << "HRVNORTH " << data->hrvNorth << endl;
+	//cerr << "HRVSOUTH " << data->hrvSouth << endl;
+
+	/*
 	// Special handling for HRV images
 	if (data->hrv)
 	{
@@ -557,9 +608,10 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 		// position
 		data->origColumns += data->UpperEastColumnActual + 1;
 	}
+	*/
 
-	data->columns = data->origColumns;
-	data->lines = data->origLines;
+	//data->columns = data->origColumns;
+	//data->lines = data->origLines;
 
   // Get calibration values
   data->calibration = PRO_data.prologue->radiometric_proc.get_calibration(img->channel_id, data->bpp);
