@@ -185,8 +185,10 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 	if (isXRIT(filename))
 		return createXRITImporter(filename);
 #endif
+#ifdef HAVE_GDAL
 	if (isGDAL(filename))
 		return createGDALImporter(filename);
+#endif
 	return std::auto_ptr<ImageImporter>();
 }
 
