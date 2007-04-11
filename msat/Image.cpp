@@ -379,6 +379,7 @@ std::string Image::sensorName(int hritSpacecraftID)
 	switch (hritSpacecraftID)
 	{
 		case MSG_MSG_1: return "Seviri";
+		case MSG_MSG_2: return "Seviri";
 		default:
 			stringstream str;
 			str << "unknown" << hritSpacecraftID;
@@ -389,7 +390,7 @@ std::string Image::sensorName(int hritSpacecraftID)
 // Reimplemented here to be able to link without libhrit in case it's disabled
 std::string Image::channelName(int hritSpacecraftID, int channelID)
 {
-	if (hritSpacecraftID == MSG_MSG_1)
+	if (hritSpacecraftID == MSG_MSG_1 || hritSpacecraftID == MSG_MSG_2)
 	{
 		switch (channelID)
 		{
@@ -415,7 +416,7 @@ std::string Image::channelName(int hritSpacecraftID, int channelID)
 
 std::string Image::channelUnit(int hritSpacecraftID, int channelID)
 {
-	if (hritSpacecraftID == MSG_MSG_1)
+	if (hritSpacecraftID == MSG_MSG_1 || hritSpacecraftID == MSG_MSG_2)
 	{
 		switch (channelID)
 		{

@@ -46,7 +46,8 @@
 #define LOCALDEF3ID        3    // Satellite image data
 #define LOCALDEF3CLASS     1    // Operations
 #define LOCALDEF3TYPE      40   // Image Data
-#define LOCALDEF3STREAM    55   // Meteosat 8 = 55
+//#define LOCALDEF3STREAM    55   // Meteosat 8 = 55
+#define LOCALDEF3STREAM    56   // Meteosat 9 = 56
 //#define LOCALDEF3FUNC      1    // T in K - 145
 #define LOCALDEF3FUNC      0    // Pixel value
 
@@ -55,7 +56,8 @@
 #define LOCALDEF24CLASS    1    // Operations
 #define LOCALDEF24TYPE     40   // Image Data
 #define LOCALDEF24STREAM   55   // Meteosat 8 = 55
-#define LOCALDEF24SATID    55   // Meteosat 8 = 55
+//#define LOCALDEF24SATID    55   // Meteosat 8 = 55
+#define LOCALDEF24SATID    56   // Meteosat 9 = 56
 #define LOCALDEF24INSTR    207  // Seviri = 207
 #define LOCALDEF24FUNC     1    // T in K - 145
 
@@ -102,7 +104,8 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
         0, 0, 0, 0);
 
   // Satellite identifier, satellite spectral band
-  l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, (img.channel_id >> 8) & 255, img.channel_id & 255);
+  //l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, (img.channel_id >> 8) & 255, img.channel_id & 255);
+  l.set(GRIB_LEVEL_SATELLITE_METEOSAT9, (img.channel_id >> 8) & 255, img.channel_id & 255);
 
 
   // Dimensions
