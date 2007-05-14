@@ -76,10 +76,15 @@ public:
 	std::auto_ptr<proj::Projection> proj;
 
 	/// Channel ID (from table TODO)
+	/// http://www.ecmwf.int/publications/manuals/libraries/gribex/Proposed_Channel_ID_tables.doc
   int channel_id;
 
-	/// Spacecraft identifier (from table TODO)
+	/// Spacecraft identifier (from WMO Common code table C-5)
+	/// http://www.emc.ncep.noaa.gov/mmb/data_processing/common_tbl_c1-c5.htm
   int spacecraft_id;
+
+	/// TODO: instrument identifier from WMO Common code table C-8
+	/// http://www.emc.ncep.noaa.gov/mmb/data_processing/common_tbl_c8-c13.htm
 
 	/**
 	 * Horizontal resolution: how many pixels are in one projection unit
