@@ -193,7 +193,7 @@ std::auto_ptr<ImageImporter> getImporter(const std::string& filename)
 }
 
 /*
- * Created an exported based on the given action
+ * Created an exporter based on the given action
  */
 std::auto_ptr<ImageConsumer> getExporter(Action action)
 {
