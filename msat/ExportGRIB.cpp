@@ -34,6 +34,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 #define FILL_VALUE         9.999E-20
 //#define GRIB_CENTER        98	// ARPA SIM
@@ -104,9 +105,21 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
         0, 0, 0, 0);
 
   // Satellite identifier, satellite spectral band
-  //l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, (img.channel_id >> 8) & 255, img.channel_id & 255);
-  l.set(GRIB_LEVEL_SATELLITE_METEOSAT9, (img.channel_id >> 8) & 255, img.channel_id & 255);
-
+	switch (img.spacecraft_id)
+	{
+		case 55:
+			l.set(GRIB_LEVEL_SATELLITE_METEOSAT8, (img.channel_id >> 8) & 255, img.channel_id & 255);
+			break;
+		case 56:
+			l.set(GRIB_LEVEL_SATELLITE_METEOSAT9, (img.channel_id >> 8) & 255, img.channel_id & 255);
+			break;
+		default: {
+		  std::stringstream str;
+			str << "error encoding unknown spacecraft id " << img.spacecraft_id;
+			throw std::runtime_error(str.str());
+			break;
+		}
+	}
 
   // Dimensions
   grid.set_size(img.data->columns, img.data->lines);
@@ -171,6 +184,7 @@ void ExportGRIB(const Image& img, GRIB_FILE& gf)
 
 #else
 #if LOCALDEF == 24
+	// http://www.ecmwf.int/publications/manuals/libraries/gribex/localDefinition24.html
   unsigned char localdefinition24[LOCALDEF24LEN];
   localdefinition24[0] = LOCALDEF24ID;
   localdefinition24[1] = LOCALDEF24CLASS;
