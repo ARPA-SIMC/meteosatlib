@@ -54,26 +54,42 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(p->sublon, 0);
 	gen_ensure_equals(img.channel_id, 12);
 	gen_ensure_equals(img.spacecraft_id, 55);
-	gen_ensure_equals(img.column_offset, 2063);
-	gen_ensure_equals(img.line_offset, 5568);
+	gen_ensure_equals(img.column_offset, 5566);
+	gen_ensure_equals(img.line_offset, 5566);
 	//gen_ensure_equals(img.column_offset, -2);
 	//gen_ensure_equals(img.line_offset, 462);
 	//gen_ensure_equals(img.column_offset, 2060 - (100 + 2064));
 	//gen_ensure_equals(img.line_offset, 5566 - 5500);
 	gen_ensure_equals(img.shortName, "HRV");
-	gen_ensure_equals(img.unit, "unknown");
+	gen_ensure_equals(img.unit, "mW m^-2 sr^-1 (cm^-1)^-1");
 }
 
 static void checkFullImageData(Image& img)
 {
 	checkGeneralImageData(img);
 
-	gen_ensure_equals(img.data->columns, 7632);
+	gen_ensure_equals(img.data->columns, 11136);
 	gen_ensure_equals(img.data->lines, 11136);
-	gen_ensure_equals(img.x0, 1);
-	gen_ensure_equals(img.y0, 1);
+	gen_ensure_equals(img.x0, 0);
+	gen_ensure_equals(img.y0, 0);
 	gen_ensure_equals(img.data->scaled(0, 0), img.data->missingValue);
 	gen_ensure_equals(img.data->scaled(10, 10), img.data->missingValue);
+
+	// TODO: now that the image has been moved as the concept of HRV frame
+	// changed, choose a different set of points with non-missing values
+	gen_ensure_similar(img.data->scaled(2540, 2950), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2550, 2970), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2560, 2990), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2570, 3010), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2580, 3030), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2590, 3050), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2600, 3070), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2610, 3090), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2620, 3110), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2630, 3130), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled(2640, 3150), img.data->missingValue, 0.001); // unverified
+
+    /*
 	gen_ensure_similar(img.data->scaled(2540, 2950), 6.07987, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2550, 2970), 6.27186, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2560, 2990), 4.73590, 0.001); // unverified
@@ -85,6 +101,7 @@ static void checkFullImageData(Image& img)
 	gen_ensure_similar(img.data->scaled(2620, 3110), 4.57590, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2630, 3130), 4.86389, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled(2640, 3150), 5.27988, 0.001); // unverified
+	*/
 }
 
 static std::auto_ptr<ImageImporter> importer()
@@ -104,8 +121,22 @@ static void checkCroppedImageData(Image& img)
 
 	gen_ensure_equals(img.data->columns, 150);
 	gen_ensure_equals(img.data->lines, 300);
-	gen_ensure_equals(img.x0, 2541);
-	gen_ensure_equals(img.y0, 2951);
+	gen_ensure_equals(img.x0, 2540);
+	gen_ensure_equals(img.y0, 2950);
+	// TODO: now that the image has been moved as the concept of HRV frame
+	// changed, choose a different set of points with non-missing values
+	gen_ensure_similar(img.data->scaled(  0,   0), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 10,  20), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 20,  40), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 30,  60), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 40,  80), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 50, 100), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 60, 120), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 70, 140), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 80, 160), img.data->missingValue, 0.001); // unverified
+	gen_ensure_similar(img.data->scaled( 90, 180), img.data->missingValue, 0.01); // unverified
+	gen_ensure_similar(img.data->scaled(100, 200), img.data->missingValue, 0.01); // unverified
+	/*
 	gen_ensure_similar(img.data->scaled(  0,   0), 6.07987, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 10,  20), 6.27186, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 20,  40), 4.73590, 0.001); // unverified
@@ -117,6 +148,7 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_similar(img.data->scaled( 80, 160), 4.57590, 0.001); // unverified
 	gen_ensure_similar(img.data->scaled( 90, 180), 4.86389, 0.01); // unverified
 	gen_ensure_similar(img.data->scaled(100, 200), 5.27988, 0.01); // unverified
+	*/
 }
 
 

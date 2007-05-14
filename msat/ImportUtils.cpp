@@ -1,11 +1,6 @@
 #include "ImportUtils.h"
 #include "Image.h"
 
-// For HRIT satellite IDs
-#include <hrit/MSG_spacecraft.h>
-// For HRIT channel names
-#include <hrit/MSG_channel.h>
-
 using namespace std;
 
 namespace msat {
@@ -20,15 +15,14 @@ void escapeSpacesAndDots(std::string& str)
 
 std::string satelliteSingleImageFilename(const Image& img)
 {
-	t_enum_MSG_spacecraft sc = (t_enum_MSG_spacecraft)Image::spacecraftIDToHRIT(img.spacecraft_id);
 	// Get the string describing the spacecraft
-	std::string spacecraft = Image::spacecraftName(sc);
+	std::string spacecraft = Image::spacecraftName(img.spacecraft_id);
 
 	// Get the string describing the sensor
-	std::string sensor = Image::sensorName(sc);
+	std::string sensor = Image::sensorName(img.spacecraft_id);
 
 	// Get the string describing the channel
-	std::string channel = Image::channelName(sc, img.channel_id);
+	std::string channel = Image::channelName(img.spacecraft_id, img.channel_id);
 
 	escapeSpacesAndDots(spacecraft);
 	escapeSpacesAndDots(sensor);
@@ -46,7 +40,7 @@ std::string satelliteSingleImageFilename(const Image& img)
 
 std::string satelliteSingleImageShortName(const Image& img)
 {
-	string channelstring = Image::channelName(img.spacecraftIDToHRIT(img.spacecraft_id), img.channel_id);
+	string channelstring = Image::channelName(img.spacecraft_id, img.channel_id);
 	escapeSpacesAndDots(channelstring);
 	return channelstring;
 }

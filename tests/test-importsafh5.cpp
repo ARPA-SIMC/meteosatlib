@@ -55,7 +55,7 @@ static void checkGeneralImageData(Image& img)
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
 	gen_ensure_equals(img.shortName, "CRR");
-	gen_ensure_equals(img.unit, "");
+	gen_ensure_equals(img.unit, "NUMERIC");
 }
 
 static void checkFullImageData(Image& img)
@@ -160,7 +160,7 @@ void to::test<4>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_unknown321_546_channel_20051205_0615");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
 	test_tag("fullSAFH5RecodedGrib");
 	checkFullImageData(*img);
@@ -187,7 +187,7 @@ void to::test<5>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 2);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_unknown321_546_channel_20051205_0615");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
 	test_tag("croppedSAFH5RecodedGrib");
 	checkCroppedImageData(*img);
@@ -213,7 +213,7 @@ void to::test<6>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 3);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_unknown321_546_channel_20051205_0615");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
 	test_tag("fullSAFH5RecodedNetCDF24");
 	checkFullImageData(*img);
@@ -240,7 +240,7 @@ void to::test<7>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 2);
 	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_unknown321_546_channel_20051205_0615");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
 	test_tag("croppedSAFH5RecodedNetCDF24");
 	checkCroppedImageData(*img);
@@ -266,7 +266,7 @@ void to::test<8>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_unknown321_546_channel_20051205_0615");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
 	test_tag("fullSAFH5RecodedNetCDF");
 	checkFullImageData(*img);
@@ -293,7 +293,7 @@ void to::test<9>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_unknown321_546_channel_20051205_0615");
+	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
 	test_tag("croppedSAFH5RecodedNetCDF");
 	checkCroppedImageData(*img);

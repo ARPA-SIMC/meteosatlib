@@ -330,109 +330,121 @@ int Image::decimalDigitsOfScaledValues() const
 }
 
 // Reimplemented here to be able to link without libhrit in case it's disabled
-std::string Image::spacecraftName(int hritID)
+std::string Image::spacecraftName(int spacecraft_id)
 {
-  switch (hritID)
+  switch (spacecraft_id)
   {
-    case MSG_NO_SPACECRAFT: return "Non Spacecraft";
-    case MSG_METOP_1: return "METOP1";
-    case MSG_METOP_2: return "METOP2";
-    case MSG_METOP_3: return "METOP3";
-    case MSG_METEOSAT_3: return "METEOSAT3";
-    case MSG_METEOSAT_4: return "METEOSAT4";
-    case MSG_METEOSAT_5: return "METEOSAT5";
-    case MSG_METEOSAT_6: return "METEOSAT6";
-    case MSG_MTP_1: return "MTP1";
-    case MSG_MTP_2: return "MTP2";
-    case MSG_MSG_1: return "MSG1";
-    case MSG_MSG_2: return "MSG2";
-    case MSG_MSG_3: return "MSG3";
-    case MSG_MSG_4: return "MSG4";
-    case MSG_NOAA_12: return "NOAA12";
-    case MSG_NOAA_13: return "NOAA13";
-    case MSG_NOAA_14: return "NOAA14";
-    case MSG_NOAA_15: return "NOAA15";
-    case MSG_GOES_7: return "GOES7";
-    case MSG_GOES_8: return "GOES8";
-    case MSG_GOES_9: return "GOES9";
-    case MSG_GOES_10: return "GOES10";
-    case MSG_GOES_11: return "GOES11";
-    case MSG_GOES_12: return "GOES12";
-    case MSG_GOMS_1: return "GOMS1";
-    case MSG_GOMS_2: return "GOMS2";
-    case MSG_GOMS_3: return "GOMS3";
-    case MSG_GMS_4: return "GMS4";
-    case MSG_GMS_5: return "GMS5";
-    case MSG_GMS_6: return "GMS6";
-    case MSG_MTSAT_1: return "MTSAT1";
-    case MSG_MTSAT_2: return "MTSAT2";
+    case 3: return "METOP1";
+    case 4: return "METOP2";
+    case 5: return "METOP3";
+    case 50: return "METEOSAT3";
+    case 51: return "METEOSAT4";
+    case 52: return "METEOSAT5";
+    case 53: return "METEOSAT6";
+    case 54: return "METEOSAT7";
+    case 55: return "MSG1";
+    case 56: return "MSG2";
+    case 57: return "MSG3";
+    case 58: return "MTSAT1";
+    case 59: return "MTSAT2";
+    case 70: return "MSG4";
+    case 150: return "GMS3";
+    case 151: return "GMS4";
+    case 152: return "GMS5";
+    case 204: return "NOAA12";
+    case 205: return "NOAA14";
+    case 206: return "NOAA15";
+    case 251: return "GOES7";
+    case 252: return "GOES8";
+    case 253: return "GOES9";
+    case 254: return "GOES10";
+    case 255: return "GOES11";
+    case 256: return "GOES12";
+    case 310: return "GOMS1";
+    case 311: return "GOMS2";
+    case 999: return "Non Spacecraft";
+    case 1023: return "Non Spacecraft";
 		default:
 			stringstream str;
-			str << "unknown" << hritID;
+			str << "unknown" << spacecraft_id;
 			return str.str();
   }
 }
 
 // Reimplemented here to be able to link without libhrit in case it's disabled
-std::string Image::sensorName(int hritSpacecraftID)
+std::string Image::sensorName(int spacecraftID)
 {
-	switch (hritSpacecraftID)
+	switch (spacecraftID)
 	{
-		case MSG_MSG_1: return "Seviri";
-		case MSG_MSG_2: return "Seviri";
+		case 55: return "Seviri";
+		case 56: return "Seviri";
 		default:
 			stringstream str;
-			str << "unknown" << hritSpacecraftID;
+			str << "unknown" << spacecraftID;
 			return str.str();
 	}
 }
 
 // Reimplemented here to be able to link without libhrit in case it's disabled
-std::string Image::channelName(int hritSpacecraftID, int channelID)
+std::string Image::channelName(int spacecraftID, int channelID)
 {
-	if (hritSpacecraftID == MSG_MSG_1 || hritSpacecraftID == MSG_MSG_2)
+	switch (spacecraftID)
 	{
-		switch (channelID)
+		case 55:
+		case 56:
 		{
-			case MSG_SEVIRI_NO_CHANNEL:		return "no-channel";
-			case MSG_SEVIRI_1_5_VIS_0_6:	return "VIS006";
-			case MSG_SEVIRI_1_5_VIS_0_8:	return "VIS008";
-			case MSG_SEVIRI_1_5_IR_1_6:		return "IR_016";
-			case MSG_SEVIRI_1_5_IR_3_9:		return "IR_039";
-			case MSG_SEVIRI_1_5_WV_6_2:		return "WV_062";
-			case MSG_SEVIRI_1_5_WV_7_3:		return "WV_073";
-			case MSG_SEVIRI_1_5_IR_8_7:		return "IR_087";
-			case MSG_SEVIRI_1_5_IR_9_7:		return "IR_097";
-			case MSG_SEVIRI_1_5_IR_10_8:	return "IR_108";
-			case MSG_SEVIRI_1_5_IR_12_0:	return "IR_120";
-			case MSG_SEVIRI_1_5_IR_13_4:	return "IR_134";
-			case MSG_SEVIRI_1_5_HRV:			return "HRV";
+			switch (channelID)
+			{
+				case MSG_SEVIRI_NO_CHANNEL:		return "no-channel";
+				case MSG_SEVIRI_1_5_VIS_0_6:	return "VIS006";
+				case MSG_SEVIRI_1_5_VIS_0_8:	return "VIS008";
+				case MSG_SEVIRI_1_5_IR_1_6:		return "IR_016";
+				case MSG_SEVIRI_1_5_IR_3_9:		return "IR_039";
+				case MSG_SEVIRI_1_5_WV_6_2:		return "WV_062";
+				case MSG_SEVIRI_1_5_WV_7_3:		return "WV_073";
+				case MSG_SEVIRI_1_5_IR_8_7:		return "IR_087";
+				case MSG_SEVIRI_1_5_IR_9_7:		return "IR_097";
+				case MSG_SEVIRI_1_5_IR_10_8:	return "IR_108";
+				case MSG_SEVIRI_1_5_IR_12_0:	return "IR_120";
+				case MSG_SEVIRI_1_5_IR_13_4:	return "IR_134";
+				case MSG_SEVIRI_1_5_HRV:			return "HRV";
+				// SAF special cases
+				case 546:											return "CRR";
+			}
+			break;
 		}
 	}
 	stringstream str;
-	str << "unknown" << hritSpacecraftID << "_" << channelID;
+	str << "unknown" << spacecraftID << "_" << channelID;
 	return str.str();
 }
 
-std::string Image::channelUnit(int hritSpacecraftID, int channelID)
+std::string Image::channelUnit(int spacecraftID, int channelID)
 {
-	if (hritSpacecraftID == MSG_MSG_1 || hritSpacecraftID == MSG_MSG_2)
+	switch (spacecraftID)
 	{
-		switch (channelID)
+		case 55:
+		case 56:
 		{
-			case MSG_SEVIRI_NO_CHANNEL:		return "unknown";
-			case MSG_SEVIRI_1_5_VIS_0_6:	return "mW m^-2 sr^-1 (cm^-1)^-1";
-			case MSG_SEVIRI_1_5_VIS_0_8:	return "mW m^-2 sr^-1 (cm^-1)^-1";
-			case MSG_SEVIRI_1_5_IR_1_6:		return "mW m^-2 sr^-1 (cm^-1)^-1";
-			case MSG_SEVIRI_1_5_IR_3_9:		return "K";
-			case MSG_SEVIRI_1_5_WV_6_2:		return "K";
-			case MSG_SEVIRI_1_5_WV_7_3:		return "K";
-			case MSG_SEVIRI_1_5_IR_8_7:		return "K";
-			case MSG_SEVIRI_1_5_IR_9_7:		return "K";
-			case MSG_SEVIRI_1_5_IR_10_8:	return "K";
-			case MSG_SEVIRI_1_5_IR_12_0:	return "K";
-			case MSG_SEVIRI_1_5_IR_13_4:	return "K";
-			case MSG_SEVIRI_1_5_HRV:			return "mW m^-2 sr^-1 (cm^-1)^-1";
+			switch (channelID)
+			{
+				case MSG_SEVIRI_NO_CHANNEL:		return "unknown";
+				case MSG_SEVIRI_1_5_VIS_0_6:	return "mW m^-2 sr^-1 (cm^-1)^-1";
+				case MSG_SEVIRI_1_5_VIS_0_8:	return "mW m^-2 sr^-1 (cm^-1)^-1";
+				case MSG_SEVIRI_1_5_IR_1_6:		return "mW m^-2 sr^-1 (cm^-1)^-1";
+				case MSG_SEVIRI_1_5_IR_3_9:		return "K";
+				case MSG_SEVIRI_1_5_WV_6_2:		return "K";
+				case MSG_SEVIRI_1_5_WV_7_3:		return "K";
+				case MSG_SEVIRI_1_5_IR_8_7:		return "K";
+				case MSG_SEVIRI_1_5_IR_9_7:		return "K";
+				case MSG_SEVIRI_1_5_IR_10_8:	return "K";
+				case MSG_SEVIRI_1_5_IR_12_0:	return "K";
+				case MSG_SEVIRI_1_5_IR_13_4:	return "K";
+				case MSG_SEVIRI_1_5_HRV:			return "mW m^-2 sr^-1 (cm^-1)^-1";
+				// SAF special cases
+				case 546:											return "NUMERIC";
+			}
+			break;
 		}
 	}
 	return "unknown";

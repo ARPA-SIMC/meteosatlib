@@ -89,8 +89,8 @@ void ExportRepNetCDF(const Image& img, const std::string& fileName)
 		}
 	}
 
-
-  ncfAddAttr(ncf, "Satellite", Image::spacecraftName(Image::spacecraftIDToHRIT(img.spacecraft_id)).c_str());
+	string name = Image::spacecraftName(img.spacecraft_id);
+  ncfAddAttr(ncf, "Satellite", name.c_str());
 	//ncf.add_att("Antenna", ncf.get_att("Antenna")->as_string(0));
   ncfAddAttr(ncf, "Antenna", "Fixed");
 	//ncf.add_att("Receiver", ncf.get_att("Receiver")->as_string(0));

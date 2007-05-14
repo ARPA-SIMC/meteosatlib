@@ -229,17 +229,17 @@ public:
 	/// used by HRIT
 	static int spacecraftIDToHRIT(int id);
 
-	/// Get the spacecraft name from the given HRIT satellite ID
+	/// Get the spacecraft name from the WMO Common code table C-5 satellite ID
 	static std::string spacecraftName(int hritID);
 
-	/// Get the sensor name from the given HRIT satellite ID
-	static std::string sensorName(int hritSpacecraftID);
+	/// Get the sensor name from the given WMO Common code table C-5 satellite ID
+	static std::string sensorName(int spacecraftID);
 
-	/// Get the channel name from the given HRIT satellite ID and channel ID
-	static std::string channelName(int hritSpacecraftID, int channelID);
+	/// Get the channel name from the given WMO Common code table C-5 satellite ID and channel ID
+	static std::string channelName(int spacecraftID, int channelID);
 
-	/// Get the measure unit name from the given HRIT satellite ID and channel ID
-	static std::string channelUnit(int hritSpacecraftID, int channelID);
+	/// Get the measure unit name from the given WMO Common code table C-5 satellite ID and channel ID
+	static std::string channelUnit(int spacecraftID, int channelID);
 };
 
 /// Interface for image data of various types
