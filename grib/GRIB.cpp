@@ -595,6 +595,7 @@ void GRIB_LEVEL::set(t_enum_GRIB_LEVELS type, float lev1, float lev2)
     case GRIB_LEVEL_LAYER_ISOBARIC_MIXED_PRECISION_mb:
     case GRIB_LEVEL_SATELLITE_METEOSAT7:
     case GRIB_LEVEL_SATELLITE_METEOSAT8:
+    case GRIB_LEVEL_SATELLITE_METEOSAT9:
       lv1 = lev1;
       lv2 = lev2;
       break;
