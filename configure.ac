@@ -19,7 +19,7 @@
 
 m4_pattern_allow
 
-AC_INIT([meteosatlib], [0.5.2], [enrico@enricozini.org, giuliani@lamma.rete.toscana.it])
+AC_INIT([meteosatlib], [0.5.3], [enrico@enricozini.org, giuliani@lamma.rete.toscana.it])
 
 AC_REVISION([$Revision$])
 
