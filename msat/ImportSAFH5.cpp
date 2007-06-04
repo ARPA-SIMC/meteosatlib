@@ -34,8 +34,22 @@ namespace msat {
 bool isSAFH5(const std::string& filename)
 {
 	try {
-		if (access(filename.c_str(), F_OK) == 0)
-			return H5File::isHdf5(filename);
+		size_t pos = filename.rfind('/');
+		if (pos == string::npos)
+			pos = 0;
+		pos = filename.find(':', pos);
+		if (pos == string::npos)
+		{
+			//cerr << "Filename: '"<<filename<<"'"<<endl;
+			if (access(filename.c_str(), F_OK) == 0)
+				return H5File::isHdf5(filename);
+		}
+		else
+		{
+			//cerr << "Filename: '"<<filename.substr(0, pos)<<"' name '" <<filename.substr(pos+1)<<"'"<<endl;
+			if (access(filename.substr(0, pos).c_str(), F_OK) == 0)
+				return H5File::isHdf5(filename.substr(0, pos));
+		}
 		return false;
 	} catch (FileIException& e) {
 		e.printError(stderr);
@@ -196,27 +210,52 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 class SAFH5ImageImporter : public ImageImporter
 {
 	std::string filename;
+	std::string imageName;
 	H5File HDF5_source;
 
 public:
 	SAFH5ImageImporter(const std::string& filename)
-		: filename(filename), HDF5_source(filename, H5F_ACC_RDONLY) {}
+	{
+		size_t pos = filename.rfind('/');
+		if (pos == string::npos)
+			pos = 0;
+		pos = filename.find(':', pos);
+		if (pos == string::npos)
+			this->filename = filename;
+		else
+		{
+			this->filename = filename.substr(0, pos);
+			imageName = filename.substr(pos+1);
+		}
+		HDF5_source = H5File(this->filename, H5F_ACC_RDONLY);
+	}
 
 	virtual void read(ImageConsumer& output)
 	{
 		ProgressTask p("Reading SAFH5 file " + filename);
-
 		Group group = HDF5_source.openGroup("/");
 
-		// Iterate on all the images within
-		for (hsize_t i = 0; i < group.getNumObjs(); ++i)
+		if (imageName.empty())
 		{
-			string name = group.getObjnameByIdx(i);
-			DataSet dataset = group.openDataSet(name);
+			// Iterate on all the images within
+			for (hsize_t i = 0; i < group.getNumObjs(); ++i)
+			{
+				string name = group.getObjnameByIdx(i);
+				DataSet dataset = group.openDataSet(name);
+				string c = readStringAttribute(dataset, "CLASS");
+				if (c != "IMAGE")
+					continue;
+				std::auto_ptr<Image> img = ImportSAFH5(group, name);
+				cropIfNeeded(*img);
+				output.processImage(img);
+			}
+		} else {
+			// Read only the image specified
+			DataSet dataset = group.openDataSet(imageName);
 			string c = readStringAttribute(dataset, "CLASS");
 			if (c != "IMAGE")
-				continue;
-			std::auto_ptr<Image> img = ImportSAFH5(group, name);
+				throw std::runtime_error("dataset name " + imageName + " is not an image");
+			std::auto_ptr<Image> img = ImportSAFH5(group, imageName);
 			cropIfNeeded(*img);
 			output.processImage(img);
 		}

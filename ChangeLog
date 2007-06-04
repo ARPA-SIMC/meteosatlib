@@ -1,3 +1,11 @@
+2007-06-04  Enrico Zini  <enrico@viaza>
+
+	* Version 0.5.4
+
+ImportSAFH5:
+
+ * Allow to append ":imagename" to a file name to extract only one image
+
 Tue Mar 21 18:19:30 2007 Enrico Zini <enrico@enricozini.org>
 
 	* Version 0.5.3
