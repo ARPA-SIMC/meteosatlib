@@ -1,3 +1,8 @@
+2007-10-03  enrico@enricozini.org
+
+	* Fixed include headers for gdal in msat/ImportGDAL
+	* Reenabled custom channel ID for known SAF products
+
 Tue Jul  4 12:35:00 2007 Enrico Zini <enrico@enricozini.org>
     
     * Version 0.5.5
