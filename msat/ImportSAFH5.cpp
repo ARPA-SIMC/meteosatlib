@@ -152,7 +152,7 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
 
   // Compute/invent the spectral channel id
 	SAFChannelInfo* ci = SAFChannelByName(name);
-	//img->channel_id = ci == NULL ? 0 : ci->channelID;
+	img->channel_id = ci == NULL ? img->channel_id : ci->channelID;
 
 	// Read image data
   switch (dataset.getDataType().getSize())
