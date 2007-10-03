@@ -2215,6 +2215,7 @@ int GRIB_FILE::ReadMessage(GRIB_MESSAGE &message)
     return -1;
   }
 
+  message.recpos = pos;
   pos = pos + reclen;
   return message.Decode(msg, reclen);
 }

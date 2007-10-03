@@ -1105,6 +1105,8 @@ class GRIB_MESSAGE {
     /// @param field: field parameter to be encoded
     void set_field(GRIB_FIELD &field);
 
+    /// Offset of the message in the input file
+    size_t recpos;
     /// Overall message record lenght
     size_t reclen;
 
