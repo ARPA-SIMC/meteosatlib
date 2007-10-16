@@ -1,3 +1,8 @@
+2007-10-16  enrico@enricozini.org
+
+	* Incorporated new publicdecompwt patch by Deneys S. Maartens
+	* Integrated the patch to fix the source for recent gcc pedantness
+
 2007-10-03  enrico@enricozini.org
 
 	* Fixed include headers for gdal in msat/ImportGDAL
