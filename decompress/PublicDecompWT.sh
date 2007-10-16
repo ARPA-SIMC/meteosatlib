@@ -16,12 +16,14 @@
     echo "Please unzip PublicDecompWT.zip manually"
     exit 1
   }
-  $unzip -a PublicDecompWT.zip
+  $unzip -a PublicDecompWT.zip '2.02/*'
   if [ $? -ne 0 ]
   then
     echo "Error decompressing EUMETSAT sources."
     exit 1
   fi
+  mv 2.02/* .
+  rmdir 2.02
   mv PublicDecompWT.zip Original_PublicDecompWT.zip
 }
 

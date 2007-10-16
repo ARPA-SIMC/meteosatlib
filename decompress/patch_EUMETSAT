@@ -1,7 +1,7 @@
-diff -Naur --strip-trailing-cr t1/COMP/Inc/CImage.h t2/COMP/Inc/CImage.h
---- t1/COMP/Inc/CImage.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/Inc/CImage.h	2006-01-03 11:37:54.000000000 +0000
-@@ -438,15 +438,15 @@
+diff -aurp 2.02/COMP/Inc/CImage.h 2.02/COMP/Inc/CImage.h
+--- 2.02/COMP/Inc/CImage.h	2007-05-08 12:49:26.000000000 +0200
++++ 2.02/COMP/Inc/CImage.h	2007-08-03 14:05:55.000000000 +0200
+@@ -438,15 +438,15 @@ public:
  
  	// Description:	Similar to std::auto_ptr::size().
  	// Returns:		The number of pixels in the image.
@@ -20,63 +20,10 @@ diff -Naur --strip-trailing-cr t1/COMP/Inc/CImage.h t2/COMP/Inc/CImage.h
  
  	// Description:	Set the pixels of the lines from line # i_from to line  
  	//				# i_to included to 0.
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CHcodec.h t2/COMP/JPEG/Inc/CHcodec.h
---- t1/COMP/JPEG/Inc/CHcodec.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/JPEG/Inc/CHcodec.h	2006-01-03 11:37:54.000000000 +0000
-@@ -49,7 +49,9 @@
- 
- *******************************************************************************/
- 
-+#ifndef __GNUC__
- #pragma warning(disable: 4275)
-+#endif
- 
- #include <iostream>
- #include <fstream>
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CHufftables.h t2/COMP/JPEG/Inc/CHufftables.h
---- t1/COMP/JPEG/Inc/CHufftables.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/JPEG/Inc/CHufftables.h	2006-01-03 11:37:54.000000000 +0000
-@@ -43,7 +43,9 @@
- 
- *******************************************************************************/
- 
-+#ifndef __GNUC__
- #pragma warning(disable: 4275)
-+#endif
- 
- #include <iostream>
- #include <fstream>
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CJBlock.h t2/COMP/JPEG/Inc/CJBlock.h
---- t1/COMP/JPEG/Inc/CJBlock.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/JPEG/Inc/CJBlock.h	2006-01-03 11:37:54.000000000 +0000
-@@ -148,7 +148,7 @@
- 	inline void Zero()
- 	{
- 		COMP_TRYTHIS
--		for (unsigned int i=0 ; i<64 ; i++) m_data[i] = 0;
-+		for (unsigned int i=0 ; i<64 ; i++) COMP::CBlock<T>::m_data[i] = 0;
- 		COMP_CATCHTHIS
- 	}
- 
-@@ -163,7 +163,7 @@
- #ifdef _DEBUG
- 		Assert (i_k < 64, Util::CParamException());
- #endif
--		return m_data[ZZ[i_k]];
-+		return COMP::CBlock<T>::m_data[ZZ[i_k]];
- 		COMP_CATCHTHIS_SPEED
- 	}
- 
-@@ -180,7 +180,7 @@
- #ifdef _DEBUG
- 		Assert (i_k < 64, Util::CParamException());
- #endif
--		m_data[ZZ[i_k]] = i_val;
-+		COMP::CBlock<T>::m_data[ZZ[i_k]] = i_val;
- 		COMP_CATCHTHIS_SPEED
- 	}
- 
-@@ -190,12 +190,13 @@
+diff -aurp 2.02/COMP/JPEG/Inc/CJBlock.h 2.02/COMP/JPEG/Inc/CJBlock.h
+--- 2.02/COMP/JPEG/Inc/CJBlock.h	2007-05-08 12:49:26.000000000 +0200
++++ 2.02/COMP/JPEG/Inc/CJBlock.h	2007-08-03 14:11:39.000000000 +0200
+@@ -190,6 +190,7 @@ public:
  
  
  // is only supposed to operate on unsigned short:
@@ -84,469 +31,49 @@ diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CJBlock.h t2/COMP/JPEG/Inc/CJBlo
  inline void CJBlock<short> :: differential_unshift (short &t_last_DC)
  {
  	COMP_TRYTHIS_SPEED
- 	// transform the DC coefficient of Qblock by adding the last_DC value
- 	// last_DC is then set to the new value of the DC coefficient
--	t_last_DC = (m_data[0] += t_last_DC);
-+	t_last_DC = (COMP::CBlock<short>::m_data[0] += t_last_DC);
- 	COMP_CATCHTHIS_SPEED
+@@ -207,7 +208,7 @@ inline void CJBlock<T> :: differential_u
+ 	COMP_CATCHTHIS
  }
  
-@@ -208,13 +209,14 @@
- }
- 
- 
+-
 +template <>
  inline void CJBlock<short> :: differential_shift (short &t_last_DC)
  {
  	COMP_TRYTHIS_SPEED
- 	// transform the DC coefficient of Qblock by substracting the last_DC value
- 	// last_DC is then set to the new value of the DC coefficient
--	short tmp = m_data[0];
--	m_data[0] -= t_last_DC;
-+	short tmp = COMP::CBlock<short>::m_data[0];
-+	COMP::CBlock<short>::m_data[0] -= t_last_DC;
- 	t_last_DC = tmp;
- 	COMP_CATCHTHIS_SPEED
- }
-@@ -228,10 +230,11 @@
+@@ -227,7 +228,7 @@ inline void CJBlock<T> :: differential_s
+ 	COMP_CATCHTHIS
  }
  
- 
+-
 +template <>
  inline void CJBlock<unsigned short>::level_shift (CJBlock<short> &o_block, const unsigned short &i_sub)
  {
  	COMP_TRYTHIS_SPEED
--	for (unsigned int i=0 ; i<64 ; i++) o_block.Cset (i, m_data[i] - i_sub);
-+	for (unsigned int i=0 ; i<64 ; i++) o_block.Cset (i, COMP::CBlock<unsigned short>::m_data[i] - i_sub);
- 	COMP_CATCHTHIS_SPEED
+@@ -243,7 +244,7 @@ inline void CJBlock<T>::level_shift (CJB
+ 	COMP_CATCHTHIS
  }
  
-@@ -244,6 +247,7 @@
- }
- 
- 
+-
 +template <>
  inline void CJBlock<short> :: level_unshift (CJBlock<unsigned short> &o_block, const unsigned short &i_add)
  {
  	COMP_TRYTHIS_SPEED
-@@ -251,7 +255,7 @@
- 	
- 	for (unsigned int i=0 ; i<64 ; i++)
- 		// check range
--		o_block.Cset (i, (prov = m_data[i] + i_add) < 0 ? 0 : prov > 65535 ? 65535 : (unsigned short)prov);
-+		o_block.Cset (i, (prov = COMP::CBlock<short>::m_data[i] + i_add) < 0 ? 0 : prov > 65535 ? 65535 : (unsigned short)prov);
- 	COMP_CATCHTHIS_SPEED
+diff -aurp 2.02/COMP/JPEG/Src/CJBlock.cpp 2.02/COMP/JPEG/Src/CJBlock.cpp
+--- 2.02/COMP/JPEG/Src/CJBlock.cpp	2007-05-08 12:49:26.000000000 +0200
++++ 2.02/COMP/JPEG/Src/CJBlock.cpp	2007-08-03 14:12:22.000000000 +0200
+@@ -155,7 +155,7 @@ void CJBlock<T>::forward_DCT (CJBlock<do
+ 	COMP_CATCHTHIS
  }
  
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CJPEGCoder.h t2/COMP/JPEG/Inc/CJPEGCoder.h
---- t1/COMP/JPEG/Inc/CJPEGCoder.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/JPEG/Inc/CJPEGCoder.h	2006-01-03 11:37:54.000000000 +0000
-@@ -92,8 +92,8 @@
- 															// data to compress
- 		const CJPEGParams &i_param							// Parameters of the compression
- 	)
--	: m_Image (i_cdfui)
--	, m_param (i_param)
-+	: m_param (i_param)
-+	, m_Image (i_cdfui)
- 	, m_buf ((unsigned __int32)(i_cdfui.GetLength () * e_ExpectedCompressionFactor / 8))
- 	, m_hcoder (m_param, m_buf)
- 	{
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CompressJPEG.h t2/COMP/JPEG/Inc/CompressJPEG.h
---- t1/COMP/JPEG/Inc/CompressJPEG.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/JPEG/Inc/CompressJPEG.h	2006-01-03 11:37:54.000000000 +0000
-@@ -285,6 +285,7 @@
- 			case e_10to8_floor1	:
- 			case e_10to8_round	:
- 			case e_10to8_ceil	:	PRECONDITION(m_BitsPerPixel == 10);	break;
-+                        case e_NoRequantization :       break;
- 		}
- 	}
- 
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Inc/CQuantizationTable.h t2/COMP/JPEG/Inc/CQuantizationTable.h
---- t1/COMP/JPEG/Inc/CQuantizationTable.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/JPEG/Inc/CQuantizationTable.h	2006-01-03 11:37:54.000000000 +0000
-@@ -39,7 +39,9 @@
- 
- *******************************************************************************/
- 
-+#ifndef __GNUC__
- #pragma warning(disable: 4275)
-+#endif
- 
- #include <iostream>
- #include <fstream>
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Src/CHcodec.cpp t2/COMP/JPEG/Src/CHcodec.cpp
---- t1/COMP/JPEG/Src/CHcodec.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/JPEG/Src/CHcodec.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -21,7 +21,10 @@
- 
- #define NOMINMAX
- 
-+#ifndef __GNUC__
- #pragma warning(disable: 4275)
-+#endif
-+
- #include <iostream>
- #include <fstream>
- #include <stdlib.h>
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Src/CHOptim.cpp t2/COMP/JPEG/Src/CHOptim.cpp
---- t1/COMP/JPEG/Src/CHOptim.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/JPEG/Src/CHOptim.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -29,8 +29,8 @@
- 
- CHOptim::CHOptim (CJPEGParams &i_param) :
- m_param (i_param), 
--m_cqtbl (i_param),
--m_default_value( 0 )
-+m_default_value( 0 ),
-+m_cqtbl (i_param)
- {
- 	COMP_TRYTHIS
- 	init ();
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Src/CHufftables.cpp t2/COMP/JPEG/Src/CHufftables.cpp
---- t1/COMP/JPEG/Src/CHufftables.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/JPEG/Src/CHufftables.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -21,7 +21,10 @@
- 
- #define NOMINMAX
- 
-+#ifndef __GNUC__
- #pragma warning(disable: 4275)
-+#endif
-+
- #include <iostream>
- #include <fstream>
- #include <stdlib.h>
-@@ -357,7 +360,7 @@
- 			for (unsigned int j = 0; j < pcode.m_nbtot; j++)
- 			{
- 				unsigned __int16 size = pcode.m_Hsi[j];
--				Assert (size >= 0 && size <= 16, Util::CParamException ());
-+				// Assert (size >= 0 && size <= 16, Util::CParamException ());
- 				if (size)
- 				{
- 					unsigned __int16 code = pcode.m_Hco[j];
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Src/CJBlock.cpp t2/COMP/JPEG/Src/CJBlock.cpp
---- t1/COMP/JPEG/Src/CJBlock.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/JPEG/Src/CJBlock.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -47,14 +47,14 @@
- 
- 	for (i=0 ; i<8 ; i++) 
- 	{
--		dtmp0 = Cget (0, i);
--		dtmp1 = Cget (1, i);
--		dtmp2 = Cget (2, i);
--		dtmp3 = Cget (3, i);
--		dtmp4 = Cget (4, i);
--		dtmp5 = Cget (5, i);
--		dtmp6 = Cget (6, i);
--		dtmp7 = Cget (7, i);
-+		dtmp0 = this->Cget (0, i);
-+		dtmp1 = this->Cget (1, i);
-+		dtmp2 = this->Cget (2, i);
-+		dtmp3 = this->Cget (3, i);
-+		dtmp4 = this->Cget (4, i);
-+		dtmp5 = this->Cget (5, i);
-+		dtmp6 = this->Cget (6, i);
-+		dtmp7 = this->Cget (7, i);
- 
- 		tmp0 = dtmp0 + dtmp7;
- 		tmp7 = dtmp0 - dtmp7;
-@@ -156,6 +156,7 @@
- }
- 
- 
-+template<>
+-
++template <>
  void CJBlock<double>::inverse_DCT (CJBlock<short> &o_shifted_block)
  {
  	COMP_TRYTHIS
-@@ -306,7 +307,9 @@
- // disable warning about  "CJBlock<short>' is already instantiated" because
- // it doesn't seems to be true
- 
-+#ifndef __GNUC__
- #pragma warning (disable: 4660)  
-+#endif
- 
- template class CJBlock <__int8>;
- template class CJBlock <short>;
-@@ -316,6 +319,8 @@
- template class CJBlock <float>;
- template class CJBlock <double>;
- 
-+#ifndef __GNUC__
- #pragma warning (default: 4660)  
-+#endif
- 
- } // end namespace COMP
-diff -Naur --strip-trailing-cr t1/COMP/JPEG/Src/CJPEGDecoder.cpp t2/COMP/JPEG/Src/CJPEGDecoder.cpp
---- t1/COMP/JPEG/Src/CJPEGDecoder.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/JPEG/Src/CJPEGDecoder.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -28,7 +28,6 @@
- {
- 	COMP_TRYTHIS
- 	// read the compressed file header into the buffer, and set the decompression parameters
--	CJPEGParams::ECompressionMode compression_mode = CJPEGParams::e_Unknown;
- 	unsigned int lg;
- 	unsigned short marker_code;
- 	
-@@ -572,7 +571,6 @@
- 				return false; // bad value for Se in SOS segment  
- 							  // testing for Se=0 and Ah=0
- 			}
--			str_bin;
- 			m_param.m_Predictor = 0;  // In lossy mode, this parameter is meaningless
- 			m_param.m_PointTransform = str_bin & 0xF;
- 			SOS_ok = true;
-@@ -644,8 +642,8 @@
- 	// read the LOSSLESS compressed file header into the buffer, and set the decompression parameters
- 	unsigned int lg;
- 	int selected_table = -1;
--	unsigned short NLines;
--	unsigned short NColumns;
-+	unsigned short NLines = 0;
-+	unsigned short NColumns = 0;
- 	unsigned short marker_code;
- 	unsigned short real_RI = 0;
- 	unsigned __int32 str_bin;
-diff -Naur --strip-trailing-cr t1/COMP/Src/CQualityMeasures.cpp t2/COMP/Src/CQualityMeasures.cpp
---- t1/COMP/Src/CQualityMeasures.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/Src/CQualityMeasures.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -34,8 +34,6 @@
- 	m_testImg (i_testImg)
- {
- 	COMP_TRYTHIS
--	unsigned __int16 minError = 0; // positive, but to be interpreted as negative
--	unsigned __int16 maxError = 0; // always positive
- 
- 	// Do both images have the same size?
- 	Assert (m_refImg.GetH() == m_testImg.GetH(), Util::CParamException());
-diff -Naur --strip-trailing-cr t1/COMP/T4/Inc/CBitBuffer.h t2/COMP/T4/Inc/CBitBuffer.h
---- t1/COMP/T4/Inc/CBitBuffer.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/T4/Inc/CBitBuffer.h	2006-01-03 11:37:54.000000000 +0000
-@@ -102,8 +102,8 @@
- 		unsigned __int64		i_bufOffset = 0	// start offset in the given buffer
- 	)
- 	: Util::CDataField	(i_datafield)
--	, m_bufOffset		((unsigned long)i_bufOffset)
- 	, m_bitIndex		((unsigned long)i_bufOffset) // we start reading at the index...
-+	, m_bufOffset		((unsigned long)i_bufOffset)
- 	, m_NbZeroes		(0)
- 	{
- 	}
-@@ -116,8 +116,8 @@
- 		unsigned __int64		i_bufOffset = 0	// start offset in the given buffer
- 	)
- 	: Util::CDataField	(i_bufLength, false			)
--	, m_bufOffset		((unsigned long)i_bufOffset	)
- 	, m_bitIndex		(0							)
-+	, m_bufOffset		((unsigned long)i_bufOffset	)
- 	, m_NbZeroes		(0							) 
- 	{
- 	}
-@@ -131,8 +131,8 @@
- 		unsigned __int64				i_bufOffset = 0	// start offset in the given buffer
- 	)
- 	: Util::CDataField	(i_buf.Release(), i_bufLength	)
--	, m_bufOffset		((unsigned char)i_bufOffset		)
- 	, m_bitIndex		((unsigned char)i_bufOffset		) // we start reading at the index...
-+	, m_bufOffset		((unsigned char)i_bufOffset		)
- 	, m_NbZeroes		(0								)
- 	{
- 	}
-diff -Naur --strip-trailing-cr t1/COMP/T4/Src/CBitBuffer.cpp t2/COMP/T4/Src/CBitBuffer.cpp
---- t1/COMP/T4/Src/CBitBuffer.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/T4/Src/CBitBuffer.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -106,8 +106,6 @@
- {
- 	COMP_TRYTHIS
- 		Assert(m_bitIndex + i_length < sizeMaxBit(), COMP::COutOfBufferException());
--		unsigned long byteIndex = m_bitIndex / 8;
--
- 		unsigned short mask = 1 << (i_length - 1);
- 		while (mask !=0)
- 		{
-diff -Naur --strip-trailing-cr t1/COMP/T4/Src/T4Decoder.cpp t2/COMP/T4/Src/T4Decoder.cpp
---- t1/COMP/T4/Src/T4Decoder.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/T4/Src/T4Decoder.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -59,7 +59,6 @@
- {
- 	COMP_TRYTHIS
- 	// size & position managment
--	short height    = 0;
- 	short width     = 0;
- 	short i         = 0;
- 	short j         = 0;
-diff -Naur --strip-trailing-cr t1/COMP/WT/Inc/CompressWT.h t2/COMP/WT/Inc/CompressWT.h
---- t1/COMP/WT/Inc/CompressWT.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/WT/Inc/CompressWT.h	2006-01-03 11:37:54.000000000 +0000
-@@ -153,6 +153,8 @@
- 				AssertNamed(m_nWTlevels <= 6,
- 							"nWTlevels value out of range allowed for selected block size 64x64.");
- 				break;
-+                        case e_FullWidth:
-+                                break;
- 		}
- 	}
- 
-diff -Naur --strip-trailing-cr t1/COMP/WT/Inc/CWTCoder.h t2/COMP/WT/Inc/CWTCoder.h
---- t1/COMP/WT/Inc/CWTCoder.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/WT/Inc/CWTCoder.h	2006-01-03 11:37:54.000000000 +0000
-@@ -58,7 +58,7 @@
- 	
- 	enum E_constants
- 	{
--		e_ExpectedCompressionFactor = 1,	// Expected compression factor, used
-+		e_ExpectedCompressionFactor = 1 	// Expected compression factor, used
- 											// to allocate the first CWBuffer.
- 	};
- 
-@@ -87,8 +87,8 @@
- 															// data to compress
- 		const CWTParams& i_Param							// parameters of the compression
- 	)
--	: m_Image	(i_Cdfui)
--	, m_Param	(i_Param)
-+	: m_Param	(i_Param)
-+	, m_Image	(i_Cdfui)
- 	, m_Buf		((unsigned __int32)(i_Cdfui.GetLength() * e_ExpectedCompressionFactor / 8))
- 	{
- 		PRECONDITION(m_Image.GetW() >= 1 && m_Image.GetH() >= 1);
-diff -Naur --strip-trailing-cr t1/COMP/WT/Inc/CWTDecoder.h t2/COMP/WT/Inc/CWTDecoder.h
---- t1/COMP/WT/Inc/CWTDecoder.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/COMP/WT/Inc/CWTDecoder.h	2006-01-03 11:37:54.000000000 +0000
-@@ -60,7 +60,7 @@
- 	CRBuffer		m_Buf;			//	compressed data buffer
- 	CQualityInfo	m_Qinfo;		//	quality information vector
- 	unsigned int	m_LastGoodLine;	//  last line decoded without error
--	
-+
- // INTERFACES:
- 
- 	// Description:	Performs the decoding of the input buffer by block.
-diff -Naur --strip-trailing-cr t1/COMP/WT/Src/CWTDecoder.cpp t2/COMP/WT/Src/CWTDecoder.cpp
---- t1/COMP/WT/Src/CWTDecoder.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/COMP/WT/Src/CWTDecoder.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -19,9 +19,6 @@
- 	unsigned short bX = i_from_column;
- 	unsigned short bY = i_from_line;
- 
--	unsigned short nBW = (m_Image.GetW() + i_Bs - 1) / i_Bs;	// nb blocks per line
--	unsigned short nBH = (m_Image.GetH() + i_Bs - 1) / i_Bs;	// nb blocks per column
--	unsigned long  nB  = (unsigned long) nBH * nBW;				// total number of blocks
- 
- 	CWBlock wblk (i_Bs, i_Bs);
- 	wblk.Zero();
-diff -Naur --strip-trailing-cr t1/DISE/CDataField.h t2/DISE/CDataField.h
---- t1/DISE/CDataField.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/DISE/CDataField.h	2006-01-03 11:37:54.000000000 +0000
-@@ -304,7 +304,7 @@
-      {
- 	 AssertNamed(o_Data != NULL &&
- 		     i_Offset >= 0 &&
--		     i_Offset + i_Length <= (m_Size + 7) / 8,
-+		     (size_t) (i_Offset + i_Length) <= (m_Size + 7) / 8,
- 		     "Out-of-border read access to data field attempted.");
- 	 
- 	 memcpy(o_Data, Data() + i_Offset, i_Length);
-@@ -325,7 +325,7 @@
-      {
- 	 AssertNamed(i_Data != NULL &&
- 		     i_Offset >= 0 &&
--		     i_Offset + i_Length <= (m_Size + 7) / 8,
-+		     (size_t) (i_Offset + i_Length) <= (m_Size + 7) / 8,
- 		     "Out-of-border write access to data field attempted.");
- 
- 	 memcpy(Data() + i_Offset, i_Data, i_Length);
-@@ -345,7 +345,7 @@
- 	 )
-      {
- 	 AssertNamed(i_Offset >= 0 &&
--		     i_Offset + i_Length <= (m_Size + 7) / 8,
-+		     (size_t) (i_Offset + i_Length) <= (m_Size + 7) / 8,
- 		     "Out-of-border write access to data field attempted.");
- 
- 	 memset(Data() + i_Offset, i_Value, i_Length);
-@@ -427,7 +427,7 @@
- 	, m_NR(i_NR)
- 	{
- 		PRECONDITION(m_NB <= m_NR                );
--		PRECONDITION(m_NC * m_NL * m_NR == m_Size);
-+		PRECONDITION((size_t) (m_NC * m_NL * m_NR) == m_Size);
- 	}
- 
- 	// Description:	Copy constructor.
-diff -Naur --strip-trailing-cr t1/DISE/CSpacecraftID.h t2/DISE/CSpacecraftID.h
---- t1/DISE/CSpacecraftID.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/DISE/CSpacecraftID.h	2006-01-03 11:37:54.000000000 +0000
-@@ -130,6 +130,7 @@
- 			case e_GMS_6		: return std::string("GMS6");
- 			case e_MTSAT_1		: return std::string("MTSAT1");
- 			case e_MTSAT_2		: return std::string("MTSAT2");
-+                        case e_UnknownSpacecraft: return std::string("UNKNOWN");
- 		}
- 		return std::string("UnknownSpacecraft");
- 	}
-diff -Naur --strip-trailing-cr t1/DISE/CSpectralChannelID.h t2/DISE/CSpectralChannelID.h
---- t1/DISE/CSpectralChannelID.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/DISE/CSpectralChannelID.h	2006-01-03 11:37:54.000000000 +0000
-@@ -144,6 +144,7 @@
- 			case GP_SC_CHAN_ID::e_IR_12_0    : return std::string("IR_120");
- 			case GP_SC_CHAN_ID::e_IR_13_4    : return std::string("IR_134");
- 			case GP_SC_CHAN_ID::e_HRV        : return std::string("HRV___");
-+                        case e_UnknownChannel            : return std::string("");
- 		}
- 		return std::string("");
- 	}
-diff -Naur --strip-trailing-cr t1/DISE/CxRITFile.cpp t2/DISE/CxRITFile.cpp
---- t1/DISE/CxRITFile.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/DISE/CxRITFile.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -1,4 +1,6 @@
-+#ifndef __GNUC__
- #pragma warning(disable: 4275 4786)
-+#endif
- 
- #include <stdlib.h>
- #include <fstream>
-diff -Naur --strip-trailing-cr t1/DISE/CxRITFileHeaderRecords.cpp t2/DISE/CxRITFileHeaderRecords.cpp
---- t1/DISE/CxRITFileHeaderRecords.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/DISE/CxRITFileHeaderRecords.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -578,6 +578,8 @@
- 								fileTypeCode = "Repeat cycle epilogue file";	break;
- 							case e_DCPMessage			:
- 								fileTypeCode = "DCP messages file";				break;
-+							case e_NotSpecified			:
-+								fileTypeCode = "Unspecified file";				break;
- 						}
- 
- 						temp
-@@ -722,7 +724,7 @@
- 					try
- 					{
- 						char seed[17];
--						sprintf(seed, "%016I64x", m_Seed);
-+						sprintf(seed, "%016i64x", (int) m_Seed);
- 
- 						temp
- 						<< "Key Header Record"					
-diff -Naur --strip-trailing-cr t1/DISE/CxRITFileHeaderRecords.h t2/DISE/CxRITFileHeaderRecords.h
---- t1/DISE/CxRITFileHeaderRecords.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/DISE/CxRITFileHeaderRecords.h	2006-01-03 11:37:54.000000000 +0000
-@@ -40,7 +40,9 @@
- 
- *******************************************************************************/
- 
-+#ifndef __GNUC__
- #pragma warning(disable: 4786)
-+#endif
- 
- 
- #include <iostream>
-diff -Naur --strip-trailing-cr t1/DISE/ErrorHandling.cpp t2/DISE/ErrorHandling.cpp
---- t1/DISE/ErrorHandling.cpp	2006-01-03 11:39:47.000000000 +0000
-+++ t2/DISE/ErrorHandling.cpp	2006-01-03 11:37:54.000000000 +0000
-@@ -57,7 +57,7 @@
+diff -aurp 2.02/DISE/ErrorHandling.cpp 2.02/DISE/ErrorHandling.cpp
+--- 2.02/DISE/ErrorHandling.cpp	2007-10-16 17:20:28.000000000 +0100
++++ 2.02/DISE/ErrorHandling.cpp	2007-10-16 17:23:47.000000000 +0100
+@@ -57,7 +57,7 @@ void Util::LogException(const char* file
      std::cout << trcMsg.str() << std::endl;
  
  
@@ -555,7 +82,7 @@ diff -Naur --strip-trailing-cr t1/DISE/ErrorHandling.cpp t2/DISE/ErrorHandling.c
  
  void Util::LogError(const CBaseException& excp)
  {
-@@ -69,7 +69,7 @@
+@@ -69,7 +69,7 @@ void Util::LogError(const CBaseException
     
      std::cout << trcMsg.str() << std::endl;
  
@@ -564,39 +91,10 @@ diff -Naur --strip-trailing-cr t1/DISE/ErrorHandling.cpp t2/DISE/ErrorHandling.c
  
  
  
-diff -Naur --strip-trailing-cr t1/DISE/SmartPtr.h t2/DISE/SmartPtr.h
---- t1/DISE/SmartPtr.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/DISE/SmartPtr.h	2006-01-03 11:37:54.000000000 +0000
-@@ -36,6 +36,7 @@
- #ifndef _SMARTPTR_H_
- #define _SMARTPTR_H_
- 
-+#include "ErrorHandling.h"
- 
- namespace Util
- {
-@@ -80,7 +81,7 @@
- 		{
- 		    if (0 == --m_NumReferences)
- 		    {
--			delete m_Ptr;
-+			delete [ ] m_Ptr;
- 			delete this;
- 		    }
- 		}
-@@ -265,7 +266,7 @@
- 	}
- 	catch (...)
- 	{
--		LogCatchAndThrow;
-+		LOGCATCHANDTHROW
- 	}
- }
- 
-diff -Naur --strip-trailing-cr t1/DISE/TimeSpan.h t2/DISE/TimeSpan.h
---- t1/DISE/TimeSpan.h	2006-01-03 11:40:04.000000000 +0000
-+++ t2/DISE/TimeSpan.h	2006-01-03 11:37:54.000000000 +0000
-@@ -42,7 +42,7 @@
+diff -aurp 2.02/DISE.orig/TimeSpan.h 2.02/DISE/TimeSpan.h
+--- 2.02/DISE/TimeSpan.h	2007-10-16 17:20:28.000000000 +0100
++++ 2.02/DISE/TimeSpan.h	2007-10-16 17:21:30.000000000 +0100
+@@ -42,7 +42,7 @@ LOGIC:		// to be added
  
  namespace dass {
      class CCSDSUTime;
@@ -605,3 +103,16 @@ diff -Naur --strip-trailing-cr t1/DISE/TimeSpan.h t2/DISE/TimeSpan.h
  
  namespace Util
  {
+
+diff -aurp 2.02/COMP/WT/Inc/CWTCoder.h 2.02/COMP/WT/Inc/CWTCoder.h
+--- 2.02/COMP/WT/Inc/CWTCoder.h	2007-10-16 17:27:18.000000000 +0100
++++ 2.02/COMP/WT/Inc/CWTCoder.h	2007-10-16 17:28:14.000000000 +0100
+@@ -58,7 +58,7 @@ private:
+ 	
+ 	enum E_constants
+ 	{
+-		e_ExpectedCompressionFactor = 1,	// Expected compression factor, used
++		e_ExpectedCompressionFactor = 1 	// Expected compression factor, used
+ 											// to allocate the first CWBuffer.
+ 	};
+ 
