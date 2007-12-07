@@ -86,10 +86,13 @@ int main( int argc, char* argv[] )
 {
 	// Defaults to view
 	int ax = 0, ay = 0, aw = 0, ah = 0;
+	bool fromlatlon = true;
 
   static struct option longopts[] = {
     { "help",	0, NULL, 'H' },
 		{ "area", 1, 0, 'a' },
+		{ "pixels", 0, 0, 'p' },
+		{ 0, 0, 0, 0 },
   };
 
   bool done = false;
@@ -107,6 +110,9 @@ int main( int argc, char* argv[] )
 					return 1;
 				}
 				break;
+	  case 'p':
+	  	fromlatlon = false;
+		break;
       case -1:
 				done = true;
 				break;
@@ -151,26 +157,48 @@ int main( int argc, char* argv[] )
 		cerr << "Read " << (*i)->data->columns << 'x' << (*i)->data->lines << " image." << endl;
 	*/
 
-	while (!feof(stdin))
-	{
-		double lat, lon;
-		char buf[100];
-		fgets(buf, 99, stdin);
-		sscanf(buf, "%lf,%lf", &lat, &lon);
-		fprintf(stdout, "%f,%f", lat, lon);
-		for (ImageVector::const_iterator i = imgs.begin();
-					i != imgs.end(); ++i)
+	if (fromlatlon)
+		while (!feof(stdin))
+		{
+			double lat, lon;
+			char buf[100];
+			fgets(buf, 99, stdin);
+			sscanf(buf, "%lf,%lf", &lat, &lon);
+			fprintf(stdout, "%f,%f", lat, lon);
+			for (ImageVector::const_iterator i = imgs.begin();
+						i != imgs.end(); ++i)
+			{
+				int x, y;
+				(*i)->coordsToPixels(lat, lon, x, y);
+				fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
+				if (x < 0 || (unsigned)x >= (*i)->data->columns || y < 0 || (unsigned)y >= (*i)->data->lines)
+					fprintf(stdout, ",");
+				else
+					fprintf(stdout, ",%f", (*i)->data->scaled(x, y));
+			}
+			fprintf(stdout, "\n");
+		}
+	else
+		while (!feof(stdin))
 		{
 			int x, y;
-			(*i)->coordsToPixels(lat, lon, x, y);
-			//fprintf(stderr, "  (%f,%f) -> (%d,%d)\n", lat, lon, x, y);
-			if (x < 0 || (unsigned)x >= (*i)->data->columns || y < 0 || (unsigned)y >= (*i)->data->lines)
-				fprintf(stdout, ",");
-			else
-				fprintf(stdout, ",%f", (*i)->data->scaled(x, y));
+			char buf[100];
+			fgets(buf, 99, stdin);
+			sscanf(buf, "%d,%d", &x, &y);
+			fprintf(stdout, "%d,%d", x, y);
+			for (ImageVector::const_iterator i = imgs.begin();
+						i != imgs.end(); ++i)
+			{
+				double lat, lon;
+				(*i)->pixelsToCoords(x, y, lat, lon);
+				fprintf(stderr, "  (%d,%d) -> (%f,%f)\n", x, y, lat, lon);
+				if (x < 0 || (unsigned)x >= (*i)->data->columns || y < 0 || (unsigned)y >= (*i)->data->lines)
+					fprintf(stdout, ",");
+				else
+					fprintf(stdout, ",%f", (*i)->data->scaled(x, y));
+			}
+			fprintf(stdout, "\n");
 		}
-		fprintf(stdout, "\n");
-	}
   
   return(0);
 }
