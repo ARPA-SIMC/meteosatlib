@@ -27,6 +27,7 @@
 #define __MSG_MACHINE_H__
 
 #include <ctype.h>
+#include <stddef.h>
 
 #define char_1 char
 
