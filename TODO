@@ -1,0 +1,51 @@
+(15:44:45) fdg@jabber.linux.it: mi sono ricordata del baco. 
+(15:45:19) fdg@jabber.linux.it: quando dai questa linea di comando 
+(15:45:22) fdg@jabber.linux.it: msat --grib SAFNWC_MSG2_CT___07234_057_MSGEURO_____.h5
+(15:45:37) fdg@jabber.linux.it: lui genera 3 grib tutti con la stessa spectral band 
+(15:45:57) fdg@jabber.linux.it: che quindi non vanno bene perche in archivio si sovrappongono
+
+ - Risolvere problemi nei test (in particolare, la modifica per la francesca
+   rompe i nomi del saf
+
+ - Prossima release
+    - aggiungere il -I e il -L alle opzioni su netcdf nel .pc di msat
+    - fare una release
+
+ - Export verso GeoTiff
+ - Export verso GDAL
+ - Merge con GDAL
+
+ - Export di grigliati regolari in Grib (Met_reproj lo fa e si può prendere
+   come esempio)
+
+ - Esportare i satelliti polari in grigliati lat-lon (data area e passo)
+ - Esportare i satelliti polari in un NetCDF con i vettori lat, lon, dati e
+   attributi vari (come dagli esempi di netcdf)
+    - Vedere cosa succede se si danno a GMT dati coi vettori lat, lon e dati
+      dove lat e lon non sono su grigliati regolari
+
+ - Fare accessor stile HRIT anche per SAF e NetCDF, visto che lo permettono
+
+ - Export verso GeoTiff
+ - Export verso GDAL
+
+ - Gestire immagini non necessariamente meteosat
+    - Usare ORBIT_RADIUS o SEVIRI_CAMERA_H come parametro di proiezione letto e
+      scritto dai vari formati
+
+ - Check the proj library for reprojections
+ - Sentire Graziano se includere il convertitore a TDF
+ - Feature extra:
+    - Uso di proj e riproiezione su coordinate aribtrarie
+ - Leggere da satelliti polari:
+   http://www.eumetsat.int/Home/Main/Access_to_Data/Metop__amp__NOAA_Services/Global_Data_Service/index.htm?l=en
+   (non si sa se da meteosatlib o da dballe)
+
+ = La proiezione GEOS riporta i punti della parte nascosta come dentro la parte
+   normale: cambiare le funzioni della Projection per rimapparli fuori
+ = DIY Reprojection:
+   http://lists.maptools.org/pipermail/gdal-dev/2006-June/009157.html
+ = La proiezione geostazionaria in proj si chiama geos:
+   http://www.remotesensing.org/geotiff/proj_list/geos.html
+   http://www.nabble.com/Missing-projections-t2841710.html
+
