@@ -153,7 +153,7 @@ bool NetCDFProduct(char *inname)
     if (!ivar->add_att("chnum", hri.image[i].get_image_band( ))) return false;
 
     // Write output values
-    if (!ivar->put(hri.image[i].get_image( ), 1, hg, wd)) return false;
+    if (!ivar->put((ncbyte*)hri.image[i].get_image( ), 1, hg, wd)) return false;
 
     // Close NetCDF output
     (void) ncf.close( );

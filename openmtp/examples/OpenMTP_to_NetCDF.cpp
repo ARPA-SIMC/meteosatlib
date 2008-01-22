@@ -182,7 +182,7 @@ bool NetCDFProduct( char *inpath )
   if (!ivar->add_att("scale_factor", 1.0)) return false;
 
   // Write output values
-  if (!ivar->put(omtp.get_image( ), 1, hg, wd)) return false;
+  if (!ivar->put((ncbyte*)omtp.get_image( ), 1, hg, wd)) return false;
 
   // Close NetCDF output
   (void) ncf.close( );

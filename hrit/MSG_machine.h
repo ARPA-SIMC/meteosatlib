@@ -26,6 +26,7 @@
 #ifndef __MSG_MACHINE_H__
 #define __MSG_MACHINE_H__
 
+#include <string.h>
 #include <ctype.h>
 #include <stddef.h>
 
