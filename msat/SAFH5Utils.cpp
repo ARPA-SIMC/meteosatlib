@@ -65,7 +65,7 @@ int readIntAttribute(const H5Object& dataGroup, const std::string& name)
 {
   try
   {
-    DataType intType(H5T_NATIVE_INT, 1);
+    DataType intType(H5T_INT, 1);
     int res;
     dataGroup.openAttribute(name).read(intType, &res);
     return res;
@@ -81,7 +81,7 @@ float readFloatAttribute(const H5Object& dataGroup, const std::string& name)
 {
   try
   {
-    DataType doubleType(H5T_NATIVE_FLOAT, 1);
+    DataType doubleType(H5T_FLOAT, 1);
     float res;
     dataGroup.openAttribute(name).read(doubleType, &res);
     return res;
