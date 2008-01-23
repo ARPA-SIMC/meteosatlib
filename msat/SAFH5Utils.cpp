@@ -49,12 +49,15 @@ struct SAFChannelInfo channel_table[] = {
 string readStringAttribute(const H5Object& dataGroup, const std::string& name)
 {
   try {
-    string res;
     Attribute a = dataGroup.openAttribute(name);
-    DataType dt = a.getDataType();
-    a.read(dt, res);
-    res.resize(dt.getSize());
+    DataType dt(a.getDataType());
+    char buf[a.getStorageSize()];
+    a.read(dt, buf);
+    string res(buf, a.getStorageSize());
     return res;
+  } catch (H5::Exception& e) {
+    e.printError(stderr);
+    throw;
   } catch (...) {
     std::cerr << "File does not have " << name << " attribute..." << std::endl;
     throw;
@@ -65,13 +68,14 @@ int readIntAttribute(const H5Object& dataGroup, const std::string& name)
 {
   try
   {
-    DataType intType(H5T_INT, 1);
+    IntType intType(PredType::NATIVE_INT);
     int res;
     dataGroup.openAttribute(name).read(intType, &res);
     return res;
-  }
-  catch ( ... )
-  {
+  } catch (H5::Exception& e) {
+    e.printError(stderr);
+    throw;
+  } catch ( ... ) {
     std::cerr << "File does not have " << name << " attribute..." << std::endl;
     throw;
   }
@@ -81,7 +85,7 @@ float readFloatAttribute(const H5Object& dataGroup, const std::string& name)
 {
   try
   {
-    DataType doubleType(H5T_FLOAT, 1);
+    FloatType doubleType(PredType::NATIVE_FLOAT);
     float res;
     dataGroup.openAttribute(name).read(doubleType, &res);
     return res;
