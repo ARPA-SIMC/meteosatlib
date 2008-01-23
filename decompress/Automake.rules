@@ -90,9 +90,7 @@ PublicDecompWT_headers = \
     decompress/DISE/CxRITFileHeaderRecords.h \
     decompress/DISE/ErrorHandling.h \
     decompress/DISE/GSDS_Volume_F.h \
-    decompress/DISE/GSDS_Volume_F_Impl.h \
     decompress/DISE/GSDS_Volume_F_NBO.h \
-    decompress/DISE/GSDS_Volume_F_NBO_impl.h \
     decompress/DISE/MSGTime.h \
     decompress/DISE/MSGTime_impl.h \
     decompress/DISE/SmartPtr.h \
