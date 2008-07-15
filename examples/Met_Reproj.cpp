@@ -28,10 +28,11 @@
 #include <config.h>
 
 #include <iostream>
+#include <cstring>
 
 #include <Standard.h>
 #include <Area.h>
-#include <GRIB.h>
+#include <grib/GRIB.h>
 
 #include <netcdfcpp.h>
 #include <unistd.h>

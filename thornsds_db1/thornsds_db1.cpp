@@ -22,6 +22,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cmath>
+#include <limits.h>
 #include <thornsds_db1/thornsds_db1.h>
 
 static char vname[NVAR][VARLEN] = { "V", "N", "T", "U" };

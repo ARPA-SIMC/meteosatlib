@@ -7,6 +7,7 @@
 #include <limits>
 #include <math.h>
 #include <limits.h>
+#include <cstdlib>
 #include "proj/const.h"
 
 // For HRIT satellite IDs

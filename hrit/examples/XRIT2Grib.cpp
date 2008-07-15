@@ -27,10 +27,11 @@
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 
 // Grib Library
 
-#include <GRIB.h>
+#include <grib/GRIB.h>
 
 #define FILL_VALUE         9.999E-20
 #define GRIB_DECIMAL_SCALE 1

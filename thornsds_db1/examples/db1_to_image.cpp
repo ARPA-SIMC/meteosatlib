@@ -30,6 +30,7 @@
 
 #include <config.h>
 
+#include <limits.h>
 #include <iostream>
 #include <thornsds_db1/thornsds_db1.h>
 

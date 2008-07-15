@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <limits.h>
 #include <msg-native/MSG_native.h>
 
 #include <Magick++.h>

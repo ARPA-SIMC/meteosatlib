@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <limits>
 
 #if 0
 #include <cstdio>

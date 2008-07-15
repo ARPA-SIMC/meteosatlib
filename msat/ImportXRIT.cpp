@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 #include <hrit/MSG_HRIT.h>
 #include <glob.h>
 

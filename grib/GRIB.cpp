@@ -27,6 +27,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <cstring>
+#include <cstdlib>
 
 #include "Ebisuzaki.h"
 #include "GRIB.h"

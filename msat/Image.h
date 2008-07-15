@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <msat/proj/Projection.h>
-//#include <iostream>
+#include <memory>
 
 
 namespace msat {

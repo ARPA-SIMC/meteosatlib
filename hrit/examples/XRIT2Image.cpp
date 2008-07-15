@@ -34,6 +34,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cstring>
 
 #include <hrit/MSG_HRIT.h>
 

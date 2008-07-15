@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 
 #include "config.h"
 
@@ -37,7 +38,7 @@
 
 // GRIB Interface
 
-#include <GRIB.h>
+#include <grib/GRIB.h>
 
 #define TITLE "Observation File from MSG-SEVIRI"
 #define INSTITUTION "HIMET"

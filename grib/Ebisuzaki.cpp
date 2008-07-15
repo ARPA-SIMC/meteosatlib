@@ -20,6 +20,7 @@
 #include <cmath>
 #include <cstdarg>
 #include <cstdlib>
+#include <cstring>
 
 static unsigned int mask[9]      = { 0,   1,   3,   7,  15,  31,  63, 127, 255};
 static unsigned int mask2[8]     = { 1,   2,   4,   8,  16,  32,  64, 128};
@@ -5223,7 +5224,8 @@ int setup_user_table(int center, int subcenter, int ptable)
   int i, j, c0, c1, c2;
   static FILE *input;
   static int file_open = 0;
-  char *filename, line[300];
+  const char *filename;
+  char line[300];
 
   if (status == init) {
     for (i = 0; i < 256; i++) {

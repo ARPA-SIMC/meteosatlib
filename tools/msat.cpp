@@ -50,6 +50,7 @@
 #include <vector>
 #include <stdexcept>
 #include <iostream>
+#include <cstdlib>
 
 #include <getopt.h>
 

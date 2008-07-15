@@ -24,6 +24,7 @@
 // SYSTEM INCLUDES
 //
 #include <iostream>
+#include <cstdlib>
 
 // PROJECT INCLUDES
 //

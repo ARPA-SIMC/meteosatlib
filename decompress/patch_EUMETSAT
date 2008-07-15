@@ -1,6 +1,6 @@
 diff -aurp 2.02/COMP/Inc/CImage.h 2.02/COMP/Inc/CImage.h
---- 2.02/COMP/Inc/CImage.h	2007-05-08 12:49:26.000000000 +0200
-+++ 2.02/COMP/Inc/CImage.h	2007-08-03 14:05:55.000000000 +0200
+--- 2.02/COMP/Inc/CImage.h	2008-07-09 14:06:49.000000000 +0200
++++ 2.02/COMP/Inc/CImage.h	2008-04-23 15:17:06.000000000 +0200
 @@ -438,15 +438,15 @@ public:
  
  	// Description:	Similar to std::auto_ptr::size().
@@ -20,9 +20,20 @@ diff -aurp 2.02/COMP/Inc/CImage.h 2.02/COMP/Inc/CImage.h
  
  	// Description:	Set the pixels of the lines from line # i_from to line  
  	//				# i_to included to 0.
+diff -aurp 2.02/COMP/Inc/CQualityInfo.h 2.02/COMP/Inc/CQualityInfo.h
+--- 2.02/COMP/Inc/CQualityInfo.h	2008-07-09 14:06:49.000000000 +0200
++++ 2.02/COMP/Inc/CQualityInfo.h	2008-07-09 14:00:25.000000000 +0200
+@@ -36,6 +36,7 @@ LOGIC:
+ *******************************************************************************/
+ 
+ #include <memory>
++#include <cstdlib>
+ 
+ #include "CDataField.h"
+ #include "RMAErrorHandling.h"
 diff -aurp 2.02/COMP/JPEG/Inc/CJBlock.h 2.02/COMP/JPEG/Inc/CJBlock.h
---- 2.02/COMP/JPEG/Inc/CJBlock.h	2007-05-08 12:49:26.000000000 +0200
-+++ 2.02/COMP/JPEG/Inc/CJBlock.h	2007-08-03 14:11:39.000000000 +0200
+--- 2.02/COMP/JPEG/Inc/CJBlock.h	2008-07-09 14:07:17.000000000 +0200
++++ 2.02/COMP/JPEG/Inc/CJBlock.h	2008-04-23 15:17:06.000000000 +0200
 @@ -190,6 +190,7 @@ public:
  
  
@@ -59,8 +70,8 @@ diff -aurp 2.02/COMP/JPEG/Inc/CJBlock.h 2.02/COMP/JPEG/Inc/CJBlock.h
  {
  	COMP_TRYTHIS_SPEED
 diff -aurp 2.02/COMP/JPEG/Src/CJBlock.cpp 2.02/COMP/JPEG/Src/CJBlock.cpp
---- 2.02/COMP/JPEG/Src/CJBlock.cpp	2007-05-08 12:49:26.000000000 +0200
-+++ 2.02/COMP/JPEG/Src/CJBlock.cpp	2007-08-03 14:12:22.000000000 +0200
+--- 2.02/COMP/JPEG/Src/CJBlock.cpp	2008-07-09 14:07:22.000000000 +0200
++++ 2.02/COMP/JPEG/Src/CJBlock.cpp	2008-04-23 15:17:06.000000000 +0200
 @@ -155,7 +155,7 @@ void CJBlock<T>::forward_DCT (CJBlock<do
  	COMP_CATCHTHIS
  }
@@ -70,10 +81,67 @@ diff -aurp 2.02/COMP/JPEG/Src/CJBlock.cpp 2.02/COMP/JPEG/Src/CJBlock.cpp
  void CJBlock<double>::inverse_DCT (CJBlock<short> &o_shifted_block)
  {
  	COMP_TRYTHIS
+Only in 2.02/COMP/JPEG/Src: libJPEG.a
+Only in 2.02/COMP/Src: libCOMP.a
+diff -aurp 2.02/COMP/T4/Inc/T4Decoder.h 2.02/COMP/T4/Inc/T4Decoder.h
+--- 2.02/COMP/T4/Inc/T4Decoder.h	2008-07-09 14:07:29.000000000 +0200
++++ 2.02/COMP/T4/Inc/T4Decoder.h	2008-07-09 13:59:22.000000000 +0200
+@@ -53,6 +53,7 @@ LOGIC:
+ 
+ #include <string>
+ #include <vector>
++#include <memory>
+ 
+ #include "CDataField.h"
+ #include "CBitBuffer.h"
+Only in 2.02/COMP/T4/Src: libT4.a
+diff -aurp 2.02/COMP/WT/Inc/CWTCoder.h 2.02/COMP/WT/Inc/CWTCoder.h
+--- 2.02/COMP/WT/Inc/CWTCoder.h	2008-07-09 14:07:37.000000000 +0200
++++ 2.02/COMP/WT/Inc/CWTCoder.h	2008-04-23 15:17:06.000000000 +0200
+@@ -58,7 +58,7 @@ private:
+ 	
+ 	enum E_constants
+ 	{
+-		e_ExpectedCompressionFactor = 1,	// Expected compression factor, used
++		e_ExpectedCompressionFactor = 1 	// Expected compression factor, used
+ 											// to allocate the first CWBuffer.
+ 	};
+ 
+Only in 2.02/COMP/WT/Src: libWT.a
+diff -aurp 2.02/DISE/CDataField.h 2.02/DISE/CDataField.h
+--- 2.02/DISE/CDataField.h	2008-07-09 14:07:51.000000000 +0200
++++ 2.02/DISE/CDataField.h	2008-07-09 13:58:39.000000000 +0200
+@@ -53,6 +53,7 @@ LOGIC:		
+ 
+ #include <iostream>
+ #include <string>
++#include <cstring>
+ 
+ #include "SmartPtr.h"		// Util
+ #include "ErrorHandling.h"	// Util
+diff -aurp 2.02/DISE/CxRITAnnotation.cpp 2.02/DISE/CxRITAnnotation.cpp
+--- 2.02/DISE/CxRITAnnotation.cpp	2008-07-09 14:07:51.000000000 +0200
++++ 2.02/DISE/CxRITAnnotation.cpp	2008-07-09 14:01:45.000000000 +0200
+@@ -1,5 +1,6 @@
+ #include <iomanip>
+-#include <stdio.h>
++#include <cstdio>
++#include <cstring>
+ #include "CxRITAnnotation.h"	// DISE
+ 
+ 
 diff -aurp 2.02/DISE/ErrorHandling.cpp 2.02/DISE/ErrorHandling.cpp
---- 2.02/DISE/ErrorHandling.cpp	2007-10-16 17:20:28.000000000 +0100
-+++ 2.02/DISE/ErrorHandling.cpp	2007-10-16 17:23:47.000000000 +0100
-@@ -57,7 +57,7 @@ void Util::LogException(const char* file
+--- 2.02/DISE/ErrorHandling.cpp	2008-07-09 14:07:51.000000000 +0200
++++ 2.02/DISE/ErrorHandling.cpp	2008-07-09 14:02:09.000000000 +0200
+@@ -37,6 +37,7 @@ LOGIC:		// to be added
+ #include <errno.h>
+ #include <stdio.h>
+ #include <string>
++#include <cstring>
+ #include <iostream>
+ #include <sstream>
+ 
+@@ -57,7 +58,7 @@ void Util::LogException(const char* file
      std::cout << trcMsg.str() << std::endl;
  
  
@@ -82,7 +150,7 @@ diff -aurp 2.02/DISE/ErrorHandling.cpp 2.02/DISE/ErrorHandling.cpp
  
  void Util::LogError(const CBaseException& excp)
  {
-@@ -69,7 +69,7 @@ void Util::LogError(const CBaseException
+@@ -69,7 +70,7 @@ void Util::LogError(const CBaseException
     
      std::cout << trcMsg.str() << std::endl;
  
@@ -91,9 +159,21 @@ diff -aurp 2.02/DISE/ErrorHandling.cpp 2.02/DISE/ErrorHandling.cpp
  
  
  
-diff -aurp 2.02/DISE.orig/TimeSpan.h 2.02/DISE/TimeSpan.h
---- 2.02/DISE/TimeSpan.h	2007-10-16 17:20:28.000000000 +0100
-+++ 2.02/DISE/TimeSpan.h	2007-10-16 17:21:30.000000000 +0100
+diff -aurp 2.02/DISE/GSDS_Volume_F_NBO.h 2.02/DISE/GSDS_Volume_F_NBO.h
+--- 2.02/DISE/GSDS_Volume_F_NBO.h	2008-07-09 14:07:51.000000000 +0200
++++ 2.02/DISE/GSDS_Volume_F_NBO.h	2008-07-09 14:01:24.000000000 +0200
+@@ -51,6 +51,7 @@ LOGIC:		
+ *******************************************************************************/
+ 
+ #include <iostream>
++#include <cstring>
+ 
+ #include "ErrorHandling.h"	// Util
+ #include "Types.h"
+Only in 2.02/DISE: libDISE.a
+diff -aurp 2.02/DISE/TimeSpan.h 2.02/DISE/TimeSpan.h
+--- 2.02/DISE/TimeSpan.h	2008-07-09 14:07:51.000000000 +0200
++++ 2.02/DISE/TimeSpan.h	2008-04-23 15:17:06.000000000 +0200
 @@ -42,7 +42,7 @@ LOGIC:		// to be added
  
  namespace dass {
@@ -103,16 +183,14 @@ diff -aurp 2.02/DISE.orig/TimeSpan.h 2.02/DISE/TimeSpan.h
  
  namespace Util
  {
-
-diff -aurp 2.02/COMP/WT/Inc/CWTCoder.h 2.02/COMP/WT/Inc/CWTCoder.h
---- 2.02/COMP/WT/Inc/CWTCoder.h	2007-10-16 17:27:18.000000000 +0100
-+++ 2.02/COMP/WT/Inc/CWTCoder.h	2007-10-16 17:28:14.000000000 +0100
-@@ -58,7 +58,7 @@ private:
- 	
- 	enum E_constants
- 	{
--		e_ExpectedCompressionFactor = 1,	// Expected compression factor, used
-+		e_ExpectedCompressionFactor = 1 	// Expected compression factor, used
- 											// to allocate the first CWBuffer.
- 	};
+diff -aurp 2.02/DISE/UTCTime.cpp 2.02/DISE/UTCTime.cpp
+--- 2.02/DISE/UTCTime.cpp	2008-07-09 14:07:51.000000000 +0200
++++ 2.02/DISE/UTCTime.cpp	2008-07-09 14:02:23.000000000 +0200
+@@ -33,6 +33,7 @@ LOGIC:		// to be added
+ ****  END MODULE HEADER   ***
+ ------------------------------------------------------------------------------------------*/
+ 
++#include <cstring>
+ #include "UTCTime.h"
+ #include "ErrorHandling.h"
  
