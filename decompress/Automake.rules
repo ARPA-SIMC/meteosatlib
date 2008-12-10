@@ -24,14 +24,18 @@ all: decompress/all
 # create symbolic links if an out-of-source build
 decompress/all: \
     decompress/LICENSE \
-    decompress/patch_EUMETSAT \
+    decompress/patch_EUMETSAT_2.02 \
+    decompress/patch_EUMETSAT_2.04 \
     decompress/PublicDecompWT.sh
 	if test $(top_builddir) != $(top_srcdir) ; then \
     rm -f $(top_builddir)/decompress/LICENSE ; \
     $(LN_S) ../$(top_srcdir)/decompress/LICENSE \
         $(top_builddir)/decompress/ ; \
-    rm -f $(top_builddir)/decompress/patch_EUMETSAT ; \
-    $(LN_S) ../$(top_srcdir)/decompress/patch_EUMETSAT \
+    rm -f $(top_builddir)/decompress/patch_EUMETSAT_2.02 ; \
+    $(LN_S) ../$(top_srcdir)/decompress/patch_EUMETSAT_2.02 \
+        $(top_builddir)/decompress/ ; \
+    rm -f $(top_builddir)/decompress/patch_EUMETSAT_2.04 ; \
+    $(LN_S) ../$(top_srcdir)/decompress/patch_EUMETSAT_2.04 \
         $(top_builddir)/decompress/ ; \
     rm -f $(top_builddir)/decompress/PublicDecompWT.sh ; \
     $(LN_S) ../$(top_srcdir)/decompress/PublicDecompWT.sh \
@@ -41,7 +45,8 @@ fi
 
 dist_noinst_DATA += \
     decompress/LICENSE \
-    decompress/patch_EUMETSAT \
+    decompress/patch_EUMETSAT_2.02 \
+    decompress/patch_EUMETSAT_2.04 \
     decompress/PublicDecompWT.sh
 
 PublicDecompWT_headers = \
