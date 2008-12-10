@@ -22,6 +22,8 @@
 #include "tut.h"
 #include "tut_reporter.h"
 #include <signal.h>
+#include <cstring>
+#include <cstdlib>
 
 namespace tut
 {

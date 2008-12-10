@@ -21,6 +21,7 @@
 
 #include "tut.h"
 #include <msat/Image.h>
+#include <cstdlib>
 
 #define TESTGRP(name) \
 typedef test_group<name ## _shar> tg; \
