@@ -60,6 +60,7 @@ msg_native_examples_nativedump_LDADD = \
 msg_native_examples_nativedump_SOURCES = \
     msg-native/examples/nativedump.cpp
 
+msg_native_examples_native2Image_CXXFLAGS = $(MAGICKPP_CFLAGS)
 msg_native_examples_native2Image_LDADD = \
     -lMagick++ \
     hrit/libhrit.la \

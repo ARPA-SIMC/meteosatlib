@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <math.h>
 #include <limits>
+#include <cstring>
 
 namespace msat {
 

@@ -95,6 +95,28 @@ AC_LANG_CPLUSPLUS
 dnl --------------------------------------------------------------------
 dnl Checks for libraries.
 
+PKG_PROG_PKG_CONFIG()
+
+dnl ImageMagick++
+
+PKG_CHECK_EXISTS(ImageMagick++,[
+    have_libmagick=yes
+    AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
+    AC_DEFINE([MSAT_HAVE_MAGICKPP], 1, [Magick++ functions are available])
+], [
+    if test "$enable_hrit" == "yes"; then
+        enable_hrit="no"
+        AC_MSG_WARN("*** hrit support disabled for lack of libmagick++")
+    fi
+    if test "$enable_thornsds_db1" == "yes"; then
+        enable_thornsds_db1="no"
+        AC_MSG_WARN("*** thornsds_db1 support disabled for lack of libmagick++")
+    fi
+])
+PKG_CHECK_MODULES(MAGICKPP,Magick++)
+
+dnl NetCDF3 (which does not use pkg-config)
+
 if test -d /usr/include/netcdf-3 ; then
     CPPFLAGS="$CPPFLAGS -I/usr/include/netcdf-3"
 fi
@@ -116,8 +138,6 @@ AC_LINK_IFELSE(
     [AC_MSG_RESULT([no])])
 LIBS="$savedLIBS"
 
-AC_CHECK_LIB([Magick++], [ReadImage], [have_libmagick=yes])
-
 AC_CHECK_LIB([hdf5], [H5_init_library], [have_libhdf5=yes])
 dnl AC_CHECK_LIB([hdf5_cpp], [Exception], [have_libhdf5cpp=yes])
 
@@ -137,22 +157,6 @@ fi
 
 dnl --------------------------------------------------------------------
 dnl Checks for header files.
-
-AC_CHECK_HEADER([Magick++.h],
-    [
-     	AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
-     	AC_DEFINE([MSAT_HAVE_MAGICKPP], 1, [Magick++ functions are available])
-    ],
-    [
-    if test "$enable_hrit" == "yes"; then
-        enable_hrit="no"
-        AC_MSG_WARN("*** hrit support disabled")
-    fi
-    if test "$enable_thornsds_db1" == "yes"; then
-        enable_thornsds_db1="no"
-        AC_MSG_WARN("*** thornsds_db1 support disabled")
-    fi
-])
 
 AC_CHECK_HEADER([netcdfcpp.h],
     [
@@ -289,7 +293,6 @@ fi
 
 if test x"$have_libmagick" = x"yes"; then
 	PC_MSAT_REQS="$PC_MSAT_REQS ImageMagick++"
-	PC_MSAT_LIBS="$PC_MSAT_LIBS -lMagick++"
 fi
 
 if test x"$have_gdal" = x"yes"; then

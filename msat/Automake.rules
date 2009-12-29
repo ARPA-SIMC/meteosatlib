@@ -64,6 +64,7 @@ dist_msat_proj_include_HEADERS = \
 # - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
 # - interfaces added -> inc AGE
 # - interfaces removed -> AGE = 0
+msat_libmsat_la_CXXFLAGS =
 msat_libmsat_la_LDFLAGS = \
     -version-info 0:0:0
 msat_libmsat_la_LIBADD = \
@@ -111,10 +112,9 @@ msat_libmsat_la_SOURCES += \
 endif
 
 if HAVE_MAGICK
-msat_libmsat_la_LIBADD += \
-    -lMagick++
-msat_libmsat_la_SOURCES += \
-    msat/ExportImage.cpp
+msat_libmsat_la_CXXFLAGS += $(MAGICKPP_CFLAGS)
+msat_libmsat_la_LIBADD += $(MAGICKPP_LIBS)
+msat_libmsat_la_SOURCES += msat/ExportImage.cpp
 endif
 
 if GDAL

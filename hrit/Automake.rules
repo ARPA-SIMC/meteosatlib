@@ -147,6 +147,7 @@ hrit_examples_XRIT2Grib_SOURCES = \
     grib/GRIB.cpp \
     hrit/examples/XRIT2Grib.cpp
 
+hrit_examples_XRIT2Image_CPPFLAGS = $(MAGICKPP_CFLAGS)
 hrit_examples_XRIT2Image_LDADD = \
     hrit/libhrit.la \
     -lMagick++
