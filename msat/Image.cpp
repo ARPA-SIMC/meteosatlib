@@ -410,6 +410,7 @@ std::string Image::channelName(int spacecraftID, int channelID)
 				case MSG_SEVIRI_1_5_IR_13_4:	return "IR_134";
 				case MSG_SEVIRI_1_5_HRV:			return "HRV";
 				// SAF special cases
+				case 106:
 				case 546:											return "CRR";
 			}
 			break;
@@ -443,6 +444,7 @@ std::string Image::channelUnit(int spacecraftID, int channelID)
 				case MSG_SEVIRI_1_5_IR_13_4:	return "K";
 				case MSG_SEVIRI_1_5_HRV:			return "mW m^-2 sr^-1 (cm^-1)^-1";
 				// SAF special cases
+				case 106:
 				case 546:											return "NUMERIC";
 			}
 			break;

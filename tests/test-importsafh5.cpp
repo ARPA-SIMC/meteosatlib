@@ -50,7 +50,7 @@ static void checkGeneralImageData(Image& img)
 	proj::Geos* p = dynamic_cast<proj::Geos*>(img.proj.get());
 	gen_ensure(p != 0);
 	gen_ensure_equals(p->sublon, 0);
-	gen_ensure_equals(img.channel_id, 546);
+	gen_ensure_equals(img.channel_id, 106);
 	gen_ensure_equals(img.column_offset, 1856);
 	gen_ensure_equals(img.line_offset, 1856);
 	gen_ensure_equals(img.spacecraft_id, 55); // it is GP_SC_ID, but shouldn't it be 55?
