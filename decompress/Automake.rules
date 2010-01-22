@@ -49,80 +49,80 @@ dist_noinst_DATA += \
     decompress/patch_EUMETSAT_2.04 \
     decompress/PublicDecompWT.sh
 
-PublicDecompWT_headers = \
-    decompress/COMP/Inc/Bitlevel.h \
-    decompress/COMP/Inc/CBlock.h \
-    decompress/COMP/Inc/CBuffer.h \
-    decompress/COMP/Inc/CImage.h \
-    decompress/COMP/Inc/Compress.h \
-    decompress/COMP/Inc/CQualityInfo.h \
-    decompress/COMP/Inc/CQualityMeasures.h \
-    decompress/COMP/Inc/RMAErrorHandling.h \
-    decompress/COMP/JPEG/Inc/CHcodec.h \
-    decompress/COMP/JPEG/Inc/CHOptim.h \
-    decompress/COMP/JPEG/Inc/CHufftables.h \
-    decompress/COMP/JPEG/Inc/CJBlock.h \
-    decompress/COMP/JPEG/Inc/CJPEGCoder.h \
-    decompress/COMP/JPEG/Inc/CJPEGDecoder.h \
-    decompress/COMP/JPEG/Inc/CJPEGLossLessCoder.h \
-    decompress/COMP/JPEG/Inc/CJPEGLossyCoder.h \
-    decompress/COMP/JPEG/Inc/CompressJPEG.h \
-    decompress/COMP/JPEG/Inc/CQuantizationTable.h \
-    decompress/COMP/JPEG/Inc/JPEGConst.h \
-    decompress/COMP/T4/Inc/CBitBuffer.h \
-    decompress/COMP/T4/Inc/CompressT4.h \
-    decompress/COMP/T4/Inc/T4Coder.h \
-    decompress/COMP/T4/Inc/T4Codes.h \
-    decompress/COMP/T4/Inc/T4Decoder.h \
-    decompress/COMP/WT/Inc/CACCoder.h \
-    decompress/COMP/WT/Inc/CACDecoder.h \
-    decompress/COMP/WT/Inc/CACModel.h \
-    decompress/COMP/WT/Inc/CompressWT.h \
-    decompress/COMP/WT/Inc/CVLCCodec.h \
-    decompress/COMP/WT/Inc/CVLCCoder.h \
-    decompress/COMP/WT/Inc/CVLCDecoder.h \
-    decompress/COMP/WT/Inc/CWBlock.h \
-    decompress/COMP/WT/Inc/CWTCoder.h \
-    decompress/COMP/WT/Inc/CWTDecoder.h \
-    decompress/COMP/WT/Inc/WTConst.h \
-    decompress/DISE/CDataField.h \
-    decompress/DISE/CSpacecraftID.h \
-    decompress/DISE/CSpectralChannelID.h \
-    decompress/DISE/CxRITAnnotation.h \
-    decompress/DISE/CxRITFile.h \
-    decompress/DISE/CxRITFileCompressed.h \
-    decompress/DISE/CxRITFileDecompressed.h \
-    decompress/DISE/CxRITFileHeaderRecords.h \
-    decompress/DISE/ErrorHandling.h \
-    decompress/DISE/GSDS_Volume_F.h \
-    decompress/DISE/GSDS_Volume_F_NBO.h \
-    decompress/DISE/MSGTime.h \
-    decompress/DISE/MSGTime_impl.h \
-    decompress/DISE/SmartPtr.h \
-    decompress/DISE/TimeSpan.h \
-    decompress/DISE/Types.h \
-    decompress/DISE/UTCTime.h \
-    decompress/DISE/YYYYMMDDhhmm.h
+#PublicDecompWT_headers = \
+#    decompress/COMP/Inc/Bitlevel.h \
+#    decompress/COMP/Inc/CBlock.h \
+#    decompress/COMP/Inc/CBuffer.h \
+#    decompress/COMP/Inc/CImage.h \
+#    decompress/COMP/Inc/Compress.h \
+#    decompress/COMP/Inc/CQualityInfo.h \
+#    decompress/COMP/Inc/CQualityMeasures.h \
+#    decompress/COMP/Inc/RMAErrorHandling.h \
+#    decompress/COMP/JPEG/Inc/CHcodec.h \
+#    decompress/COMP/JPEG/Inc/CHOptim.h \
+#    decompress/COMP/JPEG/Inc/CHufftables.h \
+#    decompress/COMP/JPEG/Inc/CJBlock.h \
+#    decompress/COMP/JPEG/Inc/CJPEGCoder.h \
+#    decompress/COMP/JPEG/Inc/CJPEGDecoder.h \
+#    decompress/COMP/JPEG/Inc/CJPEGLossLessCoder.h \
+#    decompress/COMP/JPEG/Inc/CJPEGLossyCoder.h \
+#    decompress/COMP/JPEG/Inc/CompressJPEG.h \
+#    decompress/COMP/JPEG/Inc/CQuantizationTable.h \
+#    decompress/COMP/JPEG/Inc/JPEGConst.h \
+#    decompress/COMP/T4/Inc/CBitBuffer.h \
+#    decompress/COMP/T4/Inc/CompressT4.h \
+#    decompress/COMP/T4/Inc/T4Coder.h \
+#    decompress/COMP/T4/Inc/T4Codes.h \
+#    decompress/COMP/T4/Inc/T4Decoder.h \
+#    decompress/COMP/WT/Inc/CACCoder.h \
+#    decompress/COMP/WT/Inc/CACDecoder.h \
+#    decompress/COMP/WT/Inc/CACModel.h \
+#    decompress/COMP/WT/Inc/CompressWT.h \
+#    decompress/COMP/WT/Inc/CVLCCodec.h \
+#    decompress/COMP/WT/Inc/CVLCCoder.h \
+#    decompress/COMP/WT/Inc/CVLCDecoder.h \
+#    decompress/COMP/WT/Inc/CWBlock.h \
+#    decompress/COMP/WT/Inc/CWTCoder.h \
+#    decompress/COMP/WT/Inc/CWTDecoder.h \
+#    decompress/COMP/WT/Inc/WTConst.h \
+#    decompress/DISE/CDataField.h \
+#    decompress/DISE/CSpacecraftID.h \
+#    decompress/DISE/CSpectralChannelID.h \
+#    decompress/DISE/CxRITAnnotation.h \
+#    decompress/DISE/CxRITFile.h \
+#    decompress/DISE/CxRITFileCompressed.h \
+#    decompress/DISE/CxRITFileDecompressed.h \
+#    decompress/DISE/CxRITFileHeaderRecords.h \
+#    decompress/DISE/ErrorHandling.h \
+#    decompress/DISE/GSDS_Volume_F.h \
+#    decompress/DISE/GSDS_Volume_F_NBO.h \
+#    decompress/DISE/MSGTime.h \
+#    decompress/DISE/MSGTime_impl.h \
+#    decompress/DISE/SmartPtr.h \
+#    decompress/DISE/TimeSpan.h \
+#    decompress/DISE/Types.h \
+#    decompress/DISE/UTCTime.h \
+#    decompress/DISE/YYYYMMDDhhmm.h
+#
+#PublicDecompWT_libs = \
+#    decompress/COMP/JPEG/Src/libJPEG.a \
+#    decompress/COMP/Src/libCOMP.a \
+#    decompress/COMP/T4/Src/libT4.a \
+#    decompress/COMP/WT/Src/libWT.a \
+#    decompress/DISE/libDISE.a
 
-PublicDecompWT_libs = \
-    decompress/COMP/JPEG/Src/libJPEG.a \
-    decompress/COMP/Src/libCOMP.a \
-    decompress/COMP/T4/Src/libT4.a \
-    decompress/COMP/WT/Src/libWT.a \
-    decompress/DISE/libDISE.a
-
-clean-local:
-	test -d decompress/COMP && $(MAKE) -C decompress/COMP clean || :
-	test -d decompress/DISE && $(MAKE) -C decompress/DISE clean || :
+#clean-local:
+#	test -d decompress/COMP && $(MAKE) -C decompress/COMP clean || :
+#	test -d decompress/DISE && $(MAKE) -C decompress/DISE clean || :
 
 distclean-local:
 	cd decompress && rm -rf COMP DISE Image Inc TestData xRITDecompress
 	cd decompress && rm -f README.txt XRitDecomp.* pdwt.patched
 
-install-data-local: $(PublicDecompWT_libs) $(PublicDecompWT_headers)
-	$(mkinstalldirs) $(DESTDIR)$(includedir)/PublicDecompWT
-	$(INSTALL) $(PublicDecompWT_headers) $(DESTDIR)$(includedir)/PublicDecompWT
-	$(INSTALL) $(PublicDecompWT_libs) $(DESTDIR)$(libdir)
+#install-data-local: $(PublicDecompWT_libs) $(PublicDecompWT_headers)
+#	$(mkinstalldirs) $(DESTDIR)$(includedir)/PublicDecompWT
+#	$(INSTALL) $(PublicDecompWT_headers) $(DESTDIR)$(includedir)/PublicDecompWT
+#	$(INSTALL) $(PublicDecompWT_libs) $(DESTDIR)$(libdir)
 
 ## -fin-
 ## vim:syn=automake:
