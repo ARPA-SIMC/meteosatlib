@@ -18,7 +18,7 @@
 ## Include this file in the top-level Makefile.am with an include
 ## directive.
 
-lib_LTLIBRARIES += \
+noinst_LTLIBRARIES += \
     grib/libgrib.la
 
 grib_includedir = \
