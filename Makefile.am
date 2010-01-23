@@ -140,4 +140,8 @@ pkgconfig_DATA += libhrit.pc
 m4_DATA += libhrit.m4
 endif
 
+if OPENMTP
+pkgconfig_DATA += libopenmtp.pc
+endif
+
 ## -fin-
