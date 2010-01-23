@@ -335,6 +335,7 @@ AC_CONFIG_FILES([
     libmsat.pc
     libhrit.pc
     libgrib.pc
+    libopenmtp.pc
 ])
 AC_OUTPUT
 

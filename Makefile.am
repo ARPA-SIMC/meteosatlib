@@ -105,7 +105,8 @@ EXTRA_DIST += \
     libhrit.m4 \
     libhrit.pc.in \
     libgrib.m4 \
-    libgrib.pc.in
+    libgrib.pc.in \
+    libopenmtp.pc.in
 
 AUX_DIST = \
     $(ac_aux_dir)/compile \
