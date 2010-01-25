@@ -139,6 +139,13 @@ public:
 	// Image data
 	ImageData* data;
 
+	/// Well-Known Text with the projection information (see GDAL)
+	std::string projWKT;
+
+	/// Geotransformation matrix (see GDAL)
+	double geotransform[6];
+
+
 	Image() : quality('_'), data(0) {}
 	~Image();
 
@@ -210,6 +217,12 @@ public:
 	std::auto_ptr<Image> reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const proj::MapBox& box) const;
 #endif
 
+	/// Pixel size in "metres" from column resolution in microradians
+	static double pixelHSizeFromCFAC(double cfac);
+
+	/// Pixel size in "metres" from line resolution in microradians
+	static double pixelVSizeFromLFAC(double lfac);
+
 	/// Earth dimension scanned by Seviri in the X direction
 	static int seviriDXFromColumnRes(double column_res);
 
@@ -240,6 +253,9 @@ public:
 
 	/// Get the measure unit name from the given WMO Common code table C-5 satellite ID and channel ID
 	static std::string channelUnit(int spacecraftID, int channelID);
+
+	/// Get the WKT description for the Spaceview projection
+	static std::string spaceviewWKT(double sublon = 0.0);
 };
 
 /// Interface for image data of various types

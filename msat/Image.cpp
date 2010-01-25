@@ -1,5 +1,7 @@
 #include "Image.h"
 
+#include <gdal/ogr_spatialref.h>
+
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -164,6 +166,37 @@ double Image::pixelHSize() const
 double Image::pixelVSize() const
 {
 	return (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/line_res) * M_PI / 180 );
+}
+
+// THIS is the way to get to ColumnDirGridStep and LineDirGridStep
+double Image::pixelHSizeFromCFAC(double cfac)
+{
+	int test_cfac = round(cfac * exp2(16));
+	//fprintf(stderr, "Band::pixelHSizeFromCFAC cheat %d", test_cfac);
+	switch (test_cfac)
+	{
+		// Handle known values
+		case 13642337: return METEOSAT_PIXELSIZE_X;
+		case -13642337: return -METEOSAT_PIXELSIZE_X;
+		case 40927000: return METEOSAT_PIXELSIZE_X_HRV;
+		case -40927000: return -METEOSAT_PIXELSIZE_X_HRV;
+		default: 
+			return (ORBIT_RADIUS - EARTH_RADIUS) * tan(M_PI / 180.0 / cfac) * 1000.0;
+	}
+}
+double Image::pixelVSizeFromLFAC(double lfac)
+{
+	int test_lfac = round(lfac * exp2(16));
+	switch (test_lfac)
+	{
+		// Handle known values
+		case 13642337: return METEOSAT_PIXELSIZE_Y;
+		case -13642337: return -METEOSAT_PIXELSIZE_Y;
+		case 40927000: return METEOSAT_PIXELSIZE_Y_HRV;
+		case -40927000: return -METEOSAT_PIXELSIZE_Y_HRV;
+		default:
+			return (ORBIT_RADIUS - EARTH_RADIUS) * tan(M_PI / 180.0 / lfac) * 1000.0;
+	}
 }
 
 int Image::seviriDXFromColumnRes(double column_res)
@@ -451,6 +484,42 @@ std::string Image::channelUnit(int spacecraftID, int channelID)
 		}
 	}
 	return "unknown";
+}
+
+std::string Image::spaceviewWKT(double sublon)
+{
+	// Also add GDAL projection (see the msg driver they have)
+	// Taken from GDAL's msgdataset
+	OGRSpatialReference osr;
+	osr.SetGEOS(sublon, ORBIT_RADIUS_FOR_GDAL, 0, 0);
+	//osr.SetWellKnownGeogCS("WGS84"); // Temporary line to satisfy ERDAS (otherwise the ellips is "unnamed"). Eventually this should become the custom a and b ellips (CGMS).
+
+	// The following are 3 different try-outs for also setting the ellips a and b parameters.
+	// We leave them out for now however because this does not work. In gdalwarp, when choosing some
+	// specific target SRS, the result is an error message:
+	// 
+	// ERROR 1: geocentric transformation missing z or ellps
+	// ERROR 1: GDALWarperOperation::ComputeSourceWindow() failed because
+	// the pfnTransformer failed.
+	// 
+	// I can't explain the reason for the message at this time (could be a problem in the way the SRS is set here,
+	// but also a bug in Proj.4 or GDAL.
+	osr.SetGeogCS( NULL, NULL, NULL, 6378169, 295.488065897, NULL, 0, NULL, 0 );
+
+	/*
+	   oSRS.SetGeogCS( "unnamed ellipse", "unknown", "unnamed", 6378169, 295.488065897, "Greenwich", 0.0);
+
+	   if( oSRS.importFromProj4("+proj=geos +h=35785831 +a=6378169 +b=6356583.8") == OGRERR_NONE )
+	   {
+	   oSRS.exportToWkt( &(poDS->pszProjection) );
+	   }
+	   */
+
+	char* projstring;
+	osr.exportToWkt(&projstring);
+	string res = projstring;
+	OGRFree(projstring);
+	return res;
 }
 
 std::auto_ptr<Image> Image::rescaled(size_t width, size_t height) const
