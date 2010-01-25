@@ -408,6 +408,8 @@ public:
 		for (int i = 1; i <= poDataset->GetRasterCount(); ++i)
 		{
 			auto_ptr<Image> img = importGDALBand(poDataset, i);
+			img->projWKT = poDataset->GetProjectionRef();
+			poDataset->GetGeoTransform(img->geotransform);
 			img->setQualityFromPathname(filename);
 			// Use defaultFilename to avoid exposing the original image file name,
 			// which could cause unexpected leakage of private information

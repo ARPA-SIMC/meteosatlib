@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
+#include <cstdlib>
 
 #include <math.h>
 
@@ -202,6 +203,56 @@ auto_ptr<Image> ImportSAFH5(const H5::Group& group, const std::string& name)
   img->defaultFilename = "SAF_" + regionName + "_" + name + "_" + datestring;
   img->shortName = name;
   img->unit = "NUMERIC";
+
+
+	// Compute the GDAL-friendly geocoding information
+
+	// Get projection name and subsatellite longitude
+	{
+		string proj = readStringAttribute(group, "PROJECTION_NAME");
+		if (proj.size() < 8)
+			throw std::runtime_error("projection name '"+proj+"' is too short to contain subsatellite longitude");
+
+		if (proj.substr(0, 6) != "GEOS<+")
+			throw std::runtime_error("projection name '"+proj+"' does not begin with 'GEOS<+'");
+
+		// Extract subsatellite longitude
+		const char* s = proj.c_str() + 6;
+		// skip initial zeros
+		while (*(s+1) && *(s+1) == '0') ++s;
+		double sublon;
+		if (sscanf(s, "%lf>", &sublon) != 1)
+			throw std::runtime_error("cannot read subsatellite longitude from projection name '" + proj + "' at '" + s + "'");
+
+		img->projWKT = Image::spaceviewWKT(sublon);
+	}
+
+	// SAF COFF and LOFF represent the distance in pixels from the top-left
+	// cropped image point to the subsatellite point, increasing with increasing
+	// latitudes and increasing longitudes
+	const int column_offset = 1856;
+	const int line_offset = 1856;
+	const int x0 = 1856 - readIntAttribute(group, "COFF") + 1;
+	const int y0 = 1856 - readIntAttribute(group, "LOFF") + 1;
+
+	// Compute geotransform matrix
+
+	// Only valid for non-HRV
+	const double psx = Image::pixelHSizeFromCFAC(abs(readIntAttribute(group, "CFAC")) * exp2(-16));
+	const double psy = Image::pixelVSizeFromLFAC(abs(readIntAttribute(group, "LFAC")) * exp2(-16));
+#if 0
+	if (readIntAttribute(group, "CFAC") != 13642337)
+		throw std::runtime_error("CFAC attribute is not 13642337");
+	if (readIntAttribute(group, "LFAC") != 13642337)
+		throw std::runtime_error("CFAC attribute is not 13642337");
+#endif
+
+	img->geotransform[0] = -(column_offset - x0) * psx;
+	img->geotransform[3] = (line_offset   - y0) * psy;
+	img->geotransform[1] = psx;
+	img->geotransform[5] = -psy;
+	img->geotransform[2] = 0.0;
+	img->geotransform[4] = 0.0;
 
   return img;
 }
