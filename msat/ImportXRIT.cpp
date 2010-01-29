@@ -382,6 +382,39 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			img->spacecraft_id = Image::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
 			img->unit = Image::channelUnit(img->spacecraft_id, img->channel_id);
 
+			img->projWKT = Image::spaceviewWKT(header.image_navigation->subsatellite_longitude);
+
+			double pixelSizeX, pixelSizeY;
+			int column_offset, line_offset, x0 = 0, y0 = 0;
+			if (img->channel_id == MSG_SEVIRI_1_5_HRV)
+			{
+							pixelSizeX = 1000 * PRO_data.prologue->image_description.ReferenceGridHRV.ColumnDirGridStep;
+							pixelSizeY = 1000 * PRO_data.prologue->image_description.ReferenceGridHRV.LineDirGridStep;
+
+							// Since we are omitting the first (11136-UpperWestColumnActual) of the
+							// rotated image, we need to shift the column offset accordingly
+							// FIXME: don't we have a way to compute this from the HRIT data?
+							//img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
+							column_offset = 5568;
+							line_offset = 5568;
+			} else {
+							pixelSizeX = 1000 * PRO_data.prologue->image_description.ReferenceGridVIS_IR.ColumnDirGridStep;
+							pixelSizeY = 1000 * PRO_data.prologue->image_description.ReferenceGridVIS_IR.LineDirGridStep;
+
+							column_offset = 1856;
+							line_offset = 1856;
+			}
+			//img->geotransform[0] = -(band->column_offset - band->x0) * band->column_res;
+			//img->geotransform[3] = -(band->line_offset   - band->y0) * band->line_res;
+			img->geotransform[0] = -(column_offset - x0) * fabs(pixelSizeX);
+			img->geotransform[3] = (line_offset   - y0) * fabs(pixelSizeY);
+			//img->geotransform[1] = band->column_res;
+			//img->geotransform[5] = band->line_res;
+			img->geotransform[1] = fabs(pixelSizeX);
+			img->geotransform[5] = -fabs(pixelSizeY);
+			img->geotransform[2] = 0.0;
+			img->geotransform[4] = 0.0;
+
 			// See if the image needs to be rotated
 			data->swapX = header.image_navigation->column_scaling_factor < 0;
 			data->swapY = header.image_navigation->line_scaling_factor < 0;

@@ -66,7 +66,7 @@ class MSG_grid {
   public:
     size_t read_from( unsigned const char_1 *buff );
     friend std::ostream& operator<< ( std::ostream& os, MSG_grid &g );
-  private:
+//  private:
     int_4                      NumberofLines;
     int_4                      NumberofColumns;
     real_4                     LineDirGridStep;
