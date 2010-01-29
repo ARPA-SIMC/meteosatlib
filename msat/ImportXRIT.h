@@ -2,6 +2,7 @@
 #define MSATLIB_XRIT_IMPORT_H
 
 #include <msat/Image.h>
+#include <msat/xrit/fileaccess.h>
 #include <hrit/MSG_data_image.h>
 #include <memory>
 #include <vector>
@@ -11,25 +12,7 @@ struct MSG_data;
 
 namespace msat {
 
-struct XRITImportOptions
-{
-  std::string directory;
-  std::string resolution;
-  std::string productid1;
-  std::string productid2;
-  std::string timing;
-
-  XRITImportOptions() : directory(".") {}
-  XRITImportOptions(const std::string& filename);
-
-  void ensureComplete() const;
-
-  std::string prologueFile() const;
-  std::string epilogueFile() const;
-  std::vector<std::string> segmentFiles() const;
-
-  std::string toString() const;
-};
+typedef xrit::FileAccess XRITImportOptions;
 
 struct HRITImageData : public ImageData
 {
@@ -144,7 +127,11 @@ struct HRITImageData : public ImageData
   virtual void crop(size_t x, size_t y, size_t width, size_t height);
 };
 
-bool isXRIT(const std::string& filename);
+static inline bool isXRIT(const std::string& filename)
+{
+  return xrit::isValid(filename);
+}
+
 std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts);
 std::auto_ptr<ImageImporter> createXRITImporter(const std::string& filename);
 

@@ -59,6 +59,11 @@ dist_msat_proj_include_HEADERS = \
     msat/proj/Polar.h \
     msat/proj/Projection.h
 
+msat_xrit_includedir = \
+    $(includedir)/msat/xrit
+dist_msat_xrit_include_HEADERS = \
+    msat/xrit/fileaccess.h
+
 # CURRENT:REVISION:AGE
 # - library source changed -> inc REVISION
 # - interfaces added/removed/changed -> inc CURRENT, REVISION = 0
@@ -87,6 +92,7 @@ if HRIT
 msat_libmsat_la_LIBADD += \
     hrit/libhrit.la
 msat_libmsat_la_SOURCES += \
+    msat/xrit/fileaccess.cpp \
     msat/ImportXRIT.cpp
 endif
 
