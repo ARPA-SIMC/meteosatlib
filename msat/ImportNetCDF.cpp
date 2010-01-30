@@ -142,6 +142,17 @@ class NetCDFImageImporter : public ImageImporter
 			throw std::runtime_error(msg.str());
 		}
 		img.proj.reset(new proj::Geos(ftmp, ORBIT_RADIUS));
+		img.projWKT = Image::spaceviewWKT(ftmp);
+
+		// Only valid for non-HRV
+		const double psx = Image::pixelHSizeFromCFAC(fabs(img.column_res));
+		const double psy = Image::pixelVSizeFromLFAC(fabs(img.line_res));
+		img.geotransform[0] = -(img.column_offset - img.x0) * psx;
+		img.geotransform[3] =  (img.line_offset   - img.y0) * psy;
+		img.geotransform[1] = psx;
+		img.geotransform[5] = -psy;
+		img.geotransform[2] = 0.0;
+		img.geotransform[4] = 0.0;
 
 		stmp = GET(string, "Time");
 		if (sscanf(stmp.c_str(), "%04d-%02d-%02d %02d:%02d:00 UTC",
