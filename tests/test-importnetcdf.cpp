@@ -150,8 +150,8 @@ void to::test<4>()
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	gen_ensure_similar(img->data->slope, 0.01, 0.0001);
-	gen_ensure_similar(img->data->offset, -1, 0.0001);
-	gen_ensure_equals(img->data->bpp, 15);
+	gen_ensure_similar(img->data->offset, -205.6, 0.0001);
+	gen_ensure_equals(img->data->bpp, 14);
 	gen_ensure_equals(img->data->scalesToInt, true);
 
 	test_tag("fullNetCDFRecodedGrib");
