@@ -136,7 +136,7 @@ AC_LINK_IFELSE(
     [AC_MSG_RESULT([yes])
     have_libnetcdf_c__=yes],
     [AC_MSG_RESULT([no])])
-LIBS="$savedLIBS"
+LIBS="$saved_LIBS"
 
 AC_CHECK_LIB([hdf5], [H5_init_library], [have_libhdf5=yes])
 dnl AC_CHECK_LIB([hdf5_cpp], [Exception], [have_libhdf5cpp=yes])
