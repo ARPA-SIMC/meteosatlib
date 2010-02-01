@@ -199,6 +199,26 @@ double Image::pixelVSizeFromLFAC(double lfac)
 	}
 }
 
+double Image::CFACFromPixelHSize(double psx)
+{
+	// Handle known values
+	//fprintf(stderr, "Band::CFACFromPixelHSize cheat %f\n", psx - METEOSAT_PIXELSIZE_X);
+	if (fabs(psx - METEOSAT_PIXELSIZE_X) < 0.001) return 13642337*exp2(-16);
+	if (fabs(psx - -METEOSAT_PIXELSIZE_X) < 0.001) return -13642337*exp2(-16);
+	if (fabs(psx - METEOSAT_PIXELSIZE_X_HRV) < 0.001) return 40927000*exp2(-16);
+	if (fabs(psx - -METEOSAT_PIXELSIZE_X_HRV) < 0.001) return -40927000*exp2(-16);
+	return M_PI / atan(psx / ((ORBIT_RADIUS - EARTH_RADIUS) * 1000.0)) / 180.0;
+}
+
+double Image::LFACFromPixelVSize(double psy)
+{
+	if (fabs(psy - METEOSAT_PIXELSIZE_Y) < 0.001) return 13642337*exp2(-16);
+	if (fabs(psy - -METEOSAT_PIXELSIZE_Y) < 0.001) return -13642337*exp2(-16);
+	if (fabs(psy - METEOSAT_PIXELSIZE_Y_HRV) < 0.001) return 40927000*exp2(-16);
+	if (fabs(psy - -METEOSAT_PIXELSIZE_Y_HRV) < 0.001) return -40927000*exp2(-16);
+	return M_PI / atan(psy / ((ORBIT_RADIUS - EARTH_RADIUS) * 1000.0)) / 180.0;
+}
+
 int Image::seviriDXFromColumnRes(double column_res)
 {
 #if 0

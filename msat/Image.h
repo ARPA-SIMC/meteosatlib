@@ -223,6 +223,12 @@ public:
 	/// Pixel size in "metres" from line resolution in microradians
 	static double pixelVSizeFromLFAC(double lfac);
 
+	/// Inverse of pixelHSizeFromCFAC
+	static double CFACFromPixelHSize(double psx);
+
+	/// Inverse of pixelVSizeFromLFAC
+	static double LFACFromPixelVSize(double psx);
+
 	/// Earth dimension scanned by Seviri in the X direction
 	static int seviriDXFromColumnRes(double column_res);
 
