@@ -25,6 +25,7 @@ AC_REVISION([$Revision$])
 
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
 AC_SUBST([ac_aux_dir])
 
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -116,27 +117,7 @@ PKG_CHECK_EXISTS(ImageMagick++,[
 PKG_CHECK_MODULES(MAGICKPP,Magick++)
 
 dnl NetCDF3 (which does not use pkg-config)
-
-if test -d /usr/include/netcdf-3 ; then
-    CPPFLAGS="$CPPFLAGS -I/usr/include/netcdf-3"
-fi
-if test -d /usr/lib/netcdf-3 ; then
-    LDFLAGS="$LDFLAGS -L/usr/lib/netcdf-3"
-fi
-
-AC_CHECK_LIB([netcdf], [ncopts], [have_libnetcdf=yes])
-
-saved_LIBS="$LIBS"
-LIBS="$LIBS -lnetcdf_c++ -lnetcdf"
-AC_MSG_CHECKING([for NcFile in -lnetcdf_c++])
-AC_LINK_IFELSE(
-    [AC_LANG_PROGRAM(
-        [#include <netcdfcpp.h>],
-        [NcFile::NcFile nc("example.nc")])],
-    [AC_MSG_RESULT([yes])
-    have_libnetcdf_c__=yes],
-    [AC_MSG_RESULT([no])])
-LIBS="$saved_LIBS"
+AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
 
 AC_CHECK_LIB([hdf5], [H5_init_library], [have_libhdf5=yes])
 dnl AC_CHECK_LIB([hdf5_cpp], [Exception], [have_libhdf5cpp=yes])
@@ -158,12 +139,10 @@ fi
 dnl --------------------------------------------------------------------
 dnl Checks for header files.
 
-AC_CHECK_HEADER([netcdfcpp.h],
-    [
-     	AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
-     	AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
-    ],
-    [
+if test "x$have_libnetcdf" == "xyes"; then
+    AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
+    AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
+else
     if test "$enable_hri" == "yes"; then
         enable_hri="no"
         AC_MSG_WARN("*** hri support disabled")
@@ -176,7 +155,7 @@ AC_CHECK_HEADER([netcdfcpp.h],
         enable_thornsds_db1="no"
         AC_MSG_WARN("*** thornsds_db1 support disabled")
     fi
-])
+fi
 
 AC_CHECK_HEADER([H5Cpp.h],
     [],
@@ -201,7 +180,7 @@ if test x"$enable_hri" == x"yes"; then
         enable_hri="no"
         AC_MSG_WARN("*** hri support disabled")
     else
-        if ! test x"$have_libnetcdf_c__" = x"yes"; then
+        if ! test x"$have_libnetcdf" = x"yes"; then
             enable_hri="no"
             AC_MSG_WARN("*** hri support disabled")
         fi
