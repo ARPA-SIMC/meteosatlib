@@ -73,10 +73,8 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   sprintf(projname, "GEOS(%3.1f)", 0.0);
   //sprintf(projname, "GEOS(%3.1f)", pds.sublon);
   ncfAddAttr(ncf, "Projection", projname);
-  ncfAddAttr(ncf, "Columns", 3712);
-  //if (! ncf.add_att("Columns", pds.npix ) ) return false;
-  ncfAddAttr(ncf, "Lines", 3712);
-  //if (! ncf.add_att("Lines", pds.nlin ) ) return false;
+  ncfAddAttr(ncf, "Columns", (int)img.data->columns);
+  ncfAddAttr(ncf, "Lines", (int)img.data->lines);
   ncfAddAttr(ncf, "AreaStartPix", img.x0 + 1);
   //if (! ncf.add_att("AreaStartPix", (int) m.grid.sp.X0 ) ) return false;
   ncfAddAttr(ncf, "AreaStartLin", img.y0 + 1);

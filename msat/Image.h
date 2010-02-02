@@ -251,6 +251,9 @@ public:
 	/// Get the spacecraft name from the WMO Common code table C-5 satellite ID
 	static std::string spacecraftName(int hritID);
 
+	/// Get the spacecraft id by name from the WMO Common code table C-5 satellite ID
+	static int spacecraftID(const std::string& name);
+
 	/// Get the sensor name from the given WMO Common code table C-5 satellite ID
 	static std::string sensorName(int spacecraftID);
 

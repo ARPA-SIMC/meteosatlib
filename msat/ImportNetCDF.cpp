@@ -90,16 +90,18 @@ class NetCDFImageImporter : public ImageImporter
 
 		img.history = GET(string, "title");
 
-		stmp = GET(string, "Satellite");
-		if (stmp == "MSG1")
-			img.spacecraft_id = 55;
+		/// Spacecraft
+		if ((a = ncf.get_att("Satellite")))
+						img.spacecraft_id = Image::spacecraftID(a->as_string(0));
 		else
-			throw std::runtime_error("finding the satellite ID for satellite " + stmp + " is still unimplemented");
+						throw std::runtime_error(string() + "finding the satellite ID for satellite " + a->as_string(0) + " is still unimplemented");
 
+#if 0
 		if (GETDEF(int, "Columns", 3712) != 3712)
 			cerr << "Columns should have been 3712 but is " << GETDEF(int, "Columns", 3712) << " instead: ignoring it" << endl;
 		if (GETDEF(int, "Lines", 3712) != 3712)
 			cerr << "Lines should have been 3712 but is " << GETDEF(int, "Lines", 3712) << " instead: ignoring it" << endl;
+#endif
 
 //		img.column_offset = 1 + 3712/2 - GET(int, "AreaStartPix");
 //		img.line_offset = 1 + 3712/2 - GET(int, "AreaStartLin");

@@ -425,6 +425,39 @@ std::string Image::spacecraftName(int spacecraft_id)
   }
 }
 
+int Image::spacecraftID(const std::string& name)
+{
+    if (name == "METOP1")	return    3;
+    if (name == "METOP2")	return    4;
+    if (name == "METOP3")	return    5;
+    if (name == "METEOSAT3") return  50;
+    if (name == "METEOSAT4") return  51;
+    if (name == "METEOSAT5") return  52;
+    if (name == "METEOSAT6") return  53;
+    if (name == "METEOSAT7") return  54;
+    if (name == "MSG1")		return   55;
+    if (name == "MSG2")		return   56;
+    if (name == "MSG3")		return   57;
+    if (name == "MTSAT1")	return   58;
+    if (name == "MTSAT2")	return   59;
+    if (name == "MSG4")		return   70;
+    if (name == "GMS3")		return  150;
+    if (name == "GMS4")		return  151;
+    if (name == "GMS5")		return  152;
+    if (name == "NOAA12")	return  204;
+    if (name == "NOAA14")	return  205;
+    if (name == "NOAA15")	return  206;
+    if (name == "GOES7")	return  251;
+    if (name == "GOES8")	return  252;
+    if (name == "GOES9")	return  253;
+    if (name == "GOES10")	return  254;
+    if (name == "GOES11")	return  255;
+    if (name == "GOES12")	return  256;
+    if (name == "GOMS1")	return  310;
+    if (name == "GOMS2")	return  311;
+	throw std::runtime_error("Unknown spacecraft name " + name);
+}
+
 // Reimplemented here to be able to link without libhrit in case it's disabled
 std::string Image::sensorName(int spacecraftID)
 {
