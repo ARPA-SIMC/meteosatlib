@@ -52,9 +52,12 @@ static void ncfAddAttr(NCObject& ncf, const char* name, const T& val)
 template<typename Sample>
 static inline Sample getAttribute(const NcAtt& a) { throw std::runtime_error("requested to read attribute from unknown C++ type"); }
 template<> inline ncbyte getAttribute<ncbyte>(const NcAtt& a) { return a.as_ncbyte(0); }
+template<> inline ncbyte getAttribute<unsigned char>(const NcAtt& a) { return (unsigned char)a.as_ncbyte(0); }
 template<> inline char getAttribute<char>(const NcAtt& a) { return a.as_char(0); }
 template<> inline short getAttribute<short>(const NcAtt& a) { return a.as_short(0); }
+template<> inline short getAttribute<unsigned short>(const NcAtt& a) { return (unsigned short)a.as_short(0); }
 template<> inline int getAttribute<int>(const NcAtt& a) { return a.as_int(0); }
+template<> inline int getAttribute<unsigned int>(const NcAtt& a) { return (unsigned int)a.as_int(0); }
 template<> inline float getAttribute<float>(const NcAtt& a) { return a.as_float(0); }
 template<> inline double getAttribute<double>(const NcAtt& a) { return a.as_double(0); }
 
@@ -62,8 +65,11 @@ template<typename Sample>
 static inline NcType getNcType() { throw std::runtime_error("requested NcType for unknown C++ type"); }
 template<> inline NcType getNcType<ncbyte>() { return ncByte; }
 template<> inline NcType getNcType<char>() { return ncChar; }
+template<> inline NcType getNcType<unsigned char>() { return ncByte; }
 template<> inline NcType getNcType<short>() { return ncShort; }
+template<> inline NcType getNcType<unsigned short>() { return ncShort; }
 template<> inline NcType getNcType<int>() { return ncInt; }
+template<> inline NcType getNcType<unsigned int>() { return ncInt; }
 template<> inline NcType getNcType<float>() { return ncFloat; }
 template<> inline NcType getNcType<double>() { return ncDouble; }
 
