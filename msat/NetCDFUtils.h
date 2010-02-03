@@ -151,14 +151,22 @@ static NcAtt* getAttrIfExists(const NcVar& var, const std::string& name)
 template<typename Sample>
 void decodeMissing(const NcVar& var, ImageDataWithPixels<Sample>& img)
 {
-	NcAtt* attrMissing = getAttrIfExists(var, "missing_value");
-	if (attrMissing != NULL)
+	NcError nce(NcError::silent_nonfatal);
+	if (NcAtt* attrMissing = getAttrIfExists(var, "_FillValue"))
 		img.missing = getAttribute<Sample>(*attrMissing);
-	else
+	else if (NcAtt* attrMissing = getAttrIfExists(var, "missing_value"))
+		img.missing = getAttribute<Sample>(*attrMissing);
+	else if (NcAtt* units = getAttrIfExists(var, "units")) {
+		std::string unit = units->as_string(0);
+		if (unit == "K")
+			img.missing = 0;
+		else
+			img.missing = getMissing<Sample>();
+	} else
 		img.missing = getMissing<Sample>();
 }
 
-template<typename Sample>
+template<typename Sample, typename NCSample>
 static ImageData* acquireImage(const NcVar& var)
 {
 	if (var.num_dims() != 3)
@@ -179,10 +187,16 @@ static ImageData* acquireImage(const NcVar& var)
 	std::auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
 	decodeMissing(var, *res);
 
-	if (!var.get(res->pixels, 1, res->lines, res->columns))
+	if (!var.get((NCSample*)res->pixels, 1, res->lines, res->columns))
 		throw std::runtime_error("reading image pixels failed");
 
 	return res.release();
+}
+
+template<typename Sample>
+static ImageData* acquireImage(const NcVar& var)
+{
+	return acquireImage<Sample, Sample>(var);
 }
 
 }
