@@ -241,6 +241,11 @@ public:
 	/// Set the column factor from a seviri DY value
 	static double lineResFromSeviriDY(int seviriDY);
 
+	static int seviriDXFromPixelHSize(double psx);
+	static int seviriDYFromPixelVSize(double psy);
+	static double pixelHSizeFromSeviriDX(int dx);
+	static double pixelVSizeFromSeviriDY(int dy);
+
 	/// Convert the HRIT spacecraft ID to the ID as in WMO Common code table C-5
 	static int spacecraftIDFromHRIT(int id);
 

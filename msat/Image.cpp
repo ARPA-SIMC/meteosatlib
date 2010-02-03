@@ -247,6 +247,48 @@ double Image::lineResFromSeviriDY(int seviriDY)
 	return (double)seviriDY * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*360);
 }
 
+int Image::seviriDXFromPixelHSize(double psx)
+{
+	// Handle well-known values
+	if (fabs(psx - METEOSAT_PIXELSIZE_X) < 0.001)
+		return 3622;
+	else
+		return seviriDXFromCFAC(CFACFromPixelHSize(psx));
+}
+
+int Image::seviriDYFromPixelVSize(double psy)
+{
+	// Handle well-known values
+	if (fabs(psy - METEOSAT_PIXELSIZE_Y) < 0.001)
+		return 3622;
+	else
+		return seviriDYFromLFAC(LFACFromPixelVSize(psy));
+}
+
+double Image::pixelHSizeFromSeviriDX(int dx)
+{
+	switch (dx)
+	{
+		// Handle well-known values
+		case 3608: return METEOSAT_PIXELSIZE_X;
+		case 3622: return METEOSAT_PIXELSIZE_X;
+		default:
+			return pixelHSizeFromCFAC(CFACFromSeviriDX(dx));
+	}
+}
+
+double Image::pixelVSizeFromSeviriDY(int dy)
+{
+	switch (dy)
+	{
+		// Handle well-known values
+		case 3608: return METEOSAT_PIXELSIZE_Y;
+		case 3622: return METEOSAT_PIXELSIZE_Y;
+		default:
+			return pixelVSizeFromLFAC(LFACFromSeviriDY(dy));
+	}
+}
+
 int Image::spacecraftIDFromHRIT(int id)
 {
 	switch (id)
