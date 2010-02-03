@@ -247,6 +247,34 @@ double Image::lineResFromSeviriDY(int seviriDY)
 	return (double)seviriDY * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*360);
 }
 
+int Image::seviriDXFromCFAC(double column_res)
+{
+#if 0
+	double ps = (ORBIT_RADIUS - EARTH_RADIUS) * tan( (1.0/column_factor/exp2(-16)) * PI / 180 );
+	return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(ps / (ORBIT_RADIUS-EARTH_RADIUS)));
+#endif
+
+	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * column_res * 360 / M_PI);
+}
+
+int Image::seviriDYFromLFAC(double line_res)
+{
+	// This computation has been found by Dr2 Francesca Di Giuseppe and simplified by Enrico Zini
+	return (int)round(asin(EARTH_RADIUS / ORBIT_RADIUS) * line_res * 360 / M_PI);
+	//return round((2 * asin(EARTH_RADIUS / ORBIT_RADIUS)) / atan(pixelVSize() / (ORBIT_RADIUS-EARTH_RADIUS)));
+}
+
+double Image::CFACFromSeviriDX(int seviriDX)
+{
+	return (double)seviriDX * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*360);
+}
+
+double Image::LFACFromSeviriDY(int seviriDY)
+{
+	return (double)seviriDY * M_PI / (asin(EARTH_RADIUS / ORBIT_RADIUS)*360);
+}
+
 int Image::seviriDXFromPixelHSize(double psx)
 {
 	// Handle well-known values

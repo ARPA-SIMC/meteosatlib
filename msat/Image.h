@@ -241,6 +241,18 @@ public:
 	/// Set the column factor from a seviri DY value
 	static double lineResFromSeviriDY(int seviriDY);
 
+	/// Set the column factor from a seviri DX value
+	static double CFACFromSeviriDX(int seviriDX);
+
+	/// Set the column factor from a seviri DY value
+	static double LFACFromSeviriDY(int seviriDY);
+
+	/// Earth dimension scanned by Seviri in the X direction
+	static int seviriDXFromCFAC(double column_res);
+
+	/// Earth dimension scanned by Seviri in the Y direction
+	static int seviriDYFromLFAC(double line_res);
+
 	static int seviriDXFromPixelHSize(double psx);
 	static int seviriDYFromPixelVSize(double psy);
 	static double pixelHSizeFromSeviriDX(int dx);
