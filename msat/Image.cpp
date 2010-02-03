@@ -21,21 +21,24 @@ using namespace std;
 
 static struct ChannelInfo {
 	size_t decimalDigits;
+	double packedMissing;
+	double scaledMissing;
 } channelInfo[] = {
-	{ 2 },	//  0		FIXME: unverified
-	{ 4 },	//  1
-	{ 4 },	//  2
-	{ 4 },	//  3
-	{ 2 },	//  4
-	{ 2 },	//  5
-	{ 2 },	//  6
-	{ 2 },	//  7
-	{ 2 },	//  8
-	{ 2 },	//  9
-	{ 2 },	// 10
-	{ 2 },	// 11
-	{ 4 },	// 12
+	{ 2, 0, 0 },	//  0		FIXME: unverified
+	{ 4, 0, -1.02691 },	//  1
+	{ 4, 0, 0 },	//  2
+	{ 4, 0, 0 },	//  3
+	{ 2, 0, 0 },	//  4
+	{ 2, 0, 0 },	//  5
+	{ 2, 0, 0 },	//  6
+	{ 2, 0, 0 },	//  7
+	{ 2, 0, 0 },	//  8
+	{ 2, 0, 0 },	//  9
+	{ 2, 0, 0 },	// 10
+	{ 2, 0, 0 },	// 11
+	{ 4, 0, -1.63196 },	// 12
 };
+
 
 static const size_t channel_info_size = sizeof(channelInfo) / sizeof(struct ChannelInfo);
 
@@ -643,6 +646,26 @@ std::string Image::spaceviewWKT(double sublon)
 	string res = projstring;
 	OGRFree(projstring);
 	return res;
+}
+
+double Image::defaultPackedMissing(int channel_id)
+{
+	if (channel_id >= 0 && (size_t)channel_id < channel_info_size)
+		// When it's a known channel, se can use our internal table
+		return channelInfo[channel_id].packedMissing;
+	else
+		// Otherwise, default on something 
+		return std::numeric_limits<double>::quiet_NaN();
+}
+
+double Image::defaultScaledMissing(int channel_id)
+{
+	if (channel_id >= 0 && (size_t)channel_id < channel_info_size)
+		// When it's a known channel, se can use our internal table
+		return channelInfo[channel_id].scaledMissing;
+	else
+		// Otherwise, default on something 
+		return std::numeric_limits<double>::quiet_NaN();
 }
 
 std::auto_ptr<Image> Image::rescaled(size_t width, size_t height) const

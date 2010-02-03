@@ -282,6 +282,12 @@ public:
 
 	/// Get the WKT description for the Spaceview projection
 	static std::string spaceviewWKT(double sublon = 0.0);
+
+	/// Get the default missing value that can be used for the given channel
+	static double defaultPackedMissing(int channel);
+
+	/// Get the default missing value that can be used for the given channel
+	static double defaultScaledMissing(int channel);
 };
 
 /// Interface for image data of various types
