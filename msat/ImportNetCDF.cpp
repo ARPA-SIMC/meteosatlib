@@ -171,13 +171,17 @@ class NetCDFImageImporter : public ImageImporter
 
 		img.setData(acquireImage<Sample>(var));
 
+		NcError nce(NcError::silent_nonfatal);
+
 		img.data->offset = ((a = var.get_att("add_offset")) != NULL ? a->as_float(0) : 0);
 		img.data->slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
 		img.channel_id = ((a = var.get_att("chnum")) != NULL ? a->as_int(0) :
 			throw std::runtime_error(string("could not find the 'chnum' attribute in image ") + var.name()));
 		img.unit = ((a = var.get_att("units")) != NULL ? a->as_string(0) : Image::channelUnit(img.spacecraft_id, img.channel_id));
-		if (img.unit == "K")
+		if ((a = var.get_att("_FillValue")) != NULL)
 		{
+			dynamic_cast<ImageDataWithPixels<Sample>*>(img.data)->missing = getAttribute<Sample>(*a);
+		} else if (img.unit == "K") {
 			dynamic_cast<ImageDataWithPixels<Sample>*>(img.data)->missing = 0;
 		}
 	}
