@@ -162,14 +162,22 @@ void decodeMissing(const NcVar& var, ImageDataWithPixels<Sample>& img)
 		img.missing = getAttribute<Sample>(*attrMissing);
 	else if (NcAtt* attrMissing = getAttrIfExists(var, "missing_value"))
 		img.missing = getAttribute<Sample>(*attrMissing);
-	else if (NcAtt* units = getAttrIfExists(var, "units")) {
-		std::string unit = units->as_string(0);
-		if (unit == "K")
-			img.missing = 0;
-		else
-			img.missing = getMissing<Sample>();
-	} else
+	else {
 		img.missing = getMissing<Sample>();
+
+		NcAtt* chnum = getAttrIfExists(var, "chnum");
+		NcAtt* offset = getAttrIfExists(var, "add_offset");
+		NcAtt* scale = getAttrIfExists(var, "scale_factor");
+		if (chnum != NULL)
+		{
+			int channel = getAttribute<int>(*chnum);
+			if ((!offset || getAttribute<double>(*offset) == 0) &&
+			    (!scale  || getAttribute<double>(*scale)  == 1))
+			{
+				img.missing = Image::defaultScaledMissing(channel);
+			}
+		}
+	}
 }
 
 template<typename Sample, typename NCSample>
