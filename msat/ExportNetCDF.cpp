@@ -32,6 +32,7 @@
 
 #include <netcdfcpp.h>
 
+#include <cstdio>
 #include <sstream>
 #include <stdexcept>
 
