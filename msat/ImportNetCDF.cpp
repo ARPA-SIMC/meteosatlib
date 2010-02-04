@@ -39,6 +39,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <stdint.h>
 
 #include <msat/Image.tcc>
 #include <msat/Progress.h>
@@ -165,23 +166,24 @@ class NetCDFImageImporter : public ImageImporter
 	}
 
 	template<typename Sample, typename NCSample>
-	void readData(const NcVar& var, Image& img)
+	void readData(NcVar& var, Image& img, bool offset1bug = false)
 	{
 		NcAtt* a;
 
-		img.setData(acquireImage<Sample, NCSample>(var));
+		img.setData(acquireImage<Sample, NCSample>(var, offset1bug));
 
-		img.data->offset = ((a = var.get_att("add_offset")) != NULL ? a->as_float(0) : 0);
 		img.data->slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
+		img.data->offset = ((a = var.get_att("add_offset")) != NULL ? a->as_float(0) : 0);
+		if (offset1bug && img.data->offset == 1 && img.data->slope == 1) img.data->offset = 0;
 		img.channel_id = ((a = var.get_att("chnum")) != NULL ? a->as_int(0) :
 			throw std::runtime_error(string("could not find the 'chnum' attribute in image ") + var.name()));
 		img.unit = ((a = var.get_att("units")) != NULL ? a->as_string(0) : Image::channelUnit(img.spacecraft_id, img.channel_id));
 	}
 
 	template<typename Sample>
-	void readData(const NcVar& var, Image& img)
+	void readData(NcVar& var, Image& img, bool offset1bug = false)
 	{
-		return readData<Sample, Sample>(var, img);
+		return readData<Sample, Sample>(var, img, offset1bug);
 	}
 
 public:
@@ -196,6 +198,11 @@ public:
 	{
 		NcError nce(NcError::silent_nonfatal);
 
+		NcAtt* a = ncf.get_att("Version");
+		string version = "0";
+		if (a != NULL)
+			version = a->as_string(0);
+
 		ProgressTask p("Reading NetCDF file " + filename);
 		for (int i = 0; i < ncf.num_vars(); ++i)
 		{
@@ -207,6 +214,16 @@ public:
 			if (string(var->name()) == "time")
 				continue;
 			ProgressTask p1(string("Reading NetCDF variable ") + var->name());
+
+			// Detect the old encoding bug that set offset to 1 instead of 0
+			bool offset1bug = false;
+			if (version == "0")
+			{
+				// Adjust old NetCDF that lied about their offset
+				NcAtt* offset = getAttrIfExists(*var, "add_offset");
+				if (offset && offset->as_double(0) == 1)
+					offset1bug = true;
+			}
 
 			bool _Unsigned = false;
 			if (NcAtt* a = var->get_att("_Unsigned"))
@@ -220,34 +237,34 @@ public:
 				case ncNoType: throw std::runtime_error("The NetCDF data has values with unknown type");
 				case ncByte:
 					if (_Unsigned)
-						readData<uint8_t, ncbyte>(*var, *img);
+						readData<uint8_t, ncbyte>(*var, *img, offset1bug);
 					else
-						readData<ncbyte>(*var, *img);
+						readData<ncbyte>(*var, *img, offset1bug);
 					img->data->scalesToInt = true;
 					break;
 				case ncChar:
 					if (_Unsigned)
-						readData<unsigned char, char>(*var, *img);
+						readData<unsigned char, char>(*var, *img, offset1bug);
 					else
-						readData<char>(*var, *img);
+						readData<char>(*var, *img, offset1bug);
 					img->data->scalesToInt = true;
 					break;
 				case ncShort:
 					if (_Unsigned)
-						readData<unsigned short, short>(*var, *img);
+						readData<unsigned short, short>(*var, *img, offset1bug);
 					else
-						readData<short>(*var, *img);
+						readData<short>(*var, *img, offset1bug);
 					img->data->scalesToInt = true;
 					break;
 				case ncInt:
 					if (_Unsigned)
-						readData<unsigned int, int>(*var, *img);
+						readData<unsigned int, int>(*var, *img, offset1bug);
 					else
-						readData<int>(*var, *img);
+						readData<int>(*var, *img, offset1bug);
 					img->data->scalesToInt = true;
 					break;
-				case ncFloat:  readData<float>(*var, *img);  img->data->scalesToInt = false; break;
-				case ncDouble: readData<double>(*var, *img); img->data->scalesToInt = false; break;
+				case ncFloat:  readData<float>(*var, *img, offset1bug);  img->data->scalesToInt = false; break;
+				case ncDouble: readData<double>(*var, *img, offset1bug); img->data->scalesToInt = false; break;
 			}
 			img->defaultFilename = util::satelliteSingleImageFilename(*img);
 			img->shortName = util::satelliteSingleImageShortName(*img);

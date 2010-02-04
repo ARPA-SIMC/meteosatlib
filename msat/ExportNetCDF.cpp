@@ -124,6 +124,9 @@ void ExportNetCDF(const Image& img, const std::string& fileName)
   ncfAddAttr(*ivar, "scale_factor", 1.0);
   ncfAddAttr(*ivar, "chnum", img.channel_id);
 	ncfAddAttr(*ivar, "units", img.unit.c_str());
+  float missing = img.data->missingValue;
+  ncfAddAttr(*ivar, "missing_value", missing);
+  ncfAddAttr(*ivar, "_FillValue", missing);
 
   // Write output values
   //cerr << "output." << endl;

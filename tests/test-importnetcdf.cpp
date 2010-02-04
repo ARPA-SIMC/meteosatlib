@@ -70,8 +70,8 @@ static void checkFullImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 700);
 	gen_ensure_equals(img.x0, 1499);
 	gen_ensure_equals(img.y0, 199);
-	gen_ensure_similar(img.data->scaled(0, 0), 231.3, 0.01);
-	gen_ensure_similar(img.data->scaled(10, 10), 241.6, 0.01);
+	gen_ensure_similar(img.data->scaled(0, 0), 230.3, 0.01);
+	gen_ensure_similar(img.data->scaled(10, 10), 240.6, 0.01);
 }
 
 static void checkCroppedImageData(Image& img)
@@ -82,8 +82,8 @@ static void checkCroppedImageData(Image& img)
 	gen_ensure_equals(img.data->lines, 50);
 	gen_ensure_equals(img.x0, 1599);
 	gen_ensure_equals(img.y0, 299);
-	gen_ensure_similar(img.data->scaled(0, 0), 252.4, 0.01);
-	gen_ensure_similar(img.data->scaled(10, 10), 267.5, 0.01);
+	gen_ensure_similar(img.data->scaled(0, 0), 251.4, 0.01);
+	gen_ensure_similar(img.data->scaled(10, 10), 266.5, 0.01);
 }
 
 
@@ -107,7 +107,7 @@ void to::test<2>()
 	Image* img = imgs[0];
 
 	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->scalesToInt, false);
 
@@ -129,7 +129,7 @@ void to::test<3>()
 	Image* img = imgs[0];
 
 	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 1);
+	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->scalesToInt, false);
 
@@ -150,7 +150,7 @@ void to::test<4>()
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	gen_ensure_similar(img->data->slope, 0.01, 0.0001);
-	gen_ensure_similar(img->data->offset, -205.6, 0.0001);
+	gen_ensure_similar(img->data->offset, -204.6, 0.0001);
 	gen_ensure_equals(img->data->bpp, 14);
 	gen_ensure_equals(img->data->scalesToInt, true);
 
@@ -174,7 +174,7 @@ void to::test<5>()
 	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
 
 	gen_ensure_similar(img->data->slope, 0.01, 0.0001);
-	gen_ensure_similar(img->data->offset, -247.6, 0.00001);
+	gen_ensure_similar(img->data->offset, -246.6, 0.00001);
 	gen_ensure_equals(img->data->bpp, 12);
 	gen_ensure_equals(img->data->scalesToInt, true);
 

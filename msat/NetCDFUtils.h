@@ -101,6 +101,7 @@ struct NcEncoderImpl : public NcEncoder
 		int missing = img.data->unscaledMissingValue();
 		//Sample encodedMissing = getMissing<Sample>();
 		ncfAddAttr(var, "missing_value", missing);
+		ncfAddAttr(var, "_FillValue", missing);
 
 		for (size_t y = 0; y < img.data->lines; ++y)
 			for (size_t x = 0; x < img.data->columns; ++x)
@@ -155,14 +156,15 @@ static NcAtt* getAttrIfExists(const NcVar& var, const std::string& name)
 }
 
 template<typename Sample>
-void decodeMissing(const NcVar& var, ImageDataWithPixels<Sample>& img)
+void decodeMissing(NcVar& var, ImageDataWithPixels<Sample>& img, bool offset1bug = false)
 {
 	NcError nce(NcError::silent_nonfatal);
 	if (NcAtt* attrMissing = getAttrIfExists(var, "_FillValue"))
 		img.missing = getAttribute<Sample>(*attrMissing);
 	else if (NcAtt* attrMissing = getAttrIfExists(var, "missing_value"))
+	{
 		img.missing = getAttribute<Sample>(*attrMissing);
-	else {
+	} else {
 		img.missing = getMissing<Sample>();
 
 		NcAtt* chnum = getAttrIfExists(var, "chnum");
@@ -171,17 +173,20 @@ void decodeMissing(const NcVar& var, ImageDataWithPixels<Sample>& img)
 		if (chnum != NULL)
 		{
 			int channel = getAttribute<int>(*chnum);
-			if ((!offset || getAttribute<double>(*offset) == 0) &&
+			if ((!offset || (getAttribute<double>(*offset) == 0 ||
+					 (offset1bug && getAttribute<double>(*offset) == 1))) &&
 			    (!scale  || getAttribute<double>(*scale)  == 1))
 			{
 				img.missing = Image::defaultScaledMissing(channel);
+				img.missingValue = Image::defaultScaledMissing(channel);
+				var.add_att("_FillValue", img.missingValue);
 			}
 		}
 	}
 }
 
 template<typename Sample, typename NCSample>
-static ImageData* acquireImage(const NcVar& var)
+static ImageData* acquireImage(NcVar& var, bool offset1bug = false)
 {
 	if (var.num_dims() != 3)
 	{
@@ -199,7 +204,7 @@ static ImageData* acquireImage(const NcVar& var)
 	}
 
 	std::auto_ptr< ImageDataWithPixels<Sample> > res(new ImageDataWithPixels<Sample>(var.get_dim(2)->size(), var.get_dim(1)->size()));
-	decodeMissing(var, *res);
+	decodeMissing(var, *res, offset1bug);
 
 	if (!var.get((NCSample*)res->pixels, 1, res->lines, res->columns))
 		throw std::runtime_error("reading image pixels failed");
@@ -208,7 +213,7 @@ static ImageData* acquireImage(const NcVar& var)
 }
 
 template<typename Sample>
-static ImageData* acquireImage(const NcVar& var)
+static ImageData* acquireImage(NcVar& var)
 {
 	return acquireImage<Sample, Sample>(var);
 }

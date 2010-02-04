@@ -374,7 +374,6 @@ void to::test<9>()
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32);
 	gen_ensure_equals(img->data->scalesToInt, false);
-
 	test_tag("croppedXRITRecodedNetCDF");
 	checkCroppedImageData(*img);
 	test_untag();
