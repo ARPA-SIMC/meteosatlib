@@ -183,7 +183,7 @@ void decodeMissing(NcVar& var, ImageDataWithPixels<Sample>& img, bool offset1bug
 			{
 				img.missing = Image::defaultScaledMissing(channel);
 				img.missingValue = Image::defaultScaledMissing(channel);
-				var.add_att("_FillValue", (Sample)img.missingValue);
+				var.add_att("_FillValue", img.missingValue);
 			}
 		}
 	}
