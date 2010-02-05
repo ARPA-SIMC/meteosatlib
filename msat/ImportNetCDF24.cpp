@@ -132,7 +132,7 @@ class NetCDF24ImageImporter : public ImageImporter
 	}
 
 	template<typename Sample>
-	void readData(const NcVar& var, Image& img)
+	void readData(NcVar& var, Image& img)
 	{
 		NcAtt* a;
 

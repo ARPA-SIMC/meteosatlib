@@ -1,5 +1,6 @@
 #include "ImportUtils.h"
 #include "Image.h"
+#include <cstdio>
 
 using namespace std;
 

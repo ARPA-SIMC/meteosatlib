@@ -98,10 +98,14 @@ struct NcEncoderImpl : public NcEncoder
 	virtual void setData(NcVar& var, const Image& img)
 	{
 		Sample* pixels = new Sample[img.data->columns * img.data->lines];
-		int missing = img.data->unscaledMissingValue();
+		Sample missing;
+		if (img.data->scalesToInt)
+			missing = img.data->unscaledMissingValue();
+		else
+			missing = img.data->missingValue;
 		//Sample encodedMissing = getMissing<Sample>();
 		ncfAddAttr(var, "missing_value", missing);
-		ncfAddAttr(var, "_FillValue", missing);
+		ncfAddAttr(var, "_FillValue", (Sample)missing);
 
 		for (size_t y = 0; y < img.data->lines; ++y)
 			for (size_t x = 0; x < img.data->columns; ++x)
@@ -179,7 +183,7 @@ void decodeMissing(NcVar& var, ImageDataWithPixels<Sample>& img, bool offset1bug
 			{
 				img.missing = Image::defaultScaledMissing(channel);
 				img.missingValue = Image::defaultScaledMissing(channel);
-				var.add_att("_FillValue", img.missingValue);
+				var.add_att("_FillValue", (Sample)img.missingValue);
 			}
 		}
 	}

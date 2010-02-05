@@ -25,6 +25,7 @@
 #include <hri/HRI_subframe_identification.h>
 #include <cstring>
 #include <ctime>
+#include <cstdio>
 
 HRI_subframe_identification::HRI_subframe_identification( char *hsi )
 {

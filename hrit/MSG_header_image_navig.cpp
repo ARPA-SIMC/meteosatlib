@@ -24,6 +24,7 @@
 //-----------------------------------------------------------------------------
 
 #include <cstring>
+#include <cstdio>
 
 #include <hrit/MSG_header_image_navig.h>
 

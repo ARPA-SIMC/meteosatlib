@@ -35,6 +35,7 @@
 #include <vector>
 #include <stdexcept>
 #include <iostream>
+#include <cstdio>
 
 #include <getopt.h>
 

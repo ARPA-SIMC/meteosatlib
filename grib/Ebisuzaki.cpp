@@ -21,6 +21,7 @@
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 static unsigned int mask[9]      = { 0,   1,   3,   7,  15,  31,  63, 127, 255};
 static unsigned int mask2[8]     = { 1,   2,   4,   8,  16,  32,  64, 128};

@@ -6,4 +6,9 @@ BIN=`basename "$0" | sed 's/_wrap$//'`
 #$DEBUGGER $BIN $ARGS 2>&1 | tee `pwd`/testrun-$id
 #echo Output saved in `pwd`/testrun-$id
 
-$DEBUGGER tests/$BIN $ARGS
+if [ -z "$DEBUGGER" ]
+then
+	tests/$BIN $ARGS
+else
+	$DEBUGGER tests/.libs/lt-$BIN $ARGS
+fi

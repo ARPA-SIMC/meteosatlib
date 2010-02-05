@@ -26,6 +26,7 @@
 #include <hrit/MSG_time_cds.h>
 #include <cstring>
 #include <cmath>
+#include <cstdio>
 
 MSG_time_cds_short::MSG_time_cds_short( )
 {

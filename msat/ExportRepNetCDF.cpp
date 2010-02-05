@@ -30,6 +30,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <cstdio>
 
 #include "NetCDFUtils.h"
 
