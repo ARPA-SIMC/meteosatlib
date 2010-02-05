@@ -612,6 +612,75 @@ std::string Image::channelUnit(int spacecraftID, int channelID)
 	return "unknown";
 }
 
+std::string Image::channelLevel(int spacecraftID, int channelID)
+{
+	switch (spacecraftID)
+	{
+		case 55:
+		case 56:
+		{
+			switch (channelID)
+			{
+				case MSG_SEVIRI_NO_CHANNEL:
+				case MSG_SEVIRI_1_5_VIS_0_6:
+				case MSG_SEVIRI_1_5_VIS_0_8:
+				case MSG_SEVIRI_1_5_IR_1_6:
+				case MSG_SEVIRI_1_5_IR_3_9:
+				case MSG_SEVIRI_1_5_WV_6_2:
+				case MSG_SEVIRI_1_5_WV_7_3:
+				case MSG_SEVIRI_1_5_IR_8_7:
+				case MSG_SEVIRI_1_5_IR_9_7:
+				case MSG_SEVIRI_1_5_IR_10_8:
+				case MSG_SEVIRI_1_5_IR_12_0:
+				case MSG_SEVIRI_1_5_IR_13_4:
+				case MSG_SEVIRI_1_5_HRV:
+					return "1.5";
+				// SAF special cases
+	            case 100:
+	            case 101:
+	            case 102:
+	            case 103:
+	            case 104:
+	            case 105:
+	            case 106:
+	            case 107:
+	            case 108:
+	            case 109:
+	            case 110:
+	            case 111:
+	            case 112:
+	            case 113:
+	            case 114:
+	            case 115:
+	            case 116:
+	            case 117:
+	            case 118:
+	            case 119:
+	            case 120:
+	            case 121:
+	            case 122:
+	            case 123:
+	            case 124:
+	            case 125:
+	            case 126:
+	            case 127:
+	            case 128:
+	            case 129:
+	            case 130:
+	            case 131:
+	            case 132:
+	            case 133:
+	            case 134:
+	            case 135:
+	            case 136:
+					return "3";
+			}
+			break;
+		}
+	}
+	return "";
+}
+
 std::string Image::spaceviewWKT(double sublon)
 {
 	// Also add GDAL projection (see the msg driver they have)

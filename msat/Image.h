@@ -277,6 +277,9 @@ public:
 	/// Get the channel name from the given WMO Common code table C-5 satellite ID and channel ID
 	static std::string channelName(int spacecraftID, int channelID);
 
+	/// Get the data level string "1", "1.5", "2", "3"... for the given channel
+	static std::string channelLevel(int spacecraftID, int channelID);
+
 	/// Get the measure unit name from the given WMO Common code table C-5 satellite ID and channel ID
 	static std::string channelUnit(int spacecraftID, int channelID);
 
