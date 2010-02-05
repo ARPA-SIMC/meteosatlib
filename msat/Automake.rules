@@ -33,11 +33,9 @@ dist_msat_include_HEADERS = \
     msat/ExportGDTNetCDF.h \
     msat/ExportRepNetCDF.h \
     msat/ExportGRIB.h \
-    msat/ExportNetCDF.h \
     msat/ExportNetCDF24.h \
     msat/ImportGRIB.h \
     msat/ImportSAFH5.h \
-    msat/ImportNetCDF.h \
     msat/ImportNetCDF24.h \
     msat/ImportXRIT.h \
     msat/ImportUtils.h \
@@ -98,8 +96,6 @@ msat_libmsat_la_LIBADD += \
     -lnetcdf_c++ \
     -lnetcdf
 msat_libmsat_la_SOURCES += \
-    msat/ImportNetCDF.cpp \
-    msat/ExportNetCDF.cpp \
     msat/ImportNetCDF24.cpp \
     msat/ExportNetCDF24.cpp \
     msat/ExportGDTNetCDF.cpp \

@@ -327,59 +327,6 @@ void to::test<7>()
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
-// Import a full XRIT product and pass it from netcdf
-template<> template<>
-void to::test<8>()
-{
-#if PERFORM_SLOW_TESTS
-	-- Temporarily disabled as it currently uses too much ram
-
-	XRITImportOptions opts;
-	setSource(opts);
-	std::auto_ptr<Image> img = importXRIT(opts);
-	img = recodeThroughNetCDF(*img);
-
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
-
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, 40927014);
-	gen_ensure_equals(img->line_factor, 40927014);
-	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
-	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
-
-	test_tag("fullXRITRecodedNetCDF");
-	checkFullImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-#endif
-}
-
-// Import a subarea of an XRIT product and pass it from netcdf
-template<> template<>
-void to::test<9>()
-{
-	ImageVector imgs(*croppedImporter());
-	gen_ensure_equals(imgs.size(), 1u);
-	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
-
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
-
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, 40927014*exp2(-16));
-	gen_ensure_equals(img->line_res, 40927014*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	test_tag("croppedXRITRecodedNetCDF");
-	checkCroppedImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-}
 }
 
 /* vim:set ts=4 sw=4: */

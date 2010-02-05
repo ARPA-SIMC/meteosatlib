@@ -66,11 +66,6 @@ tests_msatlib_test_SOURCES += \
     tests/test-importxrit.cpp
 endif
 
-if HAVE_NETCDF
-tests_msatlib_test_SOURCES += \
-    tests/test-importnetcdf.cpp
-endif
-
 if HDF5
 tests_msatlib_test_SOURCES += \
     tests/test-importsafh5.cpp

@@ -27,10 +27,8 @@
 #include <pwd.h>
 #include <grib/GRIB.h>
 #include <ImportGRIB.h>
-#include <ImportNetCDF.h>
 #include <ImportNetCDF24.h>
 #include <ExportGRIB.h>
-#include <ExportNetCDF.h>
 #include <ExportNetCDF24.h>
 
 
@@ -126,24 +124,6 @@ std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile)
 
 	// Reread the grib
 	ImageVector imgs(*createGribImporter(file.name()));
-	if (imgs.empty())
-		return std::auto_ptr<Image>();
-	return imgs.shift();
-}
-
-std::auto_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile)
-{
-	using namespace msat;
-
-	TempTestFile file(leaveFile);
-
-	// Write the NetCDF24
-	ExportNetCDF(img, file.name());
-
-	// Reread the NetCDF24
-	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(file.name()));
-	ImageVector imgs;
-	imp->read(imgs);
 	if (imgs.empty())
 		return std::auto_ptr<Image>();
 	return imgs.shift();

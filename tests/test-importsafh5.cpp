@@ -249,59 +249,6 @@ void to::test<7>()
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
-// Try reimporting an exported netcdf
-template<> template<>
-void to::test<8>()
-{
-	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	ImageVector imgs;
-	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 3u);
-	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
-
-	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-
-	test_tag("fullSAFH5RecodedNetCDF");
-	checkFullImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-}
-
-// Try reimporting a subarea exported to netcdf
-template<> template<>
-void to::test<9>()
-{
-	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropImgArea = safCropArea;
-	ImageVector imgs;
-	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 3u);
-	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
-
-	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-
-	test_tag("croppedSAFH5RecodedNetCDF");
-	checkCroppedImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-}
-
 }
 
 /* vim:set ts=4 sw=4: */

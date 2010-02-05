@@ -231,53 +231,6 @@ void to::test<7>()
 	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
-// Try reimporting an exported netcdf
-template<> template<>
-void to::test<8>()
-{
-	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	ImageVector imgs;
-	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 1u);
-	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
-
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-
-	test_tag("fullGribRecodedNetCDF");
-	checkFullImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-}
-
-// Try reimporting an exported subarea netcdf
-template<> template<>
-void to::test<9>()
-{
-	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createGribImporter(DATA_DIR "/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb"));
-	imp->cropImgArea = gribCropArea;
-	ImageVector imgs;
-	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 1u);
-	std::auto_ptr<Image> img = recodeThroughNetCDF(*imgs[0]);
-
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-
-	test_tag("croppedGribRecodedNetCDF");
-	checkCroppedImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-}
-
 }
 
 /* vim:set ts=4 sw=4: */
