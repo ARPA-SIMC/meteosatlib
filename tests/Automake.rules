@@ -51,7 +51,8 @@ tests_msatlib_test_CPPFLAGS = \
 # otherwise it fails for reason I haven't yet managed to explain --Enrico
 tests_msatlib_test_LDADD = \
     grib/libgrib.la \
-    msat/libmsat.la
+    msat/libmsat.la \
+    $(GDAL_LIBS)
 
 tests_msatlib_test_SOURCES = \
     tests/tut-main.cpp \

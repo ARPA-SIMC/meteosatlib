@@ -18,34 +18,13 @@
 ## Include this file in the top-level Makefile with an include
 ## directive.
 
-bin_PROGRAMS += \
-    tools/interpolate \
-    tools/msat
-
-tools_msat_LDADD = \
-    msat/libmsat.la
-tools_msat_SOURCES = \
-    tools/msat.cpp
-
-#if HAVE_NETCDF
 #bin_PROGRAMS += \
-#    tools/msatgmt
-#tools_msatgmt_LDADD = \
-#    msat/libmsat.la \
-#    -lnetcdf_c++ \
-#    -lnetcdf
-#tools_msatgmt_SOURCES = \
-#    tools/msatgmt.cpp
-#endif
-
-tools_interpolate_LDADD = \
-    msat/libmsat.la
-tools_interpolate_SOURCES = \
-    tools/interpolate.cpp
-
-man_MANS += tools/msat.1
-
-EXTRA_DIST += tools/msat.1 tools/regenerate-msat-manpage
+#    tools/interpolate
+#
+#tools_interpolate_LDADD = \
+#    msat/libmsat.la
+#tools_interpolate_SOURCES = \
+#    tools/interpolate.cpp
 
 ## -fin-
 ## vim:syn=automake:

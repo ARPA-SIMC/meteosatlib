@@ -30,14 +30,11 @@ nodist_msat_include_HEADERS = \
 dist_msat_include_HEADERS = \
     msat/Image.h \
     msat/Image.tcc \
-    msat/ExportGDAL.h \
     msat/ExportGDTNetCDF.h \
     msat/ExportRepNetCDF.h \
     msat/ExportGRIB.h \
     msat/ExportNetCDF.h \
     msat/ExportNetCDF24.h \
-    msat/ExportImage.h \
-    msat/ImportGDAL.h \
     msat/ImportGRIB.h \
     msat/ImportSAFH5.h \
     msat/ImportNetCDF.h \
@@ -117,18 +114,9 @@ msat_libmsat_la_SOURCES += \
     msat/ImportSAFH5.cpp
 endif
 
-if HAVE_MAGICK
-msat_libmsat_la_CXXFLAGS += $(MAGICKPP_CFLAGS)
-msat_libmsat_la_LIBADD += $(MAGICKPP_LIBS)
-msat_libmsat_la_SOURCES += msat/ExportImage.cpp
-endif
-
 if GDAL
 msat_libmsat_la_LIBADD += \
     $(GDAL_LIBS)
-msat_libmsat_la_SOURCES += \
-    msat/ImportGDAL.cpp \
-    msat/ExportGDAL.cpp
 endif
 
 ## -fin-
