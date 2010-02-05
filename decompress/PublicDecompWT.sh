@@ -48,9 +48,16 @@ then
     echo "no unzip program found." >&2
     exit 1
   fi
-  if ! which dos2unix > /dev/null
+  for cmd in dos2unix fromdos
+  do
+    if which $cmd > /dev/null
+    then
+      DOS2UNIX=$cmd
+    fi
+  done
+  if [ -z "$DOS2UNIX" ]
   then
-    echo "no dos2unix program found." >&2
+    echo "no dos2unix or fromdos program found." >&2
     exit 1
   fi
 
@@ -73,7 +80,7 @@ then
   rmdir $PDVER
 
   # Fix newline encoding
-  find COMP DISE -name "*.cpp" -or -name "*.h" -or -name "Makefile" | xargs dos2unix
+  find COMP DISE -name "*.cpp" -or -name "*.h" -or -name "Makefile" | xargs $DOS2UNIX
 
   # Apply our patch
   if ! patch -p1 < $PATCHFILE
