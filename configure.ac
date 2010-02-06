@@ -72,12 +72,6 @@ AC_ARG_ENABLE([openmtp],
         [disable openmtp support])],
     [],
     [enable_openmtp="yes"])
-AC_ARG_ENABLE([hdf5],
-    [AS_HELP_STRING(
-        [--disable-hdf5],
-        [disable hdf5 support])],
-    [],
-    [enable_hdf5="yes"])
 AC_ARG_ENABLE([gdal],
     [AS_HELP_STRING(
         [--disable-gdal],
@@ -119,9 +113,6 @@ PKG_CHECK_MODULES(MAGICKPP,Magick++)
 dnl NetCDF3 (which does not use pkg-config)
 AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
 
-AC_CHECK_LIB([hdf5], [H5_init_library], [have_libhdf5=yes])
-dnl AC_CHECK_LIB([hdf5_cpp], [Exception], [have_libhdf5cpp=yes])
-
 AC_PATH_PROG([GDAL_CONFIG], [gdal-config], [NONE])
 if test "x$GDAL_CONFIG" == "xNONE"; then
     enable_gdal="no"
@@ -156,15 +147,6 @@ else
         AC_MSG_WARN("*** thornsds_db1 support disabled")
     fi
 fi
-
-AC_CHECK_HEADER([H5Cpp.h],
-    [],
-    [
-    if test "$enable_hdf5" == "yes"; then
-        enable_hdf5="no"
-        AC_MSG_WARN("*** hdf5 support disabled")
-    fi
-])
 
 dnl --------------------------------------------------------------------
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -221,16 +203,6 @@ if test x"$enable_thornsds_db1" == x"yes"; then
     fi
 fi
 
-if test x"$enable_hdf5" == x"yes"; then
-    if ! test x"$have_libhdf5" = x"yes"; then
-        enable_hdf5="no"
-        AC_MSG_WARN("*** hdf5 support disabled")
-    else
-	AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
-	AC_DEFINE([MSAT_HAVE_HDF5], 1, [HDF5 functions are available])
-    fi
-fi
-
 AM_CONDITIONAL([HRI], [test x"$enable_hri" = x"yes"])
 AM_CONDITIONAL([HRIT], [test x"$enable_hrit" = x"yes"])
 AM_CONDITIONAL([MSG_NATIVE], [test x"$enable_msg_native" = x"yes"])
@@ -239,7 +211,6 @@ AM_CONDITIONAL([OPENMTP], [test x"$enable_openmtp" = x"yes"])
 AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
-AM_CONDITIONAL([HDF5], [test x"$enable_hdf5" = x"yes"])
 AM_CONDITIONAL([GDAL], [test x"$enable_gdal" = x"yes"])
 
 dnl --------------------------------------------------------------------
@@ -261,13 +232,6 @@ if test x"$have_libnetcdf" = x"yes"; then
 	# need the netcdf libraries, as netcdf does not package .pc files.  Are
 	# there better ways of handling this?
 	PC_MSAT_LIBS="$PC_MSAT_LIBS -lnetcdf_c++ -lnetcdf"
-fi
-
-if test x"$enable_hdf5" = x"yes"; then
-	# FIXME: there seems to be no way to tell users of the .pc.in that they
-	# need the hdf5_cpp library, as libhdf5 does not package .pc files.  Are
-	# there better ways of handling this?
-	PC_MSAT_LIBS="$PC_MSAT_LIBS -lhdf5_cpp"
 fi
 
 if test x"$have_libmagick" = x"yes"; then
@@ -321,7 +285,6 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 ===================================================
 $PACKAGE_NAME-$PACKAGE_VERSION configuration:
-AS_HELP_STRING([hdf5:], [$enable_hdf5])
 AS_HELP_STRING([hri:], [$enable_hri])
 AS_HELP_STRING([hrit:], [$enable_hrit])
 AS_HELP_STRING([msg-native:], [$enable_msg_native])

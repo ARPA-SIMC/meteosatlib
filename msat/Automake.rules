@@ -35,12 +35,10 @@ dist_msat_include_HEADERS = \
     msat/ExportGRIB.h \
     msat/ExportNetCDF24.h \
     msat/ImportGRIB.h \
-    msat/ImportSAFH5.h \
     msat/ImportNetCDF24.h \
     msat/ImportXRIT.h \
     msat/ImportUtils.h \
     msat/NetCDFUtils.h \
-    msat/SAFH5Utils.h \
     msat/Progress.h
 
 msat_proj_includedir = \
@@ -100,14 +98,6 @@ msat_libmsat_la_SOURCES += \
     msat/ExportNetCDF24.cpp \
     msat/ExportGDTNetCDF.cpp \
     msat/ExportRepNetCDF.cpp
-endif
-
-if HDF5
-msat_libmsat_la_LIBADD += \
-    -lhdf5_cpp -lhdf5
-msat_libmsat_la_SOURCES += \
-    msat/SAFH5Utils.cpp \
-    msat/ImportSAFH5.cpp
 endif
 
 if GDAL

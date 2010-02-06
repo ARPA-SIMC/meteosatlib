@@ -41,8 +41,7 @@ dist_noinst_DATA += \
     tests/data/H-000-MSG1__-MSG1________-HRV______-000018___-200611141200-C_ \
     tests/data/H-000-MSG1__-MSG1________-_________-PRO______-200611141200-__ \
     tests/data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc \
-    tests/data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb \
-    tests/data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5
+    tests/data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb
 
 tests_msatlib_test_CPPFLAGS = \
     -I$(top_srcdir)/msat
@@ -64,11 +63,6 @@ tests_msatlib_test_SOURCES = \
 if HRIT
 tests_msatlib_test_SOURCES += \
     tests/test-importxrit.cpp
-endif
-
-if HDF5
-tests_msatlib_test_SOURCES += \
-    tests/test-importsafh5.cpp
 endif
 
 INCLUDES = \
