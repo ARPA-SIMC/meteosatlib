@@ -181,8 +181,8 @@ void decodeMissing(NcVar& var, ImageDataWithPixels<Sample>& img, bool offset1bug
 					 (offset1bug && getAttribute<double>(*offset) == 1))) &&
 			    (!scale  || getAttribute<double>(*scale)  == 1))
 			{
-				img.missing = Image::defaultScaledMissing(channel);
-				img.missingValue = Image::defaultScaledMissing(channel);
+				img.missing = facts::defaultScaledMissing(channel);
+				img.missingValue = facts::defaultScaledMissing(channel);
 				var.add_att("_FillValue", img.missingValue);
 			}
 		}

@@ -31,7 +31,7 @@
 
 #include <msat/Image.h>
 #include <msat/ImportUtils.h>
-#include "proj/const.h"
+#include <msat/facts.h>
 #include "proj/Geos.h"
 
 // GRIB Interface
@@ -101,8 +101,8 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 			img->column_offset = (int)m.grid.sp.Xp;
 			img->line_offset = (int)m.grid.sp.Yp;
 			img->proj.reset(new proj::Geos(m.grid.sp.lop, ORBIT_RADIUS));
-			img->column_res = Image::columnResFromSeviriDX(m.grid.sp.dx);
-			img->line_res = Image::lineResFromSeviriDY(m.grid.sp.dy);
+			img->column_res = facts::columnResFromSeviriDX(m.grid.sp.dx);
+			img->line_res = facts::lineResFromSeviriDY(m.grid.sp.dy);
 			break;
 		default:
 		{
@@ -133,7 +133,7 @@ auto_ptr<Image> importGrib(GRIB_MESSAGE& m)
 		unsigned char* pds = m.get_pds_values(0, 12);
 		img->spacecraft_id = (int)pds[9];
 		img->channel_id = ((int)pds[10] << 8) + (int)pds[11];
-		img->unit = Image::channelUnit(img->spacecraft_id, img->channel_id);
+		img->unit = facts::channelUnit(img->spacecraft_id, img->channel_id);
 		delete[] pds;
 	} else {
 		std::stringstream str;

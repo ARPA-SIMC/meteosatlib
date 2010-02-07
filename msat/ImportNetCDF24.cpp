@@ -36,7 +36,7 @@
 
 #include <msat/Image.h>
 #include <msat/ImportUtils.h>
-#include "proj/const.h"
+#include "facts.h"
 #include "proj/Geos.h"
 #include <grib/GRIB.h>
 
@@ -119,8 +119,8 @@ class NetCDF24ImageImporter : public ImageImporter
 
 		NcVar* proj = ncf.get_var("Projection");
 		img.proj.reset(new proj::Geos(PGET(float, "Lop"), ORBIT_RADIUS));
-		img.column_res = Image::columnResFromSeviriDX(PGET(int, "DX"));
-		img.line_res = Image::lineResFromSeviriDY(PGET(int, "DY"));
+		img.column_res = facts::columnResFromSeviriDX(PGET(int, "DX"));
+		img.line_res = facts::lineResFromSeviriDY(PGET(int, "DY"));
 		img.column_offset =	PGET(int, "Xp");
 		img.line_offset =	PGET(int, "Yp");
 		img.x0 =	PGET(int, "X0") - 1;
@@ -142,7 +142,7 @@ class NetCDF24ImageImporter : public ImageImporter
 		img.data->slope = ((a = var.get_att("scale_factor")) != NULL ? a->as_float(0) : 1);
 		img.channel_id = ((a = var.get_att("channel")) != NULL ? a->as_int(0) :
 			throw std::runtime_error(string("could not find the 'channel' attribute in image ") + var.name()));
-		img.unit = ((a = var.get_att("units")) != NULL ? a->as_string(0) : Image::channelUnit(img.spacecraft_id, img.channel_id));
+		img.unit = ((a = var.get_att("units")) != NULL ? a->as_string(0) : facts::channelUnit(img.spacecraft_id, img.channel_id));
 	}
 
 public:

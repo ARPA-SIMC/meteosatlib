@@ -36,7 +36,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "proj/const.h"
+#include "facts.h"
 #include "NetCDFUtils.h"
 
 using namespace std;
@@ -140,7 +140,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*ivar, "add_offset", img.data->offset);
 		ncfAddAttr(*ivar, "scale_factor", img.data->slope);
 		ncfAddAttr(*ivar, "channel", img.channel_id);
-		string name = Image::channelName(img.spacecraft_id, img.channel_id);
+		string name = facts::channelName(img.spacecraft_id, img.channel_id);
 		ncfAddAttr(*ivar, "channelName", name.c_str());
 		ncfAddAttr(*ivar, "units", img.unit.c_str());
 
@@ -153,7 +153,7 @@ void ExportNetCDF24(const Image& img, const std::string& fileName)
 		ncfAddAttr(*ivar, "scale_factor", 1.0);
 		ncfAddAttr(*ivar, "missing_value", img.data->missingValue);
 		ncfAddAttr(*ivar, "channel", img.channel_id);
-		string name = Image::channelName(img.spacecraft_id, img.channel_id);
+		string name = facts::channelName(img.spacecraft_id, img.channel_id);
 		ncfAddAttr(*ivar, "channelName", name.c_str());
 
 		if (img.channel_id > 3 && img.channel_id < 12)

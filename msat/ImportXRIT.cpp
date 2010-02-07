@@ -25,7 +25,7 @@
 
 #include "msat/ImportXRIT.h"
 #include "msat/ImportUtils.h"
-#include "proj/const.h"
+#include "facts.h"
 #include "proj/Geos.h"
 #include <stdexcept>
 #include <fstream>
@@ -379,10 +379,10 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			img->proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
 			img->channel_id = header.segment_id->spectral_channel_id;
 			data->hrv = img->channel_id == MSG_SEVIRI_1_5_HRV;
-			img->spacecraft_id = Image::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
-			img->unit = Image::channelUnit(img->spacecraft_id, img->channel_id);
+			img->spacecraft_id = facts::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
+			img->unit = facts::channelUnit(img->spacecraft_id, img->channel_id);
 
-			img->projWKT = Image::spaceviewWKT(header.image_navigation->subsatellite_longitude);
+			img->projWKT = facts::spaceviewWKT(header.image_navigation->subsatellite_longitude);
 
 			double pixelSizeX, pixelSizeY;
 			int column_offset, line_offset, x0 = 0, y0 = 0;

@@ -28,6 +28,7 @@ msat_includedir = \
 nodist_msat_include_HEADERS = \
     msat/config.h
 dist_msat_include_HEADERS = \
+    msat/facts.h \
     msat/Image.h \
     msat/Image.tcc \
     msat/ExportGDTNetCDF.h \
@@ -44,7 +45,6 @@ dist_msat_include_HEADERS = \
 msat_proj_includedir = \
     $(includedir)/msat/proj
 dist_msat_proj_include_HEADERS = \
-    msat/proj/const.h \
     msat/proj/Geos.h \
     msat/proj/Latlon.h \
     msat/proj/Mercator.h \
@@ -69,6 +69,7 @@ msat_libmsat_la_LIBADD = \
     grib/libgrib.la \
     msat/proj/libproj.la
 msat_libmsat_la_SOURCES = \
+    msat/facts.cpp \
     msat/Image.cpp \
     msat/ImportUtils.cpp \
     msat/ImportGRIB.cpp \

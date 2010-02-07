@@ -5,6 +5,7 @@
 #include <vector>
 #include <msat/proj/Projection.h>
 #include <memory>
+#include <msat/facts.h>
 
 
 namespace msat {
@@ -168,10 +169,10 @@ public:
 	double pixelVSize() const;
 
 	/// Earth dimension scanned by Seviri in the X direction
-	int seviriDX() const { return seviriDXFromColumnRes(column_res); }
+	int seviriDX() const { return facts::seviriDXFromColumnRes(column_res); }
 
 	/// Earth dimension scanned by Seviri in the Y direction
-	int seviriDY() const { return seviriDYFromLineRes(line_res); }
+	int seviriDY() const { return facts::seviriDYFromLineRes(line_res); }
 
   // Get the datetime as a string
   std::string datetime() const;
@@ -216,81 +217,6 @@ public:
 	 */
 	std::auto_ptr<Image> reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const proj::MapBox& box) const;
 #endif
-
-	/// Pixel size in "metres" from column resolution in microradians
-	static double pixelHSizeFromCFAC(double cfac);
-
-	/// Pixel size in "metres" from line resolution in microradians
-	static double pixelVSizeFromLFAC(double lfac);
-
-	/// Inverse of pixelHSizeFromCFAC
-	static double CFACFromPixelHSize(double psx);
-
-	/// Inverse of pixelVSizeFromLFAC
-	static double LFACFromPixelVSize(double psx);
-
-	/// Earth dimension scanned by Seviri in the X direction
-	static int seviriDXFromColumnRes(double column_res);
-
-	/// Earth dimension scanned by Seviri in the Y direction
-	static int seviriDYFromLineRes(double line_res);
-
-	/// Set the column factor from a seviri DX value
-	static double columnResFromSeviriDX(int seviriDX);
-
-	/// Set the column factor from a seviri DY value
-	static double lineResFromSeviriDY(int seviriDY);
-
-	/// Set the column factor from a seviri DX value
-	static double CFACFromSeviriDX(int seviriDX);
-
-	/// Set the column factor from a seviri DY value
-	static double LFACFromSeviriDY(int seviriDY);
-
-	/// Earth dimension scanned by Seviri in the X direction
-	static int seviriDXFromCFAC(double column_res);
-
-	/// Earth dimension scanned by Seviri in the Y direction
-	static int seviriDYFromLFAC(double line_res);
-
-	static int seviriDXFromPixelHSize(double psx);
-	static int seviriDYFromPixelVSize(double psy);
-	static double pixelHSizeFromSeviriDX(int dx);
-	static double pixelVSizeFromSeviriDY(int dy);
-
-	/// Convert the HRIT spacecraft ID to the ID as in WMO Common code table C-5
-	static int spacecraftIDFromHRIT(int id);
-
-	/// Convert the spacecraft ID as in WMO Common code table C-5 to the value
-	/// used by HRIT
-	static int spacecraftIDToHRIT(int id);
-
-	/// Get the spacecraft name from the WMO Common code table C-5 satellite ID
-	static std::string spacecraftName(int hritID);
-
-	/// Get the spacecraft id by name from the WMO Common code table C-5 satellite ID
-	static int spacecraftID(const std::string& name);
-
-	/// Get the sensor name from the given WMO Common code table C-5 satellite ID
-	static std::string sensorName(int spacecraftID);
-
-	/// Get the channel name from the given WMO Common code table C-5 satellite ID and channel ID
-	static std::string channelName(int spacecraftID, int channelID);
-
-	/// Get the data level string "1", "1.5", "2", "3"... for the given channel
-	static std::string channelLevel(int spacecraftID, int channelID);
-
-	/// Get the measure unit name from the given WMO Common code table C-5 satellite ID and channel ID
-	static std::string channelUnit(int spacecraftID, int channelID);
-
-	/// Get the WKT description for the Spaceview projection
-	static std::string spaceviewWKT(double sublon = 0.0);
-
-	/// Get the default missing value that can be used for the given channel
-	static double defaultPackedMissing(int channel);
-
-	/// Get the default missing value that can be used for the given channel
-	static double defaultScaledMissing(int channel);
 };
 
 /// Interface for image data of various types

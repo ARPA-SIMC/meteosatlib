@@ -1,5 +1,6 @@
 #include "ImportUtils.h"
 #include "Image.h"
+#include "facts.h"
 #include <cstdio>
 
 using namespace std;
@@ -17,13 +18,13 @@ void escapeSpacesAndDots(std::string& str)
 std::string satelliteSingleImageFilename(const Image& img)
 {
 	// Get the string describing the spacecraft
-	std::string spacecraft = Image::spacecraftName(img.spacecraft_id);
+	std::string spacecraft = facts::spacecraftName(img.spacecraft_id);
 
 	// Get the string describing the sensor
-	std::string sensor = Image::sensorName(img.spacecraft_id);
+	std::string sensor = facts::sensorName(img.spacecraft_id);
 
 	// Get the string describing the channel
-	std::string channel = Image::channelName(img.spacecraft_id, img.channel_id);
+	std::string channel = facts::channelName(img.spacecraft_id, img.channel_id);
 
 	escapeSpacesAndDots(spacecraft);
 	escapeSpacesAndDots(sensor);
@@ -41,7 +42,7 @@ std::string satelliteSingleImageFilename(const Image& img)
 
 std::string satelliteSingleImageShortName(const Image& img)
 {
-	string channelstring = Image::channelName(img.spacecraft_id, img.channel_id);
+	string channelstring = facts::channelName(img.spacecraft_id, img.channel_id);
 	escapeSpacesAndDots(channelstring);
 	return channelstring;
 }
