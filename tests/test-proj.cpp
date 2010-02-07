@@ -20,7 +20,7 @@
  */
 
 #include "test-utils.h"
-#include <proj/const.h>
+#include <msat/facts.h>
 #include <proj/Geos.h>
 #include <proj/Mercator.h>
 #include <proj/Polar.h>

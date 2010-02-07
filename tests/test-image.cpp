@@ -21,7 +21,7 @@
 
 #include "test-utils.h"
 #include <Image.h>
-#include <proj/const.h>
+#include <msat/facts.h>
 #include <proj/Geos.h>
 #include <math.h>
 
@@ -46,20 +46,20 @@ template<> template<>
 void to::test<1>()
 {
 	// This computation should be exact
-	gen_ensure_equals(Image::seviriDXFromColumnRes(13642337*exp2(-16)), 3622); // Test with the real parameters
-	gen_ensure_equals(Image::seviriDYFromLineRes(13642337*exp2(-16)), 3622); // Test with the real parameters
+	gen_ensure_equals(facts::seviriDXFromColumnRes(13642337*exp2(-16)), 3622); // Test with the real parameters
+	gen_ensure_equals(facts::seviriDYFromLineRes(13642337*exp2(-16)), 3622); // Test with the real parameters
 
 	// This computation is necessarily approximated, as we truncate significant digits
-	gen_ensure_similar(Image::columnResFromSeviriDX(3622), 13641224*exp2(-16), 0.000001);
-	gen_ensure_similar(Image::lineResFromSeviriDY(3622), 13641224*exp2(-16), 0.000001);
+	gen_ensure_similar(facts::columnResFromSeviriDX(3622), 13641224*exp2(-16), 0.000001);
+	gen_ensure_similar(facts::lineResFromSeviriDY(3622), 13641224*exp2(-16), 0.000001);
 
 	// This computation is necessarily approximated, as we truncate significant digits
-	gen_ensure_similar(Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))), 13641224*exp2(-16), 0.000001);
-	gen_ensure_similar(Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(13642337*exp2(-16))), 13641224*exp2(-16), 0.000001);
+	gen_ensure_similar(facts::columnResFromSeviriDX(facts::seviriDXFromColumnRes(13642337*exp2(-16))), 13641224*exp2(-16), 0.000001);
+	gen_ensure_similar(facts::lineResFromSeviriDY(facts::seviriDYFromLineRes(13642337*exp2(-16))), 13641224*exp2(-16), 0.000001);
 
 	// This computation should be exact
-	gen_ensure_equals(Image::seviriDXFromColumnRes(Image::columnResFromSeviriDX(3622)), 3622);
-	gen_ensure_equals(Image::seviriDXFromColumnRes(Image::columnResFromSeviriDX(3622)), 3622);
+	gen_ensure_equals(facts::seviriDXFromColumnRes(facts::columnResFromSeviriDX(3622)), 3622);
+	gen_ensure_equals(facts::seviriDXFromColumnRes(facts::columnResFromSeviriDX(3622)), 3622);
 }
 
 // Test coordinates to point conversion

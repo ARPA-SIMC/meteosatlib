@@ -229,8 +229,8 @@ void to::test<4>()
 	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
+	gen_ensure_equals(img->column_factor, facts::columnFactorFromSeviriDX(facts::seviriDXFromColumnFactor(40927014)));
+	gen_ensure_equals(img->line_factor, facts::lineFactorFromSeviriDY(facts::seviriDYFromLineFactor(40927014)));
 	gen_ensure_equals(img->data->slope, 1);
 	gen_ensure_equals(img->data->offset, 0);
 	gen_ensure_equals(img->data->bpp, 32); // unverified
@@ -257,8 +257,8 @@ void to::test<5>()
 	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
+	gen_ensure_equals(img->column_res, facts::columnResFromSeviriDX(facts::seviriDXFromColumnRes(40927014*exp2(-16))));
+	gen_ensure_equals(img->line_res, facts::lineResFromSeviriDY(facts::seviriDYFromLineRes(40927014*exp2(-16))));
 	gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
 	//gen_ensure_equals(img->data->offset, -3.3f);
 	gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
@@ -313,8 +313,8 @@ void to::test<7>()
 	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
 	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
+	gen_ensure_equals(img->column_res, facts::columnResFromSeviriDX(facts::seviriDXFromColumnRes(40927014*exp2(-16))));
+	gen_ensure_equals(img->line_res, facts::lineResFromSeviriDY(facts::seviriDYFromLineRes(40927014*exp2(-16))));
 	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
 	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
 	gen_ensure_equals(img->data->bpp, 9);
