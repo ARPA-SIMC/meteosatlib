@@ -25,11 +25,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include <grib/GRIB.h>
-#include <ImportGRIB.h>
 #include <ImportNetCDF24.h>
-#include <ExportGRIB.h>
 #include <ExportNetCDF24.h>
+#include <cstdio>
 
 
 namespace tut {
@@ -106,27 +104,6 @@ TempTestFile::TempTestFile(bool leave) : leave(leave)
 	char* pn = tempnam(WORK_DIR, "test");
 	pathname = pn;
 	free(pn);
-}
-
-std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile)
-{
-	using namespace msat;
-
-	TempTestFile file(leaveFile);
-
-	// Write the grib
-	GRIB_FILE gf;
-	if (gf.OpenWrite(file.name()) != 0)
-		return std::auto_ptr<Image>();
-	ExportGRIB(img, gf);
-	if (gf.Close() != 0)
-		return std::auto_ptr<Image>();
-
-	// Reread the grib
-	ImageVector imgs(*createGribImporter(file.name()));
-	if (imgs.empty())
-		return std::auto_ptr<Image>();
-	return imgs.shift();
 }
 
 std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile)

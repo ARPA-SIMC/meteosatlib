@@ -147,53 +147,12 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-	// Read the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	ImageVector imgs;
-	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 3u);
-	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
-
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 3);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-
-	test_tag("fullSAFH5RecodedGrib");
-	checkFullImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 // Try reimporting a subarea exported to grib
 template<> template<>
 void to::test<5>()
 {
-	// Read and crop the grib
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropImgArea = safCropArea;
-	ImageVector imgs;
-	imp->read(imgs);
-	gen_ensure_equals(imgs.size(), 3u);
-	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
-
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 2);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-
-	test_tag("croppedSAFH5RecodedGrib");
-	checkCroppedImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 }
 
 // Try reimporting an exported netcdf24

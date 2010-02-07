@@ -219,57 +219,12 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-#if PERFORM_SLOW_TESTS
-	-- Temporarily disabled as it currently uses too much ram
-
-	ImageVector imgs(*importer());
-	gen_ensure_equals(imgs.size(), 1u);
-	std::auto_ptr<Image> img = recodeThroughGrib(*imgs[0]);
-
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
-
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, facts::columnFactorFromSeviriDX(facts::seviriDXFromColumnFactor(40927014)));
-	gen_ensure_equals(img->line_factor, facts::lineFactorFromSeviriDY(facts::seviriDYFromLineFactor(40927014)));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
-
-	test_tag("fullXRITRecodedGrib");
-	checkFullImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
-#endif
 }
 
 // Import a subarea of an XRIT product and pass it from grib
 template<> template<>
 void to::test<5>()
 {
-	ImageVector imgs(*croppedImporter());
-	gen_ensure_equals(imgs.size(), 1u);
-	std::auto_ptr<Image> origimg = imgs.shift();
-
-	std::auto_ptr<Image> img = recodeThroughGrib(*origimg);
-
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
-
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, facts::columnResFromSeviriDX(facts::seviriDXFromColumnRes(40927014*exp2(-16))));
-	gen_ensure_equals(img->line_res, facts::lineResFromSeviriDY(facts::seviriDYFromLineRes(40927014*exp2(-16))));
-	gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
-	//gen_ensure_equals(img->data->offset, -3.3f);
-	gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
-	gen_ensure_equals(img->data->bpp, 16); // unverified
-	gen_ensure_equals(img->data->scalesToInt, true);
-
-	test_tag("croppedXRITRecodedGrib");
-	checkCroppedImageData(*img);
-	test_untag();
-
-	gen_ensure_imagedata_similar(*img->data, *origimg->data, 0.01);
 }
 
 // Import a full XRIT product and pass it from netcdf24

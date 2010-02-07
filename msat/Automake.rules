@@ -33,9 +33,7 @@ dist_msat_include_HEADERS = \
     msat/Image.tcc \
     msat/ExportGDTNetCDF.h \
     msat/ExportRepNetCDF.h \
-    msat/ExportGRIB.h \
     msat/ExportNetCDF24.h \
-    msat/ImportGRIB.h \
     msat/ImportNetCDF24.h \
     msat/ImportXRIT.h \
     msat/ImportUtils.h \
@@ -72,8 +70,6 @@ msat_libmsat_la_SOURCES = \
     msat/facts.cpp \
     msat/Image.cpp \
     msat/ImportUtils.cpp \
-    msat/ImportGRIB.cpp \
-    msat/ExportGRIB.cpp \
     msat/Progress.cpp
 
 msat_proj_libproj_la_SOURCES = \
