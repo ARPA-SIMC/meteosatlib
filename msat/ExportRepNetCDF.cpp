@@ -23,7 +23,7 @@
 #include <config.h>
 
 #include <msat/ExportRepNetCDF.h>
-#include <msat/proj/const.h>
+#include <msat/facts.h>
 #include <msat/proj/Latlon.h>
 
 #include <netcdfcpp.h>
