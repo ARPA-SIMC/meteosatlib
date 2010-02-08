@@ -3,12 +3,10 @@
 
 #include <msat/Image.h>
 #include <msat/xrit/fileaccess.h>
-#include <hrit/MSG_data_image.h>
+#include <msat/xrit/dataaccess.h>
 #include <memory>
 #include <vector>
 #include <deque>
-
-struct MSG_data;
 
 namespace msat {
 
@@ -55,50 +53,13 @@ struct HRITImageData : public ImageData
   size_t UpperWestColumnActual;
 	*/
 
-  /// Number of pixels in every segment
-  size_t npixperseg;
-
-  /// True if the image needs to be swapped horizontally
-  bool swapX;
-
-  /// True if the image needs to be swapped vertically
-  bool swapY;
-
-  /// True if the image is an HRV image divided in two parts
-  bool hrv;
-
-  /// Pathnames of the segment files, indexed with their index
-  std::vector<std::string> segnames;
-
-	struct scache
-	{
-		MSG_data* segment;
-		size_t segno;
-	};
-	/// Segment cache
-	mutable std::deque<scache> segcache;
-
-  /// Calibration vector
-  float* calibration;
-
-  /// Number of columns in the uncropped image
-  size_t origColumns;
-
-  /// Number of lines in the uncropped image
-  size_t origLines;
+	xrit::DataAccess da;
 
   /// Cropping edges
   int cropX, cropY;
 
-  HRITImageData() : npixperseg(0), calibration(0), cropX(0), cropY(0) {}
+  HRITImageData() : cropX(0), cropY(0) {}
   virtual ~HRITImageData();
-
-  /**
-   * Return the MSG_data corresponding to the segment with the given index.
-   *
-   * The pointer could be invalidated by another call to segment()
-   */
-  MSG_data* segment(size_t idx) const;
 
   /// Get an unscaled sample from the given coordinates in the normalised image
   MSG_SAMPLE sample(size_t x, size_t y) const;

@@ -27,11 +27,11 @@
 #include "msat/ImportUtils.h"
 #include "facts.h"
 #include "proj/Geos.h"
+#include <hrit/MSG_HRIT.h>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
-#include <hrit/MSG_HRIT.h>
 #include <glob.h>
 
 #include <msat/Image.tcc>
@@ -62,64 +62,6 @@ namespace msat {
 
 HRITImageData::~HRITImageData()
 {
-	// Delete the segment cache
-	//if (m_segment) delete m_segment;
-	for (std::deque<scache>::iterator i = segcache.begin();
-			 i != segcache.end(); ++i)
-		delete i->segment;
-	if (calibration) delete[] calibration;
-}
-
-MSG_data* HRITImageData::segment(size_t idx) const
-{
-	// Check to see if the segment we need is the current one
-	if (segcache.empty() || segcache.begin()->segno != idx)
-	{
-		// If not, check to see if we can find the segment in the cache
-		std::deque<scache>::iterator i = segcache.begin();
-		for ( ; i != segcache.end(); ++i)
-			if (i->segno == idx)
-				break;
-		if (i == segcache.end())
-		{
-			// Not in cache: we need to load it
-
-			// Do not load missing segments
-			if (idx >= segnames.size()) return 0;
-			if (segnames[idx].empty()) return 0;
-
-			// Remove the last recently used if the cache is full
-			if (segcache.size() == 2)
-			{
-				delete segcache.rbegin()->segment;
-				segcache.pop_back();
-			}
-
-			// Load the segment
-			ProgressTask p("Reading segment " + segnames[idx]);
-			std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
-			if (hrit.fail())
-				throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
-			MSG_header header;
-			header.read_from(hrit);
-			if (header.segment_id->data_field_format == MSG_NO_FORMAT)
-				throw std::runtime_error("Product dumped in binary format.");
-			scache new_scache;
-			new_scache.segment = new MSG_data;
-			new_scache.segment->read_from(hrit, header);
-			new_scache.segno = idx;
-			hrit.close();
-
-			// Put it in the front
-			segcache.push_front(new_scache);
-		} else {
-			// The segment is in the cache: bring it to the front
-			scache tmp = *i;
-			segcache.erase(i);
-			segcache.push_front(tmp);
-		}
-	}
-	return segcache.begin()->segment;
 }
 
 // #define tmprintf(...) fprintf(stderr, __VA_ARGS__)
@@ -151,16 +93,16 @@ MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
 	tmprintf("%zd,%zd -> ", rx, ry);
 
 	// Rotate if needed
-	if (swapX) rx = origColumns - rx - 1;
-	if (swapY) ry = origLines - ry - 1;
+	if (da.swapX) rx = da.columns - rx - 1;
+	if (da.swapY) ry = da.lines - ry - 1;
 
-	size_t pos = ry * origColumns + rx;
+	size_t pos = ry * da.columns + rx;
 	tmprintf("%zd,%zd -> %zd -> ", rx, ry, pos);
 
 	// Segment number where is the pixel
-	size_t segno = pos / npixperseg;
-	tmprintf("seg %zd/%zd=%zd -> ", pos, npixperseg, segno);
-	MSG_data* d = segment(segno);
+	size_t segno = pos / da.npixperseg;
+	tmprintf("seg %zd/%zd=%zd -> ", pos, da.npixperseg, segno);
+	MSG_data* d = da.segment(segno);
 	if (d == 0)
 	{
 		tmprintf("discarded.\n");
@@ -168,7 +110,7 @@ MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
 	}
 
 	// Offset of the pixel in the segment
-	size_t segoff = pos - (segno * npixperseg);
+	size_t segoff = pos - (segno * da.npixperseg);
 	tmprintf("segoff %zd -> val %d\n", segoff, d->image->data[segoff]);
 	return d->image->data[segoff];
 }
@@ -182,8 +124,8 @@ float HRITImageData::scaled(int column, int line) const
 
 	// To avoid spurious data, negative values after calibration are
 	// converted to missing values
-	if (s > 0 && calibration[s] >= 0)
-		return calibration[s];
+	if (s > 0 && da.calibration[s] >= 0)
+		return da.calibration[s];
 	else
 		return missingValue;
 }
@@ -362,7 +304,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			throw std::runtime_error("Product dumped in binary format.");
 
 		// Read common info just once from a random segment
-		if (data->npixperseg == 0)
+		if (data->da.npixperseg == 0)
 		{
 			// Decoding information
 			int totalsegs = header.segment_id->planned_end_segment_sequence_number;
@@ -371,14 +313,14 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			cerr << "NCOL " << header.image_structure->number_of_columns << endl; 
 			cerr << "NLIN " << header.image_structure->number_of_lines << endl; 
 #endif
-			data->origColumns = header.image_structure->number_of_columns;
-			data->origLines = seglines * totalsegs;
-			data->npixperseg = data->origColumns * seglines;
+			data->da.columns = header.image_structure->number_of_columns;
+			data->da.lines = seglines * totalsegs;
+			data->da.npixperseg = data->da.columns * seglines;
 
 			// Image metadata
 			img->proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
 			img->channel_id = header.segment_id->spectral_channel_id;
-			data->hrv = img->channel_id == MSG_SEVIRI_1_5_HRV;
+			data->da.hrv = img->channel_id == MSG_SEVIRI_1_5_HRV;
 			img->spacecraft_id = facts::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
 			img->unit = facts::channelUnit(img->spacecraft_id, img->channel_id);
 
@@ -416,15 +358,15 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			img->geotransform[4] = 0.0;
 
 			// See if the image needs to be rotated
-			data->swapX = header.image_navigation->column_scaling_factor < 0;
-			data->swapY = header.image_navigation->line_scaling_factor < 0;
+			data->da.swapX = header.image_navigation->column_scaling_factor < 0;
+			data->da.swapY = header.image_navigation->line_scaling_factor < 0;
 		  // Horizontal scaling coefficient computed as (2**16)/delta, where delta is
 		  // size in micro Radians of one pixel
 			img->column_res = abs(header.image_navigation->column_scaling_factor) * exp2(-16);
 	    // Vertical scaling coefficient computed as (2**16)/delta, where delta is the
 	    // size in micro Radians of one pixel
 			img->line_res = abs(header.image_navigation->line_scaling_factor) * exp2(-16);
-			if (data->hrv)
+			if (data->da.hrv)
 			{
 				data->hrvNorth.x = 11136 - UpperWestColumnActual - 1;
 				data->hrvNorth.y = 11136 - UpperNorthLineActual - 1;
@@ -460,7 +402,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 				data->hrvNorth.x = 1856 - header.image_navigation->column_offset;
 				data->hrvNorth.y = 1856 - header.image_navigation->line_offset;
 				data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
-				data->hrvNorth.height = data->origLines;
+				data->hrvNorth.height = data->da.lines;
 				data->hrvNorth.startcolumn = 0;
 				data->hrvNorth.startline = 0;
 
@@ -479,9 +421,9 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 		int idx = header.segment_id->sequence_number-1;
 		if (idx < 0) continue;
-		if ((size_t)idx >= data->segnames.size())
-			data->segnames.resize(idx + 1);
-		data->segnames[idx] = *i;
+		if ((size_t)idx >= data->da.segnames.size())
+			data->da.segnames.resize(idx + 1);
+		data->da.segnames[idx] = *i;
 	}
 
 	//cerr << "HRVNORTH " << data->hrvNorth << endl;
@@ -501,7 +443,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	//data->lines = data->origLines;
 
   // Get calibration values
-  data->calibration = PRO_data.prologue->radiometric_proc.get_calibration(img->channel_id, data->bpp);
+  data->da.calibration = PRO_data.prologue->radiometric_proc.get_calibration(img->channel_id, data->bpp);
 
 	// Get offset and slope
 	double slope;

@@ -51,7 +51,8 @@ dist_msat_proj_include_HEADERS = \
 msat_xrit_includedir = \
     $(includedir)/msat/xrit
 dist_msat_xrit_include_HEADERS = \
-    msat/xrit/fileaccess.h
+    msat/xrit/fileaccess.h \
+    msat/xrit/dataaccess.h
 
 # CURRENT:REVISION:AGE
 # - library source changed -> inc REVISION
@@ -81,6 +82,7 @@ msat_libmsat_la_LIBADD += \
     hrit/libhrit.la
 msat_libmsat_la_SOURCES += \
     msat/xrit/fileaccess.cpp \
+    msat/xrit/dataaccess.cpp \
     msat/ImportXRIT.cpp
 endif
 
