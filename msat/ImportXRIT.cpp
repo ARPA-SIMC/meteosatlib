@@ -283,12 +283,8 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 				i != segfiles.end(); ++i)
 	{
 		p.activity("Scanning segment " + *i);
-		std::ifstream hrit(i->c_str(), (std::ios::binary | std::ios::in));
-		if (hrit.fail())
-			throw std::runtime_error("Cannot open input hrit segment " + *i);
 		MSG_header header;
-		header.read_from(hrit);
-		hrit.close( );
+		data->da.read_file(*i, header);
 
 		if (header.segment_id->data_field_format == MSG_NO_FORMAT)
 			throw std::runtime_error("Product dumped in binary format.");

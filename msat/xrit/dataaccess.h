@@ -81,6 +81,11 @@ struct DataAccess
         void read_file(const std::string& file, MSG_header& head, MSG_data& data) const;
 
         /**
+         * Read only the xRIT header of a file
+         */
+        void read_file(const std::string& file, MSG_header& head) const;
+
+        /**
          * Return the X offset at which the given line starts
          *
          * This is always 0 for non-HRV. For HRV, it is the offset a line needs

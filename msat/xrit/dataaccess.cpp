@@ -43,6 +43,15 @@ DataAccess::~DataAccess()
         if (calibration) delete[] calibration;
 }
 
+void DataAccess::read_file(const std::string& file, MSG_header& head) const
+{
+        // ProgressTask p("Reading segment " + segnames[idx]);
+        std::ifstream hrit(file.c_str(), (std::ios::binary | std::ios::in));
+        if (hrit.fail()) throw std::runtime_error(file + ": cannot open");
+        head.read_from(hrit);
+        hrit.close();
+}
+
 void DataAccess::read_file(const std::string& file, MSG_header& head, MSG_data& data) const
 {
         // ProgressTask p("Reading segment " + segnames[idx]);
