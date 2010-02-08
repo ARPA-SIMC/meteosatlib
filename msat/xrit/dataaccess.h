@@ -28,6 +28,7 @@
 #include <deque>
 #include <hrit/MSG_data_image.h>
 
+struct MSG_header;
 struct MSG_data;
 
 namespace msat {
@@ -73,6 +74,11 @@ struct DataAccess
 
         DataAccess();
         ~DataAccess();
+
+        /**
+         * Read a xRIT file (prologue, epilogue or segment)
+         */
+        void read_file(const std::string& file, MSG_header& head, MSG_data& data) const;
 
         /**
          * Return the X offset at which the given line starts

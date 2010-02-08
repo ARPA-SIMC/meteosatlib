@@ -43,6 +43,19 @@ DataAccess::~DataAccess()
         if (calibration) delete[] calibration;
 }
 
+void DataAccess::read_file(const std::string& file, MSG_header& head, MSG_data& data) const
+{
+        // ProgressTask p("Reading segment " + segnames[idx]);
+        std::ifstream hrit(file.c_str(), (std::ios::binary | std::ios::in));
+        if (hrit.fail())
+                throw std::runtime_error(file + ": cannot open");
+        head.read_from(hrit);
+        if (head.segment_id && head.segment_id->data_field_format == MSG_NO_FORMAT)
+                throw std::runtime_error(file + ": product dumped in binary format");
+        data.read_from(hrit, head);
+        hrit.close();
+}
+
 MSG_data* DataAccess::segment(size_t idx) const
 {
         // Check to see if the segment we need is the current one
@@ -70,18 +83,11 @@ MSG_data* DataAccess::segment(size_t idx) const
 
                         // Load the segment
                         // ProgressTask p("Reading segment " + segnames[idx]);
-                        std::ifstream hrit(segnames[idx].c_str(), (std::ios::binary | std::ios::in));
-                        if (hrit.fail())
-                                throw std::runtime_error("Cannot open input hrit segment " + segnames[idx]);
                         MSG_header header;
-                        header.read_from(hrit);
-                        if (header.segment_id->data_field_format == MSG_NO_FORMAT)
-                                throw std::runtime_error("Product dumped in binary format.");
                         scache new_scache;
                         new_scache.segment = new MSG_data;
-                        new_scache.segment->read_from(hrit, header);
                         new_scache.segno = idx;
-                        hrit.close();
+                        read_file(segnames[idx].c_str(), header, *new_scache.segment);
 
                         // Put it in the front
                         segcache.push_front(new_scache);

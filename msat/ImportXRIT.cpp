@@ -217,12 +217,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   MSG_header PRO_head;
   MSG_data PRO_data;
 	p.activity("Reading prologue " + opts.prologueFile());
-	std::ifstream hrit(opts.prologueFile().c_str(), (std::ios::binary | std::ios::in));
-	if (hrit.fail())
-		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
-	PRO_head.read_from(hrit);
-	PRO_data.read_from(hrit, PRO_head);
-	hrit.close();
+	data->da.read_file(opts.prologueFile(), PRO_head, PRO_data);
 
 	// Image time
   struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
@@ -239,12 +234,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	MSG_header EPI_head;
 	MSG_data EPI_data;
 	p.activity("Reading epilogue " + opts.epilogueFile());
-	hrit.open(opts.epilogueFile().c_str(), (std::ios::binary | std::ios::in));
-	if (hrit.fail())
-		throw std::runtime_error("Cannot open input hrit file " + opts.prologueFile());
-	EPI_head.read_from(hrit);
-	EPI_data.read_from(hrit, EPI_head);
-	hrit.close();
+	data->da.read_file(opts.epilogueFile(), EPI_head, EPI_data);
 
   size_t LowerEastColumnActual;
   size_t LowerSouthLineActual;
