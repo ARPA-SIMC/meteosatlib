@@ -21,6 +21,7 @@
  */
 
 #include <msat/xrit/dataaccess.h>
+#include <msat/xrit/fileaccess.h>
 #include <hrit/MSG_HRIT.h>
 #include <stdexcept>
 
@@ -68,7 +69,7 @@ void DataAccess::scanSegment(const MSG_header& header)
 {
         // Decoding information
         int totalsegs = header.segment_id->planned_end_segment_sequence_number;
-        int seglines = header.image_structure->number_of_lines;
+        seglines = header.image_structure->number_of_lines;
 #if 0
         cerr << "NCOL " << header.image_structure->number_of_columns << endl; 
         cerr << "NLIN " << header.image_structure->number_of_lines << endl; 
@@ -83,8 +84,20 @@ void DataAccess::scanSegment(const MSG_header& header)
         swapY = header.image_navigation->line_scaling_factor < 0;
 }
 
-void DataAccess::scan(const std::vector<std::string>& segfiles, MSG_header& header)
+void DataAccess::scan(const FileAccess& fa, MSG_data& pro, MSG_data& epi, MSG_header& header)
 {
+        // Read prologue
+        MSG_header PRO_head;
+        //p.activity("Reading prologue " + opts.prologueFile());
+        read_file(fa.prologueFile(), PRO_head, pro);
+
+        // Read epilogue
+        MSG_header EPI_head;
+        //p.activity("Reading epilogue " + opts.epilogueFile());
+        read_file(fa.epilogueFile(), EPI_head, epi);
+
+        // Sort the segment names by their index
+        vector<string> segfiles = fa.segmentFiles();
         for (vector<string>::const_iterator i = segfiles.begin();
                         i != segfiles.end(); ++i)
         {
@@ -104,6 +117,22 @@ void DataAccess::scan(const std::vector<std::string>& segfiles, MSG_header& head
 
         // Read common info just once from a random segment
         scanSegment(header);
+
+        if (hrv)
+        {
+                MSG_ActualL15CoverageHRV& cov = epi.epilogue->product_stats.ActualL15CoverageHRV;
+                LowerEastColumnActual = cov.LowerEastColumnActual;
+                LowerNorthLineActual = cov.LowerNorthLineActual;
+                LowerWestColumnActual = cov.LowerWestColumnActual;
+                LowerSouthLineActual = cov.LowerSouthLineActual;
+                UpperEastColumnActual = cov.UpperEastColumnActual;
+                UpperSouthLineActual = cov.UpperSouthLineActual;
+                UpperWestColumnActual = cov.UpperWestColumnActual;
+                UpperNorthLineActual = cov.UpperNorthLineActual;
+        } else {
+                WestColumnActual = 1856 - header.image_navigation->column_offset;
+                SouthLineActual = 1856 - header.image_navigation->line_offset;
+        }
 }
 
 MSG_data* DataAccess::segment(size_t idx) const
@@ -149,6 +178,50 @@ MSG_data* DataAccess::segment(size_t idx) const
                 }
         }
         return segcache.begin()->segment;
+}
+
+size_t DataAccess::line_start(size_t line)
+{
+        if (!hrv) return WestColumnActual;
+        if (line >= UpperNorthLineActual) return 0;
+
+        // Bring line in the domain of the HRV reference grid
+        line = UpperNorthLineActual - line;
+
+        if (line < LowerSouthLineActual) return 0;
+        if (line <= LowerNorthLineActual) return 11136 - LowerWestColumnActual;
+        if (line < UpperSouthLineActual) return 0;
+        if (line <= UpperNorthLineActual) return 11136 - UpperWestColumnActual;
+        return 0;
+}
+
+void DataAccess::line_read(size_t line, MSG_SAMPLE* buf)
+{
+        size_t segnum;
+        size_t segline;
+
+        if (hrv)
+        {
+                line = 11136 - line;
+                segnum = (line - LowerSouthLineActual) / seglines;
+                segline = (line - LowerSouthLineActual) % seglines;
+        }
+        else
+        {
+                line = 3712 - line;
+                segnum = (line - SouthLineActual) / seglines;
+                segline = (line - SouthLineActual) % seglines;
+        }
+
+        MSG_data* d = segment(segnum);
+        if (d == 0) return;
+
+        if (swapX)
+        {
+                for (size_t i = 0; i < columns; ++i)
+                        buf[columns - i - 1] = d->image->data[segline * columns + i];
+        } else
+                memcpy(buf, d->image->data + segline * columns, columns * sizeof(MSG_SAMPLE));
 }
 
 }

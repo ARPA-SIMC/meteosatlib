@@ -214,11 +214,11 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	auto_ptr<HRITImageData> data(new HRITImageData);
 
-	// Read prologue
-  MSG_header PRO_head;
-  MSG_data PRO_data;
-	p.activity("Reading prologue " + opts.prologueFile());
-	data->da.read_file(opts.prologueFile(), PRO_head, PRO_data);
+	// Scan segment headers
+	MSG_data PRO_data;
+	MSG_data EPI_data;
+	MSG_header header;
+	data->da.scan(opts, PRO_data, EPI_data, header);
 
 	// Image time
   struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
@@ -231,30 +231,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
   // FIXME: and this? pds.sh = header[0].image_navigation->satellite_h;
 
 
-	// Read epilogue
-	MSG_header EPI_head;
-	MSG_data EPI_data;
-	p.activity("Reading epilogue " + opts.epilogueFile());
-	data->da.read_file(opts.epilogueFile(), EPI_head, EPI_data);
-
-  size_t LowerEastColumnActual;
-  size_t LowerSouthLineActual;
-  size_t LowerWestColumnActual;
-  size_t LowerNorthLineActual;
-  size_t UpperEastColumnActual;
-  size_t UpperSouthLineActual;
-  size_t UpperWestColumnActual;
-  size_t UpperNorthLineActual;
-
-	// Subtracting one because they start from 1 instead of 0
-	LowerEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerEastColumnActual - 1;
-	LowerNorthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerNorthLineActual - 1;
-	LowerWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerWestColumnActual - 1;
-	LowerSouthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.LowerSouthLineActual - 1;
-	UpperEastColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperEastColumnActual - 1;
-	UpperSouthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperSouthLineActual - 1;
-	UpperWestColumnActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperWestColumnActual - 1;
-	UpperNorthLineActual = EPI_data.epilogue->product_stats.ActualL15CoverageHRV.UpperNorthLineActual - 1;
 
 #if 0
 	data->LowerEastColumnActual = 1;
@@ -278,13 +254,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 			   << endl;
 #endif
 
-	// Sort the segment names by their index
-	vector<string> segfiles = opts.segmentFiles();
-
-	// Scan segment headers
-	MSG_header header;
-	data->da.scan(segfiles, header);
-
 	// Fill in image information
         img->proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
         img->projWKT = facts::spaceviewWKT(header.image_navigation->subsatellite_longitude);
@@ -295,17 +264,17 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
         if (data->da.hrv)
         {
-                data->hrvNorth.x = 11136 - UpperWestColumnActual - 1;
-                data->hrvNorth.y = 11136 - UpperNorthLineActual - 1;
-                data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
-                data->hrvNorth.height = UpperNorthLineActual - UpperSouthLineActual;
+                data->hrvNorth.x = 11136 - data->da.UpperWestColumnActual;
+                data->hrvNorth.y = 11136 - data->da.UpperNorthLineActual;
+                data->hrvNorth.width = data->da.UpperWestColumnActual - data->da.UpperEastColumnActual;
+                data->hrvNorth.height = data->da.UpperNorthLineActual - data->da.UpperSouthLineActual;
                 data->hrvNorth.startcolumn = 0;
                 data->hrvNorth.startline = 0;
 
-                data->hrvSouth.x = 11136 - LowerWestColumnActual - 1;
-                data->hrvSouth.y = 11136 - LowerNorthLineActual - 1;
-                data->hrvSouth.width = LowerWestColumnActual - LowerEastColumnActual;
-                data->hrvSouth.height = LowerNorthLineActual - LowerSouthLineActual;
+                data->hrvSouth.x = 11136 - data->da.LowerWestColumnActual;
+                data->hrvSouth.y = 11136 - data->da.LowerNorthLineActual;
+                data->hrvSouth.width = data->da.LowerWestColumnActual - data->da.LowerEastColumnActual;
+                data->hrvSouth.height = data->da.LowerNorthLineActual - data->da.LowerSouthLineActual;
                 data->hrvSouth.startcolumn = 0;
                 data->hrvSouth.startline = data->hrvNorth.height - 1;
 
@@ -328,7 +297,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
         } else {
                 data->hrvNorth.x = 1856 - header.image_navigation->column_offset;
                 data->hrvNorth.y = 1856 - header.image_navigation->line_offset;
-                data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
+                data->hrvNorth.width = data->da.UpperWestColumnActual - data->da.UpperEastColumnActual;
                 data->hrvNorth.height = data->da.lines;
                 data->hrvNorth.startcolumn = 0;
                 data->hrvNorth.startline = 0;

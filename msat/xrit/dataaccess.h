@@ -34,6 +34,8 @@ struct MSG_data;
 namespace msat {
 namespace xrit {
 
+struct FileAccess;
+
 /**
  * Higher level data access for xRIT files
  */
@@ -45,6 +47,9 @@ protected:
 public:
         /// Number of pixels in every segment
         size_t npixperseg;
+
+        /// Number of lines in every segment
+        size_t seglines;
 
         /// True if the image needs to be swapped horizontally
         bool swapX;
@@ -72,6 +77,19 @@ public:
         /// Number of scanlines
         size_t lines;
 
+        /// HRV reference grid (meaningless if not HRV)
+        size_t LowerEastColumnActual;
+        size_t LowerSouthLineActual;
+        size_t LowerWestColumnActual;
+        size_t LowerNorthLineActual;
+        size_t UpperEastColumnActual;
+        size_t UpperSouthLineActual;
+        size_t UpperWestColumnActual;
+        size_t UpperNorthLineActual;
+
+        /// non-HRV reference grid (meaningless if HRV)
+        size_t SouthLineActual;
+        size_t WestColumnActual;
 
         DataAccess();
         ~DataAccess();
@@ -80,7 +98,7 @@ public:
          * Scan the given segments, filling in all the various DataAccess
          * fields.
          */
-        void scan(const std::vector<std::string>& segfiles, MSG_header& header);
+        void scan(const FileAccess& fa, MSG_data& pro, MSG_data& epi, MSG_header& header);
 
         /**
          * Read a xRIT file (prologue, epilogue or segment)
@@ -93,12 +111,26 @@ public:
         void read_file(const std::string& file, MSG_header& head) const;
 
         /**
-         * Return the X offset at which the given line starts
+         * Return the X offset at which the given line starts.
+         *
+         * Line is intended as the scanline of the full world image starting
+         * from the north. Line 0 is the northernmost scanline.
          *
          * This is always 0 for non-HRV. For HRV, it is the offset a line needs
-         * to be shifted to geographically align it in the combined image.
+         * to be shifted right to geographically align it in the virtual
+         * fullsize image.
          */
         size_t line_start(size_t line);
+
+        /**
+         * Read a scanline
+         *
+         * The scanline will be appropriately swapped so that it goes from west
+         * to east
+         *
+         * \a buf must be at least 'columns' elements
+         */
+        void line_read(size_t line, MSG_SAMPLE* buf);
 
         /**
          * Return the MSG_data corresponding to the segment with the given index.
