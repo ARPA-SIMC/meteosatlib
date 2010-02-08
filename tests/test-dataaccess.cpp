@@ -53,8 +53,8 @@ void to::test<1>()
         MSG_header header;
         da.scan(fa, pro, epi, header);
 
-        gen_ensure_equals(da.npixperseg, 3712u * 123u);
-        gen_ensure_equals(da.seglines, 123u);
+        gen_ensure_equals(da.npixperseg, 3712u * 464u);
+        gen_ensure_equals(da.seglines, 464u);
         gen_ensure_equals(da.swapX, true);
         gen_ensure_equals(da.swapY, true);
         gen_ensure_equals(da.hrv, false);
@@ -86,8 +86,8 @@ void to::test<2>()
         MSG_header header;
         da.scan(fa, pro, epi, header);
 
-        gen_ensure_equals(da.npixperseg, 3712u * 123u);
-        gen_ensure_equals(da.seglines, 123u);
+        gen_ensure_equals(da.npixperseg, 3712u * 464u);
+        gen_ensure_equals(da.seglines, 464u);
         gen_ensure_equals(da.swapX, true);
         gen_ensure_equals(da.swapY, true);
         gen_ensure_equals(da.hrv, false);
@@ -119,32 +119,37 @@ void to::test<3>()
         MSG_header header;
         da.scan(fa, pro, epi, header);
 
-        gen_ensure_equals(da.npixperseg, 11136u * 123u);
-        gen_ensure_equals(da.seglines, 123u);
+        gen_ensure_equals(da.npixperseg, 11136u * 232u);
+        gen_ensure_equals(da.seglines, 464u);
         gen_ensure_equals(da.swapX, true);
         gen_ensure_equals(da.swapY, true);
         gen_ensure_equals(da.hrv, true);
-        gen_ensure_equals(da.segnames.size(), 1u);
-        gen_ensure_equals(da.columns, 11136u);
+        gen_ensure_equals(da.segnames.size(), 18u);
+        gen_ensure_equals(da.columns, 5568u);
         gen_ensure_equals(da.lines, 11136u);
 
         gen_ensure_equals(da.LowerEastColumnActual, 1u);
         gen_ensure_equals(da.LowerSouthLineActual, 1u);
         gen_ensure_equals(da.LowerWestColumnActual, 5568u);
-        gen_ensure_equals(da.LowerNorthLineActual, 8064u);
+        gen_ensure_equals(da.LowerNorthLineActual, 8128u);
         gen_ensure_equals(da.UpperEastColumnActual, 2064u);
-        gen_ensure_equals(da.UpperSouthLineActual, 8065u);
+        gen_ensure_equals(da.UpperSouthLineActual, 8129u);
         gen_ensure_equals(da.UpperWestColumnActual, 7631u);
         gen_ensure_equals(da.UpperNorthLineActual, 11136u);
 
-        gen_ensure_equals(da.line_start(   0), 0u);
-        gen_ensure_equals(da.line_start(1856), 0u);
-        gen_ensure_equals(da.line_start(3712), 0u);
-        gen_ensure_equals(da.line_start(9999), 0u);
+        gen_ensure_equals(da.line_start(    0), 11136u-7631u);
+        gen_ensure_equals(da.line_start( 1856), 11136u-7631u);
+        gen_ensure_equals(da.line_start( 3007), 11136u-7631u);
+        gen_ensure_equals(da.line_start( 3008), 11136u-5568u);
+        gen_ensure_equals(da.line_start( 9999), 11136u-5568u);
+        gen_ensure_equals(da.line_start(11135), 11136u-5568u);
+        gen_ensure_equals(da.line_start(11136), 0);
 
-        gen_ensure(da.segment(0) != NULL);
+        gen_ensure(da.segment(0) == NULL);
+        gen_ensure(da.segment(17) != NULL);
+        gen_ensure(da.segment(18) == NULL);
 
-        MSG_SAMPLE buf[3712];
+        MSG_SAMPLE buf[11136];
         da.line_read(0, buf);
 }
 

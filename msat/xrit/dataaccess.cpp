@@ -130,8 +130,8 @@ void DataAccess::scan(const FileAccess& fa, MSG_data& pro, MSG_data& epi, MSG_he
                 UpperWestColumnActual = cov.UpperWestColumnActual;
                 UpperNorthLineActual = cov.UpperNorthLineActual;
         } else {
-                WestColumnActual = 1856 - header.image_navigation->column_offset;
-                SouthLineActual = 1856 - header.image_navigation->line_offset;
+                WestColumnActual = 1856 - header.image_navigation->column_offset + 1;
+                SouthLineActual = 1856 - header.image_navigation->line_offset + 1;
         }
 }
 
@@ -182,7 +182,7 @@ MSG_data* DataAccess::segment(size_t idx) const
 
 size_t DataAccess::line_start(size_t line)
 {
-        if (!hrv) return WestColumnActual;
+        if (!hrv) return WestColumnActual - 1;
         if (line >= UpperNorthLineActual) return 0;
 
         // Bring line in the domain of the HRV reference grid
