@@ -25,8 +25,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include <ImportNetCDF24.h>
-#include <ExportNetCDF24.h>
 #include <cstdio>
 
 
@@ -104,24 +102,6 @@ TempTestFile::TempTestFile(bool leave) : leave(leave)
 	char* pn = tempnam(WORK_DIR, "test");
 	pathname = pn;
 	free(pn);
-}
-
-std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile)
-{
-	using namespace msat;
-
-	TempTestFile file(leaveFile);
-
-	// Write the NetCDF24
-	ExportNetCDF24(img, file.name());
-
-	// Reread the NetCDF24
-	std::auto_ptr<ImageImporter> imp(createNetCDF24Importer(file.name()));
-	ImageVector imgs;
-	imp->read(imgs);
-	if (imgs.empty())
-		return std::auto_ptr<Image>();
-	return imgs.shift();
 }
 
 }
