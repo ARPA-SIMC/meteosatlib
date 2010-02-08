@@ -37,8 +37,12 @@ namespace xrit {
 /**
  * Higher level data access for xRIT files
  */
-struct DataAccess
+class DataAccess
 {
+protected:
+        void scanSegment(const MSG_header& header);
+
+public:
         /// Number of pixels in every segment
         size_t npixperseg;
 
@@ -62,9 +66,6 @@ struct DataAccess
         /// Segment cache
         mutable std::deque<scache> segcache;
 
-        /// Calibration vector
-        float* calibration;
-
         /// Length of a scanline
         size_t columns;
 
@@ -74,6 +75,12 @@ struct DataAccess
 
         DataAccess();
         ~DataAccess();
+
+        /**
+         * Scan the given segments, filling in all the various DataAccess
+         * fields.
+         */
+        void scan(const std::vector<std::string>& segfiles, MSG_header& header);
 
         /**
          * Read a xRIT file (prologue, epilogue or segment)

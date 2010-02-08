@@ -29,7 +29,7 @@ using namespace std;
 namespace msat {
 namespace xrit {
 
-DataAccess::DataAccess() : npixperseg(0), calibration(0)
+DataAccess::DataAccess() : npixperseg(0)
 {
 }
 
@@ -40,7 +40,6 @@ DataAccess::~DataAccess()
         for (std::deque<scache>::iterator i = segcache.begin();
                         i != segcache.end(); ++i)
                 delete i->segment;
-        if (calibration) delete[] calibration;
 }
 
 void DataAccess::read_file(const std::string& file, MSG_header& head) const
@@ -63,6 +62,48 @@ void DataAccess::read_file(const std::string& file, MSG_header& head, MSG_data& 
                 throw std::runtime_error(file + ": product dumped in binary format");
         data.read_from(hrit, head);
         hrit.close();
+}
+
+void DataAccess::scanSegment(const MSG_header& header)
+{
+        // Decoding information
+        int totalsegs = header.segment_id->planned_end_segment_sequence_number;
+        int seglines = header.image_structure->number_of_lines;
+#if 0
+        cerr << "NCOL " << header.image_structure->number_of_columns << endl; 
+        cerr << "NLIN " << header.image_structure->number_of_lines << endl; 
+#endif
+        columns = header.image_structure->number_of_columns;
+        lines = seglines * totalsegs;
+        npixperseg = columns * seglines;
+        hrv = header.segment_id->spectral_channel_id == MSG_SEVIRI_1_5_HRV;
+
+        // See if the image needs to be rotated
+        swapX = header.image_navigation->column_scaling_factor < 0;
+        swapY = header.image_navigation->line_scaling_factor < 0;
+}
+
+void DataAccess::scan(const std::vector<std::string>& segfiles, MSG_header& header)
+{
+        for (vector<string>::const_iterator i = segfiles.begin();
+                        i != segfiles.end(); ++i)
+        {
+                //p.activity("Scanning segment " + *i);
+                read_file(*i, header);
+                if (header.segment_id->data_field_format == MSG_NO_FORMAT)
+                        throw std::runtime_error(*i + ": product dumped in binary format");
+
+                int idx = header.segment_id->sequence_number-1;
+                if (idx < 0) continue;
+                if ((size_t)idx >= segnames.size())
+                        segnames.resize(idx + 1);
+                segnames[idx] = *i;
+        }
+
+        if (segnames.empty()) throw std::runtime_error("no segments found");
+
+        // Read common info just once from a random segment
+        scanSegment(header);
 }
 
 MSG_data* DataAccess::segment(size_t idx) const

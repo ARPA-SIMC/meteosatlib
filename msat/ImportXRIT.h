@@ -55,10 +55,13 @@ struct HRITImageData : public ImageData
 
 	xrit::DataAccess da;
 
+        /// Calibration vector
+        float* calibration;
+
   /// Cropping edges
   int cropX, cropY;
 
-  HRITImageData() : cropX(0), cropY(0) {}
+  HRITImageData() : calibration(0), cropX(0), cropY(0) {}
   virtual ~HRITImageData();
 
   /// Get an unscaled sample from the given coordinates in the normalised image

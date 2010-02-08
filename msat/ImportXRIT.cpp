@@ -62,6 +62,7 @@ namespace msat {
 
 HRITImageData::~HRITImageData()
 {
+        if (calibration) delete[] calibration;
 }
 
 // #define tmprintf(...) fprintf(stderr, __VA_ARGS__)
@@ -124,8 +125,8 @@ float HRITImageData::scaled(int column, int line) const
 
 	// To avoid spurious data, negative values after calibration are
 	// converted to missing values
-	if (s > 0 && da.calibration[s] >= 0)
-		return da.calibration[s];
+	if (s > 0 && calibration[s] >= 0)
+		return calibration[s];
 	else
 		return missingValue;
 }
@@ -279,138 +280,111 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
 	// Sort the segment names by their index
 	vector<string> segfiles = opts.segmentFiles();
-	for (vector<string>::const_iterator i = segfiles.begin();
-				i != segfiles.end(); ++i)
+
+	// Scan segment headers
+	MSG_header header;
+	data->da.scan(segfiles, header);
+
+	// Fill in image information
+        img->proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
+        img->projWKT = facts::spaceviewWKT(header.image_navigation->subsatellite_longitude);
+        img->spacecraft_id = facts::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
+        img->channel_id = header.segment_id->spectral_channel_id;
+        data->bpp = header.image_structure->number_of_bits_per_pixel;
+	img->unit = facts::channelUnit(img->spacecraft_id, img->channel_id);
+
+        if (data->da.hrv)
+        {
+                data->hrvNorth.x = 11136 - UpperWestColumnActual - 1;
+                data->hrvNorth.y = 11136 - UpperNorthLineActual - 1;
+                data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
+                data->hrvNorth.height = UpperNorthLineActual - UpperSouthLineActual;
+                data->hrvNorth.startcolumn = 0;
+                data->hrvNorth.startline = 0;
+
+                data->hrvSouth.x = 11136 - LowerWestColumnActual - 1;
+                data->hrvSouth.y = 11136 - LowerNorthLineActual - 1;
+                data->hrvSouth.width = LowerWestColumnActual - LowerEastColumnActual;
+                data->hrvSouth.height = LowerNorthLineActual - LowerSouthLineActual;
+                data->hrvSouth.startcolumn = 0;
+                data->hrvSouth.startline = data->hrvNorth.height - 1;
+
+                // Since we are omitting the first (11136-UpperWestColumnActual) of the
+                // rotated image, we need to shift the column offset accordingly
+                // FIXME: don't we have a way to compute this from the HRIT data?
+                //img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
+                img->column_offset = 5566;
+                img->line_offset = 5566;
+#if 0
+                cerr << "COFF " << header.image_navigation->column_offset << endl;
+                cerr << "LOFF " << header.image_navigation->line_offset << endl;
+                cerr << "COFF " << header.image_navigation->COFF << endl;
+                cerr << "LOFF " << header.image_navigation->LOFF << endl;
+                cerr << "cCOFF " << img->column_offset << endl;
+                cerr << "cLOFF " << img->line_offset << endl;
+#endif
+                data->columns = 11136;
+                data->lines = 11136;
+        } else {
+                data->hrvNorth.x = 1856 - header.image_navigation->column_offset;
+                data->hrvNorth.y = 1856 - header.image_navigation->line_offset;
+                data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
+                data->hrvNorth.height = data->da.lines;
+                data->hrvNorth.startcolumn = 0;
+                data->hrvNorth.startline = 0;
+
+                img->column_offset = 1856;
+                img->line_offset = 1856;
+
+                // img->column_offset = header.image_navigation->column_offset;
+                // img->line_offset = header.image_navigation->line_offset;
+                data->columns = 3712;
+                data->lines = 3712;
+        }
+
+        // Horizontal scaling coefficient computed as (2**16)/delta, where delta is
+        // size in micro Radians of one pixel
+        img->column_res = abs(header.image_navigation->column_scaling_factor) * exp2(-16);
+        // Vertical scaling coefficient computed as (2**16)/delta, where delta is the
+        // size in micro Radians of one pixel
+        img->line_res = abs(header.image_navigation->line_scaling_factor) * exp2(-16);
+
+	double pixelSizeX, pixelSizeY;
+	int column_offset, line_offset, x0 = 0, y0 = 0;
+	if (data->da.hrv)
 	{
-		p.activity("Scanning segment " + *i);
-		MSG_header header;
-		data->da.read_file(*i, header);
+		pixelSizeX = 1000 * PRO_data.prologue->image_description.ReferenceGridHRV.ColumnDirGridStep;
+		pixelSizeY = 1000 * PRO_data.prologue->image_description.ReferenceGridHRV.LineDirGridStep;
 
-		if (header.segment_id->data_field_format == MSG_NO_FORMAT)
-			throw std::runtime_error("Product dumped in binary format.");
+		// Since we are omitting the first (11136-UpperWestColumnActual) of the
+		// rotated image, we need to shift the column offset accordingly
+		// FIXME: don't we have a way to compute this from the HRIT data?
+		//img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
+		column_offset = 5568;
+		line_offset = 5568;
+	} else {
+		pixelSizeX = 1000 * PRO_data.prologue->image_description.ReferenceGridVIS_IR.ColumnDirGridStep;
+		pixelSizeY = 1000 * PRO_data.prologue->image_description.ReferenceGridVIS_IR.LineDirGridStep;
 
-		// Read common info just once from a random segment
-		if (data->da.npixperseg == 0)
-		{
-			// Decoding information
-			int totalsegs = header.segment_id->planned_end_segment_sequence_number;
-			int seglines = header.image_structure->number_of_lines;
-#if 0
-			cerr << "NCOL " << header.image_structure->number_of_columns << endl; 
-			cerr << "NLIN " << header.image_structure->number_of_lines << endl; 
-#endif
-			data->da.columns = header.image_structure->number_of_columns;
-			data->da.lines = seglines * totalsegs;
-			data->da.npixperseg = data->da.columns * seglines;
-
-			// Image metadata
-			img->proj.reset(new proj::Geos(header.image_navigation->subsatellite_longitude, ORBIT_RADIUS));
-			img->channel_id = header.segment_id->spectral_channel_id;
-			data->da.hrv = img->channel_id == MSG_SEVIRI_1_5_HRV;
-			img->spacecraft_id = facts::spacecraftIDFromHRIT(header.segment_id->spacecraft_id);
-			img->unit = facts::channelUnit(img->spacecraft_id, img->channel_id);
-
-			img->projWKT = facts::spaceviewWKT(header.image_navigation->subsatellite_longitude);
-
-			double pixelSizeX, pixelSizeY;
-			int column_offset, line_offset, x0 = 0, y0 = 0;
-			if (img->channel_id == MSG_SEVIRI_1_5_HRV)
-			{
-							pixelSizeX = 1000 * PRO_data.prologue->image_description.ReferenceGridHRV.ColumnDirGridStep;
-							pixelSizeY = 1000 * PRO_data.prologue->image_description.ReferenceGridHRV.LineDirGridStep;
-
-							// Since we are omitting the first (11136-UpperWestColumnActual) of the
-							// rotated image, we need to shift the column offset accordingly
-							// FIXME: don't we have a way to compute this from the HRIT data?
-							//img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
-							column_offset = 5568;
-							line_offset = 5568;
-			} else {
-							pixelSizeX = 1000 * PRO_data.prologue->image_description.ReferenceGridVIS_IR.ColumnDirGridStep;
-							pixelSizeY = 1000 * PRO_data.prologue->image_description.ReferenceGridVIS_IR.LineDirGridStep;
-
-							column_offset = 1856;
-							line_offset = 1856;
-			}
-			//img->geotransform[0] = -(band->column_offset - band->x0) * band->column_res;
-			//img->geotransform[3] = -(band->line_offset   - band->y0) * band->line_res;
-			img->geotransform[0] = -(column_offset - x0) * fabs(pixelSizeX);
-			img->geotransform[3] = (line_offset   - y0) * fabs(pixelSizeY);
-			//img->geotransform[1] = band->column_res;
-			//img->geotransform[5] = band->line_res;
-			img->geotransform[1] = fabs(pixelSizeX);
-			img->geotransform[5] = -fabs(pixelSizeY);
-			img->geotransform[2] = 0.0;
-			img->geotransform[4] = 0.0;
-
-			// See if the image needs to be rotated
-			data->da.swapX = header.image_navigation->column_scaling_factor < 0;
-			data->da.swapY = header.image_navigation->line_scaling_factor < 0;
-		  // Horizontal scaling coefficient computed as (2**16)/delta, where delta is
-		  // size in micro Radians of one pixel
-			img->column_res = abs(header.image_navigation->column_scaling_factor) * exp2(-16);
-	    // Vertical scaling coefficient computed as (2**16)/delta, where delta is the
-	    // size in micro Radians of one pixel
-			img->line_res = abs(header.image_navigation->line_scaling_factor) * exp2(-16);
-			if (data->da.hrv)
-			{
-				data->hrvNorth.x = 11136 - UpperWestColumnActual - 1;
-				data->hrvNorth.y = 11136 - UpperNorthLineActual - 1;
-				data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
-				data->hrvNorth.height = UpperNorthLineActual - UpperSouthLineActual;
-				data->hrvNorth.startcolumn = 0;
-				data->hrvNorth.startline = 0;
-
-				data->hrvSouth.x = 11136 - LowerWestColumnActual - 1;
-				data->hrvSouth.y = 11136 - LowerNorthLineActual - 1;
-				data->hrvSouth.width = LowerWestColumnActual - LowerEastColumnActual;
-				data->hrvSouth.height = LowerNorthLineActual - LowerSouthLineActual;
-				data->hrvSouth.startcolumn = 0;
-				data->hrvSouth.startline = data->hrvNorth.height - 1;
-
-				// Since we are omitting the first (11136-UpperWestColumnActual) of the
-				// rotated image, we need to shift the column offset accordingly
-				// FIXME: don't we have a way to compute this from the HRIT data?
-				//img->column_offset = 5568 - (11136 - data->UpperWestColumnActual - 1);
-				img->column_offset = 5566;
-				img->line_offset = 5566;
-#if 0
-				cerr << "COFF " << header.image_navigation->column_offset << endl;
-				cerr << "LOFF " << header.image_navigation->line_offset << endl;
-				cerr << "COFF " << header.image_navigation->COFF << endl;
-				cerr << "LOFF " << header.image_navigation->LOFF << endl;
-				cerr << "cCOFF " << img->column_offset << endl;
-				cerr << "cLOFF " << img->line_offset << endl;
-#endif
-				data->columns = 11136;
-				data->lines = 11136;
-			} else {
-				data->hrvNorth.x = 1856 - header.image_navigation->column_offset;
-				data->hrvNorth.y = 1856 - header.image_navigation->line_offset;
-				data->hrvNorth.width = UpperWestColumnActual - UpperEastColumnActual;
-				data->hrvNorth.height = data->da.lines;
-				data->hrvNorth.startcolumn = 0;
-				data->hrvNorth.startline = 0;
-
-				img->column_offset = 1856;
-				img->line_offset = 1856;
-
-				// img->column_offset = header.image_navigation->column_offset;
-				// img->line_offset = header.image_navigation->line_offset;
-				data->columns = 3712;
-				data->lines = 3712;
-			}
-			img->x0 = 0;
-			img->y0 = 0;
-			data->bpp = header.image_structure->number_of_bits_per_pixel;
-		}
-
-		int idx = header.segment_id->sequence_number-1;
-		if (idx < 0) continue;
-		if ((size_t)idx >= data->da.segnames.size())
-			data->da.segnames.resize(idx + 1);
-		data->da.segnames[idx] = *i;
+		column_offset = 1856;
+		line_offset = 1856;
 	}
+	//img->geotransform[0] = -(band->column_offset - band->x0) * band->column_res;
+	//img->geotransform[3] = -(band->line_offset   - band->y0) * band->line_res;
+	img->geotransform[0] = -(column_offset - x0) * fabs(pixelSizeX);
+	img->geotransform[3] = (line_offset   - y0) * fabs(pixelSizeY);
+	//img->geotransform[1] = band->column_res;
+	//img->geotransform[5] = band->line_res;
+	img->geotransform[1] = fabs(pixelSizeX);
+	img->geotransform[5] = -fabs(pixelSizeY);
+	img->geotransform[2] = 0.0;
+	img->geotransform[4] = 0.0;
+
+	img->x0 = 0;
+	img->y0 = 0;
+
+
+
 
 	//cerr << "HRVNORTH " << data->hrvNorth << endl;
 	//cerr << "HRVSOUTH " << data->hrvSouth << endl;
@@ -429,7 +403,7 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 	//data->lines = data->origLines;
 
   // Get calibration values
-  data->da.calibration = PRO_data.prologue->radiometric_proc.get_calibration(img->channel_id, data->bpp);
+  data->calibration = PRO_data.prologue->radiometric_proc.get_calibration(img->channel_id, data->bpp);
 
 	// Get offset and slope
 	double slope;
