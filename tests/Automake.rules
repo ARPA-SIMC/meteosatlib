@@ -57,6 +57,8 @@ tests_msatlib_test_SOURCES = \
 
 if HRIT
 tests_msatlib_test_SOURCES += \
+    tests/test-fileaccess.cpp \
+    tests/test-dataaccess.cpp \
     tests/test-importxrit.cpp
 endif
 
