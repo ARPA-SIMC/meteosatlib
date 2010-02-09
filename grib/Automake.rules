@@ -21,7 +21,7 @@
 noinst_LTLIBRARIES += \
     grib/libgrib.la
 
-noinst_HEADERS = \
+EXTRA_DIST += \
     grib/Ebisuzaki.h \
     grib/GRIB.h
 
