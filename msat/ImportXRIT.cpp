@@ -37,13 +37,6 @@
 #include <msat/Image.tcc>
 #include <msat/Progress.h>
 
-namespace std {
-ostream& operator<<(ostream& out, const msat::HRITImageData::AreaMap& a)
-{
-	return out << a.x << "," << a.y << " dim: " << a.width << "," << a.height << " start: " << a.startcolumn << ", " << a.startline;
-}
-}
-
 using namespace std;
 
 #define PATH_SEPARATOR "/"
@@ -174,20 +167,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 
         if (data->da.hrv)
         {
-                data->hrvNorth.x = 11136 - data->da.UpperWestColumnActual;
-                data->hrvNorth.y = 11136 - data->da.UpperNorthLineActual;
-                data->hrvNorth.width = data->da.UpperWestColumnActual - data->da.UpperEastColumnActual;
-                data->hrvNorth.height = data->da.UpperNorthLineActual - data->da.UpperSouthLineActual;
-                data->hrvNorth.startcolumn = 0;
-                data->hrvNorth.startline = 0;
-
-                data->hrvSouth.x = 11136 - data->da.LowerWestColumnActual;
-                data->hrvSouth.y = 11136 - data->da.LowerNorthLineActual;
-                data->hrvSouth.width = data->da.LowerWestColumnActual - data->da.LowerEastColumnActual;
-                data->hrvSouth.height = data->da.LowerNorthLineActual - data->da.LowerSouthLineActual;
-                data->hrvSouth.startcolumn = 0;
-                data->hrvSouth.startline = data->hrvNorth.height - 1;
-
                 // Since we are omitting the first (11136-UpperWestColumnActual) of the
                 // rotated image, we need to shift the column offset accordingly
                 // FIXME: don't we have a way to compute this from the HRIT data?
@@ -205,13 +184,6 @@ std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
                 data->columns = 11136;
                 data->lines = 11136;
         } else {
-                data->hrvNorth.x = 1856 - header.image_navigation->column_offset;
-                data->hrvNorth.y = 1856 - header.image_navigation->line_offset;
-                data->hrvNorth.width = data->da.UpperWestColumnActual - data->da.UpperEastColumnActual;
-                data->hrvNorth.height = data->da.lines;
-                data->hrvNorth.startcolumn = 0;
-                data->hrvNorth.startline = 0;
-
                 img->column_offset = 1856;
                 img->line_offset = 1856;
 
