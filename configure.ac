@@ -102,7 +102,7 @@ PKG_CHECK_EXISTS(ImageMagick++,[
         AC_MSG_WARN("*** thornsds_db1 support disabled for lack of libmagick++")
     fi
 ])
-PKG_CHECK_MODULES(MAGICKPP,Magick++)
+PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
 
 dnl NetCDF3 (which does not use pkg-config)
 AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
