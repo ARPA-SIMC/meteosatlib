@@ -32,10 +32,10 @@ noinst_HEADERS += \
 
 examples_Met_Reproj_CPPFLAGS = \
     -I$(top_srcdir)/examples \
-    -I$(top_srcdir)/grib
+    -I$(top_srcdir)/grib \
+    $(NETCDF_CFLAGS)
 examples_Met_Reproj_LDADD = \
-    -lnetcdf_c++ \
-    -lnetcdf
+    $(NETCDF_LIBS)
 examples_Met_Reproj_SOURCES = \
     examples/Area.cpp \
     examples/Met_Reproj.cpp \

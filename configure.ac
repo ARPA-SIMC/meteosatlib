@@ -113,6 +113,8 @@ dnl Checks for header files.
 if test "x$have_libnetcdf" == "xyes"; then
     AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
     AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
+    AC_SUBST(NETCDF_CFLAGS)
+    AC_SUBST(NETCDF_LIBS)
 else
     if test "$enable_hri" == "yes"; then
         enable_hri="no"
