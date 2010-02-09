@@ -1,3 +1,10 @@
+Tue Feb  9 17:27:06 2010 Enrico Zini <enrico@enricozini.org>
+
+	* Version 0.6.0
+	* Removed most of the msat/ Image abstration (now implemented properly
+	  in msat-gdal)
+	* Reorganised msat/ code as generic, higher level utility code
+
 Sat Jan 23 14:42:20 2010 Enrico Zini <enrico@enricozini.org>
 
 	* Version 0.5.6
