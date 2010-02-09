@@ -53,13 +53,12 @@ tests_msatlib_test_SOURCES = \
     tests/tut-main.cpp \
     tests/test-utils.cpp \
     tests/test-proj.cpp \
-    tests/test-image.cpp
+    tests/test-facts.cpp
 
 if HRIT
 tests_msatlib_test_SOURCES += \
     tests/test-fileaccess.cpp \
-    tests/test-dataaccess.cpp \
-    tests/test-importxrit.cpp
+    tests/test-dataaccess.cpp
 endif
 
 INCLUDES = \

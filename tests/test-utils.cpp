@@ -52,50 +52,6 @@ std::string __ensure_errmsg(std::string file, int line, std::string msg)
 	return ss.str();
 }
 
-void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageData& actual, const msat::ImageData& expected, const float& delta)
-{
-	if (actual.lines != expected.lines)
-	{
-		std::stringstream ss;
-		ss << "Line count differ: expected " << expected.lines << " actual " << actual.lines;
-		throw failure(__ensure_errmsg(file, line, ss.str()));
-	}
-	if (actual.columns != expected.columns)
-	{
-		std::stringstream ss;
-		ss << "Column count differ: expected " << expected.columns << " actual " << actual.columns;
-		throw failure(__ensure_errmsg(file, line, ss.str()));
-	}
-	for (size_t y = 0; y < expected.lines; ++y)
-		for (size_t x = 0; x < expected.columns; ++x)
-		{
-			float v1 = actual.scaled(x,y);
-			float v2 = expected.scaled(x,y);
-			if (v1 == actual.missingValue && v2 == expected.missingValue)
-				continue;
-			if (v1 == actual.missingValue && v2 != expected.missingValue)
-			{
-				std::stringstream ss;
-				ss << "at position " << x << "," << y << ": expected "
-				   << v2 << " actual missing";
-				throw failure(__ensure_errmsg(file, line, ss.str()));
-			}
-			if (v1 != actual.missingValue && v2 == expected.missingValue)
-			{
-				std::stringstream ss;
-				ss << "at position " << x << "," << y << ": expected missing actual " << v1;
-				throw failure(__ensure_errmsg(file, line, ss.str()));
-			}
-			if (v1 <= v2 - delta || v2 + delta <= v1)
-			{
-				std::stringstream ss;
-				ss << "at position " << x << "," << y << ": expected "
-				   << v2 << " actual " << v1;
-				throw failure(__ensure_errmsg(file, line, ss.str()));
-			}
-		}
-}
-
 TempTestFile::TempTestFile(bool leave) : leave(leave)
 {
 	::mkdir(WORK_DIR, 0755);

@@ -2,6 +2,7 @@
 #define MSAT_FACTS_H
 
 #include <string>
+#include <math.h>
 
 namespace msat {
 namespace facts {
@@ -99,9 +100,6 @@ const char* channelUnit(int spacecraftID, int channelID);
 
 /// Get the data level string "1", "1.5", "2", "3"... for the given channel
 const char* channelLevel(int spacecraftID, int channelID);
-
-/// Get the WKT description for the Spaceview projection
-std::string spaceviewWKT(double sublon = 0.0);
 
 /// Get the default missing value that can be used for the given channel
 double defaultPackedMissing(int channel);

@@ -72,12 +72,6 @@ AC_ARG_ENABLE([openmtp],
         [disable openmtp support])],
     [],
     [enable_openmtp="yes"])
-AC_ARG_ENABLE([gdal],
-    [AS_HELP_STRING(
-        [--disable-gdal],
-        [disable GDAL support])],
-    [],
-    [enable_gdal="yes"])
 
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
@@ -112,20 +106,6 @@ PKG_CHECK_MODULES(MAGICKPP,Magick++)
 
 dnl NetCDF3 (which does not use pkg-config)
 AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
-
-AC_PATH_PROG([GDAL_CONFIG], [gdal-config], [NONE])
-if test "x$GDAL_CONFIG" == "xNONE"; then
-    enable_gdal="no"
-    AC_MSG_WARN("*** GDAL support disabled")
-else
-    AC_DEFINE([HAVE_GDAL], 1, [Magick++ functions are available])
-    AC_DEFINE([MSAT_HAVE_GDAL], 1, [Magick++ functions are available])
-    AC_SUBST(GDAL_CONFIG)
-    GDAL_CFLAGS=`$GDAL_CONFIG --cflags`
-    GDAL_LIBS=`$GDAL_CONFIG --libs`
-    AC_SUBST(GDAL_CFLAGS)
-    AC_SUBST(GDAL_LIBS)
-fi
 
 dnl --------------------------------------------------------------------
 dnl Checks for header files.
@@ -211,7 +191,6 @@ AM_CONDITIONAL([OPENMTP], [test x"$enable_openmtp" = x"yes"])
 AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
-AM_CONDITIONAL([GDAL], [test x"$enable_gdal" = x"yes"])
 
 dnl --------------------------------------------------------------------
 dnl Extra defines
@@ -236,13 +215,6 @@ fi
 
 if test x"$have_libmagick" = x"yes"; then
 	PC_MSAT_REQS="$PC_MSAT_REQS ImageMagick++"
-fi
-
-if test x"$have_gdal" = x"yes"; then
-	# FIXME: there seems to be no way to tell users of the .pc.in that they
-	# need the gdal libraries, as gdal does not package .pc files.  Are
-	# there better ways of handling this?
-	PC_MSAT_LIBS="$PC_MSAT_LIBS `$GDAL_CONFIG --libs`"
 fi
 
 AC_SUBST(PC_MSAT_REQS)
@@ -291,7 +263,6 @@ AS_HELP_STRING([msg-native:], [$enable_msg_native])
 AS_HELP_STRING([omtp-ids:], [$enable_omtp_ids])
 AS_HELP_STRING([openmtp:], [$enable_openmtp])
 AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
-AS_HELP_STRING([gdal:], [$enable_gdal])
 ===================================================])
 
 ## -fin-

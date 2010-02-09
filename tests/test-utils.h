@@ -20,7 +20,7 @@
  */
 
 #include "tut.h"
-#include <msat/Image.h>
+#include <msat/facts.h>
 #include <cstdlib>
 
 #define TESTGRP(name) \
@@ -67,11 +67,6 @@ void my_ensure_similar(const char* file, int line, const Q& actual, const T& exp
 #define gen_ensure_similar(x, y, delta) my_ensure_similar(__FILE__, __LINE__, (x), (y), (delta))
 #define inner_ensure_similar(x, y, delta) my_ensure_similar(file, line, (x), (y), (delta))
 
-void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageData& actual, const msat::ImageData& expected, const float& delta);
-
-#define gen_ensure_imagedata_similar(x, y, delta) my_ensure_imagedata_similar(__FILE__, __LINE__, (x), (y), (delta))
-#define inner_ensure_imagedata_similar(x, y, delta) my_ensure_imagedata_similar(file, line, (x), (y), (delta))
-
 class LocalEnv
 {
 	std::string key;
@@ -102,7 +97,5 @@ public:
 
 	const std::string& name() const { return pathname; }
 };
-
-std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile = false);
 
 }
