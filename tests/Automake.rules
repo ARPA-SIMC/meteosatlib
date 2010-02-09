@@ -37,9 +37,15 @@ noinst_HEADERS += \
     tests/test-utils.h
 
 dist_noinst_DATA += \
+    tests/data/H-000-MSG1__-MSG1________-_________-EPI______-200611130800-__ \
     tests/data/H-000-MSG1__-MSG1________-_________-EPI______-200611141200-__ \
     tests/data/H-000-MSG1__-MSG1________-HRV______-000018___-200611141200-C_ \
+    tests/data/H-000-MSG1__-MSG1________-IR_039___-000001___-200611130800-C_ \
+    tests/data/H-000-MSG1__-MSG1________-_________-PRO______-200611130800-__ \
     tests/data/H-000-MSG1__-MSG1________-_________-PRO______-200611141200-__ \
+    tests/data/H-000-MSG2__-MSG2________-_________-EPI______-200807150900-__ \
+    tests/data/H-000-MSG2__-MSG2________-_________-PRO______-200807150900-__ \
+    tests/data/H-000-MSG2__-MSG2________-VIS006___-000001___-200807150900-C_ \
     tests/data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc
 
 tests_msatlib_test_CPPFLAGS = \
