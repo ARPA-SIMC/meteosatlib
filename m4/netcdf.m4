@@ -37,8 +37,10 @@ fi
 
 dnl Check that the library has what we need
 if test $have_netcdf = yes; then
+    saved_CPPFLAGS="$CFLAGS"
     saved_CFLAGS="$CFLAGS"
     saved_LIBS="$LIBS"
+    CPPFLAGS="$CFLAGS $NETCDF_CFLAGS"
     CFLAGS="$CFLAGS $NETCDF_CFLAGS"
     LIBS="$LIBS -lnetcdf_c++ -lnetcdf"
     AC_MSG_CHECKING([for NcFile in -lnetcdf_c++])
@@ -55,6 +57,7 @@ if test $have_netcdf = yes; then
             have_netcdf=no
         ]
     )
+    CPPFLAGS="$saved_CPPFLAGS"
     CFLAGS="$saved_CFLAGS"
     LIBS="$saved_LIBS"
 fi
