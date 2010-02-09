@@ -21,9 +21,7 @@
 noinst_LTLIBRARIES += \
     grib/libgrib.la
 
-grib_includedir = \
-    $(includedir)/grib
-grib_include_HEADERS = \
+noinst_HEADERS = \
     grib/Ebisuzaki.h \
     grib/GRIB.h
 
