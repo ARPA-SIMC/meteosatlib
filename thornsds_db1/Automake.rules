@@ -41,10 +41,6 @@ thornsds_db1_libthornsds_db1_la_SOURCES = \
 thornsds_db1_examples_db1_to_image_CPPFLAGS = \
     $(MAGICKPP_CFLAGS) \
     -I$(top_srcdir)/iniparser
-
-thornsds_db1_examples_db1_to_netcdf_CPPFLAGS = \
-    -I$(top_srcdir)/iniparser
-
 thornsds_db1_examples_db1_to_image_LDADD = \
     thornsds_db1/libthornsds_db1.la \
     -lMagick++
@@ -53,6 +49,7 @@ thornsds_db1_examples_db1_to_image_SOURCES = \
     iniparser/iniparser.c
 
 thornsds_db1_examples_db1_to_netcdf_LDADD = \
+    -I$(top_srcdir)/iniparser \
     thornsds_db1/libthornsds_db1.la \
     $(NETCDF_LIBS)
 thornsds_db1_examples_db1_to_netcdf_CPPFLAGS = \
