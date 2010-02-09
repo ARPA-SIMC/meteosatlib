@@ -57,9 +57,9 @@ bin_PROGRAMS += \
     openmtp/examples/OpenMTP_to_NetCDF
 
 openmtp_examples_OpenMTP_to_NetCDF_LDADD = \
-    openmtp/libopenmtp.la \
-    -lnetcdf_c++ \
-    -lnetcdf
+    openmtp/libopenmtp.la $(NETCDF_LIBS)
+openmtp_examples_OpenMTP_to_NetCDF_CPPFLAGS = \
+    $(NETCDF_CFLAGS)
 openmtp_examples_OpenMTP_to_NetCDF_SOURCES = \
     openmtp/examples/OpenMTP_to_NetCDF.cpp
 endif
