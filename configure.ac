@@ -249,7 +249,6 @@ AC_CONFIG_FILES([
     meteosatlib.spec
     libmsat.pc
     libhrit.pc
-    libgrib.pc
     libopenmtp.pc
 ])
 AC_OUTPUT

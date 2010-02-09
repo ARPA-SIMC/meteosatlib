@@ -106,8 +106,6 @@ EXTRA_DIST += \
     libmsat.pc.in \
     libhrit.m4 \
     libhrit.pc.in \
-    libgrib.m4 \
-    libgrib.pc.in \
     libopenmtp.pc.in
 
 AUX_DIST = \
@@ -132,10 +130,10 @@ MAINTAINERCLEANFILES = \
     $(AUX_DIST)
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libmsat.pc libgrib.pc
+pkgconfig_DATA = libmsat.pc
 
 m4dir = $(datadir)/aclocal
-m4_DATA = libmsat.m4 libgrib.m4
+m4_DATA = libmsat.m4
 
 if HRIT
 pkgconfig_DATA += libhrit.pc
