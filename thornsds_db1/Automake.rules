@@ -49,10 +49,10 @@ thornsds_db1_examples_db1_to_image_SOURCES = \
     iniparser/iniparser.c
 
 thornsds_db1_examples_db1_to_netcdf_LDADD = \
-    -I$(top_srcdir)/iniparser \
     thornsds_db1/libthornsds_db1.la \
     $(NETCDF_LIBS)
 thornsds_db1_examples_db1_to_netcdf_CPPFLAGS = \
+    -I$(top_srcdir)/iniparser \
     $(NETCDF_CFLAGS)
 thornsds_db1_examples_db1_to_netcdf_SOURCES = \
     thornsds_db1/examples/db1_to_netcdf.cpp \
