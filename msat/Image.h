@@ -192,31 +192,6 @@ public:
 
 	/// Return the coordinates of the place corresponding to the given pixel
 	void pixelsToCoords(int x, int y, double& lat, double& lon) const;
-
-	/**
-	 * Crop the image to the given rectangle specified in pixel coordinates
-	 * relative to the image itself
-	 */
-	void crop(const proj::ImageBox& area);
-
-	/**
-	 * Crop the image to the minimum rectangle of pixels containing the area
-	 * defined with the given geographical coordinates
-	 */
-	void cropByCoords(const proj::MapBox& area);
-
-	/**
-	 * Return a new image scaled to the given width and height
-	 */
-	std::auto_ptr<Image> rescaled(size_t width, size_t height) const;
-
-#ifdef EXPERIMENTAL_REPROJECTION
-	/**
-	 * Return a new image with the given width and height, containing the same
-	 * data of this image but using a different projection
-	 */
-	std::auto_ptr<Image> reproject(size_t width, size_t height, std::auto_ptr<proj::Projection> proj, const proj::MapBox& box) const;
-#endif
 };
 
 /// Interface for image data of various types
@@ -251,15 +226,6 @@ struct ImageData
 	/// Value used to represent a missing value in the scaled data
 	float missingValue;
 
-	virtual ImageData* createResampled(size_t width, size_t height) const = 0;
-#ifdef EXPERIMENTAL_REPROJECTION
-	/**
-	 * Create a new image with the given size using the same kind of image data
-	 * as this one.  The new image will be initialized with all missing values.
-	 */
-	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const = 0;
-#endif
-
   /// Image sample as physical value (already scaled with slope and offset)
   virtual float scaled(int column, int line) const = 0;
 
@@ -273,9 +239,6 @@ struct ImageData
 
 	/// Get all the lines * columns samples, scaled
 	virtual float* allScaled() const;
-
-	/// Crop the image to the given rectangle
-	virtual void crop(size_t x, size_t y, size_t width, size_t height) = 0;
 };
 
 // Container for image data, which can be used with different sample sizes
@@ -454,14 +417,6 @@ struct ImageImporter
 
 	ImageImporter() {}
 	virtual ~ImageImporter() {}
-
-	void cropIfNeeded(Image& img)
-	{
-		if (cropImgArea.isNonZero())
-			img.crop(cropImgArea);
-		else if (cropGeoArea.isNonZero())
-			img.cropByCoords(cropGeoArea);
-	}
 
 	virtual void read(ImageConsumer& output) = 0;
 };

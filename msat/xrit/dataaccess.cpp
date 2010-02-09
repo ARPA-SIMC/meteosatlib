@@ -180,7 +180,7 @@ MSG_data* DataAccess::segment(size_t idx) const
         return segcache.begin()->segment;
 }
 
-size_t DataAccess::line_start(size_t line)
+size_t DataAccess::line_start(size_t line) const
 {
         if (!hrv) return WestColumnActual - 1;
         if (line >= UpperNorthLineActual) return 0;
@@ -195,7 +195,7 @@ size_t DataAccess::line_start(size_t line)
         return 0;
 }
 
-void DataAccess::line_read(size_t line, MSG_SAMPLE* buf)
+void DataAccess::line_read(size_t line, MSG_SAMPLE* buf) const
 {
         size_t segnum;
         size_t segline;

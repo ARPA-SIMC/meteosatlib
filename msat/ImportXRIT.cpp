@@ -72,48 +72,14 @@ MSG_SAMPLE HRITImageData::sample(size_t x, size_t y) const
 {
 	// Shift and cut the area according to cropping
 	tmprintf("%zd,%zd -> ", x, y);
-	x += cropX;
-	y += cropY;
 
-	tmprintf("%zd,%zd -> ", x, y);
+	size_t linestart = da.line_start(y);
+	if (x < linestart) return 0;
+	if (x + linestart >= da.columns) return 0;
 
-	// Absolute position in image data
-	size_t rx, ry;
-	if (hrvNorth.contains(x, y))
-	{
-		hrvNorth.remap(x, y, rx, ry);
-		tmprintf("(north) -> ");
-	} else if (hrvSouth.contains(x, y)) {
-		hrvSouth.remap(x, y, rx, ry);
-		tmprintf("(south) -> ");
-	} else {
-		tmprintf("discarded.\n");
-		return 0;
-	}
-
-	tmprintf("%zd,%zd -> ", rx, ry);
-
-	// Rotate if needed
-	if (da.swapX) rx = da.columns - rx - 1;
-	if (da.swapY) ry = da.lines - ry - 1;
-
-	size_t pos = ry * da.columns + rx;
-	tmprintf("%zd,%zd -> %zd -> ", rx, ry, pos);
-
-	// Segment number where is the pixel
-	size_t segno = pos / da.npixperseg;
-	tmprintf("seg %zd/%zd=%zd -> ", pos, da.npixperseg, segno);
-	MSG_data* d = da.segment(segno);
-	if (d == 0)
-	{
-		tmprintf("discarded.\n");
-		return 0;
-	}
-
-	// Offset of the pixel in the segment
-	size_t segoff = pos - (segno * da.npixperseg);
-	tmprintf("segoff %zd -> val %d\n", segoff, d->image->data[segoff]);
-	return d->image->data[segoff];
+	MSG_SAMPLE buf[da.columns];
+	da.line_read(y, buf);
+	return buf[x - linestart];
 }
 
 float HRITImageData::scaled(int column, int line) const
@@ -145,62 +111,6 @@ int HRITImageData::unscaledMissingValue() const
 	// HRIT samples have 0 as missing value
 	return 0;
 }
-
-void HRITImageData::crop(size_t x, size_t y, size_t width, size_t height)
-{
-	// Virtual cropping: we just limit the area of the image we read
-	cropX += x;
-	cropY += y;
-	columns = width;
-	lines = height;
-}
-
-ImageData* HRITImageData::createResampled(size_t width, size_t height) const
-{
-	ImageDataWithPixels<float>* res(new ImageDataWithPixelsPrescaled<float>(width, height));
-	res->slope = slope;
-	res->offset = offset;
-	res->bpp = bpp;
-	res->scalesToInt = scalesToInt;
-	res->missingValue = missingValue;
-	res->missing = missingValue;
-	for (size_t y = 0; y < height; ++y)
-		for (size_t x = 0; x < height; ++x)
-		{
-			size_t nx = x * this->columns / width;
-			size_t ny = y * this->lines / height;
-			res->pixels[y*width+x] = scaled(nx, ny);
-		}
-	return res;
-}
-
-#ifdef EXPERIMENTAL_REPROJECTION
-ImageData* HRITImageData::createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const
-{
-	ImageDataWithPixels<float>* res(new ImageDataWithPixelsPrescaled<float>(width, height));
-	res->slope = slope;
-	res->offset = offset;
-	res->bpp = bpp;
-	res->scalesToInt = scalesToInt;
-	res->missingValue = missingValue;
-	res->missing = missingValue;
-	for (size_t y = 0; y < height; ++y)
-	{
-		//cout << "Line " << y << "/" << height << endl;
-		for (size_t x = 0; x < width; ++x)
-		{
-			int nx = 0, ny = 0;
-			mapper(x, y, nx, ny);
-			//cout << "  map " << x << "," << y << " -> " << nx << "," << ny << endl;
-			if (nx >= 0 && ny >= 0 && (unsigned)nx < columns && (unsigned)ny < lines)
-				res->pixels[y*width+x] = scaled(nx, ny);
-			else
-				res->pixels[y*width+x] = missingValue;
-		}
-	}
-	return res;
-}
-#endif
 
 std::auto_ptr<Image> importXRIT(const XRITImportOptions& opts)
 {
@@ -396,7 +306,6 @@ public:
 	virtual void read(ImageConsumer& output)
 	{
 		std::auto_ptr<Image> img = importXRIT(opts);
-		cropIfNeeded(*img);
 		img->defaultFilename = util::satelliteSingleImageFilename(*img);
 		img->shortName = util::satelliteSingleImageShortName(*img);
 		img->addToHistory("Imported from HRIT " + opts.resolution + ' ' + opts.productid1 + ' ' + opts.productid2 + ' ' + opts.timing);

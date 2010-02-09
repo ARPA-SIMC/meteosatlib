@@ -120,7 +120,7 @@ public:
          * to be shifted right to geographically align it in the virtual
          * fullsize image.
          */
-        size_t line_start(size_t line);
+        size_t line_start(size_t line) const;
 
         /**
          * Read a scanline
@@ -130,7 +130,7 @@ public:
          *
          * \a buf must be at least 'columns' elements
          */
-        void line_read(size_t line, MSG_SAMPLE* buf);
+        void line_read(size_t line, MSG_SAMPLE* buf) const;
 
         /**
          * Return the MSG_data corresponding to the segment with the given index.

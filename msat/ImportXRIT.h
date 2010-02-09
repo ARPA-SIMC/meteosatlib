@@ -58,10 +58,7 @@ struct HRITImageData : public ImageData
         /// Calibration vector
         float* calibration;
 
-  /// Cropping edges
-  int cropX, cropY;
-
-  HRITImageData() : calibration(0), cropX(0), cropY(0) {}
+  HRITImageData() : calibration(0) {}
   virtual ~HRITImageData();
 
   /// Get an unscaled sample from the given coordinates in the normalised image
@@ -70,15 +67,6 @@ struct HRITImageData : public ImageData
   /// Image sample as physical value (already scaled with slope and offset)
   float scaled(int column, int line) const;
 
-	virtual ImageData* createResampled(size_t width, size_t height) const;
-#ifdef EXPERIMENTAL_REPROJECTION
-	/**
-	 * Create a new image with the given size using the same kind of image data
-	 * as this one.  The new image will be initialized with all missing values.
-	 */
-	virtual ImageData* createReprojected(size_t width, size_t height, const Image::PixelMapper& mapper) const;
-#endif
-
   /// Image sample scaled to int using slope and offset.
   /// The function throws if scalesToInt is false.
   virtual int scaledToInt(int column, int line) const;
@@ -86,9 +74,6 @@ struct HRITImageData : public ImageData
   /// Value used to represent a missing value in the unscaled int
   /// data, if available
   virtual int unscaledMissingValue() const;
-
-  /// Crop the image to the given rectangle
-  virtual void crop(size_t x, size_t y, size_t width, size_t height);
 };
 
 static inline bool isXRIT(const std::string& filename)
