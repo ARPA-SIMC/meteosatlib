@@ -67,6 +67,7 @@ if test $have_netcdf = yes; then
     if test -d /usr/lib/netcdf-3 ; then
         NETCDF_LIBS="-L/usr/lib/netcdf-3"
     fi
+    NETCDF_LIBS="$NETCDF_LIBS -lnetcdf_c++ -lnetcdf"
     m4_default([$1],[])
 else
     m4_default([$2],[AC_MSG_ERROR([NetCDF not found])])
