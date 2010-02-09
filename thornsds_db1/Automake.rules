@@ -54,8 +54,9 @@ thornsds_db1_examples_db1_to_image_SOURCES = \
 
 thornsds_db1_examples_db1_to_netcdf_LDADD = \
     thornsds_db1/libthornsds_db1.la \
-    -lnetcdf_c++ \
-    -lnetcdf
+    $(NETCDF_LIBS)
+thornsds_db1_examples_db1_to_netcdf_CPPFLAGS = \
+    $(NETCDF_CFLAGS)
 thornsds_db1_examples_db1_to_netcdf_SOURCES = \
     thornsds_db1/examples/db1_to_netcdf.cpp \
     iniparser/iniparser.c
