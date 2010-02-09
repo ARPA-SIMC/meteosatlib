@@ -128,11 +128,9 @@ hrit_libhrit_la_SOURCES = \
     hrit/MSG_time_cds.cpp
 
 hrit_examples_GRIB2NetCDF_CPPFLAGS = \
-    -I$(top_srcdir)/grib
+    -I$(top_srcdir)/grib $(NETCDF_CFLAGS)
 hrit_examples_GRIB2NetCDF_LDADD = \
-    hrit/libhrit.la \
-    -lnetcdf_c++ \
-    -lnetcdf
+    hrit/libhrit.la $(NETCDF_LIBS)
 hrit_examples_GRIB2NetCDF_SOURCES = \
     grib/Ebisuzaki.cpp \
     grib/GRIB.cpp \
@@ -154,10 +152,9 @@ hrit_examples_XRIT2Image_LDADD = \
 hrit_examples_XRIT2Image_SOURCES = \
     hrit/examples/XRIT2Image.cpp
 
+hrit_examples_XRIT2NetCDF_CPPFLAGS = $(NETCDF_CFLAGS)
 hrit_examples_XRIT2NetCDF_LDADD = \
-    hrit/libhrit.la \
-    -lnetcdf_c++ \
-    -lnetcdf
+    hrit/libhrit.la $(NETCDF_LIBS)
 hrit_examples_XRIT2NetCDF_SOURCES = \
     hrit/examples/XRIT2NetCDF.cpp
 
