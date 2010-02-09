@@ -21,7 +21,7 @@
 bin_PROGRAMS += \
     examples/Met_Reproj
 
-noinst_HEADERS += \
+dist_noinst_HEADERS += \
     examples/Area.h \
     examples/Proj_Geos.h \
     examples/Proj_Polar.h \
