@@ -23,6 +23,13 @@ dnl Look for NetCDF3 (which does not use pkg-config)
 dnl Look for the headers
 AC_CHECK_HEADER([netcdfcpp.h], [have_netcdf=yes], [have_netcdf=no])
 
+if test $have_netcdf = no; then
+    AC_CHECK_HEADER([netcdf-3/netcdfcpp.h], [have_netcdf=yes], [have_netcdf=no])
+    NETCDF_CFLAGS=-I/usr/include/netcdf-3
+else
+    NETCDF_CFLAGS=
+fi
+
 dnl Look for the library
 if test $have_netcdf = yes; then
     AC_CHECK_LIB([netcdf], [ncopts], [have_netcdf=yes], [have_netcdf=no])
@@ -30,7 +37,9 @@ fi
 
 dnl Check that the library has what we need
 if test $have_netcdf = yes; then
+    saved_CFLAGS="$CFLAGS"
     saved_LIBS="$LIBS"
+    CFLAGS="$CFLAGS $NETCDF_CFLAGS"
     LIBS="$LIBS -lnetcdf_c++ -lnetcdf"
     AC_MSG_CHECKING([for NcFile in -lnetcdf_c++])
     AC_LINK_IFELSE(
@@ -46,14 +55,12 @@ if test $have_netcdf = yes; then
             have_netcdf=no
         ]
     )
+    CFLAGS="$saved_CFLAGS"
     LIBS="$saved_LIBS"
 fi
 
 dnl Define what is needed
 if test $have_netcdf = yes; then
-    if test -d /usr/include/netcdf-3 ; then
-        NETCDF_CFLAGS="-I/usr/include/netcdf-3"
-    fi
     if test -d /usr/lib/netcdf-3 ; then
         NETCDF_LIBS="-L/usr/lib/netcdf-3"
     fi
