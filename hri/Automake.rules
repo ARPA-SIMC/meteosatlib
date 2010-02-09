@@ -37,9 +37,8 @@ hri_include_HEADERS = \
     hri/HRI_subframe_label.h
 
 # have libhri depend on netcdf*.so, if available
-hri_libhri_la_LIBADD = \
-    -lnetcdf_c++ \
-    -lnetcdf
+hri_libhri_la_LIBADD = $(NETCDF_LIBS)
+hri_libhri_la_CPPFLAGS = $(NETCDF_CFLAGS)
 
 # CURRENT:REVISION:AGE
 # - library source changed -> inc REVISION
@@ -56,11 +55,10 @@ hri_libhri_la_SOURCES = \
     hri/HRI_subframe_label.cpp
 
 # in case only netcdf*.a is available
-hri_examples_HRI2NetCDF_LDFLAGS = \
-    -lnetcdf_c++ \
-    -lnetcdf
+hri_examples_HRI2NetCDF_LDFLAGS = $(NETCDF_LIBS)
 hri_examples_HRI2NetCDF_LDADD = \
     hri/libhri.la
+hri_examples_HRI2NetCDF_CPPFLAGS = $(NETCDF_CFLAGS)
 hri_examples_HRI2NetCDF_SOURCES = \
     hri/examples/HRI2NetCDF.cpp
 
