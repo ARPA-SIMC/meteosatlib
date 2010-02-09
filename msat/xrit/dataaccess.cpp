@@ -214,7 +214,11 @@ void DataAccess::line_read(size_t line, MSG_SAMPLE* buf) const
         }
 
         MSG_data* d = segment(segnum);
-        if (d == 0) return;
+        if (d == 0)
+	{
+		bzero(buf, columns * sizeof(MSG_SAMPLE));
+		return;
+	}
 
         if (swapX)
         {
