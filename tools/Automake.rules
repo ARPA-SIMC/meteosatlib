@@ -18,13 +18,13 @@
 ## Include this file in the top-level Makefile with an include
 ## directive.
 
-#bin_PROGRAMS += \
-#    tools/interpolate
-#
-#tools_interpolate_LDADD = \
-#    msat/libmsat.la
-#tools_interpolate_SOURCES = \
-#    tools/interpolate.cpp
+bin_PROGRAMS += \
+    tools/xritdump
+
+tools_xritdump_LDADD = \
+    msat/libmsat.la
+tools_xritdump_SOURCES = \
+    tools/xritdump.cpp
 
 ## -fin-
 ## vim:syn=automake:
