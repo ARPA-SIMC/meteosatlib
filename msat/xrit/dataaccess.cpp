@@ -130,8 +130,13 @@ void DataAccess::scan(const FileAccess& fa, MSG_data& pro, MSG_data& epi, MSG_he
                 UpperWestColumnActual = cov.UpperWestColumnActual;
                 UpperNorthLineActual = cov.UpperNorthLineActual;
         } else {
+                /*
+                 * TODO: what is this for?
                 WestColumnActual = 1856 - header.image_navigation->column_offset + 1;
                 SouthLineActual = 1856 - header.image_navigation->line_offset + 1;
+                */
+                WestColumnActual = 1;
+                SouthLineActual = 1;
         }
 }
 
@@ -215,10 +220,10 @@ void DataAccess::line_read(size_t line, MSG_SAMPLE* buf) const
 
         MSG_data* d = segment(segnum);
         if (d == 0)
-	{
-		bzero(buf, columns * sizeof(MSG_SAMPLE));
-		return;
-	}
+        {
+                bzero(buf, columns * sizeof(MSG_SAMPLE));
+                return;
+        }
 
         if (swapX)
         {
