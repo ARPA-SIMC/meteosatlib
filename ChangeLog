@@ -3,6 +3,7 @@ Mon Feb 15 16:00:27 CET 2010  Enrico Zini <enrico@enricozini.org>
 	* Version 0.6.1
 	* Fixed reading non-HRV images via DataAccess
 	* Added tools/xritdump
+	* Added .spec file for Fedora Core 12 (thanks to Paolo Patruno)
 
 Tue Feb  9 17:27:06 2010 Enrico Zini <enrico@enricozini.org>
 

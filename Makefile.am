@@ -106,7 +106,8 @@ EXTRA_DIST += \
     libmsat.pc.in \
     libhrit.m4 \
     libhrit.pc.in \
-    libopenmtp.pc.in
+    libopenmtp.pc.in \
+    meteosatlib_f12.spec
 
 AUX_DIST = \
     $(ac_aux_dir)/compile \
