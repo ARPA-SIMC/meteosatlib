@@ -1,7 +1,7 @@
 Name:           @PACKAGE_NAME@
 Version:        @PACKAGE_VERSION@
 Release:        1
-Summary:        Applications to manage Meteosat satellite images
+Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
 License:        GPL
@@ -16,24 +16,12 @@ Vendor:         Graziano Giuliani <giuliani@lamma.rete.toscana.it> Enrico Zini <
 Packager:       Deneys S. Maartens <dsm@tlabs.ac.za> Paolo Patruno <ppatruno@arpa.emr.it>
 
 %description
- Read, write, convert and display raster satellite images 
- (also in Meteosat8 HRIT format).
- Provide:
-  msat as a simple commandline tool allowing to:
- .
-  - Read images in GRIB version 1, SAF HDF5 and some NetCDF based formats (COARDS compliant).
-  - Write images in GRIB version 1, JPG, PNG and some NetCDF based formats (COARDS compliant).
-  - Crop and scale images
-  - Convert between file formats 
-  - Data can be reprojected in a regular latitude longitude grid of selected resolution
-  - Precisely correlate every pixel with its geographical coordinates
-  - Display images
 
- Library for working with georeferentiated raster images (shared library)
- The library allows to:
- .
-  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
-  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
+C++ source code to read Meteosat Images in various formats.
+Supported: OpenMTP OpenMTP-IDS HRI HRIT/LRIT.
+
+This library is used to read Meteosat files on a PDUS receiving
+station. No decryption is performed.
 
 
 @HRI_TRUE@%package hri-devel
@@ -42,7 +30,7 @@ Packager:       Deneys S. Maartens <dsm@tlabs.ac.za> Paolo Patruno <ppatruno@arp
 @HRI_TRUE@Summary: Development for Meteosat HRI satellite images
 
 @HRI_TRUE@%description hri-devel
-@HRI_TRUE@Libraries to read Meteosat 7/8 images in various formats.
+@HRI_TRUE@Libraries to read Meteosat 7/8/9 images in various formats.
 
 @HRI_TRUE@%package hrit-devel
 
@@ -99,21 +87,11 @@ Please fill the form at
 %package msat-devel
 
 Group: Libraries/Meteo
-Summary: Library for working with georeferentiated raster images
+Summary:Library of utility functions for working with Meteosat images
 
 %description msat-devel
-Library for working with georeferentiated raster images
- The library allows to:
- .
-  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
-  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
-  - Precisely correlate every pixel with its geographical coordinates
-  - Extract image subareas
-  - Display images
-  - Reproject images
- .
- This is the library for C++ development.
- .
+Libraries to read Meteosat 7/8 images in various formats.
+This is the library for C++ development.
 
 %prep
 %setup -q
@@ -129,7 +107,6 @@ configure_disable=
 @OMTP_IDS_FALSE@configure_disable="$configure_disable --disable-omtp-ids"
 @OPENMTP_FALSE@configure_disable="$configure_disable --disable-openmtp"
 @THORNSDS_DB1_FALSE@configure_disable="$configure_disable --disable-thornsds_db1"
-@HDF5_FALSE@configure_disable="$configure_disable --disable-hdf5"
 
 %configure $configure_disable
 
@@ -221,5 +198,3 @@ rm -rf $RPM_BUILD_ROOT
 * Fri Jul 01 2005  Deneys S. Maartens  <dsm@tlabs.ac.za>  0.3.6-1
 - modified original meteosatlib.spec by Paolo Patruno
   <ppatruno@smr.arpa.emr.it>: added sepparate devel sections
-
-# -fin-
