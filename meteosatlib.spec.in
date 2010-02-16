@@ -11,84 +11,109 @@ Source1:        PublicDecompWT.zip
 NoSource:       1
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Vendor:         Graziano Giuliani <giuliani@lamma.rete.toscana.it>
-Packager:       Deneys S. Maartens <dsm@tlabs.ac.za>
+BuildRequires:   netcdf-devel  , ImageMagick-c++-devel
+Vendor:         Graziano Giuliani <giuliani@lamma.rete.toscana.it> Enrico Zini <enrico@enricozini.org> 
+Packager:       Deneys S. Maartens <dsm@tlabs.ac.za> Paolo Patruno <ppatruno@arpa.emr.it>
 
 %description
-Programs to convert Meteosat8 HRIT format images to WMO GRIB version 1
-format, NetCDF COARDS compliant format, image format (any ImageMagick
-supported format).
+ Read, write, convert and display raster satellite images 
+ (also in Meteosat8 HRIT format).
+ Provide:
+  msat as a simple commandline tool allowing to:
+ .
+  - Read images in GRIB version 1, SAF HDF5 and some NetCDF based formats (COARDS compliant).
+  - Write images in GRIB version 1, JPG, PNG and some NetCDF based formats (COARDS compliant).
+  - Crop and scale images
+  - Convert between file formats 
+  - Data can be reprojected in a regular latitude longitude grid of selected resolution
+  - Precisely correlate every pixel with its geographical coordinates
+  - Display images
 
-Converted NetCDF images can be reprojected in a regular latitude
-longitude grid of selected resolution.
+ Library for working with georeferentiated raster images (shared library)
+ The library allows to:
+ .
+  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
+  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
 
-A program to convert GRIB images back to NetCDF images for reprojection
-is also given.
 
 @HRI_TRUE@%package hri-devel
-@HRI_TRUE@Requires: @PACKAGE_NAME@ = %{version}
-@HRI_TRUE@
+
 @HRI_TRUE@Group: Libraries/Meteo
 @HRI_TRUE@Summary: Development for Meteosat HRI satellite images
-@HRI_TRUE@
+
 @HRI_TRUE@%description hri-devel
 @HRI_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
-@HRIT_TRUE@%package hrit-devel
-@HRIT_TRUE@Requires: @PACKAGE_NAME@ = %{version}
-@HRIT_TRUE@
-@HRIT_TRUE@License: Non Free (Copyright Eumetsat)
-@HRIT_TRUE@Group: Libraries/Meteo
-@HRIT_TRUE@Summary: Development for Meteosat HRI satellite images
-@HRIT_TRUE@
-@HRIT_TRUE@%description hrit-devel
-@HRIT_TRUE@Libraries to read Meteosat 7/8 images in various formats.
-@HRIT_TRUE@For MSG data decompression, You need the EUMETSAT source code for
-@HRIT_TRUE@the decompression library for Wavelet, JPEG and T4 images.
-@HRIT_TRUE@
-@HRIT_TRUE@!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-@HRIT_TRUE@
-@HRIT_TRUE@Please fill the form at
-@HRIT_TRUE@
-@HRIT_TRUE@   http://www.eumetsat.de/en/dps/helpdesk/tools.html
-@HRIT_TRUE@
-@HRIT_TRUE@!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@HRI_TRUE@%package hrit-devel
+
+@HRI_TRUE@License: Non Free (Copyright Eumetsat)
+@HRI_TRUE@Group: Libraries/Meteo
+@HRI_TRUE@Summary: Development for Meteosat HRI satellite images
+
+@HRI_TRUE@%description hrit-devel
+@HRI_TRUE@Libraries to read Meteosat 7/8 images in various formats.
+@HRI_TRUE@For MSG data decompression, You need the EUMETSAT source code for
+@HRI_TRUE@the decompression library for Wavelet, JPEG and T4 images.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Please fill the form at
+
+   http://www.eumetsat.de/en/dps/helpdesk/tools.html
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 @MSG_NATIVE_TRUE@%package msg-native-devel
-@MSG_NATIVE_TRUE@Requires: @PACKAGE_NAME@ = %{version}
-@MSG_NATIVE_TRUE@
+
 @MSG_NATIVE_TRUE@Group: Libraries/Meteo
 @MSG_NATIVE_TRUE@Summary: Development for Meteosat MSG satellite images
-@MSG_NATIVE_TRUE@
+
 @MSG_NATIVE_TRUE@%description msg-native-devel
 @MSG_NATIVE_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
 @OMTP_IDS_TRUE@%package omtp-ids-devel
-@OMTP_IDS_TRUE@Requires: @PACKAGE_NAME@ = %{version}
-@OMTP_IDS_TRUE@
+
 @OMTP_IDS_TRUE@Group: Libraries/Meteo
 @OMTP_IDS_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
-@OMTP_IDS_TRUE@
+
 @OMTP_IDS_TRUE@%description omtp-ids-devel
 @OMTP_IDS_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
-@OPENMTP_TRUE@%package openmtp-devel
-@OPENMTP_TRUE@Requires: @PACKAGE_NAME@ = %{version}
-@OPENMTP_TRUE@
-@OPENMTP_TRUE@Group: Libraries/Meteo
-@OPENMTP_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
-@OPENMTP_TRUE@
-@OPENMTP_TRUE@%description openmtp-devel
-@OPENMTP_TRUE@Libraries to read Meteosat 7/8 images in various formats.
+@OMTP_IDS_TRUE@%package openmtp-devel
+
+@OMTP_IDS_TRUE@Group: Libraries/Meteo
+@OMTP_IDS_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
+
+@OMTP_IDS_TRUE@%description openmtp-devel
+@OMTP_IDS_TRUE@Libraries to read Meteosat 7/8 images in various formats.
 
 @THORNSDS_DB1_TRUE@%package thornsds_db1-devel
-@THORNSDS_DB1_TRUE@Requires: @PACKAGE_NAME@ = %{version}
-@THORNSDS_DB1_TRUE@
+
 @THORNSDS_DB1_TRUE@Group: Libraries/Meteo
 @THORNSDS_DB1_TRUE@Summary: Development for Meteosat ThornSDS DB1 PDUS images
-@THORNSDS_DB1_TRUE@
+
 @THORNSDS_DB1_TRUE@%description thornsds_db1-devel
 @THORNSDS_DB1_TRUE@Libraries to read Meteosat 7/8 images in various formats.
+
+
+%package msat-devel
+
+Group: Libraries/Meteo
+Summary: Library for working with georeferentiated raster images
+
+%description msat-devel
+Library for working with georeferentiated raster images
+ The library allows to:
+ .
+  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
+  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
+  - Precisely correlate every pixel with its geographical coordinates
+  - Extract image subareas
+  - Display images
+  - Reproject images
+ .
+ This is the library for C++ development.
+ .
 
 %prep
 %setup -q
@@ -107,6 +132,8 @@ configure_disable=
 @HDF5_FALSE@configure_disable="$configure_disable --disable-hdf5"
 
 %configure $configure_disable
+
+
 make %{?_smp_mflags}
 
 %install
@@ -126,34 +153,39 @@ rm -rf $RPM_BUILD_ROOT
 @OMTP_IDS_TRUE@%{_libdir}/libomtp-ids.so*
 @OPENMTP_TRUE@%{_libdir}/libopenmtp.so*
 @THORNSDS_DB1_TRUE@%{_libdir}/libthornsds_db1.so*
+%{_libdir}/libmsat.so*
 
-@HRI_TRUE@%files hri-devel
+
+%files hri-devel
 @HRI_TRUE@%{_includedir}/hri
 @HRI_TRUE@%{_libdir}/libhri.a
 @HRI_TRUE@%{_libdir}/libhri.la
 
-@HRIT_TRUE@%files hrit-devel
-@HRIT_TRUE@%{_includedir}/hrit
-@HRIT_TRUE@%{_includedir}/PublicDecompWT
-@HRIT_TRUE@%{_libdir}/libCOMP.a
-@HRIT_TRUE@%{_libdir}/libDISE.a
-@HRIT_TRUE@%{_libdir}/libhrit.a
-@HRIT_TRUE@%{_libdir}/libhrit.la
-@HRIT_TRUE@%{_libdir}/libJPEG.a
-@HRIT_TRUE@%{_libdir}/libT4.a
-@HRIT_TRUE@%{_libdir}/libWT.a
+%files hrit-devel
+@HRI_TRUE@%{_includedir}/hrit
+#%{_includedir}/PublicDecompWT
+#%{_libdir}/libCOMP.a
+#%{_libdir}/libDISE.a
+@HRI_TRUE@%{_libdir}/libhrit.a
+%{_libdir}/libhrit.la
+#%{_libdir}/libJPEG.a
+#%{_libdir}/libT4.a
+#%{_libdir}/libWT.a
+@HRI_TRUE@/usr/lib/pkgconfig/libhrit.pc
+@HRI_TRUE@/usr/share/aclocal/libhrit.m4
 
-@MSG_NATIVE_TRUE@%files msg-native-devel
+
+%files msg-native-devel
 @MSG_NATIVE_TRUE@%{_includedir}/msg-native
 @MSG_NATIVE_TRUE@%{_libdir}/libnative.a
 @MSG_NATIVE_TRUE@%{_libdir}/libnative.la
 
-@OMTP_IDS_TRUE@%files omtp-ids-devel
+%files omtp-ids-devel
 @OMTP_IDS_TRUE@%{_includedir}/omtp-ids
 @OMTP_IDS_TRUE@%{_libdir}/libomtp-ids.la
 @OMTP_IDS_TRUE@%{_libdir}/libomtp-ids.a
 
-@THORNSDS_DB1_TRUE@%files thornsds_db1-devel
+%files thornsds_db1-devel
 @THORNSDS_DB1_TRUE@%{_includedir}/thornsds_db1
 @THORNSDS_DB1_TRUE@%{_libdir}/libthornsds_db1.la
 @THORNSDS_DB1_TRUE@%{_libdir}/libthornsds_db1.a
@@ -162,10 +194,26 @@ rm -rf $RPM_BUILD_ROOT
 @OPENMTP_TRUE@%{_includedir}/openmtp
 @OPENMTP_TRUE@%{_libdir}/libopenmtp.la
 @OPENMTP_TRUE@%{_libdir}/libopenmtp.a
+@OPENMTP_TRUE@/usr/lib/pkgconfig/libopenmtp.pc
+
+
+%files msat-devel
+%{_includedir}/msat
+%{_libdir}/libmsat.a
+%{_libdir}/libmsat.la
+/usr/lib/pkgconfig/libmsat.pc
+/usr/share/aclocal/libmsat.m4
+
 
 %changelog
-* Tue Aug 15 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>  0.4.2
-- Added logic to add conditional disable-* flags to %configure
+* Tue Feb 16 2010 Paolo Patruno <patruno@localhost.localdomain> - @PACKAGE_VERSION@-1
+- adapted to meteosatlib 0.6
+
+* Wed Feb 28 2007 root <root@strip.metarpa> - 0.5-1
+- hdf5 c++library is static, so we need a specific version in BuildRequires
+
+* Tue Feb 13 2007 Paolo Patruno <ppatruno@arpa.emr.it> - 0.5-1
+- added grib and msat pachages and other change to switch to 0.5 release
 
 * Wed Aug 08 2005  Graziano Giuliani  <graziano.giuliani@poste.it>  0.4.0
 - Added ThornSDS DB1 file interface
