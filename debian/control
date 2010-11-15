@@ -1,0 +1,79 @@
+Source: meteosatlib
+Section: misc
+Priority: optional
+Maintainer: Enrico Zini <enrico@debian.org>
+Build-Depends: cdbs (>= 0.4.43), debhelper (>> 4.1), dh-buildinfo, doxygen, libtut-dev, libnetcdf-dev, libmagick++-dev
+Standards-Version: 3.7.3.0
+Homepage: http://meteosatlib.sourceforge.net
+Vcs-Svn: https://meteosatlib.svn.sourceforge.net/svnroot/meteosatlib/trunk
+
+Package: libmsat0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library for working with georeferentiated raster images (shared library)
+ The library allows to:
+ .
+  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
+  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
+  - Precisely correlate every pixel with its geographical coordinates
+  - Extract image subareas
+  - Display images
+  - Reproject images
+ .
+ This is the shared library, and the GDAL plugin.
+
+Package: libmsat-dev
+Section: libdevel
+Architecture: any
+Depends: libmsat0 (=${binary:Version})
+Recommends: pkg-config
+Description: Library for working with georeferentiated raster images
+ The library allows to:
+ .
+  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
+  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
+  - Precisely correlate every pixel with its geographical coordinates
+  - Extract image subareas
+  - Display images
+  - Reproject images
+ .
+ This is the library for C++ development.
+
+Package: libopenmtp0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library for working with OpenMTP images (shared library)
+ TODO
+ .
+ This is the shared library.
+
+Package: libopenmtp-dev
+Section: libdevel
+Architecture: any
+Depends: libopenmtp0 (=${binary:Version})
+Recommends: pkg-config
+Description: Library for working with OpenMTP images
+ TODO
+ .
+ This is the library for C++ development.
+
+Package: libhrit0
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Library for working with HRIT images (shared library)
+ TODO
+ .
+ This is the shared library.
+
+Package: libhrit-dev
+Section: libdevel
+Architecture: any
+Depends: libhrit0 (=${binary:Version})
+Recommends: pkg-config
+Description: Library for working with HRIT images
+ TODO
+ .
+ This is the library for C++ development.
