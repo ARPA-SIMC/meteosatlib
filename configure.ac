@@ -104,9 +104,8 @@ PKG_CHECK_EXISTS(ImageMagick++,[
 ])
 PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
 
-dnl NetCDF3 (which does not use pkg-config)
-dnl AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
-PKG_CHECK_MODULES(NETCDF,[netcdf],[have_libnetcdf=yes],[have_libnetcdf=no])
+dnl NetCDF3 (which does not use pkg-config, or not reliably)
+AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
 
 dnl --------------------------------------------------------------------
 dnl Checks for header files.
@@ -114,7 +113,6 @@ dnl Checks for header files.
 if test "x$have_libnetcdf" == "xyes"; then
     AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
     AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
-    NETCDF_LIBS="$NETCDF_LIBS -lnetcdf_c++"
     AC_SUBST(NETCDF_CFLAGS)
     AC_SUBST(NETCDF_LIBS)
 else

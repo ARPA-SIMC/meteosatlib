@@ -102,7 +102,7 @@ EXTRA_DIST += \
     $(PACKAGE_NAME).spec \
     CREDITS \
     PublicDecompWT_LICENSE \
-    m4/pkg.m4 \
+    m4/netcdf.m4 \
     libmsat.m4 \
     libmsat.pc.in \
     libhrit.m4 \

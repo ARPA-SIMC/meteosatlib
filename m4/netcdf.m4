@@ -51,7 +51,7 @@ if test $have_netcdf = yes; then
     AC_LINK_IFELSE(
         [AC_LANG_PROGRAM(
             [#include <netcdfcpp.h>],
-            [NcFile::NcFile nc("example.nc")])],
+            [NcFile nc("example.nc")])],
         [
             AC_MSG_RESULT([yes])
             have_netcdf=yes
