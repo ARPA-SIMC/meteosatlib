@@ -1,7 +1,7 @@
 # configure.ac -- Process this file with autoconf to produce a configure script.
 # $Id$
 # Copyright (C) 2004, 2005, 2006 Deneys S. Maartens <dsm@tlabs.ac.za>
-# Modified in 2006, 2007 by Enrico Zini <enrico@enricozini.org>
+# Modified in 2006--2011 by Enrico Zini <enrico@enricozini.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 m4_pattern_allow
 
-AC_INIT([meteosatlib], [0.6.1], [enrico@enricozini.org, giuliani@lamma.rete.toscana.it])
+AC_INIT([meteosatlib], [0.6.2], [enrico@enricozini.org, giuliani@lamma.rete.toscana.it])
 
 AC_REVISION([$Revision$])
 
@@ -105,7 +105,8 @@ PKG_CHECK_EXISTS(ImageMagick++,[
 PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
 
 dnl NetCDF3 (which does not use pkg-config)
-AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
+dnl AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
+PKG_CHECK_MODULES(NETCDF,[netcdf],[have_libnetcdf=yes],[have_libnetcdf=no])
 
 dnl --------------------------------------------------------------------
 dnl Checks for header files.
@@ -113,6 +114,7 @@ dnl Checks for header files.
 if test "x$have_libnetcdf" == "xyes"; then
     AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
     AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
+    NETCDF_LIBS="$NETCDF_LIBS -lnetcdf_c++"
     AC_SUBST(NETCDF_CFLAGS)
     AC_SUBST(NETCDF_LIBS)
 else

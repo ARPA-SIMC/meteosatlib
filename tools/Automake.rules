@@ -22,6 +22,7 @@ bin_PROGRAMS += \
     tools/xritdump
 
 tools_xritdump_LDADD = \
+    hrit/libhrit.la \
     msat/libmsat.la
 tools_xritdump_SOURCES = \
     tools/xritdump.cpp

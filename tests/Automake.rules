@@ -52,6 +52,7 @@ tests_msatlib_test_CPPFLAGS = \
     -I$(top_srcdir)/msat
 
 tests_msatlib_test_LDADD = \
+    hrit/libhrit.la \
     msat/libmsat.la \
     $(GDAL_LIBS)
 
