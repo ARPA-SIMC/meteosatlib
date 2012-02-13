@@ -1,4 +1,6 @@
-#!/bin/bash -ue
+#!/bin/bash
+
+set -ue
 
 #
 # This script manages the PublicDecompWT library
@@ -20,10 +22,8 @@ findpatch() {
 2.04 patch_EUMETSAT_2.04
 EOT
 	# If all is unknown, use a default
-	echo "PublicDecompWT version $VER is unknown: I will try the newest" >&2
-	echo "patch that I have, and hope that it will work" >&2
-	echo patch_EUMETSAT_2.04
-	return 1
+	echo "PublicDecompWT version $VER is unknown: I will try without a patch" >&2
+	return 0
 }
 
 # If the COMP or DISE directories are missing, we regenerate them
@@ -83,10 +83,13 @@ then
   find COMP DISE -name "*.cpp" -or -name "*.h" -or -name "Makefile" | xargs $DOS2UNIX
 
   # Apply our patch
-  if ! patch -p1 < $PATCHFILE
+  if [ -n "$PATCHFILE" ]
   then
-    echo "Failed to patch EUTMETSAT sources." >&2
-    exit 1
+    if ! patch -p1 < $PATCHFILE
+    then
+      echo "Failed to patch EUTMETSAT sources." >&2
+      exit 1
+    fi
   fi
 
   touch pdwt.patched
