@@ -96,6 +96,7 @@ then
 fi
 
 if ! (
+  set -ue
   cd COMP
   CPPFLAGS="-O2 -Wall -pedantic -Wno-long-long -fPIC " make
   cd ../DISE

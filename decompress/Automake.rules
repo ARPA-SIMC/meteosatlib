@@ -26,6 +26,7 @@ decompress/all: \
     decompress/LICENSE \
     decompress/patch_EUMETSAT_2.02 \
     decompress/patch_EUMETSAT_2.04 \
+    decompress/patch_EUMETSAT_2.06 \
     decompress/PublicDecompWT.sh
 	if test $(top_builddir) != $(top_srcdir) ; then \
     rm -f $(top_builddir)/decompress/LICENSE ; \
@@ -36,6 +37,9 @@ decompress/all: \
         $(top_builddir)/decompress/ ; \
     rm -f $(top_builddir)/decompress/patch_EUMETSAT_2.04 ; \
     $(LN_S) ../$(top_srcdir)/decompress/patch_EUMETSAT_2.04 \
+        $(top_builddir)/decompress/ ; \
+    rm -f $(top_builddir)/decompress/patch_EUMETSAT_2.06 ; \
+    $(LN_S) ../$(top_srcdir)/decompress/patch_EUMETSAT_2.06 \
         $(top_builddir)/decompress/ ; \
     rm -f $(top_builddir)/decompress/PublicDecompWT.sh ; \
     $(LN_S) ../$(top_srcdir)/decompress/PublicDecompWT.sh \

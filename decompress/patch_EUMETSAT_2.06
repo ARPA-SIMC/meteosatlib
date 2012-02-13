@@ -1,0 +1,60 @@
+diff -Naur a/COMP/JPEG/Src/Makefile b/COMP/JPEG/Src/Makefile
+--- a/COMP/JPEG/Src/Makefile	2012-02-13 15:17:50.938845390 +0100
++++ b/COMP/JPEG/Src/Makefile	2012-02-13 15:31:25.130868098 +0100
+@@ -16,7 +16,7 @@
+ 
+ 
+ .cpp.o:
+-	g++ $(CPPFLAGS) -c -m$(BITS) $<
++	g++ $(CPPFLAGS) -c $<
+ 
+ depend:
+ 	makedepend -- $(CPPFLAGS) -- $(MAKEDEPFLAGS) -- $(SOURCES)
+diff -Naur a/COMP/Src/Makefile b/COMP/Src/Makefile
+--- a/COMP/Src/Makefile	2012-02-13 15:17:50.946845387 +0100
++++ b/COMP/Src/Makefile	2012-02-13 15:29:44.982865303 +0100
+@@ -14,7 +14,7 @@
+ 	@touch libCOMP.a
+ 
+ .cpp.o:
+-	g++ $(CPPFLAGS) -c -m$(BITS) $<
++	g++ $(CPPFLAGS) -c $<
+ 
+ depend:
+ 	makedepend -- $(CPPFLAGS) -- $(MAKEDEPFLAGS) -- $(SOURCES)
+diff -Naur a/COMP/T4/Src/Makefile b/COMP/T4/Src/Makefile
+--- a/COMP/T4/Src/Makefile	2012-02-13 15:17:50.938845390 +0100
++++ b/COMP/T4/Src/Makefile	2012-02-13 15:33:21.438871318 +0100
+@@ -14,7 +14,7 @@
+ 	@touch libT4.a
+ 
+ .cpp.o:
+-	g++ $(CPPFLAGS) -c -m$(BITS) $<
++	g++ $(CPPFLAGS) -c $<
+ 
+ depend:
+ 	makedepend -- $(CPPFLAGS) -- $(MAKEDEPFLAGS) -- $(SOURCES)
+diff -Naur a/COMP/WT/Src/Makefile b/COMP/WT/Src/Makefile
+--- a/COMP/WT/Src/Makefile	2012-02-13 15:17:50.942845389 +0100
++++ b/COMP/WT/Src/Makefile	2012-02-13 15:33:33.670871682 +0100
+@@ -15,7 +15,7 @@
+ 	@touch libWT.a
+ 
+ .cpp.o:
+-	g++ $(CPPFLAGS) -c -m$(BITS) $<
++	g++ $(CPPFLAGS) -c $<
+ 
+ depend:
+ 	makedepend -- $(CPPFLAGS) -- $(MAKEDEPFLAGS) -- $(SOURCES)
+diff -Naur a/DISE/Makefile b/DISE/Makefile
+--- a/DISE/Makefile	2012-02-13 15:17:50.950845386 +0100
++++ b/DISE/Makefile	2012-02-13 15:28:33.510863286 +0100
+@@ -14,7 +14,7 @@
+ 	@touch libDISE.a
+ 
+ .cpp.o:
+-	g++ $(CPPFLAGS) -c -m$(BITS) $<
++	g++ $(CPPFLAGS) -c $<
+ 
+ depend:
+ 	makedepend -- $(CPPFLAGS) -- $(MAKEDEPFLAGS) -- $(SOURCES)
