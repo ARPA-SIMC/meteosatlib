@@ -20,6 +20,7 @@ findpatch() {
 	done << EOT
 2.02 patch_EUMETSAT_2.02
 2.04 patch_EUMETSAT_2.04
+2.06 patch_EUMETSAT_2.06
 EOT
 	# If all is unknown, use a default
 	echo "PublicDecompWT version $VER is unknown: I will try without a patch" >&2
