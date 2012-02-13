@@ -51,6 +51,7 @@ dist_noinst_DATA += \
     decompress/LICENSE \
     decompress/patch_EUMETSAT_2.02 \
     decompress/patch_EUMETSAT_2.04 \
+    decompress/patch_EUMETSAT_2.06 \
     decompress/PublicDecompWT.sh
 
 #PublicDecompWT_headers = \
