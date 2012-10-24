@@ -22,6 +22,7 @@
 #include "tut.h"
 #include <msat/facts.h>
 #include <cstdlib>
+#include <unistd.h>
 
 #define TESTGRP(name) \
 typedef test_group<name ## _shar> tg; \
