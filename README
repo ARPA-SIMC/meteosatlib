@@ -15,7 +15,7 @@
    http://oiswww.eumetsat.int/WEBOPS-cgi/wavelet/register
 
  to obtain the source code and put the PublicDecompWT.zip file under
- the directory src/decompress.
+ the directory "decompress".
 
  Some example program need NetCDF library and ImageMagick.
 
