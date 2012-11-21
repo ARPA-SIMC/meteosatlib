@@ -73,6 +73,13 @@ AC_ARG_ENABLE([openmtp],
     [],
     [enable_openmtp="yes"])
 
+AC_ARG_WITH([grib],
+            [AS_HELP_STRING(
+                [--with-grib],
+                [compile old tools that output GRIB files])],
+            [enable_grib=yes],
+            [enable_grib=no])
+
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
 
@@ -179,6 +186,7 @@ AM_CONDITIONAL([OPENMTP], [test x"$enable_openmtp" = x"yes"])
 AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
+AM_CONDITIONAL([OLD_GRIB], [test x"$enable_grib" = x"yes"])
 
 dnl --------------------------------------------------------------------
 dnl Extra defines
@@ -251,6 +259,7 @@ AS_HELP_STRING([omtp-ids:], [$enable_omtp_ids])
 AS_HELP_STRING([openmtp:], [$enable_openmtp])
 AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
 AS_HELP_STRING([magick++:], [$have_libmagick])
+AS_HELP_STRING([old grib tools:], [$enable_grib])
 ===================================================])
 
 ## -fin-

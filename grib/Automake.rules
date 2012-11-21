@@ -18,6 +18,7 @@
 ## Include this file in the top-level Makefile.am with an include
 ## directive.
 
+if OLD_GRIB
 noinst_LTLIBRARIES += \
     grib/libgrib.la
 
@@ -31,6 +32,7 @@ dist_noinst_DATA += \
 grib_libgrib_la_SOURCES = \
     grib/Ebisuzaki.cpp \
     grib/GRIB.cpp
+endif
 
 ## -fin-
 ## vim:syn=automake:

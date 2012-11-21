@@ -55,9 +55,10 @@ dist_msat_xrit_include_HEADERS = \
 msat_libmsat_la_CXXFLAGS =
 msat_libmsat_la_LDFLAGS = \
     -version-info 0:0:0
-msat_libmsat_la_LIBADD = \
-    grib/libgrib.la \
-    msat/proj/libproj.la
+msat_libmsat_la_LIBADD = msat/proj/libproj.la
+if OLD_GRIB
+msat_libmsat_la_LIBADD += grib/libgrib.la
+endif
 msat_libmsat_la_SOURCES = \
     msat/facts.cpp \
     msat/Progress.cpp

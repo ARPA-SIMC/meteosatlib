@@ -18,6 +18,7 @@
 ## Include this file in the top-level Makefile.am with an include
 ## directive.
 
+if OLD_GRIB
 bin_PROGRAMS += \
     examples/Met_Reproj
 
@@ -44,6 +45,7 @@ examples_Met_Reproj_SOURCES = \
     examples/Proj_Polar.cpp \
     grib/Ebisuzaki.cpp \
     grib/GRIB.cpp
+endif
 
 ## -fin-
 ## vim:syn=automake:
