@@ -24,8 +24,11 @@ lib_LTLIBRARIES += \
 bin_PROGRAMS += \
     hrit/examples/GRIB2NetCDF \
     hrit/examples/XRIT2Grib \
-    hrit/examples/XRIT2Image \
     hrit/examples/XRIT2NetCDF
+
+if HAVE_MAGICK
+bin_PROGRAMS += hrit/examples/XRIT2Image
+endif
 
 hrit_includedir = \
     $(includedir)/hrit
@@ -145,12 +148,14 @@ hrit_examples_XRIT2Grib_SOURCES = \
     grib/GRIB.cpp \
     hrit/examples/XRIT2Grib.cpp
 
+if HAVE_MAGICK
 hrit_examples_XRIT2Image_CPPFLAGS = $(MAGICKPP_CFLAGS)
 hrit_examples_XRIT2Image_LDADD = \
     hrit/libhrit.la \
     -lMagick++
 hrit_examples_XRIT2Image_SOURCES = \
     hrit/examples/XRIT2Image.cpp
+endif
 
 hrit_examples_XRIT2NetCDF_CPPFLAGS = $(NETCDF_CFLAGS)
 hrit_examples_XRIT2NetCDF_LDADD = \

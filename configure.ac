@@ -92,17 +92,13 @@ PKG_CHECK_EXISTS(ImageMagick++,[
     have_libmagick=yes
     AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
     AC_DEFINE([MSAT_HAVE_MAGICKPP], 1, [Magick++ functions are available])
+    PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
 ], [
-    if test "$enable_hrit" == "yes"; then
-        enable_hrit="no"
-        AC_MSG_WARN("*** hrit support disabled for lack of libmagick++")
-    fi
-    if test "$enable_thornsds_db1" == "yes"; then
-        enable_thornsds_db1="no"
-        AC_MSG_WARN("*** thornsds_db1 support disabled for lack of libmagick++")
+    have_libmagick=no
+    if test "$enable_hrit" == "yes" -o "$enable_thornsds_db1" == "yes"; then
+        AC_MSG_WARN("*** libmagick++ not found: some example binaries will not be built")
     fi
 ])
-PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
 
 dnl NetCDF3 (which does not use pkg-config, or not reliably)
 AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
@@ -152,12 +148,7 @@ if test x"$enable_hri" == x"yes"; then
 fi
 
 if test x"$enable_hrit" == x"yes"; then
-    if test x"$have_libmagick" = x"yes"; then
-        if ! test x"$have_libnetcdf" = x"yes" ; then
-            enable_hrit="no"
-            AC_MSG_WARN("*** hrit support disabled")
-        fi
-    else
+    if ! test x"$have_libnetcdf" = x"yes" ; then
         enable_hrit="no"
         AC_MSG_WARN("*** hrit support disabled")
     fi
@@ -170,12 +161,7 @@ if test x"$enable_hrit" == x"yes"; then
 fi
 
 if test x"$enable_thornsds_db1" == x"yes"; then
-    if test x"$have_libmagick" = x"yes"; then
-        if ! test x"$have_libnetcdf" = x"yes" ; then
-            enable_thornsds_db1="no"
-            AC_MSG_WARN("*** thornsds_db1 support disabled")
-        fi
-    else
+    if ! test x"$have_libnetcdf" = x"yes" ; then
         enable_thornsds_db1="no"
         AC_MSG_WARN("*** thornsds_db1 support disabled")
     fi
@@ -264,6 +250,7 @@ AS_HELP_STRING([msg-native:], [$enable_msg_native])
 AS_HELP_STRING([omtp-ids:], [$enable_omtp_ids])
 AS_HELP_STRING([openmtp:], [$enable_openmtp])
 AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
+AS_HELP_STRING([magick++:], [$have_libmagick])
 ===================================================])
 
 ## -fin-

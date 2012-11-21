@@ -22,8 +22,11 @@ lib_LTLIBRARIES += \
     thornsds_db1/libthornsds_db1.la
 
 bin_PROGRAMS += \
-    thornsds_db1/examples/db1_to_image \
     thornsds_db1/examples/db1_to_netcdf
+
+if HAVE_MAGICK
+bin_PROGRAMS += thornsds_db1/examples/db1_to_image
+endif
 
 thornsds_db1_includedir = \
     $(includedir)/thornsds_db1

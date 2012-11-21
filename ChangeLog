@@ -1,3 +1,8 @@
+2012-11-21  enrico@enricozini.org
+
+	* Made ImageMagick++ dependency optional (it only builds example
+	  binaries)
+
 2012-02-13  enrico@enricozini.org
 
 	* Version 0.6.3
