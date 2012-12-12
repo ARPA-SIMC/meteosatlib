@@ -36,7 +36,7 @@ lib_LTLIBRARIES = libmsat.la
 libmsat_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
 libmsat_la_CXXFLAGS =
 libmsat_la_LIBADD =
-libmsat_la_LDFLAGS = -version-info 0:0:0
+libmsat_la_LDFLAGS = -version-info 1:0:0
 
 # Common code
 libmsat_la_SOURCES = \
