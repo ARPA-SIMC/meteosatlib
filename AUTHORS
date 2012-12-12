@@ -1,6 +1,12 @@
-Written by:
 
-           Graziano Giuliani   <giuliani@lamma.rete.toscana.it>
-           Deneys S. Maartens  <dsm@tlabs.ac.za>
-           Paolo Patruno       <ppatruno@smr.arpa.emr.it>
-           Enrico Zini         <enrico@enricozini.com>
+ * Current
+
+Enrico Zini <enrico@enricozini.com>
+for ARPA SIMC Emilia Romagna (http://www.arpa.emr.it/smr/)
+
+
+ * Until 2006
+
+Graziano Giuliani   <giuliani@lamma.rete.toscana.it>
+
+Autotools and omtp-ids maintained by Deneys S. Maartens  <dsm@tlabs.ac.za>

@@ -59,6 +59,13 @@ namespace tut
     no_more_tests(){};
   };
 
+  /** Exception thrown when a message is to be ignored */
+  struct ignored
+  {
+    std::string reason;
+    ignored(const std::string& msg) : reason(msg) {};
+  };
+
   /**
    * Exception to be throwed when ensure() fails or fail() called.
    */
@@ -111,7 +118,7 @@ namespace tut
      * warn - test finished successfully, but test destructor throwed
      * term - test forced test application to terminate abnormally
      */
-    typedef enum { ok, fail, ex, warn, term } result_type;
+    typedef enum { ok, fail, ex, warn, term, ignored } result_type;
     result_type result;
 
     /**
@@ -746,6 +753,13 @@ namespace tut
       catch(const no_such_test&)
       {
         throw;
+      }
+      catch(const ignored& ex)
+      {
+        // test to be ignored
+        test_result tr(name_,ti->first,test_result::ignored);
+	tr.message = ex.reason;
+        return tr;
       }
       catch(const warning& ex)
       {

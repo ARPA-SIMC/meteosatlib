@@ -1,10 +1,9 @@
 #!/usr/bin/make -f
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/autotools.mk
-
-DEB_MAKE_CHECK_TARGET := check
+%:
+	dh $@
 
 # Store build information
-common-binary-post-install-arch common-binary-post-install-indep::
-	dh_buildinfo
+override_dh_fixperms:
+	dh_fixperms
+	test -e /usr/bin/dh_buildinfo && dh_buildinfo

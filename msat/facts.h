@@ -110,6 +110,9 @@ double defaultScaledMissing(int channel);
 /// Number of significant digits for scaled values in the given channel
 int significantDigitsForChannel(int channel);
 
+/// Compute the satellite zenith angle at a given location
+double sat_za(float lat, float lon);
+
 }
 }
 

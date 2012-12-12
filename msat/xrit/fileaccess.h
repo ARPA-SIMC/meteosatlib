@@ -43,10 +43,15 @@ struct FileAccess
 	std::string productid2;
 	std::string timing;
 
-	FileAccess() : directory(".") {}
-	FileAccess(const std::string& filename);
+    FileAccess() : directory(".") {}
+    FileAccess(const std::string& filename);
+    FileAccess(const FileAccess& fa, const std::string& chan);
 
-	void parse(const std::string& filename);
+    /// Initialize parsing a file name
+    void parse(const std::string& filename);
+
+    /// Initialize as a different channel of an existing FileAccess
+    void parse(const FileAccess& fa, const std::string& chan);
 
 	void ensureComplete() const;
 

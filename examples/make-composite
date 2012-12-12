@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Copyright (C) 2010 Francesca di Giuseppe 
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# Composite RGB using bands:
+#
+#  - IR_016  (1.5-1.78 µm, near infrared) for the red channel;
+#  - VIS_008 (0.74-0.88 µm, near infrared) for the green channel;
+#  - VIS_006 (0.56-0.71 µm, orange-red) for the blue channel;
+#
+# The resulting false colour image shows:
+#  - vegetation in green (higher reflection of channel VIS_008);
+#  - bare soil in pink-red (higher reflection of channels IR_016 and
+#    VIS_008) with intensity influenced by the water content of the ground
+#  - sea in dark blue (reflection of the band VIS_006 only).
+# 
+# Ice clouds and snow appear light blue, thanks to a higher reflectance of the
+# bands VIS_006 and VIS_008. Water clouds appear white, after a similar
+# reflection on all the three channels.
+
+DATE=$1
+DIR=${2:-"."}
+
+msat --jpg --area="1856,1000,192,700" $DIR/H:MSG2:VIS008:$DATE
+msat --jpg --area="1856,1000,192,700" $DIR/H:MSG2:VIS006:$DATE
+msat --jpg --area="1856,1000,192,700" $DIR/H:MSG2:IR_016:$DATE
+
+DATE=`echo $DATE | sed -re 's/.*(........)(....)$/\1_\2/'`
+convert -combine \
+	MSG2_Seviri_1_5_IR_016_$DATE.jpg \
+	MSG2_Seviri_1_5_VIS008_$DATE.jpg \
+	MSG2_Seviri_1_5_VIS006_$DATE.jpg \
+	composite.jpg
+

@@ -1,0 +1,66 @@
+#!/bin/sh -e
+
+TOP_SRCDIR=`pwd`/`dirname $0`/..
+export TOOLSDIR="`pwd`/tools"
+export GDAL_DRIVER_PATH="`pwd`/../gdal/.libs"
+
+CMD=`pwd`/"$1"
+
+# $TEST_ONLY can list, space separated, the tests to run
+if [ ! -z "$TEST_ONLY" ]
+then
+	can_run=
+	for name in $TEST_ONLY
+	do
+		if [ "$name" = "`basename $CMD`" ]
+		then
+			can_run=true
+		fi
+	done
+	test "$can_run" != true && exit 0
+fi
+
+
+## Set up the test environment
+
+TESTDIR="`mktemp -d \`pwd\`/testdir.XXXXXXXXXX`"
+cd "$TESTDIR"
+
+# Put data in test inbound area
+cp -a "$TOP_SRCDIR/tests/data/"* .
+tar -C "$TOP_SRCDIR/tests" --exclude=".*" -cf - data | tar xf -
+
+## Clean up the test environment at exit unless asked otherwise
+cleanup() {
+	test -z "$PRESERVE" && rm -r "$TESTDIR"
+}
+trap cleanup EXIT
+
+## Run the tests
+
+#id=`date +%y%m%d%H%M%S`
+#$DEBUGGER $BIN $ARGS 2>&1 | tee `pwd`/testrun-$id
+#echo Output saved in `pwd`/testrun-$id
+
+# Try to debug the libtool executable, if present
+DIR=`dirname $CMD`
+BASE=`basename $CMD`
+if [ ! -z "$DEBUGGER" ] && [ -x $DIR/.libs/lt-$BASE ]
+then
+	echo "Running $DEBUGGER $DIR/.libs/lt-$BASE $ARGS"
+	$DEBUGGER $DIR/.libs/lt-$BASE $ARGS
+	RES=$?
+else
+	echo "Running $DEBUGGER $CMD $ARGS"
+	$DEBUGGER $CMD $ARGS
+	RES=$?
+fi
+
+if [ ! -z "$PAUSE" ]
+then
+	echo "Post-test inspection requested."
+	echo "Exit this shell to cleanup the test environment."
+	bash
+fi
+
+exit $RES

@@ -2,9 +2,17 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
+have_hri=@enable_hri@
+have_hrit=@enable_hrit@
+have_msgnative=@enable_msg_native@
+have_omtpids=@enable_omtp_ids@
+have_openmtp=@enable_openmtp@
+have_thornsdsdb1=@enable_thornsds_db1@
+have_grib=@enable_grib@
+have_safh5=@enable_safh5@
 
 Name: libmsat
-Description: Read, write, convert and process georeferentiated raster images
+Description: Handle Meteosat images in various formats, directly or via GDAL
 Requires: @PC_MSAT_REQS@
 Version: @VERSION@
 Cflags: -I${includedir}

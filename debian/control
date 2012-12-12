@@ -1,8 +1,14 @@
 Source: meteosatlib
-Section: misc
+Section: science
 Priority: optional
 Maintainer: Enrico Zini <enrico@debian.org>
-Build-Depends: cdbs (>= 0.4.43), debhelper (>> 4.1), dh-buildinfo, doxygen, libtut-dev, libnetcdf-dev, libmagick++-dev
+Build-Depends:
+ debhelper (>= 7.0.50~), dh-buildinfo,
+ libnetcdf-dev, libhdf5-serial-dev | libhdf5-dev,
+ libgrib-api-dev,
+ libgdal1-dev (>= 1.6.0),
+ libmsat-dev (>= 0.6),
+ libmagick++-dev
 Standards-Version: 3.7.3.0
 Homepage: http://meteosatlib.sourceforge.net
 Vcs-Svn: https://meteosatlib.svn.sourceforge.net/svnroot/meteosatlib/trunk
@@ -11,69 +17,58 @@ Package: libmsat0
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Library for working with georeferentiated raster images (shared library)
- The library allows to:
+Description: Low-level library to access Meteosat images (shared)
+ This is a collection of libraries with low-level functions to work with
+ Meteosat images in several formats.
  .
-  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
-  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
-  - Precisely correlate every pixel with its geographical coordinates
-  - Extract image subareas
-  - Display images
-  - Reproject images
+ Currently supported:
+  - HRIT/LRIT
+  - HRI
+  - OpenMTP
+  - OpenMTP-IDS
  .
- This is the shared library, and the GDAL plugin.
+ This is the shared library.
 
 Package: libmsat-dev
 Section: libdevel
 Architecture: any
 Depends: libmsat0 (=${binary:Version})
 Recommends: pkg-config
-Description: Library for working with georeferentiated raster images
- The library allows to:
+Description: Low-level library to access Meteosat images
+ This is a collection of libraries with low-level functions to work with
+ Meteosat images in several formats.
  .
-  - Read images in GRIB, SAF HDF5 and some NetCDF based formats.
-  - Write images in GRIB, JPG, PNG and some NetCDF based formats.
-  - Precisely correlate every pixel with its geographical coordinates
-  - Extract image subareas
-  - Display images
-  - Reproject images
+ Currently supported:
+  - HRIT/LRIT
+  - HRI
+  - OpenMTP
+  - OpenMTP-IDS
  .
  This is the library for C++ development.
 
-Package: libopenmtp0
-Section: libs
+Package: meteosatlib-tools
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Library for working with OpenMTP images (shared library)
- TODO
+Recommends: meteosatlib-gdal-drivers, python-gdal, python-gtk2
+Description: Read, write, convert and display raster satellite images
+ This package provides two tools:
  .
- This is the shared library.
+  - msat: a command line tool to crop, scale, convert and display satellite
+    images
+  - msat-view: an interactive tool to zoom into satellite images and
+    georeference points and areas
 
-Package: libopenmtp-dev
-Section: libdevel
-Architecture: any
-Depends: libopenmtp0 (=${binary:Version})
-Recommends: pkg-config
-Description: Library for working with OpenMTP images
- TODO
- .
- This is the library for C++ development.
-
-Package: libhrit0
-Section: libs
+Package: libgdal1-1.9.0-meteosatlib
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Library for working with HRIT images (shared library)
- TODO
+Description: GDAL drivers based on Meteosatlib
+ GDAL plugins that allow to read and write images using Meteosatlib.
  .
- This is the shared library.
+ It adds support for these new formats:
+ .
+  - MsatXRIT (ro): xRIT (if enabled in meteosatlib)
+  - MsatSAFH5 (ro): SAF HDF5
+  - MsatNetCDF (rw): Meteosatlib NetCDF
+  - MsatNetCDF24 (rw): Meteosatlib NetCDF24
+  - MsatGRIB (rw): GRIB via grib_api
 
-Package: libhrit-dev
-Section: libdevel
-Architecture: any
-Depends: libhrit0 (=${binary:Version})
-Recommends: pkg-config
-Description: Library for working with HRIT images
- TODO
- .
- This is the library for C++ development.

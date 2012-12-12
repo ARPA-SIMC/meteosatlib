@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 #include <deque>
-#include <hrit/MSG_data_image.h>
+#include <msat/hrit/MSG_data_image.h>
 
 struct MSG_header;
 struct MSG_data;

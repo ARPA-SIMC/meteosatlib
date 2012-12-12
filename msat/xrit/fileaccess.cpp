@@ -42,9 +42,23 @@ static std::string underscoreit(const std::string& base, int final_len)
 	return res;
 }
 
+static std::string deunderscore(const std::string& str)
+{
+    size_t pos = str.size() - 1;
+    while (pos > 0 && str[pos] == '_')
+        --pos;
+    return str.substr(0, pos + 1);
+}
+
 // dir/res:prodid1:prodid2:time
 bool isValid(const std::string& filename)
 {
+    if (filename.size() < 3) return false;
+
+    // Segments
+    if (filename.substr(filename.size() - 3) == "-C_")
+        return true;
+
 	// check that it contains at least 3 ':' signs
 	size_t pos = 0;
 	for (int i = 0; i < 3; ++i, ++pos)
@@ -59,8 +73,23 @@ FileAccess::FileAccess(const std::string& filename)
 	parse(filename);
 }
 
+FileAccess::FileAccess(const FileAccess& fa, const std::string& chan)
+{
+    parse(fa, chan);
+}
+
+void FileAccess::parse(const FileAccess& fa, const std::string& chan)
+{
+    directory = fa.directory;
+    resolution = fa.resolution;
+    productid1 = fa.productid1;
+    productid2 = chan;
+    timing = fa.timing;
+}
+
 void FileAccess::parse(const std::string& filename)
 {
+    // Split directory name
 	size_t beg;
 	size_t end = filename.rfind('/');
 	if (end == string::npos)
@@ -75,22 +104,64 @@ void FileAccess::parse(const std::string& filename)
 		beg = end + 1;
 	}
 
-	if ((end = filename.find(':', beg)) == string::npos)
-		throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
-	resolution = filename.substr(beg, end-beg);
+    if (filename.size() < 3)
+        throw std::runtime_error(filename + " is not a valid xRIT file name");
 
-	beg = end + 1;
-	if ((end = filename.find(':', beg)) == string::npos)
-		throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
-	productid1 = filename.substr(beg, end-beg);
+    if (filename.substr(filename.size() - 3) == "-C_")
+    {
+        // Parse segment filename [directory/]H-000-MSG1__-MSG1________-HRV______-000018___-200611141200-C_
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
+        resolution = filename.substr(beg, end-beg);
 
-	beg = end + 1;
-	if ((end = filename.find(':', beg)) == string::npos)
-		throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
-	productid2 = filename.substr(beg, end-beg);
+        // Skip first number
+        beg = end + 1;
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
 
-	beg = end + 1;
-	timing = filename.substr(beg);
+        // Skip string (satellite name?)
+        beg = end + 1;
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
+
+        beg = end + 1;
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
+        productid1 = deunderscore(filename.substr(beg, end-beg));
+
+        beg = end + 1;
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
+        productid2 = deunderscore(filename.substr(beg, end-beg));
+
+        // Skip segment number
+        beg = end + 1;
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
+
+        beg = end + 1;
+        if ((end = filename.find('-', beg)) == string::npos)
+            throw std::runtime_error("XRIT segment " + filename + " is not in the form [directory/]resolution-nnn-xxxxxx-productid1-productid2-datetime-C_");
+        timing = deunderscore(filename.substr(beg, end-beg));
+    } else {
+        // Parse shortened form [directory/]resolution:productid1:productid2:datetime
+        if ((end = filename.find(':', beg)) == string::npos)
+            throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
+        resolution = filename.substr(beg, end-beg);
+
+        beg = end + 1;
+        if ((end = filename.find(':', beg)) == string::npos)
+            throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
+        productid1 = filename.substr(beg, end-beg);
+
+        beg = end + 1;
+        if ((end = filename.find(':', beg)) == string::npos)
+            throw std::runtime_error("XRIT name " + filename + " is not in the form [directory/]resolution:productid1:productid2:datetime");
+        productid2 = filename.substr(beg, end-beg);
+
+        beg = end + 1;
+        timing = filename.substr(beg);
+    }
 }
 
 void FileAccess::ensureComplete() const

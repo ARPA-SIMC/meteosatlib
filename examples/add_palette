@@ -1,0 +1,70 @@
+#!/usr/bin/python
+# coding: utf8
+
+# Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# Authors: Enrico Zini <enrico@enricozini.com>
+#          Daniele Branchini <dbranchini@arpa.emr.it>
+
+import gdal, ogr
+from gdalconst import *
+import sys
+import numpy
+
+def read_palette(fname):
+    "Read a palette from a file"
+    r = dict()
+    g = dict()
+    b = dict()
+    with open(fname) as fd:
+        for line in fd:
+            if line.startswith("#"): continue
+            vals = map(int, line.split())
+            if len(vals) != 4: continue
+            r[vals[0]] = vals[1]
+            g[vals[0]] = vals[2]
+            b[vals[0]] = vals[3]
+    return r, g, b
+
+# Open input dataset
+in_ds = gdal.Open(sys.argv[1], GA_ReadOnly)
+out_fname = sys.argv[2]
+
+# Read palette
+pr, pg, pb = read_palette(sys.argv[3])
+
+# Create output rgb geotiff, one byte per channel
+out_drv = gdal.GetDriverByName("GTiff")
+out_ds = out_drv.Create(out_fname, in_ds.RasterXSize, in_ds.RasterYSize, 3, gdal.GDT_Byte)
+
+# Copy metadata and georeferencing info from source to target
+out_ds.SetMetadata(in_ds.GetMetadata())
+out_ds.SetGeoTransform(in_ds.GetGeoTransform())
+out_ds.SetProjection(in_ds.GetProjection())
+
+# Read the indexed raster band
+in_rb = in_ds.GetRasterBand(1)
+a = in_rb.ReadAsArray()
+
+# Create mapping functions that look up the color palette
+make_r = numpy.vectorize(lambda x: pr.get(x, 0))
+make_g = numpy.vectorize(lambda x: pg.get(x, 0))
+make_b = numpy.vectorize(lambda x: pb.get(x, 0))
+
+# Map the indexed raster band into the 3 rgb channels
+out_ds.GetRasterBand(1).WriteArray(make_r(a))
+out_ds.GetRasterBand(2).WriteArray(make_g(a))
+out_ds.GetRasterBand(3).WriteArray(make_b(a))

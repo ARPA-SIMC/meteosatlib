@@ -1,7 +1,7 @@
 /*
- * DB-ALLe - Archive for punctual meteorological data
+ * test-utils - Test utils for meteosatlib GDAL bindings
  *
- * Copyright (C) 2005,2006  ARPA-SIM <urpsim@smr.arpa.emr.it>
+ * Copyright (C) 2005--2010  ARPA-SIM <urpsim@smr.arpa.emr.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,20 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include <cstdio>
+#include <gdal_priv.h>
+#include <ogr_spatialref.h>
+#include <msat/gdal/dataset.h>
+/*
+#include <msat/gdalutils.h>
+#include <msat/GRIB.h>
+#include <msat/XRIT.h>
+#include <msat/NetCDF.h>
+#include <msat/NetCDF24.h>
+#include <msat/SAFH5.h>
+*/
+#include <stdexcept>
 
+using namespace std;
 
 namespace tut {
 
@@ -54,8 +66,7 @@ std::string __ensure_errmsg(std::string file, int line, std::string msg)
 
 TempTestFile::TempTestFile(bool leave) : leave(leave)
 {
-	::mkdir(WORK_DIR, 0755);
-	char* pn = tempnam(WORK_DIR, "test");
+	char* pn = tempnam(".", "test");
 	pathname = pn;
 	free(pn);
 }

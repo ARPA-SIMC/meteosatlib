@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Load the plugins via preloading.  This does not work all the time (for
+# example, it seems to break NetCDF).
+#
+# Ideally, they should instead be installed into:
+#  - /usr/lib/gdal15plugins (in Debian, with gdal >= 1.5.1-4)
+#  - /usr/lib/gdalplugins (in any other case)
+
+DIR=`dirname $0`/../msat
+
+LIB="$DIR/libmsat2gdal.so"
+if [ ! -r "$LIB" ]
+then
+	LIB="$DIR/.libs/libmsat2gdal.so"
+fi
+
+LD_PRELOAD="$LIB"
+export LD_PRELOAD
+
+if [ $# == 0 ]
+then
+	exec "$SHELL"
+else
+	exec "$@"
+fi

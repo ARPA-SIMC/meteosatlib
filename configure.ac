@@ -1,7 +1,7 @@
 # configure.ac -- Process this file with autoconf to produce a configure script.
-# $Id$
+#
 # Copyright (C) 2004, 2005, 2006 Deneys S. Maartens <dsm@tlabs.ac.za>
-# Modified in 2006--2011 by Enrico Zini <enrico@enricozini.org>
+# Copyright (C) 2006--2012  Enrico Zini <enrico@enricozini.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,18 +17,11 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-m4_pattern_allow
-
-AC_INIT([meteosatlib], [0.6.3], [enrico@enricozini.org, giuliani@lamma.rete.toscana.it])
-
-AC_REVISION([$Revision$])
-
+AC_INIT([meteosatlib], [0.9], [enrico@enricozini.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
+AM_INIT_AUTOMAKE([foreign subdir-objects nostdinc])
 AC_CONFIG_MACRO_DIR([m4])
-AC_SUBST([ac_aux_dir])
-
-AM_INIT_AUTOMAKE([subdir-objects])
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER([config.h msat/config.h])
@@ -73,13 +66,6 @@ AC_ARG_ENABLE([openmtp],
     [],
     [enable_openmtp="yes"])
 
-AC_ARG_WITH([grib],
-            [AS_HELP_STRING(
-                [--with-grib],
-                [compile old tools that output GRIB files])],
-            [enable_grib=yes],
-            [enable_grib=no])
-
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
 
@@ -94,7 +80,6 @@ dnl Checks for libraries.
 PKG_PROG_PKG_CONFIG()
 
 dnl ImageMagick++
-
 PKG_CHECK_EXISTS(ImageMagick++,[
     have_libmagick=yes
     AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
@@ -103,16 +88,12 @@ PKG_CHECK_EXISTS(ImageMagick++,[
 ], [
     have_libmagick=no
     if test "$enable_hrit" == "yes" -o "$enable_thornsds_db1" == "yes"; then
-        AC_MSG_WARN("*** libmagick++ not found: some example binaries will not be built")
+        AC_MSG_WARN("*** libmagick++ not found: some features will be disabled")
     fi
 ])
 
 dnl NetCDF3 (which does not use pkg-config, or not reliably)
 AC_CHECK_NETCDF([have_libnetcdf=yes],[have_libnetcdf=no])
-
-dnl --------------------------------------------------------------------
-dnl Checks for header files.
-
 if test "x$have_libnetcdf" == "xyes"; then
     AC_DEFINE([HAVE_NETCDF], 1, [NetCDF functions are available])
     AC_DEFINE([MSAT_HAVE_NETCDF], 1, [NetCDF functions are available])
@@ -132,6 +113,62 @@ else
         AC_MSG_WARN("*** thornsds_db1 support disabled")
     fi
 fi
+
+dnl GDAL (which does not use pkg-config)
+AC_PATH_PROG([GDAL_CONFIG], [gdal-config], [NONE])
+if test "x$GDAL_CONFIG" == "xNONE"; then
+    have_gdal="no"
+    AC_MSG_WARN("*** GDAL support disabled")
+else
+    have_gdal="yes"
+    AC_DEFINE([HAVE_GDAL], 1, [GDAL functions are available])
+    AC_DEFINE([MSAT_HAVE_GDAL], 1, [GDAL functions are available])
+    AC_SUBST(GDAL_CONFIG)
+    GDAL_CFLAGS=`$GDAL_CONFIG --cflags`
+    GDAL_LIBS=`$GDAL_CONFIG --libs`
+    AC_SUBST(GDAL_CFLAGS)
+    AC_SUBST(GDAL_LIBS)
+    echo "GPD $GDAL_PLUGIN_DIRNAME"
+    if test -z "$GDAL_PLUGIN_DIRNAME"; then
+        GDAL_PLUGIN_DIRNAME=gdalplugins/$(gdal-config --version | sed -re ['s/([0-9]+\.[0-9]+).+/\1/'])
+    fi
+    echo "GPD $GDAL_PLUGIN_DIRNAME"
+    AC_MSG_NOTICE([GDAL plugin directory is $GDAL_PLUGIN_DIRNAME])
+    AC_SUBST(GDAL_PLUGIN_DIRNAME)
+fi
+
+dnl grib_api (which does not use pkg-config)
+have_gribapi=yes
+AC_CHECK_LIB([grib_api], [grib_get_api_version], [true], [have_gribapi=no], [-ljasper])
+AC_CHECK_HEADER([grib_api.h], [true], [have_gribapi=no])
+if test x"$have_gribapi" = xyes
+then
+	AC_DEFINE([HAVE_GRIBAPI], 1, [grib_api functions are available])
+	GRIBAPI_CFLAGS=
+	GRIBAPI_LIBS="-lgrib_api -ljasper"
+	AC_SUBST(GRIBAPI_CFLAGS)
+	AC_SUBST(GRIBAPI_LIBS)
+else
+	have_gribapi="no"
+	AC_MSG_WARN("*** GRIB support disabled")
+fi
+enable_grib=$have_gribapi
+
+dnl HDF5 (which does not use pkg-config)
+have_hdf5=yes
+AC_CHECK_LIB([hdf5], [H5Fis_hdf5], [], [have_hdf5=no])
+AC_CHECK_HEADER([hdf5.h], [], [have_hdf5=no])
+if test x"$enable_hdf5" = x"no"; then
+	AC_MSG_WARN("*** hdf5 support disabled")
+else
+	AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
+	HDF5_CFLAGS=""
+	HDF5_LIBS="-lhdf5"
+	AC_SUBST(HDF5_CFLAGS)
+	AC_SUBST(HDF5_LIBS)
+fi
+enable_safh5=$have_hdf5
+
 
 dnl --------------------------------------------------------------------
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -186,7 +223,19 @@ AM_CONDITIONAL([OPENMTP], [test x"$enable_openmtp" = x"yes"])
 AM_CONDITIONAL([THORNSDS_DB1], [test x"$enable_thornsds_db1" = x"yes"])
 AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
+AM_CONDITIONAL([HAVE_GRIBAPI], [test x"$have_gribapi" = x"yes"])
+AM_CONDITIONAL([HAVE_GDAL], [test x"$have_gdal" = x"yes"])
+AM_CONDITIONAL([HAVE_HDF5], [test x"$have_hdf5" = x"yes"])
 AM_CONDITIONAL([OLD_GRIB], [test x"$enable_grib" = x"yes"])
+
+AC_SUBST(enable_hri)
+AC_SUBST(enable_hrit)
+AC_SUBST(enable_msg_native)
+AC_SUBST(enable_omtp_ids)
+AC_SUBST(enable_openmtp)
+AC_SUBST(enable_thornsds_db1)
+AC_SUBST(enable_grib)
+AC_SUBST(enable_safh5)
 
 dnl --------------------------------------------------------------------
 dnl Extra defines
@@ -196,11 +245,6 @@ CXXFLAGS="-Wall $CXXFLAGS"
 
 dnl --------------------------------------------------------------------
 dnl Substitution variables for the .pc.in files
-
-if test x"$enable_hrit" = x"yes"; then
-	PC_MSAT_REQS="$PC_MSAT_REQS libhrit"
-	PC_MSAT_LIBS="$PC_MSAT_LIBS -lhrit"
-fi
 
 if test x"$have_libnetcdf" = x"yes"; then
 	# FIXME: there seems to be no way to tell users of the .pc.in that they
@@ -216,6 +260,13 @@ fi
 AC_SUBST(PC_MSAT_REQS)
 AC_SUBST(PC_MSAT_LIBS)
 
+dnl Default institution information required when generating NetCDF
+if test "x$MSAT_DEFAULT_INSTITUTION" == "x"; then
+    MSAT_DEFAULT_INSTITUTION="ARPA-SIM"
+fi
+AC_DEFINE_UNQUOTED([MSAT_DEFAULT_INSTITUTION], ["$MSAT_DEFAULT_INSTITUTION"], [Default institution name])
+AC_MSG_NOTICE([Default institution is $MSAT_DEFAULT_INSTITUTION])
+
 
 dnl --------------------------------------------------------------------
 dnl Create output files.
@@ -223,29 +274,13 @@ dnl Create output files.
 AC_CONFIG_FILES([
     Makefile
     decompress/Makefile
-    examples/Makefile
     msat/Makefile
-    grib/Makefile
-    iniparser/Makefile
-    images/Makefile
-    hri/Makefile
-    hri/examples/Makefile
-    hrit/Makefile
-    hrit/examples/Makefile
-    msg-native/Makefile
-    msg-native/examples/Makefile
-    omtp-ids/Makefile
-    omtp-ids/examples/Makefile
-    openmtp/Makefile
-    openmtp/examples/Makefile
-    thornsds_db1/Makefile
-    thornsds_db1/examples/Makefile
-    tests/Makefile
+    gdal/Makefile
     tools/Makefile
-    meteosatlib.spec
+    examples/Makefile
+    tests/Makefile
     libmsat.pc
-    libhrit.pc
-    libopenmtp.pc
+    meteosatlib.spec
 ])
 AC_OUTPUT
 
@@ -259,7 +294,7 @@ AS_HELP_STRING([omtp-ids:], [$enable_omtp_ids])
 AS_HELP_STRING([openmtp:], [$enable_openmtp])
 AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
 AS_HELP_STRING([magick++:], [$have_libmagick])
-AS_HELP_STRING([old grib tools:], [$enable_grib])
+AS_HELP_STRING([GDAL:], [$have_gdal])
+AS_HELP_STRING([grib_api:], [$have_gribapi])
+AS_HELP_STRING([hdf5:], [$have_hdf5])
 ===================================================])
-
-## -fin-

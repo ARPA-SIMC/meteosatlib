@@ -13,9 +13,9 @@
 #include <limits>
 
 // For HRIT satellite IDs
-#include <hrit/MSG_spacecraft.h>
+#include "hrit/MSG_spacecraft.h"
 // For HRIT channel names
-#include <hrit/MSG_channel.h>
+#include "hrit/MSG_channel.h"
 
 using namespace std;
 
@@ -514,6 +514,37 @@ int significantDigitsForChannel(int channel)
                 return channelInfo[channel].decimalDigits;
         return 0;
 }
+
+double sat_za(float lat, float lon)
+{
+    // Convert to radians
+    double rlat = lat * M_PI / 180.0;
+    double rlon = lon * M_PI / 180.0;
+
+    // http://www.spaceacademy.net.au/watch/track/locgsat.htm
+    // g is the angle at the center of earth between the observer and the
+    //   satellite
+    double cosg = cos(rlon) * cos(rlat);
+    // R is the radius of earth
+    // h is the hight of the satellite above the equator
+    // e is the angle between the satellite and the horizon at the observer
+    //   location
+    // tan(e) = [(R+h)cos(g) - R] / [(R+h)sin(g)]
+    //   simplifying (R+h) it becomes
+    // tan(e) = (cos(g) - R/(R+h)) / sin(g)
+    //   replacing  sin(g) = sqrt(1-cos²(g))  it becomes
+    // tan(e) = (cos(g) - R/(R+h)) / sqrt(1-cos²(g))
+
+    // R / (R + h)
+    const double rrh = EARTH_RADIUS / ORBIT_RADIUS;
+
+    // Elevation
+    double ele = atan((cosg - rrh) / sqrt(1 - cosg*cosg));
+
+    // Zenith angle
+    return M_PI/2 - ele;
+}
+
 
 }
 }

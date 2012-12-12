@@ -1,0 +1,15 @@
+/Met_Reproj
+/hri/HRI2NetCDF
+/hrit/XRIT2Image
+/hrit/XRIT2NetCDF
+/hrit/xritdump
+/msg-native/native2Image
+/msg-native/nativedump
+/omtp-ids/OpenMTP-IDS_debug
+/omtp-ids/OpenMTP-IDS_sector
+/omtp-ids/OpenMTP-IDS_to_pgm
+/omtp-ids/OpenMTP-IDS_write
+/openmtp/OpenMTP_info
+/openmtp/OpenMTP_to_NetCDF
+/thornsds_db1/db1_to_image
+/thornsds_db1/db1_to_netcdf

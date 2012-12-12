@@ -1,0 +1,8 @@
+#!/bin/bash
+
+TOP_SRCDIR=$(readlink -f $(dirname $0))
+
+export LD_LIBRARY_PATH="$TOP_SRCDIR/msat/.libs:$LD_LIBRARY_PATH"
+export GDAL_DRIVER_PATH=$TOP_SRCDIR/gdal/.libs
+
+exec "$@"

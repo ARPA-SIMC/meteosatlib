@@ -3,4 +3,3 @@ debian/tmp/usr/lib/libmsat.a
 debian/tmp/usr/lib/pkgconfig/libmsat.pc
 debian/tmp/usr/lib/libmsat.la
 debian/tmp/usr/lib/libmsat.so
-debian/tmp/usr/share/aclocal/libmsat.m4

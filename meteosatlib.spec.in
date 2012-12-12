@@ -11,9 +11,9 @@ Source1:        PublicDecompWT.zip
 NoSource:       1
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:   netcdf-devel  , ImageMagick-c++-devel
-Vendor:         Graziano Giuliani <giuliani@lamma.rete.toscana.it> Enrico Zini <enrico@enricozini.org> 
-Packager:       Deneys S. Maartens <dsm@tlabs.ac.za> Paolo Patruno <ppatruno@arpa.emr.it>
+BuildRequires:  netcdf-devel, ImageMagick-c++-devel, gdal-devel >= 1.6, hdf5-devel > 1.8, grib_api >= 1.8
+Vendor:         Enrico Zini <enrico@enricozini.org> 
+Packager:       Daniele Branchini <dbranchini@arpa.emr.it>
 
 %description
 
@@ -23,26 +23,6 @@ Supported: OpenMTP OpenMTP-IDS HRI HRIT/LRIT.
 This library is used to read Meteosat files on a PDUS receiving
 station. No decryption is performed.
 
-
-@HRI_TRUE@%package hri-devel
-
-@HRI_TRUE@Group: Libraries/Meteo
-@HRI_TRUE@Summary: Development for Meteosat HRI satellite images
-
-@HRI_TRUE@%description hri-devel
-@HRI_TRUE@Libraries to read Meteosat 7/8/9 images in various formats.
-
-@HRI_TRUE@%package hrit-devel
-
-@HRI_TRUE@License: Non Free (Copyright Eumetsat)
-@HRI_TRUE@Group: Libraries/Meteo
-@HRI_TRUE@Summary: Development for Meteosat HRI satellite images
-
-@HRI_TRUE@%description hrit-devel
-@HRI_TRUE@Libraries to read Meteosat 7/8 images in various formats.
-@HRI_TRUE@For MSG data decompression, You need the EUMETSAT source code for
-@HRI_TRUE@the decompression library for Wavelet, JPEG and T4 images.
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 Please fill the form at
@@ -51,47 +31,47 @@ Please fill the form at
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-@MSG_NATIVE_TRUE@%package msg-native-devel
+%package gdal
 
-@MSG_NATIVE_TRUE@Group: Libraries/Meteo
-@MSG_NATIVE_TRUE@Summary: Development for Meteosat MSG satellite images
+Group: Applications/Meteo
+Summary: GDAL drivers based on Meteosatlib
 
-@MSG_NATIVE_TRUE@%description msg-native-devel
-@MSG_NATIVE_TRUE@Libraries to read Meteosat 7/8 images in various formats.
+%description gdal
+ GDAL plugins that allow to read and write images using Meteosatlib.
+ 
+ It adds support for these new formats:
+ 
+  - MsatXRIT (ro): Meteosat xRIT (if enabled in meteosatlib)
+  - MsatSAFH5 (ro): SAF HDF5
+  - MsatNetCDF (rw): Meteosatlib NetCDF
+  - MsatNetCDF24 (rw): Meteosatlib NetCDF24
+  - MsatGRIB (rw): Meteosatlib GRIB via grib_api
 
-@OMTP_IDS_TRUE@%package omtp-ids-devel
+%package devel
 
-@OMTP_IDS_TRUE@Group: Libraries/Meteo
-@OMTP_IDS_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
+Group:		Libraries/Meteo
+Summary:	Library of utility functions for working with Meteosat images
+Obsoletes:      meteosatlib-openmtp-devel, meteosatlib-msg-native-devel, meteosatlib-hrit-devel, meteosatlib-thornsds_db1-devel, meteosatlib-hri-devel, meteosatlib-omtp-ids-devel, meteosatlib-msat-devel
 
-@OMTP_IDS_TRUE@%description omtp-ids-devel
-@OMTP_IDS_TRUE@Libraries to read Meteosat 7/8 images in various formats.
-
-@OMTP_IDS_TRUE@%package openmtp-devel
-
-@OMTP_IDS_TRUE@Group: Libraries/Meteo
-@OMTP_IDS_TRUE@Summary: Development for Meteosat OpenMTP-IDS satellite images
-
-@OMTP_IDS_TRUE@%description openmtp-devel
-@OMTP_IDS_TRUE@Libraries to read Meteosat 7/8 images in various formats.
-
-@THORNSDS_DB1_TRUE@%package thornsds_db1-devel
-
-@THORNSDS_DB1_TRUE@Group: Libraries/Meteo
-@THORNSDS_DB1_TRUE@Summary: Development for Meteosat ThornSDS DB1 PDUS images
-
-@THORNSDS_DB1_TRUE@%description thornsds_db1-devel
-@THORNSDS_DB1_TRUE@Libraries to read Meteosat 7/8 images in various formats.
-
-
-%package msat-devel
-
-Group: Libraries/Meteo
-Summary:Library of utility functions for working with Meteosat images
-
-%description msat-devel
+%description devel
 Libraries to read Meteosat 7/8 images in various formats.
 This is the library for C++ development.
+
+%package tools
+
+Group:		Applications/Meteo
+Summary:  	Read, write, convert and display raster satellite images
+Obsoletes:      meteosatlib-gdal-tools
+
+%description tools
+ This package provides two tools:
+ 
+  - msat: a command line tool to crop, scale, convert and display satellite
+    images
+  - msat-view: an interactive tool to zoom into satellite images and
+    georeference points and areas
+
+
 
 %prep
 %setup -q
@@ -110,80 +90,62 @@ configure_disable=
 
 %configure $configure_disable
 
-
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 %makeinstall
 
+## WARNING (GDAL PLUGINS PATH in RHEL/Fedora/CentOS)
+## Gdal plugins path may vary accordingly to gdal versions and architecture:
+## - plugins so lib are not versioned in gdal 1.6 and 1.7
+## - in x86_64 gdal looks for plugin in /usr/lib and not /usr/lib64
+## (for further info:
+##  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=508340 )
+## so you might want to intercept the plugins and put them in the right place:
+#mkdir -p $RPM_BUILD_ROOT/usr/lib
+#mv $RPM_BUILD_ROOT/usr/lib64/gdalplugins/1.7 $RPM_BUILD_ROOT/usr/lib/gdalplugins
+## ...and REMBEMBER to change "%files gdal" accordingly
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%doc AUTHORS ChangeLog COPYING CREDITS INSTALL NEWS
+%doc AUTHORS ChangeLog COPYING INSTALL
 %doc PublicDecompWT_LICENSE README TODO
 %{_bindir}
-@HRI_TRUE@%{_libdir}/libhri.so*
-@HRIT_TRUE@%{_libdir}/libhrit.so*
-@MSG_NATIVE_TRUE@%{_libdir}/libnative.so*
-@OMTP_IDS_TRUE@%{_libdir}/libomtp-ids.so*
-@OPENMTP_TRUE@%{_libdir}/libopenmtp.so*
-@THORNSDS_DB1_TRUE@%{_libdir}/libthornsds_db1.so*
 %{_libdir}/libmsat.so*
 
-
-%files hri-devel
-@HRI_TRUE@%{_includedir}/hri
-@HRI_TRUE@%{_libdir}/libhri.a
-@HRI_TRUE@%{_libdir}/libhri.la
-
-%files hrit-devel
-@HRI_TRUE@%{_includedir}/hrit
-#%{_includedir}/PublicDecompWT
-#%{_libdir}/libCOMP.a
-#%{_libdir}/libDISE.a
-@HRI_TRUE@%{_libdir}/libhrit.a
-%{_libdir}/libhrit.la
-#%{_libdir}/libJPEG.a
-#%{_libdir}/libT4.a
-#%{_libdir}/libWT.a
-@HRI_TRUE@/usr/lib/pkgconfig/libhrit.pc
-@HRI_TRUE@/usr/share/aclocal/libhrit.m4
-
-
-%files msg-native-devel
-@MSG_NATIVE_TRUE@%{_includedir}/msg-native
-@MSG_NATIVE_TRUE@%{_libdir}/libnative.a
-@MSG_NATIVE_TRUE@%{_libdir}/libnative.la
-
-%files omtp-ids-devel
-@OMTP_IDS_TRUE@%{_includedir}/omtp-ids
-@OMTP_IDS_TRUE@%{_libdir}/libomtp-ids.la
-@OMTP_IDS_TRUE@%{_libdir}/libomtp-ids.a
-
-%files thornsds_db1-devel
-@THORNSDS_DB1_TRUE@%{_includedir}/thornsds_db1
-@THORNSDS_DB1_TRUE@%{_libdir}/libthornsds_db1.la
-@THORNSDS_DB1_TRUE@%{_libdir}/libthornsds_db1.a
-
-@OPENMTP_TRUE@%files openmtp-devel
-@OPENMTP_TRUE@%{_includedir}/openmtp
-@OPENMTP_TRUE@%{_libdir}/libopenmtp.la
-@OPENMTP_TRUE@%{_libdir}/libopenmtp.a
-@OPENMTP_TRUE@/usr/lib/pkgconfig/libopenmtp.pc
-
-
-%files msat-devel
+%files devel
 %{_includedir}/msat
 %{_libdir}/libmsat.a
 %{_libdir}/libmsat.la
-/usr/lib/pkgconfig/libmsat.pc
-/usr/share/aclocal/libmsat.m4
+%{_libdir}/pkgconfig/libmsat.pc
+
+%files gdal
+%defattr(-,root,root,-)
+%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.a
+%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.la
+%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so
+%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so.0
+%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so.0.0.0
+%doc examples/products examples/add_palette
+%doc examples/contrast-stretch examples/make-composite
+
+%files tools
+%defattr(-,root,root,-)
+%{_bindir}
+%{_bindir}/msat
+%{_bindir}/msat-view
+%{_mandir}/man1/msat-view.1.gz
+%{_mandir}/man1/msat.1.gz
 
 
 %changelog
-* Tue Feb 16 2010 Paolo Patruno <patruno@localhost.localdomain> - @PACKAGE_VERSION@-1
+* Fri Nov 30 2012 Enrico Zini <enrico@enricozini.org> - 0.9-1
+- Merged .spec files, some corrections
+
+* Tue Feb 16 2010 Paolo Patruno <patruno@localhost.localdomain> - 0.6-1
 - adapted to meteosatlib 0.6
 
 * Wed Feb 28 2007 root <root@strip.metarpa> - 0.5-1

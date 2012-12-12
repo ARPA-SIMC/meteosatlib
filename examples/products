@@ -1,0 +1,599 @@
+#!/usr/bin/python
+# coding: utf8
+
+# Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# Authors: Enrico Zini <enrico@enricozini.com>
+#          Daniele Branchini <dbranchini@arpa.emr.it>
+
+import gdal, ogr
+from gdalconst import *
+from PIL import Image
+import datetime
+import sys
+import os
+import os.path
+import numpy
+import scipy
+import logging
+
+log = logging.getLogger(__name__)
+
+def rescale(arr, imin, imax, omin, omax, out=None):
+    """
+    Rescale values of the array from [imin, imax] to [omin, omax], clipping
+    outliers to omin or omax
+    """
+    # FIXME: is there a numpy function that does this already?    
+    if imin <= imax:
+        res = numpy.clip(arr, imin, imax, out)
+        res -= imin
+        res *= float(omax-omin) / float(imax-imin)
+        res += omin
+    else:
+        res = numpy.clip(arr, imax, imin, out)
+        res -= imin
+        res *= -(float(omax-omin) / float(imin-imax))
+        res += omin
+    return res
+
+
+class Satellite(object):
+    def __init__(self, srcdir, dt, area, opts=None):
+        self.srcdir = srcdir
+        self.dt = dt
+        self.area = area
+        self.warp_opts = opts.warp
+        self.cachedir = opts.cachedir
+
+    def gdal_dataset(self, channel_name):
+        fname = "H:MSG2:%s:%s" % (
+                channel_name,
+                self.dt.strftime("%Y%m%d%H%M")
+        )
+        if self.warp_opts:
+            cache_fname = fname.replace(":", "-") + "-latlon.tif"
+            cache_fname = os.path.join(self.cachedir, cache_fname)
+            if not os.path.exists(cache_fname):
+                import shlex, subprocess
+                opts = shlex.split(self.warp_opts)
+                cmd = ["gdalwarp", "-q", "-of", "GTiff"] + opts + [os.path.join(self.srcdir, fname), cache_fname]
+                log.info("Warping %s using '%s'...", fname, " ".join(cmd))
+                try:
+                    subprocess.check_call(cmd)
+                except:
+                    os.unlink(cache_fname)
+                    raise
+            return gdal.Open(cache_fname, GA_ReadOnly)
+
+        return gdal.Open(os.path.join(self.srcdir, fname), GA_ReadOnly)
+
+    def get_array(self, channel):
+        log.debug("Reading channel %s...", channel)
+        ds = self.gdal_dataset(channel)
+        rb = ds.GetRasterBand(1)
+        if self.area:
+            return rb.ReadAsArray(*self.area)
+        else:
+            return rb.ReadAsArray()
+
+    def save_rgb(self, name, r, g, b):
+        r = scipy.misc.toimage(r)
+        g = scipy.misc.toimage(g)
+        b = scipy.misc.toimage(b)
+
+        res = Image.merge("RGB", (r, g, b))
+        d = os.path.dirname(name)
+        fname = os.path.join(d, self.dt.strftime("%Y%m%d%H%M-") + name + ".png")
+        log.info("Saving %s ...", fname)
+        res.save(fname)
+
+    def new_dataset(self, channel_name, fname, driver, bands=3, gdtype=gdal.GDT_Byte):
+        """
+        Create a new empty dataset
+        """
+        srcds = self.gdal_dataset(channel_name)
+        if self.area:
+            target_ds = driver.Create(fname, self.area[2], self.area[3], bands, gdtype)
+            gt = srcds.GetGeoTransform()
+            target_ds.SetGeoTransform((
+                (gt[0] / gt[1] + self.area[0]) * gt[1], gt[1], gt[2],
+                (gt[3] / gt[5] + self.area[1]) * gt[5], gt[4], gt[5],
+            ))
+        else:
+            target_ds = driver.Create(fname, srcds.RasterXSize, srcds.RasterYSize, bands, gdtype)
+            target_ds.SetGeoTransform(srcds.GetGeoTransform())
+        target_ds.SetProjection(srcds.GetProjection())
+        target_ds.SetMetadata(srcds.GetMetadata())
+
+        return target_ds
+
+    def rasterize(self, tgtds, bs, fname):
+        # Open the data source
+        shp = ogr.Open(fname)
+        shp_layer = shp.GetLayer(0)
+        
+        if bs == 1:
+            err = gdal.RasterizeLayer(tgtds, (1,), shp_layer, burn_values=(255,))
+
+        if bs == 3:
+            err = gdal.RasterizeLayer(tgtds, (1, 2, 3), shp_layer, burn_values=(128, 255, 128))
+
+        if err != 0:
+            raise Exception("error rasterizing layer: %s" % err)
+
+    def make_product(self, cls, fmt="GTiff", shp=None, destdir="."):
+        log.info("Computing %s...", cls.FNAME)
+
+        maker = cls(self)
+
+        d = gdal.GetDriverByName(fmt)
+        fname = "%s.%s" % (cls.FNAME, d.GetMetadataItem(gdal.DMD_EXTENSION))
+        fname = os.path.join(destdir, fname)
+
+        metadata = d.GetMetadata()
+        can_create = metadata.has_key(gdal.DCAP_CREATE) and metadata[gdal.DCAP_CREATE] == 'YES'
+
+        res = maker.compute()
+        if isinstance(res, tuple):
+            bs=3
+            r, g, b = maker.compute()
+        else:
+            bs=1
+            v = maker.compute()
+
+        # Create the output dataset. If the dataset only supports CreateCopy,
+        # work around it by using a temporary dataset in RAM
+        if not can_create:
+            tmpdriver = gdal.GetDriverByName("MEM")
+            outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=tmpdriver, bands=bs, gdtype=gdal.GDT_Byte)
+        else:
+            outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=d, bands=bs, gdtype=gdal.GDT_Byte)
+        
+
+        if isinstance(res, tuple):
+            outds.GetRasterBand(1).WriteArray(r)
+            outds.GetRasterBand(2).WriteArray(g)
+            outds.GetRasterBand(3).WriteArray(b)
+        else:
+            outds.GetRasterBand(1).WriteArray(v)
+            
+        if shp:
+            self.rasterize(outds, bs, shp)
+
+        if not can_create:
+            outds = d.CreateCopy(fname, outds, 0)
+
+        return outds
+
+class Product(object):
+    # Default file name (without extension)
+    FNAME = "undefined"
+
+    # Channel to use as a model for output image (projection and
+    # geotransformation will be taken from this one)
+    BASE_CHANNEL = "VIS006"
+
+    def __init__(self, sat):
+        self.sat = sat
+
+class DayNatural(Product):
+    FNAME = "day-natural"
+    BASE_CHANNEL = "IR_016"
+
+    def compute(self):
+        """
+        msgproc:
+        Red     IR1.6     0 ...  +85 %   1.0  1.0
+        Green   VIS0.8    5 ...  +85 %   1.0  1.0
+        Blue    VIS0.6    0 ...  +70 %   1.0  1.0
+        """
+        ir16r = self.sat.get_array("IR_016r")
+        vis8r = self.sat.get_array("VIS008r")
+        vis6r = self.sat.get_array("VIS006r")
+
+        # Can be faster if we use toimage's bytescale parameters
+        r = rescale(ir16r, 0, 85, 0, 255)
+        g = rescale(vis8r, 5, 85, 0, 255)
+        b = rescale(vis6r, 0, 70, 0, 255)
+
+        return r, g, b
+
+class DayMicro(Product):
+    FNAME = "day-micro"
+    BASE_CHANNEL = "IR_039"
+
+    def compute(self):
+        """
+        msgproc:
+        Red     02 (VIS0.8)     0 ...  +65 %   1.0  1.0
+        Green   04r (IR3.9r)   10 ... +100 %   1.5  1.0
+        Blue    09 (IR10.8)  +203 ... +323 K   1.0  1.0
+
+        standard?:
+        Red     02  (VIS0.8)    0 ... +100 %   1.0
+        Green   04r (IR3.9r)    0 ...  +60 %   2.5
+        Blue    09  (IR10.8) +203 ... +323 K   1.0
+        """
+        vis08r = self.sat.get_array("VIS008r")
+        ir039r = self.sat.get_array("IR_039r")
+        ir108 = self.sat.get_array("IR_108")
+
+        r = rescale(vis08r,    0,  65, 0, 255)
+        g = (rescale(ir039r,  10, 100, 0, 1) ** (1/1.5)) * 255
+        b = rescale(ir108,  203, 323, 0, 255)
+        #r = rescale(vis08r,   0, 100, 0, 255)
+        #g = rescale(ir039r,   0,  60, 0, 1) ** (1/2.5) * 255
+        #b = rescale(ir108,  203, 323, 0, 255)
+
+        return r, g, b
+
+class Airmass(Product):
+    FNAME = "airmass"
+    BASE_CHANNEL = "WV_062"
+
+    def compute(self):
+        """
+        Red    WV6.2 - WV7.3   -25 ... 0    K  1.0  1.0
+        Green  IR9.7 - IR10.8  -40 ... +5   K  1.0  1.0
+        Blue   WV6.2 (inv.)   +243 ... +208 K  1.0  1.0
+        """
+        wv62 = self.sat.get_array("WV_062")
+        wv73 = self.sat.get_array("WV_073")
+        ir097 = self.sat.get_array("IR_097")
+        ir108 = self.sat.get_array("IR_108")
+
+        r = rescale(wv62 - wv73,   -25,   0, 0, 255)
+        g = rescale(ir097 - ir108, -40,   5, 0, 255)
+        b = rescale(wv62,          243, 208, 0, 255)
+
+        return r, g, b
+
+class NightMicro(Product):
+    FNAME = "night-micro"
+    BASE_CHANNEL = "IR_039"
+
+    def compute(self):
+        """
+        Red IR12.0 - IR10.8   -4 ...   +2 K  1.0  1.0
+        Green   IR10.8 - IR3.9     0 ...  +10 K  1.0  1.0
+        Blue    IR10.8      +243 ... +293 K  1.0  1.0
+        """
+        ir039 = self.sat.get_array("IR_039")
+        ir108 = self.sat.get_array("IR_108")
+        ir120 = self.sat.get_array("IR_120")
+
+        r = rescale(ir120 - ir108,  -4,   2, 0, 255)
+        g = rescale(ir108 - ir039,   0,  10, 0, 255)
+        b = rescale(ir108,         243, 293, 0, 255)
+
+        return r, g, b
+
+class H24Micro(Product):
+    FNAME = "h24-micro"
+    BASE_CHANNEL = "IR_087"
+
+    def compute(self):
+        """
+        Red IR12.0 - IR10.8   -4 ...   +2 K  1.0  1.0
+        Green   IR10.8 - IR8.7     0 ...   +6 K  1.2  1.0
+        Blue    IR10.8      +248 ... +303 K  1.0  1.0
+        """
+        ir087 = self.sat.get_array("IR_087")
+        ir108 = self.sat.get_array("IR_108")
+        ir120 = self.sat.get_array("IR_120")
+
+        r = rescale(ir120 - ir108,  -4,   2, 0, 255)
+        g = (rescale(ir108 - ir087,   0,   6, 0, 1) ** (1/1.2)) * 255
+        b = rescale(ir108,         248, 303, 0, 255)
+
+        return r, g, b
+
+class ConvectiveStorms(Product):
+    FNAME = "convective-storms"
+    BASE_CHANNEL = "WV_062"
+
+    def compute(self):
+        """
+        Red WV6.2 - WV7.3    -35 ...  +5 K  1.0  1.0
+        Green   IR3.9 - IR10.8    -5 ... +60 K  0.5  1.0
+        Blue    NIR1.6 - VIS0.6  -75 ... +25 %  1.0  1.0
+        """
+        wv62 = self.sat.get_array("WV_062")
+        wv73 = self.sat.get_array("WV_073")
+        ir039 = self.sat.get_array("IR_039")
+        ir108 = self.sat.get_array("IR_108")
+        ir016r = self.sat.get_array("IR_016r")
+        vis06r = self.sat.get_array("VIS006r")
+
+        r = rescale(wv62 - wv73,     -35,  5, 0, 255)
+        g = (rescale(ir039 - ir108,   -5, 60, 0, 1)) ** (1/0.5) * 255
+        b = rescale(ir016r - vis06r, -75, 25, 0, 255)
+
+        return r, g, b
+
+class Dust(Product):
+    FNAME = "dust"
+    BASE_CHANNEL = "IR_087"
+
+    def compute(self):
+        """
+        Red IR12.0 - IR10.8   -4 ...   +2 K 1.0  1.0
+        Green   IR10.8 - IR8.7     0 ...  +15 K 2.5  1.0
+        Blue    IR10.8      +261 ... +289 K 1.0  1.0
+        """
+        ir087 = self.sat.get_array("IR_087")
+        ir108 = self.sat.get_array("IR_108")
+        ir120 = self.sat.get_array("IR_120")
+
+        r = rescale(ir120 - ir108,  -4,   2, 0, 255)
+        g = (rescale(ir108 - ir087,  0,  15, 0, 1) ** (1/2.5)) * 255
+        b = rescale(ir108,         261, 289, 0, 255)
+
+        return r, g, b
+
+class VolcanicAsh(Product):
+    FNAME = "volcanic-ash"
+    BASE_CHANNEL = "IR_087"
+
+    def compute(self):
+        """
+        Red IR12.0 - IR10.8   -4 ...   +2 K 1.0  1.0
+        Green   IR10.8 - IR8.7    -4 ...   +5 K 1.0  1.0
+        Blue    IR10.8      +243 ... +303 K 1.0  1.0
+        """
+        ir087 = self.sat.get_array("IR_087")
+        ir108 = self.sat.get_array("IR_108")
+        ir120 = self.sat.get_array("IR_120")
+
+        r = rescale(ir120 - ir108,  -4,   2, 0, 255)
+        g = rescale(ir108 - ir087,  -4,   5, 0, 255)
+        b = rescale(ir108,         243, 303, 0, 255)
+
+        return r, g, b
+
+class Vis006(Product):
+    FNAME = "VIS006"
+    BASE_CHANNEL = "VIS006"
+
+    def compute(self):
+        """
+        Vis006 channel, gray normalization
+        """
+        vis06 = self.sat.get_array("VIS006")
+
+        v = rescale(vis06, numpy.amin(vis06), numpy.amax(vis06), 0, 255)
+
+        return v
+
+class Vis008(Product):
+    FNAME = "VIS008"
+    BASE_CHANNEL = "VIS008"
+
+    def compute(self):
+        """
+        Vis008 channel, gray normalization
+        """
+        vis08 = self.sat.get_array("VIS008")
+
+        v = rescale(vis08, numpy.amin(vis08), numpy.amax(vis08), 0, 255)
+
+        return v
+
+class Ir016(Product):
+    FNAME = "IR_016"
+    BASE_CHANNEL = "IR_016"
+
+    def compute(self):
+        """
+        IR 1.6 channel, gray normalization
+        """
+        ir016 = self.sat.get_array("IR_016")
+
+        v = rescale(ir016, numpy.amin(ir016), numpy.amax(ir016), 0, 255)
+
+        return v
+
+class Ir039(Product):
+    FNAME = "IR_039"
+    BASE_CHANNEL = "IR_039"
+
+    def compute(self):
+        """
+        IR 3.9 channel, gray normalization
+        """
+        ir039 = self.sat.get_array("IR_039")
+
+        v = rescale(ir039, numpy.amin(ir039), numpy.amax(ir039), 0, 255)
+
+        return v
+
+class Ir039r(Product):
+    FNAME = "IR_039r"
+    BASE_CHANNEL = "IR_039r"
+
+    def compute(self):
+        """
+        IR 3.9 channel reflectivity, gray normalization
+        """
+        ir039r = self.sat.get_array("IR_039r")
+
+        v = rescale(ir039r, numpy.amin(ir039r), numpy.amax(ir039r), 0, 255)
+
+        return v
+
+
+class Ir108(Product):
+    FNAME = "IR_108"
+    BASE_CHANNEL = "IR_108"
+
+    def compute(self):
+        """
+        IR 10.8 channel, gray normalization
+        """
+        ir108 = self.sat.get_array("IR_108")
+
+        v = rescale(ir108, numpy.amin(ir108), numpy.amax(ir108), 0, 255)
+
+        return v
+
+
+
+class Wv62(Product):
+    FNAME = "WV_062"
+    BASE_CHANNEL = "WV_062"
+
+    def compute(self):
+        """
+        WV 6.2 channel, gray normalization
+        """
+        wv62 = self.sat.get_array("WV_062")
+
+        v = rescale(wv62, numpy.amin(wv62), numpy.amax(wv62), 0, 255)
+
+        return v
+
+class Wv73(Product):
+    FNAME = "WV_073"
+    BASE_CHANNEL = "WV_073"
+
+    def compute(self):
+        """
+        WV 7.3 channel, gray normalization
+        """
+        wv73 = self.sat.get_array("WV_073")
+
+        v = rescale(wv73, numpy.amin(wv73), numpy.amax(wv73), 0, 255)
+
+        return v
+
+class Hrv(Product):
+    FNAME = "HRV"
+    BASE_CHANNEL = "HRV"
+
+    def compute(self):
+        """
+        HRV channel, gray normalization
+        """
+        hrv = self.sat.get_array("HRV")
+
+        v = rescale(hrv, numpy.amin(hrv), numpy.amax(hrv), 0, 255)
+
+        return v
+
+
+
+
+if __name__ == "__main__":
+    # Minimal imports so we are always able to print command line help
+    from optparse import OptionParser
+    import sys
+    import warnings
+
+    VERSION="0.1"
+
+    class Parser(OptionParser):
+        def __init__(self, *args, **kwargs):
+            OptionParser.__init__(self, *args, **kwargs)
+
+        def error(self, msg):
+            sys.stderr.write("%s: error: %s\n\n" % (self.get_prog_name(), msg))
+            self.print_help(sys.stderr)
+            sys.exit(2)
+
+    default_area = "1350,1400,100,800"
+    default_srcdir = "/autofs/scratch1/satope/done/"
+
+    # Compute a reasonable default for --time
+    default_dt = datetime.datetime.utcnow()
+    default_dt = default_dt.replace(minute=int(default_dt.minute / 15) * 15)
+    default_dt = default_dt.strftime("%Y%m%d%H%M")
+
+    parser = Parser(usage="usage: %prog [options]",
+                    version="%prog "+ VERSION,
+                    description="Generate satellite products")
+    parser.add_option("-q", "--quiet", action="store_true",
+                      help="quiet mode: only output fatal errors")
+    parser.add_option("-v", "--verbose", action="store_true",
+                      help="verbose mode")
+    parser.add_option("-s", "--srcdir", action="store", default=default_srcdir,
+                      help="directory with the HRIT data. Default: %default")
+    parser.add_option("-t", "--time", action="store", default=default_dt,
+                      help="datetime, as 'YYYYMMDDHHMM', default: %default")
+    parser.add_option("-a", "--area", metavar="x,dx,y,dy", action="store", default=default_area,
+                      help="datetime, as 'YYYYMMDDHHMM', default: %default")
+    parser.add_option("--shp", metavar="shapefile", action="store",
+                      help="shapefile to use for coastlines"),
+    parser.add_option("-f", "--format", metavar="fmt", action="store", default="GTiff",
+                      help="output file format. See gdalinfo --formats. Default: %default")
+    parser.add_option("-d", "--destdir", metavar="dir", action="store", default=".",
+                      help="output directory. Default: %default")
+    parser.add_option("--warp", metavar="opts", action="store", default=None,
+                      help="gdalwarp options to use to warp input channels before using them."
+                           " When used, area cropping is disabled. Default: %default")
+    parser.add_option("--cachedir", metavar="dir", action="store", default=".",
+                      help="cache directory for warped channels. Default: %default")
+    (opts, args) = parser.parse_args()
+
+    # Configure logging
+    LOGFORMAT = "%(asctime)-15s %(levelname)s %(message)s"
+    if opts.quiet:
+        logging.basicConfig(level=logging.ERROR, stream=sys.stderr, format=LOGFORMAT)
+    elif opts.verbose:
+        logging.basicConfig(level=logging.INFO, stream=sys.stderr, format=LOGFORMAT)
+    else:
+        logging.basicConfig(level=logging.WARNING, stream=sys.stderr, format=LOGFORMAT)
+
+    # Parse datetime
+    dt = datetime.datetime.strptime(opts.time, "%Y%m%d%H%M")
+
+    # Parse area
+    if opts.warp:
+        area = None
+    else:
+        area = map(int, opts.area.split(","))
+        area = (area[0], area[2], area[1], area[3])
+
+    # Validate output format
+    if gdal.GetDriverByName(opts.format) is None:
+        parser.error("Invalid output format. See gdalinfo --formats")
+
+    if area:
+        log.info("Reading from %s at %s x:%d, y:%d, w:%d, h:%d", opts.srcdir, dt, *area)
+    else:
+        log.info("Reading from %s at %s", opts.srcdir, dt)
+
+    sat = Satellite(opts.srcdir, dt, area, opts=opts)
+    for prod in (
+                DayNatural,
+                DayMicro,
+                Airmass,
+                NightMicro,
+                H24Micro,
+                ConvectiveStorms,
+                Dust,
+                VolcanicAsh,
+                Vis006,
+                Vis008,
+                Ir016,
+                Ir039,
+                Ir039r,
+                Ir108,
+                Wv62,
+                Wv73,
+                Hrv,
+            ):
+        sat.make_product(prod, opts.format, opts.shp, destdir=opts.destdir)

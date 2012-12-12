@@ -1,7 +1,7 @@
 /*
- * DB-ALLe - Archive for punctual meteorological data
+ * test-utils - Test utils for meteosatlib GDAL bindings
  *
- * Copyright (C) 2005,2006  ARPA-SIM <urpsim@smr.arpa.emr.it>
+ * Copyright (C) 2005--2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,38 @@
  *
  * Author: Enrico Zini <enrico@enricozini.com>
  */
+#ifndef TEST_UTILS_H
+#define TEST_UTILS_H
 
 #include "tut.h"
+#include <msat/gdal/const.h>
+#include <msat/gdal/dataset.h>
+#include <gdal_priv.h>
 #include <msat/facts.h>
+#include <memory>
 #include <cstdlib>
-#include <unistd.h>
 
 #define TESTGRP(name) \
 typedef test_group<name ## _shar> tg; \
 typedef tg::object to; \
 tg name ## _tg (#name);
+
+/*
+#define MSAT_WKT \
+    "PROJCS[\"unnamed\"," \
+    "GEOGCS[\"unnamed\"," \
+        "DATUM[\"unknown\"," \
+            "SPHEROID[\"unnamed\",6378169,295.488065897]]," \
+        "PRIMEM[\"Greenwich\",0]," \
+        "UNIT[\"degree\",0.0174532925199433]]," \
+    "PROJECTION[\"Geostationary_Satellite\"]," \
+    "PARAMETER[\"central_meridian\",0]," \
+    "PARAMETER[\"satellite_height\",35785831]," \
+    "PARAMETER[\"false_easting\",0]," \
+    "PARAMETER[\"false_northing\",0]]"
+//#define MSAT_GEOTRANS { x, METEOSAT_PIXELSIZE_X, 0, x, 0, -METEOSAT_PIXELSIZE_Y }
+#define MSAT_GEOTRANS { 0, METEOSAT_PIXELSIZE_X, 0, 0, 0, -METEOSAT_PIXELSIZE_Y }
+*/
 
 namespace tut {
 
@@ -68,6 +90,13 @@ void my_ensure_similar(const char* file, int line, const Q& actual, const T& exp
 #define gen_ensure_similar(x, y, delta) my_ensure_similar(__FILE__, __LINE__, (x), (y), (delta))
 #define inner_ensure_similar(x, y, delta) my_ensure_similar(file, line, (x), (y), (delta))
 
+#if 0
+void my_ensure_imagedata_similar(const char* file, int line, const msat::ImageData& actual, const msat::ImageData& expected, const float& delta);
+
+#define gen_ensure_imagedata_similar(x, y, delta) my_ensure_imagedata_similar(__FILE__, __LINE__, (x), (y), (delta))
+#define inner_ensure_imagedata_similar(x, y, delta) my_ensure_imagedata_similar(file, line, (x), (y), (delta))
+#endif
+
 class LocalEnv
 {
 	std::string key;
@@ -100,3 +129,4 @@ public:
 };
 
 }
+#endif

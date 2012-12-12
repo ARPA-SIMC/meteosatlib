@@ -1,0 +1,87 @@
+#!/usr/bin/python
+# coding: utf8
+
+# Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# Authors: Enrico Zini <enrico@enricozini.com>
+#          Daniele Branchini <dbranchini@arpa.emr.it>
+
+import gdal, ogr
+from gdalconst import *
+import sys
+import numpy
+import scipy
+
+def rescale(arr, imin, imax, omin, omax, out=None):
+    """
+    Rescale values of the array from [imin, imax] to [omin, omax], clipping
+    outliers to omin or omax
+    """
+    # FIXME: is there a numpy function that does this already?    
+    if imin <= imax:
+        res = numpy.clip(arr, imin, imax, out)
+        res -= imin
+        res *= float(omax-omin) / float(imax-imin)
+        res += omin
+    else:
+        res = numpy.clip(arr, imax, imin, out)
+        res -= imin
+        res *= -(float(omax-omin) / float(imin-imax))
+        res += omin
+    return res
+
+out_fname = sys.argv[2]
+
+in_ds = gdal.Open(sys.argv[1], GA_ReadOnly)
+in_drv = in_ds.GetDriver()
+in_drv_md = in_drv.GetMetadata()
+
+datatype = in_ds.GetRasterBand(1).DataType
+
+can_create = in_drv_md.has_key(gdal.DCAP_CREATE) and in_drv_md[gdal.DCAP_CREATE] == 'YES'
+
+# Create the output dataset. If the dataset only supports CreateCopy,
+# work around it by using a temporary dataset in RAM
+if not can_create:
+    tmpdriver = gdal.GetDriverByName("MEM")
+    out_ds = tmpdriver.Create(out_fname, in_ds.RasterXSize, in_ds.RasterYSize, in_ds.RasterCount, datatype)
+else:
+    out_ds = in_drv.Create(out_fname, in_ds.RasterXSize, in_ds.RasterYSize, in_ds.RasterCount, datatype)
+
+out_ds.SetMetadata(in_ds.GetMetadata())
+out_ds.SetGeoTransform(in_ds.GetGeoTransform())
+out_ds.SetProjection(in_ds.GetProjection())
+
+# Compute min and max for all bands
+v_min = 65536
+v_max = 0
+for i in range(1, in_ds.RasterCount + 1):
+    rb = in_ds.GetRasterBand(i)
+    a = rb.ReadAsArray()
+    v_min = min(numpy.amin(a), v_min)
+    v_max = max(numpy.amax(a), v_max)
+
+# Process all raster bands
+for i in range(1, in_ds.RasterCount + 1):
+    rb = in_ds.GetRasterBand(i)
+    a = rb.ReadAsArray()
+    # stretch (TODO: get target min and max according to data types)
+    a = rescale(a, v_min, v_max, 0, 65536)
+    out_ds.GetRasterBand(i).WriteArray(a)
+    
+if not can_create:
+    out_ds = d.CreateCopy(out_fname, out_ds, 0)
+

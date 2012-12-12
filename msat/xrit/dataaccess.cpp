@@ -22,7 +22,7 @@
 
 #include <msat/xrit/dataaccess.h>
 #include <msat/xrit/fileaccess.h>
-#include <hrit/MSG_HRIT.h>
+#include <msat/hrit/MSG_HRIT.h>
 #include <stdexcept>
 
 using namespace std;

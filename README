@@ -1,27 +1,50 @@
-        Comments and feedback to:
-                giuliani@lamma.rete.toscana.it
-		enrico@enricozini.org
+ * About
 
- C++ source code to read Meteosat Images in various formats.
+This is a set of libraries, tools and GDAL plugins to read and write Meteosat
+images in several formats.
 
- This libraries are used to read Meteosat files on a PDUS
- receiving station. No decryption is performed. Files are expected
- to be already decrypted by using the EUMETSAT key unit, or to be
- transitted already in clear form.
- For MSG data decompression, You need the EUMETSAT source code for
- the decompression library for Wavelet, JPEG and T4 images.
- Please fill the form at
+There are low-level functions to work with: HRIT/LRIT, HRI, OpenMTP, and
+OpenMTP-IDS.
 
-   http://oiswww.eumetsat.int/WEBOPS-cgi/wavelet/register
+The GDAL driver can work with xRIT, SAF HDF5, two NetCDF dialects, GRIB.
 
- to obtain the source code and put the PublicDecompWT.zip file under
- the directory "decompress".
+Use at Your own risk and for any purposes.
 
- Some example program need NetCDF library and ImageMagick.
+See AUTHORS file for contact information.
 
- Use at Your own risk and for any purposes.
- Feel free to contact me for any help-bug found.
+See http://sourceforge.net/p/meteosatlib/wiki/Home/ for more examples and
+troubleshooting.
 
-                                    Graziano Giuliani
-                                 giuliani@lamma.rete.toscana.it
+
+ * **IMPORTANT** HRIT support
+
+This library is used to read Meteosat files on a PDUS receiving station. No
+decryption is performed. Files are expected to be already decrypted by using
+the EUMETSAT key unit, or to be transitted already in clear form.
+
+For MSG data decompression, You need the EUMETSAT source code for the
+decompression library for Wavelet, JPEG and T4 images.
+
+Please fill the form at http://oiswww.eumetsat.int/WEBOPS-cgi/wavelet/register
+to obtain the source code and put the PublicDecompWT.zip file under
+the directory "decompress".
+
+
+ * Package contents
+
+decompress/  put PublicDecompWT.zip here. The directory contains scripts and
+             patches to convince it to build.
+
+msat/        the low-level meteosatlib library. It contains functions to
+             directly access all supported formats.
+
+gdal/        the GDAL plugin sources, which implement GDAL drivers using the
+             low-level meteosatlib library.
+
+tests/       unit tests.
+
+tools/       command line tools using the library.
+
+examples/    example code using the low-level libraries and the GDAL plugin.
+
 

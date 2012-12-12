@@ -34,6 +34,10 @@ namespace
       case tut::test_result::term: 
       os << '[' << tr.test << "=T]";
       break;
+
+      case tut::test_result::ignored: 
+      os << '[' << tr.test << "=I]";
+      break;
     }
 
     return os;
@@ -50,6 +54,7 @@ namespace tut
     std::string current_group;
     typedef std::vector<tut::test_result> not_passed_list;
     not_passed_list not_passed;
+    not_passed_list ignored;
     std::ostream& os;
 
   public:
@@ -87,11 +92,18 @@ namespace tut
       else if( tr.result == tut::test_result::ex ) exceptions_count++;
       else if( tr.result == tut::test_result::fail ) failures_count++;
       else if( tr.result == tut::test_result::warn ) warnings_count++;
+      else if( tr.result == tut::test_result::ignored ) ;
       else terminations_count++;
 
-      if( tr.result != tut::test_result::ok )
+      switch (tr.result)
       {
-        not_passed.push_back(tr);
+        case tut::test_result::ok: break;
+        case tut::test_result::ignored:
+          ignored.push_back(tr);
+          break;
+        default:
+          not_passed.push_back(tr);
+          break;
       }
     }
 
@@ -149,6 +161,22 @@ namespace tut
         }
       }
 
+      if (!ignored.empty())
+      {
+        std::map<std::string, int> counts;
+        for (not_passed_list::const_iterator i = ignored.begin(); i != ignored.end(); ++i)
+        {
+          ++counts[i->message];
+        }
+        os << std::endl;
+        os << "Reasons for ignoring tests:" << std::endl;
+        for (std::map<std::string, int>::const_iterator i = counts.begin(); i != counts.end(); ++i)
+        {
+          os << "     " << i->first
+             << " (" << i->second << " " << (i->second > 1 ? "times" : "time") << ")" << std::endl;
+        }
+      }
+
       os << std::endl;
 
       os << "tests summary:";
@@ -156,6 +184,7 @@ namespace tut
       if( exceptions_count > 0 ) os << " exceptions:" << exceptions_count;
       if( failures_count > 0 ) os << " failures:" << failures_count;
       if( warnings_count > 0 ) os << " warnings:" << warnings_count;
+      if( !ignored.empty() ) os << " ignored:" << ignored.size();
       os << " ok:" << ok_count;
       os << std::endl;
     }
@@ -175,6 +204,7 @@ namespace tut
       warnings_count = 0;
 
       not_passed.clear();
+      ignored.clear();
     }    
   };
 };
