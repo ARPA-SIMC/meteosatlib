@@ -349,6 +349,7 @@ const char* sensorName(int spacecraftID)
         {
                 case 55: return "Seviri";
                 case 56: return "Seviri";
+                case 57: return "Seviri";
                 default: return "unknown";
         }
 }
@@ -360,6 +361,7 @@ const char* channelName(int spacecraftID, int channelID)
         {
                 case 55:
                 case 56:
+                case 57:
                 {
                         switch (channelID)
                         {
@@ -392,6 +394,7 @@ const char* channelUnit(int spacecraftID, int channelID)
         {
                 case 55:
                 case 56:
+                case 57:
                 {
                         switch (channelID)
                         {
@@ -424,6 +427,7 @@ const char* channelLevel(int spacecraftID, int channelID)
         {
                 case 55:
                 case 56:
+                case 57:
                 {
                         switch (channelID)
                         {

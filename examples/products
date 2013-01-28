@@ -60,7 +60,7 @@ class Satellite(object):
         self.cachedir = opts.cachedir
 
     def gdal_dataset(self, channel_name):
-        fname = "H:MSG2:%s:%s" % (
+        fname = "H:MSG3:%s:%s" % (
                 channel_name,
                 self.dt.strftime("%Y%m%d%H%M")
         )
