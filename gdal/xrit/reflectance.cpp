@@ -340,7 +340,21 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
     double lons[nBlockXSize * nBlockYSize];
     p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats, lons);
 
-    // FIXME: this algorithm is a draft: it should be peer reviewed and validated
+    // Based on:
+    //   "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
+    //   by Meteosat Second Generation. Part II: Use of Visible Reflectance"
+    // by:
+    //   JOHN R. MECIKALSKI AND WAYNE M. MACKENZIE JR.
+    //   Earth Systems Science Center, University of Alabama in Huntsville, Huntsville, Alabama
+    //   MARIANNE KONIG
+    //   European Organisation for the Exploitation of Meteorological Satellites (EUMETSAT), Darmstadt, Germany
+    //   SAM MULLER
+    //   Jupiter’s Call, LLC, Madison, Alabama
+    // published on:
+    //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
+
+    // FIXME: this algorithm still needs validation of resulting data against a
+    // known good implementation
     const double c1 = 0.0000119104;
     const double c2 = 1.43877;
     const double Vc = 2569.094;
