@@ -13,7 +13,7 @@ Standards-Version: 3.7.3.0
 Homepage: http://meteosatlib.sourceforge.net
 Vcs-Svn: https://meteosatlib.svn.sourceforge.net/svnroot/meteosatlib/trunk
 
-Package: libmsat0
+Package: libmsat1
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -32,7 +32,7 @@ Description: Low-level library to access Meteosat images (shared)
 Package: libmsat-dev
 Section: libdevel
 Architecture: any
-Depends: libmsat0 (=${binary:Version})
+Depends: libmsat1 (=${binary:Version})
 Recommends: pkg-config
 Description: Low-level library to access Meteosat images
  This is a collection of libraries with low-level functions to work with

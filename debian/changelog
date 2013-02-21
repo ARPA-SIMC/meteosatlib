@@ -2,6 +2,7 @@ meteosatlib (1.0) unstable; urgency=low
 
   * Merged meteosatlib and its gdal plugin in a single package
   * Various improvements (see README and ChangeLog)
+  * Version is now 1.0
 
  -- Enrico Zini <enrico@debian.org>  Wed, 12 Dec 2012 15:40:05 +0100
 
