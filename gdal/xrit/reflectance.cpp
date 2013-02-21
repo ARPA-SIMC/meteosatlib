@@ -356,7 +356,7 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
         double BT108 = cal108[raw108[i]];
         double BT134 = cal134[raw134[i]];
         double R39_corr = pow((BT108 - 0.25 * (BT108 - BT134)) / BT108, 4);
-        double R_therm = c1 * Vc / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
+        double R_therm = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
         double cosTETA = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
         double SAT = facts::sat_za(lats[i], lons[i]);
         double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
