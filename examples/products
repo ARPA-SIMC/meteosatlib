@@ -494,7 +494,49 @@ class Hrv(Product):
 
         return v
 
+class HrvEnhancedIr(Product):
+    FNAME = "HrvEnhancedIr"
+    BASE_CHANNEL = "HRV"
 
+    def compute(self):
+        """
+        """
+        # Read palette
+        palette = []
+        for line in open("bluered-palette.txt"):
+            palette.append([int(x.strip(",")) for x in line.split()[:3]])
+
+        hrv = self.sat.get_array("HRV")
+        ir108 = self.sat.get_array("IR_108")
+
+        # Map ir108 to a palette
+
+        palmin = 200
+        palmax = 240
+        paldiff = palmax - palmin
+
+        # TODO: reimplementare stile rescale, più veloce di così
+        def bt_to_palette(val, idx):
+            if val < palmin or val > palmax:
+                return 255
+            return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx];
+
+        # Create mapping functions that look up the color palette
+        make_r = numpy.vectorize(lambda val: bt_to_palette(val, 0))
+        make_g = numpy.vectorize(lambda val: bt_to_palette(val, 1))
+        make_b = numpy.vectorize(lambda val: bt_to_palette(val, 2))
+
+        palr = make_r(ir108)
+        palg = make_g(ir108)
+        palb = make_b(ir108)
+
+        upscaledr = scipy.misc.imresize(palr, hrv.shape)
+        upscaledg = scipy.misc.imresize(palg, hrv.shape)
+        upscaledb = scipy.misc.imresize(palb, hrv.shape)
+
+        hrvnorm = rescale(hrv.astype(numpy.float), numpy.amin(hrv), numpy.amax(hrv), 0.0, 1.0)
+
+        return upscaledr * hrvnorm, upscaledg * hrvnorm, upscaledb * hrvnorm
 
 
 if __name__ == "__main__":
@@ -546,6 +588,8 @@ if __name__ == "__main__":
                            " When used, area cropping is disabled. Default: %default")
     parser.add_option("--cachedir", metavar="dir", action="store", default=".",
                       help="cache directory for warped channels. Default: %default")
+    parser.add_option("--products", metavar="names", action="store",
+                      help="comma separated list of products to generate. Default: all of them.")
     (opts, args) = parser.parse_args()
 
     # Configure logging
@@ -566,6 +610,11 @@ if __name__ == "__main__":
     else:
         area = map(int, opts.area.split(","))
         area = (area[0], area[2], area[1], area[3])
+
+    if opts.products:
+        products = frozenset(opts.products.split(","))
+    else:
+        products = frozenset()
 
     # Validate output format
     if gdal.GetDriverByName(opts.format) is None:
@@ -595,5 +644,8 @@ if __name__ == "__main__":
                 Wv62,
                 Wv73,
                 Hrv,
+                HrvEnhancedIr,
             ):
+        if products and prod.__name__ not in products:
+            continue
         sat.make_product(prod, opts.format, opts.shp, destdir=opts.destdir)
