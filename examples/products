@@ -223,7 +223,7 @@ class DayMicro(Product):
         Green   04r (IR3.9r)   10 ... +100 %   1.5  1.0
         Blue    09 (IR10.8)  +203 ... +323 K   1.0  1.0
 
-        standard?:
+        eumetsat:
         Red     02  (VIS0.8)    0 ... +100 %   1.0
         Green   04r (IR3.9r)    0 ...  +60 %   2.5
         Blue    09  (IR10.8) +203 ... +323 K   1.0
@@ -232,11 +232,11 @@ class DayMicro(Product):
         ir039r = self.sat.get_array("IR_039r")
         ir108 = self.sat.get_array("IR_108")
 
-        r = rescale(vis08r,    0,  65, 0, 255)
-        g = (rescale(ir039r,  10, 100, 0, 1) ** (1/1.5)) * 255
+        r = rescale(vis08r,   0,  75, 0, 255)
+        g = (rescale(ir039r,  0,  40, 0, 1) ** (1/2.0)) * 255
         b = rescale(ir108,  203, 323, 0, 255)
         #r = rescale(vis08r,   0, 100, 0, 255)
-        #g = rescale(ir039r,   0,  60, 0, 1) ** (1/2.5) * 255
+        #g = rescale(ir039r,   0, 100, 0, 255)
         #b = rescale(ir108,  203, 323, 0, 255)
 
         return r, g, b
