@@ -131,6 +131,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so.0.0.0
 %doc examples/products examples/add_palette
 %doc examples/contrast-stretch examples/make-composite
+%doc examples/bluered-palette.txt
 
 %files tools
 %defattr(-,root,root,-)

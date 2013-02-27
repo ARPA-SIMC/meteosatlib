@@ -25,4 +25,5 @@ EXTRA_DIST = \
     products \
     add_palette \
     contrast-stretch \
+    bluered-palette.txt \
     make-composite
