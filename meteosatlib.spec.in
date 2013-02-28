@@ -131,7 +131,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so.0.0.0
 %doc examples/products examples/add_palette
 %doc examples/contrast-stretch examples/make-composite
-%doc examples/bluered-palette.txt
+%doc examples/bluered-palette.txt examples/ndvi
 
 %files tools
 %defattr(-,root,root,-)
@@ -143,21 +143,24 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Feb 27 2013 Daniele Branchini <dbranchini@arpa.emr.it> - 1.2-1
+- Adding example python scripts, some corrections
+
 * Fri Nov 30 2012 Enrico Zini <enrico@enricozini.org> - 0.9-1
 - Merged .spec files, some corrections
 
-* Tue Feb 16 2010 Paolo Patruno <patruno@localhost.localdomain> - 0.6-1
-- adapted to meteosatlib 0.6
+* Tue Feb 16 2010 Paolo Patruno <patruno@arpa.emr.it> - 0.6-1
+- Adapted to meteosatlib 0.6
 
-* Wed Feb 28 2007 root <root@strip.metarpa> - 0.5-1
+* Wed Feb 28 2007 Paolo Patruno <ppatruno@arpa.emr.it> - 0.5-1
 - hdf5 c++library is static, so we need a specific version in BuildRequires
 
 * Tue Feb 13 2007 Paolo Patruno <ppatruno@arpa.emr.it> - 0.5-1
-- added grib and msat pachages and other change to switch to 0.5 release
+- Added grib and msat pachages and other change to switch to 0.5 release
 
 * Wed Aug 08 2005  Graziano Giuliani  <graziano.giuliani@poste.it>  0.4.0
 - Added ThornSDS DB1 file interface
 
 * Fri Jul 01 2005  Deneys S. Maartens  <dsm@tlabs.ac.za>  0.3.6-1
 - modified original meteosatlib.spec by Paolo Patruno
-  <ppatruno@smr.arpa.emr.it>: added sepparate devel sections
+  <ppatruno@smr.arpa.emr.it>: added separate devel sections

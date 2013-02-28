@@ -23,6 +23,7 @@ bin_PROGRAMS =
 
 EXTRA_DIST = \
     products \
+    ndvi \
     add_palette \
     contrast-stretch \
     bluered-palette.txt \

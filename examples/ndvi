@@ -1,0 +1,279 @@
+#!/usr/bin/python
+# coding: utf8
+
+# Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+#
+# Authors: Enrico Zini <enrico@enricozini.com>
+#          Daniele Branchini <dbranchini@arpa.emr.it>
+
+# This script is substantially identical to "products", but:
+#  - uses GDT_Float32 for the output dataset instead of GDT_Byte
+#  - there's no option to rasterize shapefile for coastlines
+#  - the only product available is the Normalized Difference Vegetation Index
+
+import gdal, ogr
+from gdalconst import *
+from PIL import Image
+import datetime
+import sys
+import os
+import os.path
+import numpy
+import scipy
+import logging
+
+log = logging.getLogger(__name__)
+
+def rescale(arr, imin, imax, omin, omax, out=None):
+    """
+    Rescale values of the array from [imin, imax] to [omin, omax], clipping
+    outliers to omin or omax
+    """
+    # FIXME: is there a numpy function that does this already?    
+    if imin <= imax:
+        res = numpy.clip(arr, imin, imax, out)
+        res -= imin
+        res *= float(omax-omin) / float(imax-imin)
+        res += omin
+    else:
+        res = numpy.clip(arr, imax, imin, out)
+        res -= imin
+        res *= -(float(omax-omin) / float(imin-imax))
+        res += omin
+    return res
+
+
+class Satellite(object):
+    def __init__(self, srcdir, dt, area, opts=None):
+        self.srcdir = srcdir
+        self.dt = dt
+        self.area = area
+        self.warp_opts = opts.warp
+        self.cachedir = opts.cachedir
+
+    def gdal_dataset(self, channel_name):
+        fname = "H:MSG3:%s:%s" % (
+                channel_name,
+                self.dt.strftime("%Y%m%d%H%M")
+        )
+        if self.warp_opts:
+            cache_fname = fname.replace(":", "-") + "-cache.tif"
+            cache_fname = os.path.join(self.cachedir, cache_fname)
+            if not os.path.exists(cache_fname):
+                import shlex, subprocess
+                opts = shlex.split(self.warp_opts)
+                cmd = ["gdalwarp", "-q", "-of", "GTiff"] + opts + [os.path.join(self.srcdir, fname), cache_fname]
+                log.info("Warping %s using '%s'...", fname, " ".join(cmd))
+                try:
+                    subprocess.check_call(cmd)
+                except:
+                    os.unlink(cache_fname)
+                    raise
+            return gdal.Open(cache_fname, GA_ReadOnly)
+
+        return gdal.Open(os.path.join(self.srcdir, fname), GA_ReadOnly)
+
+    def get_array(self, channel):
+        log.debug("Reading channel %s...", channel)
+        ds = self.gdal_dataset(channel)
+        rb = ds.GetRasterBand(1)
+        if self.area:
+            return rb.ReadAsArray(*self.area)
+        else:
+            return rb.ReadAsArray()
+
+    def save_rgb(self, name, r, g, b):
+        r = scipy.misc.toimage(r)
+        g = scipy.misc.toimage(g)
+        b = scipy.misc.toimage(b)
+
+        res = Image.merge("RGB", (r, g, b))
+        d = os.path.dirname(name)
+        fname = os.path.join(d, self.dt.strftime("%Y%m%d%H%M-") + name + ".png")
+        log.info("Saving %s ...", fname)
+        res.save(fname)
+
+    def new_dataset(self, channel_name, fname, driver, bands=3, gdtype=gdal.GDT_Float32):
+        """
+        Create a new empty dataset
+        """
+        srcds = self.gdal_dataset(channel_name)
+        if self.area:
+            target_ds = driver.Create(fname, self.area[2], self.area[3], bands, gdtype)
+            gt = srcds.GetGeoTransform()
+            target_ds.SetGeoTransform((
+                (gt[0] / gt[1] + self.area[0]) * gt[1], gt[1], gt[2],
+                (gt[3] / gt[5] + self.area[1]) * gt[5], gt[4], gt[5],
+            ))
+        else:
+            target_ds = driver.Create(fname, srcds.RasterXSize, srcds.RasterYSize, bands, gdtype)
+            target_ds.SetGeoTransform(srcds.GetGeoTransform())
+        target_ds.SetProjection(srcds.GetProjection())
+        target_ds.SetMetadata(srcds.GetMetadata())
+
+        return target_ds
+
+    def make_product(self, cls, fmt="GTiff", destdir="."):
+        log.info("Computing %s...", cls.FNAME)
+
+        maker = cls(self)
+
+        d = gdal.GetDriverByName(fmt)
+        fname = "%s-%s.%s" % (cls.FNAME, opts.time, d.GetMetadataItem(gdal.DMD_EXTENSION))
+        fname = os.path.join(destdir, fname)
+
+        metadata = d.GetMetadata()
+        can_create = metadata.has_key(gdal.DCAP_CREATE) and metadata[gdal.DCAP_CREATE] == 'YES'
+
+        res = maker.compute()
+        if isinstance(res, tuple):
+            bs=3
+            r, g, b = maker.compute()
+        else:
+            bs=1
+            v = maker.compute()
+
+        # Create the output dataset. If the dataset only supports CreateCopy,
+        # work around it by using a temporary dataset in RAM
+        if not can_create:
+            tmpdriver = gdal.GetDriverByName("MEM")
+            outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=tmpdriver, bands=bs, gdtype=gdal.GDT_Float32)
+        else:
+            outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=d, bands=bs, gdtype=gdal.GDT_Float32)
+        
+
+        if isinstance(res, tuple):
+            outds.GetRasterBand(1).WriteArray(r)
+            outds.GetRasterBand(2).WriteArray(g)
+            outds.GetRasterBand(3).WriteArray(b)
+        else:
+            outds.GetRasterBand(1).WriteArray(v)
+            
+        if not can_create:
+            outds = d.CreateCopy(fname, outds, 0)
+
+        return outds
+
+class Product(object):
+    # Default file name (without extension)
+    FNAME = "undefined"
+
+    # Channel to use as a model for output image (projection and
+    # geotransformation will be taken from this one)
+    BASE_CHANNEL = "VIS006"
+
+    def __init__(self, sat):
+        self.sat = sat
+
+
+class NDVI(Product):
+    FNAME = "NDVI"
+    BASE_CHANNEL = "VIS006r"
+
+    def compute(self):
+        """
+        NDVI = (VIS008r - VIS006r) / (VIS008r + VIS006r)
+        """
+        vis006r = self.sat.get_array("VIS006r")
+        vis008r = self.sat.get_array("VIS008r")
+
+        a = vis008r - vis006r
+        b = vis008r + vis006r
+
+        ndvi = a.astype(numpy.float) / b.astype(numpy.float)
+        #v = rescale(ndvi, -1, 1, 0, 255)
+
+        return ndvi
+
+if __name__ == "__main__":
+    # Minimal imports so we are always able to print command line help
+    from optparse import OptionParser
+    import sys
+    import warnings
+
+    VERSION="0.1"
+
+    class Parser(OptionParser):
+        def __init__(self, *args, **kwargs):
+            OptionParser.__init__(self, *args, **kwargs)
+
+        def error(self, msg):
+            sys.stderr.write("%s: error: %s\n\n" % (self.get_prog_name(), msg))
+            self.print_help(sys.stderr)
+            sys.exit(2)
+
+    default_area = "1350,1400,100,800"
+    default_srcdir = "/autofs/scratch1/satope/done/"
+
+    # Compute a reasonable default for --time
+    default_dt = datetime.datetime.utcnow()
+    default_dt = default_dt.replace(minute=int(default_dt.minute / 15) * 15)
+    default_dt = default_dt.strftime("%Y%m%d%H%M")
+
+    parser = Parser(usage="usage: %prog [options]",
+                    version="%prog "+ VERSION,
+                    description="Generate satellite products")
+    parser.add_option("-q", "--quiet", action="store_true",
+                      help="quiet mode: only output fatal errors")
+    parser.add_option("-v", "--verbose", action="store_true",
+                      help="verbose mode")
+    parser.add_option("-s", "--srcdir", action="store", default=default_srcdir,
+                      help="directory with the HRIT data. Default: %default")
+    parser.add_option("-t", "--time", action="store", default=default_dt,
+                      help="datetime, as 'YYYYMMDDHHMM', default: %default")
+    parser.add_option("-a", "--area", metavar="x,dx,y,dy", action="store", default=default_area,
+                      help="datetime, as 'YYYYMMDDHHMM', default: %default")
+    parser.add_option("-f", "--format", metavar="fmt", action="store", default="GTiff",
+                      help="output file format. See gdalinfo --formats. Default: %default")
+    parser.add_option("-d", "--destdir", metavar="dir", action="store", default=".",
+                      help="output directory. Default: %default")
+    parser.add_option("--warp", metavar="opts", action="store", default=None,
+                      help="gdalwarp options to use to warp input channels before using them."
+                           " When used, area cropping is disabled. Default: %default")
+    parser.add_option("--cachedir", metavar="dir", action="store", default=".",
+                      help="cache directory for warped channels. Default: %default")
+    (opts, args) = parser.parse_args()
+
+    # Configure logging
+    LOGFORMAT = "%(asctime)-15s %(levelname)s %(message)s"
+    if opts.quiet:
+        logging.basicConfig(level=logging.ERROR, stream=sys.stderr, format=LOGFORMAT)
+    elif opts.verbose:
+        logging.basicConfig(level=logging.INFO, stream=sys.stderr, format=LOGFORMAT)
+    else:
+        logging.basicConfig(level=logging.WARNING, stream=sys.stderr, format=LOGFORMAT)
+
+    # Parse datetime
+    dt = datetime.datetime.strptime(opts.time, "%Y%m%d%H%M")
+
+    # Parse area
+    if opts.warp:
+        area = None
+    else:
+        area = map(int, opts.area.split(","))
+        area = (area[0], area[2], area[1], area[3])
+
+    # Validate output format
+    if gdal.GetDriverByName(opts.format) is None:
+        parser.error("Invalid output format. See gdalinfo --formats")
+
+    if area:
+        log.info("Reading from %s at %s x:%d, y:%d, w:%d, h:%d", opts.srcdir, dt, *area)
+    else:
+        log.info("Reading from %s at %s", opts.srcdir, dt)
+
+    sat = Satellite(opts.srcdir, dt, area, opts=opts)
+    sat.make_product(NDVI, opts.format, destdir=opts.destdir)
