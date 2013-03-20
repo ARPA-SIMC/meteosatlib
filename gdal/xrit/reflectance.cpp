@@ -217,6 +217,9 @@ double scan2zen(double scan, double satheight)
 
 */
 
+// cos(80deg)
+#define cos80 0.173648178
+
 // From MSG_data_RadiometricProc.cpp
 static double sza(int yr, int month, int day, int hour, int minute,
            float lat, float lon)
@@ -226,6 +229,11 @@ static double sza(int yr, int month, int day, int hour, int minute,
   double zenith;
 
   zenith = cozena(jd, hourz,(double) lat, (double) lon);
+
+  // Use cos(80°) as lower bound, to avoid division by zero
+  if (zenith < cos80)
+    return cos80;
+
   return zenith;
 }
 
@@ -248,7 +256,6 @@ CPLErr ReflectanceRasterBand::IReadBlock(int xblock, int yblock, void *buf)
         // From counts to radiance
         double radiance = raw[i] * rad_slope + rad_offset;
         // From radiance to reflectance
-        // FIXME: misses a cos() around sza?
         dest[i] = 100.0 * radiance / tr / sza(ye, mo, da, ho, mi, lats[i], lons[i]);
         // Normalise outliars
         switch (fpclassify(dest[i]))
