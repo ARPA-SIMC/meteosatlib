@@ -324,11 +324,11 @@ bool Reflectance39RasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_h
 
 CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
 {
-    // Read the raw data
-    uint16_t raw[nBlockXSize * nBlockYSize];
+    // Read the IR 3.9 data
+    uint16_t raw039[nBlockXSize * nBlockYSize];
     size_t linestart = xds->da.line_start(yblock);
-    bzero(raw, nBlockXSize * sizeof(uint16_t));
-    xds->da.line_read(yblock, (MSG_SAMPLE*)raw + linestart);
+    bzero(raw039, nBlockXSize * sizeof(uint16_t));
+    xds->da.line_read(yblock, (MSG_SAMPLE*)raw039 + linestart);
 
     // Read the IR_10.8 channel
     uint16_t raw108[nBlockXSize * nBlockYSize];
@@ -347,7 +347,7 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
     double lons[nBlockXSize * nBlockYSize];
     p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats, lons);
 
-    // Based on:
+    // Based on: [MMKM2010]
     //   "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
     //   by Meteosat Second Generation. Part II: Use of Visible Reflectance"
     // by:
@@ -360,8 +360,8 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
     // published on:
     //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
 
-    // FIXME: this algorithm still needs validation of resulting data against a
-    // known good implementation
+    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's MSGProc
+
     const double c1 = 0.0000119104;
     const double c2 = 1.43877;
     const double Vc = 2569.094;
@@ -373,15 +373,42 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
     float* dest = (float*) buf;
     for (int i = 0; i < nBlockXSize * nBlockYSize; ++i)
     {
-        double R_tot = (raw[i] * rad_slope) + rad_offset;
+        // We can compute radiance from counts straight away
+        //double R_tot = (raw039[i] * rad_slope) + rad_offset;
+        // But we use the Brightness Temperature instead, so we can apply CO2
+        // correction
+        double BT039 = calibration[raw039[i]];
         double BT108 = cal108[raw108[i]];
         double BT134 = cal134[raw134[i]];
+
+        // Apply CO2 correction to BT039
+        BT039 = pow(pow(BT039, 4)
+                  + pow(BT108, 4)
+                  - pow(BT108 - (BT108 - BT134)/4, 4),
+                  0.25);
+
+        // Apply Planck function to convert the CO2 corrected Brightness
+        // Temperature to Radiance
+        double R_tot = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT039 + B)) - 1) + 0.015;	
+
         double R39_corr = pow((BT108 - 0.25 * (BT108 - BT134)) / BT108, 4);
         double R_therm = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
         double cosTETA = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
         double SAT = facts::sat_za(lats[i], lons[i]);
-        double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
-        double REFL = 100 * (R_tot - R_therm) / (TOARAD - R_therm);
+        // Original from MMKM2010:
+        // double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
+        // Version from MSGProc:
+        double TOARAD = 4.92 / (esd*esd)
+                      * pow(cosTETA, 0.75)
+                      * exp(-(1-R39_corr) * cosTETA)
+                      * exp(-(1-R39_corr) / cos(SAT));
+        if (R_tot <= R_therm) R_tot = R_therm + 0.0000001;
+        if (TOARAD <= R_therm) TOARAD = R_therm + 0.0000001;
+
+        // Original from MMKM2010
+        // double REFL = 100 * (R_tot - R_therm) / (TOARAD - R_therm);
+        // Version from MSGProc:
+        double REFL = 200 * (R_tot - R_therm) / (TOARAD);
         dest[i] = REFL;
 
         // Normalise outliars
