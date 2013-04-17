@@ -73,7 +73,7 @@ static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
                         // Rescale to 8 bits
                         uint8_t* res8 = new uint8_t[tx * ty];
                         for (unsigned i = 0; i < tx*ty; ++i)
-                            res8[i] = (res[i] - vmin) * 256 / (vmax - vmin);
+                            res8[i] = (res[i] - vmin) * 255 / (vmax - vmin);
                         delete[] res;
 
                         image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
@@ -108,7 +108,7 @@ static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
                         // Rescale to 8 bits
                         uint8_t* res8 = new uint8_t[tx * ty];
                         for (unsigned i = 0; i < tx*ty; ++i)
-                            res8[i] = (res[i] - vmin) * 256 / (vmax - vmin);
+                            res8[i] = (res[i] - vmin) * 255 / (vmax - vmin);
                         delete[] res;
 
                         image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
