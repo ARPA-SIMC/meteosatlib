@@ -362,7 +362,8 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
 
     // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
     //   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
-    //   MSGProc - MSG Processing tools for Windows http://www.msgproc.eu/
+    //   MSGProc - MSG Processing tools for Windows
+    // http://www.eumetsat.int/Home/Main/AboutEUMETSAT/InternationalRelations/EasternEuropeanandBalkanCountries/SP_2011062115544756?l=en
 
     const double c1 = 0.0000119104;
     const double c2 = 1.43877;
