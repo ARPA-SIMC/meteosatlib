@@ -360,7 +360,9 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
     // published on:
     //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
 
-    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's MSGProc
+    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
+    //   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
+    //   MSGProc - MSG Processing tools for Windows http://www.msgproc.eu/
 
     const double c1 = 0.0000119104;
     const double c2 = 1.43877;
@@ -396,7 +398,7 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
         double cosTETA = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
         double SAT = facts::sat_za(lats[i], lons[i]);
         // Original from MMKM2010:
-        // double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
+        //double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
         // Version from MSGProc:
         double TOARAD = 4.92 / (esd*esd)
                       * pow(cosTETA, 0.75)
@@ -406,9 +408,9 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
         if (TOARAD <= R_therm) TOARAD = R_therm + 0.0000001;
 
         // Original from MMKM2010
-        // double REFL = 100 * (R_tot - R_therm) / (TOARAD - R_therm);
+        //double REFL = 200 * (R_tot - R_therm) / (TOARAD - R_therm);
         // Version from MSGProc:
-        double REFL = 200 * (R_tot - R_therm) / (TOARAD);
+        double REFL = 100 * (R_tot - R_therm) / (TOARAD);
         dest[i] = REFL;
 
         // Normalise outliars

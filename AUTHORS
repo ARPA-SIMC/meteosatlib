@@ -2,7 +2,7 @@
  * Current
 
 Enrico Zini <enrico@enricozini.com>
-for ARPA SIMC Emilia Romagna (http://www.arpa.emr.it/smr/)
+for ARPA SIMC Emilia Romagna (http://www.arpa.emr.it/sim/)
 
 
  * Until 2006
@@ -10,3 +10,18 @@ for ARPA SIMC Emilia Romagna (http://www.arpa.emr.it/smr/)
 Graziano Giuliani   <giuliani@lamma.rete.toscana.it>
 
 Autotools and omtp-ids maintained by Deneys S. Maartens  <dsm@tlabs.ac.za>
+
+ * Credits
+
+IR 3.9 Reflectity calculation based on:
+
+ "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
+ by Meteosat Second Generation. Part II: Use of Visible Reflectance"
+ by:
+  John R.Mecikalski, Wayne M.Mackenzie Jr., Marianne Konig, Sam Muller
+ published on:
+  Journal of Applied Meteorology and Climatology, volume 49
+
+IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
+   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
+   MSGProc - MSG Processing tools for Windows (http://www.msgproc.eu/)
