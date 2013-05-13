@@ -1,7 +1,7 @@
 # configure.ac -- Process this file with autoconf to produce a configure script.
 #
 # Copyright (C) 2004, 2005, 2006 Deneys S. Maartens <dsm@tlabs.ac.za>
-# Copyright (C) 2006--2012  Enrico Zini <enrico@enricozini.org>
+# Copyright (C) 2006--2013  Enrico Zini <enrico@enricozini.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-AC_INIT([meteosatlib], [1.2], [enrico@enricozini.org])
+AC_INIT([meteosatlib], [1.3], [enrico@enricozini.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([foreign subdir-objects nostdinc])

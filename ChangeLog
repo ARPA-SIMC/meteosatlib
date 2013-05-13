@@ -1,3 +1,10 @@
+2013-05-13  enrico@enricozini.org
+	* Version 1.3
+	* Fixed bug in contrast stretching
+	* Implemented solar zenith angle check for twilight conditions
+	* Updated reflectance algorithm for IR_039 (see AUTHORS for credits)
+	* Added python script for Normalized Difference Vegetation Index
+
 2013-02-21  enrico@enricozini.org
 	* Version 1.2
 	* Fixed reflectance channel IR_039r
