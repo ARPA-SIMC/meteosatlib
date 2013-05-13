@@ -709,6 +709,9 @@ double scan2zen(double scan, double satheight)
   return asin(temp);
 }
 
+// cos(80deg)
+#define cos80 0.173648178
+
 double sza(int yr, int month, int day, int hour, int minute,
            float lat, float lon)
 {
@@ -717,6 +720,11 @@ double sza(int yr, int month, int day, int hour, int minute,
   double zenith;
 
   zenith = cozena(jd, hourz,(double) lat, (double) lon);
+
+  // Use cos(80°) as lower bound, to avoid division by zero
+  if (zenith < cos80)
+    return cos80;
+
   return zenith;
 }
 
