@@ -544,8 +544,8 @@ class EnhancedIr(Product):
         # TODO: reimplementare stile rescale, più veloce di così
         def bt_to_palette(val, idx):
             if val < palmin or val > palmax:
-                val -= 200
-                val *= 255.0 / float(320 - 200)
+                val -= 320
+                val *= 255.0 / float(200 - 320)
                 return  val
             return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx];
 
