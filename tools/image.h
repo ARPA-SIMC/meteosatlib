@@ -24,16 +24,32 @@
 
 #include <string>
 #include <memory>
+#include <stdint.h>
 
 struct GDALRasterBand;
 
 namespace msat {
 
+struct Stretch
+{
+    double min;
+    double max;
+    bool compute;
+
+    Stretch() : compute(true) {}
+
+    template<typename T>
+    void compute_if_needed(GDALRasterBand& band, const T* vals, T& vmin, T& vmax);
+
+    template<typename T>
+    uint8_t* rescale(GDALRasterBand& band, const T* vals, T vmin, T vmax);
+};
+
 /// Export data from an ImageData to an image file
-bool export_image(GDALRasterBand* band, const std::string& fileName);
+bool export_image(GDALRasterBand* band, const std::string& fileName, Stretch& s);
 
 /// Display an image on screen
-bool display_image(GDALRasterBand* band);
+bool display_image(GDALRasterBand* band, Stretch& s);
 
 }
 

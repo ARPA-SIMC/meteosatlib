@@ -343,6 +343,10 @@ struct Msat
 
     bool force_calibration;
 
+#ifdef HAVE_MAGICKPP
+    msat::Stretch stretch;
+#endif
+
     Msat()
         : action(VIEW), quiet(false), force_calibration(false)
     {
@@ -406,6 +410,7 @@ void Msat::parse_cmdline(int argc, char* argv[])
             { "band", 1, 0, 'b' },
             { "force-calibration", 0, NULL, 'F' },
 #ifdef HAVE_MAGICKPP
+            { "stretch", 1, 0, 'S' },
             { "jpg",  0, NULL, 'j' },
             { "png",  0, NULL, 'p' },
             { "display",  0, NULL, 'd' },
@@ -514,6 +519,20 @@ void Msat::parse_cmdline(int argc, char* argv[])
                             action = DISPLAY;
                             is_image = true;
                             break;
+                    case 'S': { // --stretch
+                            string arg(optarg);
+                            size_t pos = arg.find(":");
+                            if (pos == string::npos)
+                            {
+                                stretch.min = 0;
+                                stretch.max = strtod(arg.c_str(), NULL);
+                            } else {
+                                stretch.min = strtod(arg.substr(0, pos).c_str(), NULL);
+                                stretch.max = strtod(arg.substr(pos + 1).c_str(), NULL);
+                            }
+                            stretch.compute = false;
+                            break;
+                    }
 #endif
                     case -1:
                               done = true;
@@ -733,7 +752,7 @@ int Msat::main()
                             {
                                     GDALRasterBand* rb = vds->GetRasterBand(i);
                                     string fname = output_file_name(vds, rb) + ".jpg";
-                                    if (!msat::export_image(rb, fname.c_str()))
+                                    if (!msat::export_image(rb, fname.c_str(), stretch))
                                     {
                                             cerr << CPLGetLastErrorMsg() << endl;
                                             return 1;
@@ -745,7 +764,7 @@ int Msat::main()
                             {
                                     GDALRasterBand* rb = vds->GetRasterBand(i);
                                     string fname = output_file_name(vds, rb) + ".png";
-                                    if (!msat::export_image(rb, fname.c_str()))
+                                    if (!msat::export_image(rb, fname.c_str(), stretch))
                                     {
                                             cerr << CPLGetLastErrorMsg() << endl;
                                             return 1;
@@ -754,7 +773,7 @@ int Msat::main()
                             break;
                     case DISPLAY:
                             for (int i = 1; i <= vds->GetRasterCount(); ++i)
-                                    if (!msat::display_image(vds->GetRasterBand(i)))
+                                    if (!msat::display_image(vds->GetRasterBand(i), stretch))
                                     {
                                             cerr << CPLGetLastErrorMsg() << endl;
                                             return 1;

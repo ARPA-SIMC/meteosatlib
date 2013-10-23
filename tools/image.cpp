@@ -30,7 +30,56 @@ using namespace std;
 
 namespace msat {
 
-static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
+template<typename T>
+void Stretch::compute_if_needed(GDALRasterBand& band, const T* vals, T& vmin, T& vmax)
+{
+  if (!compute)
+  {
+    vmin = min;
+    vmax = max;
+    return;
+  }
+
+  size_t sx = band.GetXSize();
+  size_t sy = band.GetYSize();
+  T missing = (T)band.GetNoDataValue();
+
+  // Compute min and max values
+  vmin = missing;
+  vmax = missing;
+  for (size_t i = 0; i < sx*sy; ++i)
+  {
+    if (vals[i] == missing) continue;
+    if (vmin == missing)
+    {
+      // First time we find a good value, init min and max with it
+      vmin = vmax = vals[i];
+      continue;
+    }
+    if (vals[i] < vmin) vmin = vals[i];
+    if (vals[i] > vmax) vmax = vals[i];
+  }
+}
+
+template<typename T>
+uint8_t* Stretch::rescale(GDALRasterBand& band, const T* vals, T vmin, T vmax)
+{
+  size_t sx = band.GetXSize();
+  size_t sy = band.GetYSize();
+  uint8_t* res8 = new uint8_t[sx * sy];
+  for (size_t i = 0; i < sx * sy; ++i)
+  {
+    if (vals[i] < vmin)
+      res8[i] = 0;
+    else if (vals[i] > vmax)
+      res8[i] = 255;
+    else
+      res8[i] = (vals[i] - vmin) * 255 / (vmax - vmin);
+  }
+  return res8;
+}
+
+static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band, Stretch& s)
 {
         auto_ptr<Magick::Image> image;
         size_t sx = band.GetXSize();
@@ -48,9 +97,18 @@ static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
                                 delete[] res;
                                 return std::auto_ptr<Magick::Image>(0);
                         }
-                        image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res));
+
+                        // Compute min and max values
+                        uint8_t vmin;
+                        uint8_t vmax;
+                        s.compute_if_needed(band, res, vmin, vmax);
+
+                        // Rescale to 8 bits
+                        uint8_t* res8 = s.rescale(band, res, vmin, vmax);
                         delete[] res;
-                        image->normalize();
+
+                        image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
+                        delete[] res8;
                         break;
                 }
                 case GDT_UInt16: {
@@ -62,18 +120,12 @@ static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
                         }
 
                         // Compute min and max values
-                        uint16_t vmin = res[0];
-                        uint16_t vmax = res[0];
-                        for (unsigned i = 0; i < tx*ty; ++i)
-                        {
-                            if (res[i] < vmin) vmin = res[i];
-                            if (res[i] > vmax) vmax = res[i];
-                        }
+                        uint16_t vmin;
+                        uint16_t vmax;
+                        s.compute_if_needed(band, res, vmin, vmax);
 
                         // Rescale to 8 bits
-                        uint8_t* res8 = new uint8_t[tx * ty];
-                        for (unsigned i = 0; i < tx*ty; ++i)
-                            res8[i] = (res[i] - vmin) * 255 / (vmax - vmin);
+                        uint8_t* res8 = s.rescale(band, res, vmin, vmax);
                         delete[] res;
 
                         image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
@@ -89,26 +141,12 @@ static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
                         }
 
                         // Compute min and max values
-                        bool first = true;
                         float vmin = 0;
                         float vmax = 0;
-                        for (unsigned i = 0; i < tx*ty; ++i)
-                        {
-                            if (isnan(res[i])) continue;
-                            if (first)
-                            {
-                                vmin = vmax = res[i];
-                                first = false;
-                                continue;
-                            }
-                            if (res[i] < vmin) vmin = res[i];
-                            if (res[i] > vmax) vmax = res[i];
-                        }
+                        s.compute_if_needed(band, res, vmin, vmax);
 
                         // Rescale to 8 bits
-                        uint8_t* res8 = new uint8_t[tx * ty];
-                        for (unsigned i = 0; i < tx*ty; ++i)
-                            res8[i] = (res[i] - vmin) * 255 / (vmax - vmin);
+                        uint8_t* res8 = s.rescale(band, res, vmin, vmax);
                         delete[] res;
 
                         image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
@@ -120,7 +158,7 @@ static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band)
         return image;
 }
 
-bool export_image(GDALRasterBand* band, const std::string& fileName)
+bool export_image(GDALRasterBand* band, const std::string& fileName, Stretch& s)
 {
         // ProgressTask p("Exporting image to " + fileName);
 
@@ -131,17 +169,17 @@ bool export_image(GDALRasterBand* band, const std::string& fileName)
                 return false;
         }
 
-        auto_ptr<Magick::Image> image = imageToMagick(*band);
+        auto_ptr<Magick::Image> image = imageToMagick(*band, s);
 
         // p.activity("Writing image to file");
         image->write(fileName);
         return true;
 }
 
-bool display_image(GDALRasterBand* band)
+bool display_image(GDALRasterBand* band, Stretch& s)
 {
         //ProgressTask p("Displaying image " + defaultFilename(band));
-        auto_ptr<Magick::Image> image = imageToMagick(*band);
+        auto_ptr<Magick::Image> image = imageToMagick(*band, s);
 
         if (image.get() == 0) return false;
 
