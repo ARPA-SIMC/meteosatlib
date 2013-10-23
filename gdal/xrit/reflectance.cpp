@@ -33,6 +33,22 @@ using namespace std;
 namespace msat {
 namespace xrit {
 
+// cos(80deg)
+#define cos80 0.173648178
+
+// From MSG_data_RadiometricProc.cpp
+static double sza(int yr, int month, int day, int hour, int minute,
+           float lat, float lon)
+{
+  double hourz = (float) hour + ((float) minute) / 60.0;
+  double jd = jday(yr, month, day);
+  double zenith;
+
+  zenith = cozena(jd, hourz,(double) lat, (double) lon);
+
+  return zenith;
+}
+
 struct PixelToLatlon
 {
     double geoTransform[6];
@@ -150,6 +166,63 @@ double BaseReflectanceRasterBand::GetNoDataValue(int* pbSuccess)
     return 0.0;
 }
 
+SZARasterBand::SZARasterBand(XRITDataset* ds, int idx)
+    : BaseReflectanceRasterBand(ds, idx)
+{
+}
+
+SZARasterBand::~SZARasterBand()
+{
+}
+
+const char* SZARasterBand::GetUnitType()
+{
+    return "";
+}
+
+bool SZARasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header)
+{
+    if (!BaseReflectanceRasterBand::init(PRO_data, EPI_data, header))
+        return false;
+
+    return true;
+}
+
+CPLErr SZARasterBand::IReadBlock(int xblock, int yblock, void *buf)
+{
+    // Read the raw data
+    uint16_t raw[nBlockXSize * nBlockYSize];
+    if (XRITRasterBand::IReadBlock(xblock, yblock, raw) == CE_Failure)
+        return CE_Failure;
+
+    // Precompute pixel georeferentiation
+    double lats[nBlockXSize * nBlockYSize];
+    double lons[nBlockXSize * nBlockYSize];
+    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats, lons);
+
+    // Compute reflectances
+    float* dest = (float*) buf;
+    for (int i = 0; i < nBlockXSize * nBlockYSize; ++i)
+    {
+        // From radiance to reflectance
+        dest[i] = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        // Normalise outliars
+        switch (fpclassify(dest[i]))
+        {
+            case FP_NAN:
+            case FP_SUBNORMAL:
+            case FP_ZERO: dest[i] = 0.0; break;
+            case FP_INFINITE:
+            case FP_NORMAL:
+                if (dest[i] < 0.0) dest[i] = 0.0;
+                if (dest[i] > 1.0) dest[i] = 1.0;
+                break;
+        }
+    }
+
+    return CE_None;
+}
+
 
 ReflectanceRasterBand::ReflectanceRasterBand(XRITDataset* ds, int idx)
     : BaseReflectanceRasterBand(ds, idx)
@@ -217,26 +290,6 @@ double scan2zen(double scan, double satheight)
 
 */
 
-// cos(80deg)
-#define cos80 0.173648178
-
-// From MSG_data_RadiometricProc.cpp
-static double sza(int yr, int month, int day, int hour, int minute,
-           float lat, float lon)
-{
-  double hourz = (float) hour + ((float) minute) / 60.0;
-  double jd = jday(yr, month, day);
-  double zenith;
-
-  zenith = cozena(jd, hourz,(double) lat, (double) lon);
-
-  // Use cos(80°) as lower bound, to avoid division by zero
-  if (zenith < cos80)
-    return cos80;
-
-  return zenith;
-}
-
 CPLErr ReflectanceRasterBand::IReadBlock(int xblock, int yblock, void *buf)
 {
     // Read the raw data
@@ -255,8 +308,11 @@ CPLErr ReflectanceRasterBand::IReadBlock(int xblock, int yblock, void *buf)
     {
         // From counts to radiance
         double radiance = raw[i] * rad_slope + rad_offset;
+        double cossza = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        // Use cos(80°) as lower bound, to avoid division by zero
+        if (cossza < cos80) cossza = cos80;
         // From radiance to reflectance
-        dest[i] = 100.0 * radiance / tr / sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        dest[i] = 100.0 * radiance / tr / cossza;
         // Normalise outliars
         switch (fpclassify(dest[i]))
         {
@@ -392,11 +448,13 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
 
         // Apply Planck function to convert the CO2 corrected Brightness
         // Temperature to Radiance
-        double R_tot = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT039 + B)) - 1) + 0.015;	
+        double R_tot = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT039 + B)) - 1) + 0.015;  
 
         double R39_corr = pow((BT108 - 0.25 * (BT108 - BT134)) / BT108, 4);
         double R_therm = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
         double cosTETA = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        // Use cos(80°) as lower bound, to avoid division by zero
+        if (cosTETA < cos80) cosTETA = cos80;
         double SAT = facts::sat_za(lats[i], lons[i]);
         // Original from MMKM2010:
         //double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));

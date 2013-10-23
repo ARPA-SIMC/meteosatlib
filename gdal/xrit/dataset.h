@@ -31,14 +31,19 @@ namespace xrit {
 class XRITDataset : public GDALDataset
 {
 public:
+    typedef enum {
+        PP_NONE,
+        PP_REFLECTANCE,
+        PP_SZA,
+    } Effect;
     xrit::FileAccess fa;
     xrit::DataAccess da;
     int spacecraft_id;
     std::string projWKT;
     double geotransform[6];
-    bool reflectance;
+    Effect effect;
 
-    XRITDataset(const std::string& fname, bool reflectance=false);
+    XRITDataset(const std::string& fname, Effect effect=PP_NONE);
 
     virtual bool init();
 

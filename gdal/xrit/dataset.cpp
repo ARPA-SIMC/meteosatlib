@@ -31,8 +31,8 @@ using namespace std;
 namespace msat {
 namespace xrit {
 
-XRITDataset::XRITDataset(const std::string& fname, bool reflectance)
-    : fa(fname), spacecraft_id(0), reflectance(reflectance)
+XRITDataset::XRITDataset(const std::string& fname, Effect effect)
+    : fa(fname), spacecraft_id(0), effect(effect)
 {
 }
 
@@ -122,24 +122,34 @@ bool XRITDataset::init()
 
     // Raster bands
 
-    if (reflectance)
+    switch (effect)
     {
-        // Virtual reflectance raster band, where available
-        if (header.segment_id->spectral_channel_id == MSG_SEVIRI_1_5_IR_3_9)
+        case PP_REFLECTANCE:
+            // Virtual reflectance raster band, where available
+            if (header.segment_id->spectral_channel_id == MSG_SEVIRI_1_5_IR_3_9)
+            {
+                auto_ptr<Reflectance39RasterBand> rb(new Reflectance39RasterBand(this, 1));
+                if (!rb->init(PRO_data, EPI_data, header)) return false;
+                SetBand(1, rb.release());
+            } else {
+                auto_ptr<ReflectanceRasterBand> rb(new ReflectanceRasterBand(this, 1));
+                if (!rb->init(PRO_data, EPI_data, header)) return false;
+                SetBand(1, rb.release());
+            }
+            break;
+        case PP_SZA:
         {
-            auto_ptr<Reflectance39RasterBand> rb(new Reflectance39RasterBand(this, 1));
+            auto_ptr<SZARasterBand> rb(new SZARasterBand(this, 1));
             if (!rb->init(PRO_data, EPI_data, header)) return false;
             SetBand(1, rb.release());
-        } else {
-            auto_ptr<ReflectanceRasterBand> rb(new ReflectanceRasterBand(this, 1));
-            if (!rb->init(PRO_data, EPI_data, header)) return false;
-            SetBand(1, rb.release());
+            break;
         }
-    } else {
-        // Real raster band
-        auto_ptr<XRITRasterBand> rb(new XRITRasterBand(this, 1));
-        if (!rb->init(PRO_data, EPI_data, header)) return false;
-        SetBand(1, rb.release());
+        default:
+            // Real raster band
+            auto_ptr<XRITRasterBand> rb(new XRITRasterBand(this, 1));
+            if (!rb->init(PRO_data, EPI_data, header)) return false;
+            SetBand(1, rb.release());
+            break;
     }
 
     return true;

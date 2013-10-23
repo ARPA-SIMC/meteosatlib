@@ -57,6 +57,23 @@ public:
     virtual double GetNoDataValue(int* pbSuccess=NULL);
 };
 
+/// Rasterband returning cosine of satellite zenith angle
+class SZARasterBand : public BaseReflectanceRasterBand
+{
+public:
+    // tr factor from MSG_data_RadiometricProc.cpp radiance_to_reflectance
+    double tr;
+
+    SZARasterBand(XRITDataset* ds, int idx);
+    ~SZARasterBand();
+
+    bool init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header);
+
+    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
+
+    virtual const char* GetUnitType();
+};
+
 class ReflectanceRasterBand : public BaseReflectanceRasterBand
 {
 public:
