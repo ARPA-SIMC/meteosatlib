@@ -27,6 +27,7 @@ import sys
 import os
 import os.path
 import numpy
+import numpy.ma
 import scipy
 import logging
 
@@ -86,9 +87,11 @@ class Satellite(object):
         ds = self.gdal_dataset(channel)
         rb = ds.GetRasterBand(1)
         if self.area:
-            return rb.ReadAsArray(*self.area)
+            arr = rb.ReadAsArray(*self.area)
         else:
-            return rb.ReadAsArray()
+            arr = rb.ReadAsArray()
+        # Mask away no-data values
+        return numpy.ma.masked_equal(arr, band.GetNoDataValue(), copy=False)
 
     def save_rgb(self, name, r, g, b):
         r = scipy.misc.toimage(r)
@@ -398,7 +401,7 @@ class Vis006(Product):
         """
         vis06 = self.sat.get_array("VIS006")
 
-        v = rescale(vis06, numpy.amin(vis06), numpy.amax(vis06), 0, 255)
+        v = rescale(vis06, vis06.min(), vis06.max(), 0, 255)
 
         return v
 
@@ -412,7 +415,7 @@ class Vis008(Product):
         """
         vis08 = self.sat.get_array("VIS008")
 
-        v = rescale(vis08, numpy.amin(vis08), numpy.amax(vis08), 0, 255)
+        v = rescale(vis08, vis08.min(), vis08.max(), 0, 255)
 
         return v
 
@@ -426,7 +429,7 @@ class Ir016(Product):
         """
         ir016 = self.sat.get_array("IR_016")
 
-        v = rescale(ir016, numpy.amin(ir016), numpy.amax(ir016), 0, 255)
+        v = rescale(ir016, ir016.min(), ir016.max(), 0, 255)
 
         return v
 
@@ -440,7 +443,7 @@ class Ir039(Product):
         """
         ir039 = self.sat.get_array("IR_039")
 
-        v = rescale(ir039, numpy.amin(ir039), numpy.amax(ir039), 0, 255)
+        v = rescale(ir039, ir039.min(), ir039.max(), 0, 255)
 
         return v
 
@@ -454,7 +457,7 @@ class Ir039r(Product):
         """
         ir039r = self.sat.get_array("IR_039r")
 
-        v = rescale(ir039r, numpy.amin(ir039r), numpy.amax(ir039r), 0, 255)
+        v = rescale(ir039r, ir039r.min(), ir039r.max(), 0, 255)
 
         return v
 
@@ -469,7 +472,7 @@ class Ir108(Product):
         """
         ir108 = self.sat.get_array("IR_108")
 
-        v = rescale(ir108, numpy.amin(ir108), numpy.amax(ir108), 0, 255)
+        v = rescale(ir108, ir108.min(), ir108.max(), 0, 255)
 
         return v
 
@@ -485,7 +488,7 @@ class Wv62(Product):
         """
         wv62 = self.sat.get_array("WV_062")
 
-        v = rescale(wv62, numpy.amin(wv62), numpy.amax(wv62), 0, 255)
+        v = rescale(wv62, wv62.min(), wv62.max(), 0, 255)
 
         return v
 
@@ -499,7 +502,7 @@ class Wv73(Product):
         """
         wv73 = self.sat.get_array("WV_073")
 
-        v = rescale(wv73, numpy.amin(wv73), numpy.amax(wv73), 0, 255)
+        v = rescale(wv73, wv73.min(), wv73.max(), 0, 255)
 
         return v
 
@@ -513,7 +516,7 @@ class Hrv(Product):
         """
         hrv = self.sat.get_array("HRV")
 
-        v = rescale(hrv, numpy.amin(hrv), numpy.amax(hrv), 0, 255)
+        v = rescale(hrv, hrv.min(), hrv.max(), 0, 255)
 
         return v
 
@@ -601,7 +604,7 @@ class HrvEnhancedIr(Product):
         upscaledg = scipy.misc.imresize(palg, hrvr.shape)
         upscaledb = scipy.misc.imresize(palb, hrvr.shape)
 
-        hrvnorm = rescale(hrvr.astype(numpy.float), numpy.amin(hrvr), numpy.amax(hrvr), 0.0, 1.0)
+        hrvnorm = rescale(hrvr.astype(numpy.float), hrvr.min(), hrvr.max(), 0.0, 1.0)
 
         return upscaledr * hrvnorm, upscaledg * hrvnorm, upscaledb * hrvnorm
 
