@@ -24,6 +24,7 @@ dist_msat_include_HEADERS = \
     config.h \
     iniparser.h \
     Progress.h \
+    auto_arr_ptr.h \
     facts.h
 
 lib_LTLIBRARIES = libmsat.la
@@ -42,6 +43,7 @@ libmsat_la_LDFLAGS = -version-info 1:0:0
 libmsat_la_SOURCES = \
     iniparser.c \
     Progress.cpp \
+    auto_arr_ptr.cpp \
     facts.cpp
 
 if HAVE_GDAL

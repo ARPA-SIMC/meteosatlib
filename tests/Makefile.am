@@ -66,7 +66,8 @@ msatlib_test_SOURCES += \
     gdal/test-georef-xrit.cpp \
     gdal/test-georef-xrithrv.cpp \
     gdal/test-georef-grib.cpp \
-    gdal/test-xrit-reflectance.cpp
+    gdal/test-xrit-reflectance.cpp \
+    gdal/test-xrit-solar-za.cpp
 
 msatlib_test_LDFLAGS += $(GDAL_LIBS) $(NETCDF_LIBS)
 endif

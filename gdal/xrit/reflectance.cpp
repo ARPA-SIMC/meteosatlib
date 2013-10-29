@@ -20,6 +20,7 @@
 #include "reflectance.h"
 #include "dataset.h"
 #include "rasterband.h"
+#include <msat/auto_arr_ptr.h>
 #include <msat/gdal/const.h>
 #include <msat/facts.h>
 #include <ogr_spatialref.h>
@@ -180,15 +181,10 @@ bool SZARasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& hea
 
 CPLErr SZARasterBand::IReadBlock(int xblock, int yblock, void *buf)
 {
-    // Read the raw data
-    uint16_t raw[nBlockXSize * nBlockYSize];
-    if (XRITRasterBand::IReadBlock(xblock, yblock, raw) == CE_Failure)
-        return CE_Failure;
-
     // Precompute pixel georeferentiation
-    double lats[nBlockXSize * nBlockYSize];
-    double lons[nBlockXSize * nBlockYSize];
-    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats, lons);
+    auto_arr_ptr<double> lats(nBlockXSize * nBlockYSize);
+    auto_arr_ptr<double> lons(nBlockXSize * nBlockYSize);
+    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats.get(), lons.get());
 
     // Compute reflectances
     float* dest = (float*) buf;
@@ -283,14 +279,14 @@ double scan2zen(double scan, double satheight)
 CPLErr ReflectanceRasterBand::IReadBlock(int xblock, int yblock, void *buf)
 {
     // Read the raw data
-    uint16_t raw[nBlockXSize * nBlockYSize];
-    if (XRITRasterBand::IReadBlock(xblock, yblock, raw) == CE_Failure)
+    auto_arr_ptr<uint16_t> raw(nBlockXSize * nBlockYSize);
+    if (XRITRasterBand::IReadBlock(xblock, yblock, raw.get()) == CE_Failure)
         return CE_Failure;
 
     // Precompute pixel georeferentiation
-    double lats[nBlockXSize * nBlockYSize];
-    double lons[nBlockXSize * nBlockYSize];
-    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats, lons);
+    auto_arr_ptr<double> lats(nBlockXSize * nBlockYSize);
+    auto_arr_ptr<double> lons(nBlockXSize * nBlockYSize);
+    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats.get(), lons.get());
 
     // Compute reflectances
     float* dest = (float*) buf;
