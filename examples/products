@@ -21,6 +21,7 @@
 
 import gdal, ogr
 from gdalconst import *
+from PIL import Image
 import datetime
 import sys
 import os
@@ -28,6 +29,7 @@ import os.path
 import numpy
 import numpy.ma
 import scipy
+import math
 import logging
 
 log = logging.getLogger(__name__)
@@ -37,7 +39,9 @@ def rescale(arr, imin, imax, omin, omax, out=None):
     Rescale values of the array from [imin, imax] to [omin, omax], clipping
     outliers to omin or omax
     """
-    # FIXME: is there a numpy function that does this already?
+    # Fill masked data with the minimum sample value
+    arr = arr.filled(imin)
+
     if imin <= imax:
         res = numpy.clip(arr, imin, imax, out)
         res -= imin
@@ -50,6 +54,62 @@ def rescale(arr, imin, imax, omin, omax, out=None):
         res += omin
     return res
 
+class BaseChannel(object):
+    def __init__(self, sat, name):
+        self.name = name
+        self.sat = sat
+        # Cached versions of masked arrays
+        self.cached_data = None
+        self.cached_refl = None
+
+    @property
+    def data(self):
+        if self.cached_data is None: 
+            self.cached_data = self.sat.get_array(self.name)
+        return self.cached_data
+
+    @property
+    def reflectance(self):
+        if self.cached_refl is None: 
+            self.cached_refl = self.sat.get_array(self.name + "r")
+        return self.cached_refl
+
+    @property
+    def solar_mask(self):
+        if self.cached_solar_mask is None: 
+            self.cached_solar_mask = self.sat.get_solar_mask(self.name)
+        return self.cached_solar_mask
+
+    @property
+    def data_solar_masked(self):
+        data = self.data
+        mask = numpy.ma.mask_or(data.mask, self.solar_mask)
+        return numpy.ma.array(data.data, mask=mask, fill_value=data.fill_value)
+
+class Channel(BaseChannel):
+    # Share the same solar mask across all non-HRV channels
+    cached_solar_mask = None
+
+class MaskedChannelMixin(object):
+    @property
+    def data(self):
+        data = super(MaskedChannelMixin, self).data
+        mask = numpy.ma.mask_or(data.mask, self.solar_mask)
+        return numpy.ma.array(data.data, mask=mask, fill_value=data.fill_value)
+
+    @property
+    def reflectance(self):
+        data = super(MaskedChannelMixin, self).reflectance
+        mask = numpy.ma.mask_or(data.mask, self.solar_mask)
+        return numpy.ma.array(data.data, mask=mask, fill_value=data.fill_value)
+
+class MaskedChannel(MaskedChannelMixin, Channel):
+    pass
+
+class HRVChannel(MaskedChannelMixin, BaseChannel):
+    cached_solar_mask = None
+
+    
 
 class Satellite(object):
     def __init__(self, srcdir, dt, area, opts=None):
@@ -58,6 +118,12 @@ class Satellite(object):
         self.area = area
         self.warp_opts = opts.warp
         self.cachedir = opts.cachedir
+        # Build channel accessors
+        for chan in "IR_087", "IR_097", "IR_108", "IR_120", "WV_062", "WV_073":
+            setattr(self, chan, Channel(self, chan))
+        for chan in "VIS006", "VIS008", "IR_016", "IR_039":
+            setattr(self, chan, MaskedChannel(self, chan))
+        self.HRV = HRVChannel(self, "HRV")
 
     def gdal_dataset(self, channel_name):
         fname = "H:MSG3:%s:%s" % (
@@ -72,11 +138,21 @@ class Satellite(object):
                 opts = shlex.split(self.warp_opts)
                 cmd = ["gdalwarp", "-q", "-of", "GTiff"] + opts + [os.path.join(self.srcdir, fname), cache_fname]
                 log.info("Warping %s using '%s'...", fname, " ".join(cmd))
-                try:
-                    subprocess.check_call(cmd)
-                except:
+                proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                retcode = proc.wait()
+                if stderr:
+                    ignore_errors = frozenset([
+                        "ERROR 1: tolerance condition error",
+                        "ERROR 1: Reprojection failed, err = -20, further errors will be supressed on the transform object.",
+                    ])
+                    for line in stderr.split("\n"):
+                        if not line or line in ignore_errors: continue
+                        print("E:{}".format(line))
+                if retcode != 0:
+                    print("gdalwarp returned {}:".format(retcode))
                     os.unlink(cache_fname)
-                    raise
+                    raise RuntimeError("call to gdalwarp failed")
             return gdal.Open(cache_fname, GA_ReadOnly)
 
         return gdal.Open(os.path.join(self.srcdir, fname), GA_ReadOnly)
@@ -90,7 +166,16 @@ class Satellite(object):
         else:
             arr = rb.ReadAsArray()
         # Mask away no-data values
-        return numpy.ma.masked_equal(arr, band.GetNoDataValue(), copy=False)
+        return numpy.ma.masked_equal(arr, rb.GetNoDataValue(), copy=False)
+
+    def get_solar_mask(self, channel, threshold=85):
+        """
+        Get a mask marking data missing when the sun is below a given angle 'threshold'.
+        
+        Threshold is the maximum accepted angle, in degrees from the zenith
+        """
+        cos_sol_za = self.get_array(channel + "a")
+        return numpy.ma.masked_less_equal(cos_sol_za, math.cos(math.radians(threshold)), copy=False).mask
 
     def new_dataset(self, channel_name, fname, driver, bands=3, gdtype=gdal.GDT_Byte):
         """
@@ -191,9 +276,9 @@ class DayNatural(Product):
         Green   VIS0.8    5 ...  +85 %   1.0  1.0
         Blue    VIS0.6    0 ...  +70 %   1.0  1.0
         """
-        ir16r = self.sat.get_array("IR_016r")
-        vis8r = self.sat.get_array("VIS008r")
-        vis6r = self.sat.get_array("VIS006r")
+        ir16r = self.sat.IR_016.reflectance
+        vis8r = self.sat.VIS008.reflectance
+        vis6r = self.sat.VIS006.reflectance
 
         # Can be faster if we use toimage's bytescale parameters
         r = rescale(ir16r, 0, 85, 0, 255)
@@ -223,9 +308,9 @@ class DaySolar(Product):
         Green IR1.6       0 ...  +65 % 1.3 1.0
         Blue  IR3.9r      0 ...  +75 % 0.7 1.0
         """
-        vis8r = self.sat.get_array("VIS008r")
-        ir16r = self.sat.get_array("IR_016r")
-        ir39r = self.sat.get_array("IR_039r")
+        vis8r = self.sat.VIS008.reflectance
+        ir16r = self.sat.IR_016.reflectance
+        ir39r = self.sat.IR_039.reflectance
 
         # Can be faster if we use toimage's bytescale parameters
         r = rescale(vis8r, 0,  65, 0, 255)
@@ -245,9 +330,9 @@ class DayMicro(Product):
         Green   04r (IR3.9r)    5 ...  +60 %   1.5  1.0
         Blue    09 (IR10.8)  +203 ... +323 K   1.0  1.0
         """
-        vis08r = self.sat.get_array("VIS008r")
-        ir039r = self.sat.get_array("IR_039r")
-        ir108 = self.sat.get_array("IR_108")
+        vis08r = self.sat.VIS008.reflectance
+        ir039r = self.sat.IR_039.reflectance
+        ir108 = self.sat.IR_108.data
 
         r = rescale(vis08r,   0,  65, 0, 255)
         g = (rescale(ir039r, 2.5, 25, 0, 1) ** (1/1.5)) * 255
@@ -265,10 +350,10 @@ class Airmass(Product):
         Green  IR9.7 - IR10.8  -40 ... +5   K  1.0  1.0
         Blue   WV6.2 (inv.)   +243 ... +208 K  1.0  1.0
         """
-        wv62 = self.sat.get_array("WV_062")
-        wv73 = self.sat.get_array("WV_073")
-        ir097 = self.sat.get_array("IR_097")
-        ir108 = self.sat.get_array("IR_108")
+        wv62 = self.sat.WV_062.data
+        wv73 = self.sat.WV_073.data
+        ir097 = self.sat.IR_097.data
+        ir108 = self.sat.IR_108.data
 
         r = rescale(wv62 - wv73,   -25,   0, 0, 255)
         g = rescale(ir097 - ir108, -40,   5, 0, 255)
@@ -286,9 +371,9 @@ class NightMicro(Product):
         Green   IR10.8 - IR3.9     0 ...  +10 K  1.0  1.0
         Blue    IR10.8      +243 ... +293 K  1.0  1.0
         """
-        ir039 = self.sat.get_array("IR_039")
-        ir108 = self.sat.get_array("IR_108")
-        ir120 = self.sat.get_array("IR_120")
+        ir039 = self.sat.IR_039.data
+        ir108 = self.sat.IR_108.data
+        ir120 = self.sat.IR_120.data
 
         r = rescale(ir120 - ir108,  -4,   2, 0, 255)
         g = rescale(ir108 - ir039,   0,  10, 0, 255)
@@ -306,9 +391,9 @@ class H24Micro(Product):
         Green   IR10.8 - IR8.7     0 ...   +6 K  1.2  1.0
         Blue    IR10.8      +248 ... +303 K  1.0  1.0
         """
-        ir087 = self.sat.get_array("IR_087")
-        ir108 = self.sat.get_array("IR_108")
-        ir120 = self.sat.get_array("IR_120")
+        ir087 = self.sat.IR_087.data
+        ir108 = self.sat.IR_108.data
+        ir120 = self.sat.IR_120.data
 
         r = rescale(ir120 - ir108,  -4,   2, 0, 255)
         g = (rescale(ir108 - ir087,   0,   6, 0, 1) ** (1/1.2)) * 255
@@ -326,12 +411,12 @@ class ConvectiveStorms(Product):
         Green   IR3.9 - IR10.8    -5 ... +60 K  0.5  1.0
         Blue    NIR1.6 - VIS0.6  -75 ... +25 %  1.0  1.0
         """
-        wv62 = self.sat.get_array("WV_062")
-        wv73 = self.sat.get_array("WV_073")
-        ir039 = self.sat.get_array("IR_039")
-        ir108 = self.sat.get_array("IR_108")
-        ir016r = self.sat.get_array("IR_016r")
-        vis06r = self.sat.get_array("VIS006r")
+        wv62 = self.sat.WV_062.data
+        wv73 = self.sat.WV_073.data
+        ir039 = self.sat.IR_039.data
+        ir108 = self.sat.IR_108.data
+        ir016r = self.sat.IR_016.reflectance
+        vis06r = self.sat.VIS006.reflectance
 
         r = rescale(wv62 - wv73,     -35,  5, 0, 255)
         g = (rescale(ir039 - ir108,   -5, 60, 0, 1) ** (1/0.5)) * 255
@@ -349,9 +434,9 @@ class Dust(Product):
         Green   IR10.8 - IR8.7     0 ...  +15 K 2.5  1.0
         Blue    IR10.8      +261 ... +289 K 1.0  1.0
         """
-        ir087 = self.sat.get_array("IR_087")
-        ir108 = self.sat.get_array("IR_108")
-        ir120 = self.sat.get_array("IR_120")
+        ir087 = self.sat.IR_087.data
+        ir108 = self.sat.IR_108.data
+        ir120 = self.sat.IR_120.data
 
         r = rescale(ir120 - ir108,  -4,   2, 0, 255)
         g = (rescale(ir108 - ir087,  0,  15, 0, 1) ** (1/2.5)) * 255
@@ -369,9 +454,9 @@ class VolcanicAsh(Product):
         Green  IR10.8 - IR8.7    -4 ...   +5 K 1.0  1.0
         Blue   IR10.8          +243 ... +303 K 1.0  1.0
         """
-        ir087 = self.sat.get_array("IR_087")
-        ir108 = self.sat.get_array("IR_108")
-        ir120 = self.sat.get_array("IR_120")
+        ir087 = self.sat.IR_087.data
+        ir108 = self.sat.IR_108.data
+        ir120 = self.sat.IR_120.data
 
         r = rescale(ir120 - ir108,  -4,   2, 0, 255)
         g = rescale(ir108 - ir087,  -4,   5, 0, 255)
@@ -387,10 +472,8 @@ class Vis006(Product):
         """
         Vis006 channel, gray normalization
         """
-        vis06 = self.sat.get_array("VIS006")
-
+        vis06 = self.sat.VIS006.data
         v = rescale(vis06, vis06.min(), vis06.max(), 0, 255)
-
         return v
 
 class Vis008(Product):
@@ -401,7 +484,7 @@ class Vis008(Product):
         """
         Vis008 channel, gray normalization
         """
-        vis08 = self.sat.get_array("VIS008")
+        vis08 = self.sat.VIS008.data
 
         v = rescale(vis08, vis08.min(), vis08.max(), 0, 255)
 
@@ -415,7 +498,7 @@ class Ir016(Product):
         """
         IR 1.6 channel, gray normalization
         """
-        ir016 = self.sat.get_array("IR_016")
+        ir016 = self.sat.IR_016.data
 
         v = rescale(ir016, ir016.min(), ir016.max(), 0, 255)
 
@@ -429,7 +512,7 @@ class Ir039(Product):
         """
         IR 3.9 channel, gray normalization
         """
-        ir039 = self.sat.get_array("IR_039")
+        ir039 = self.sat.IR_039.data
 
         v = rescale(ir039, ir039.min(), ir039.max(), 0, 255)
 
@@ -443,7 +526,7 @@ class Ir039r(Product):
         """
         IR 3.9 channel reflectivity, gray normalization
         """
-        ir039r = self.sat.get_array("IR_039r")
+        ir039r = self.sat.IR_039.reflectance
 
         v = rescale(ir039r, ir039r.min(), ir039r.max(), 0, 255)
 
@@ -458,7 +541,7 @@ class Ir108(Product):
         """
         IR 10.8 channel, gray normalization
         """
-        ir108 = self.sat.get_array("IR_108")
+        ir108 = self.sat.IR_108.data
 
         v = rescale(ir108, ir108.min(), ir108.max(), 0, 255)
 
@@ -474,7 +557,7 @@ class Wv62(Product):
         """
         WV 6.2 channel, gray normalization
         """
-        wv62 = self.sat.get_array("WV_062")
+        wv62 = self.sat.WV_062.data
 
         v = rescale(wv62, wv62.min(), wv62.max(), 0, 255)
 
@@ -488,7 +571,7 @@ class Wv73(Product):
         """
         WV 7.3 channel, gray normalization
         """
-        wv73 = self.sat.get_array("WV_073")
+        wv73 = self.sat.WV_073.data
 
         v = rescale(wv73, wv73.min(), wv73.max(), 0, 255)
 
@@ -502,7 +585,7 @@ class Hrv(Product):
         """
         HRV channel, gray normalization
         """
-        hrv = self.sat.get_array("HRV")
+        hrv = self.sat.HRV.data
 
         v = rescale(hrv, hrv.min(), hrv.max(), 0, 255)
 
@@ -524,8 +607,8 @@ class EnhancedIr(Product):
         for line in open("bluered-palette.txt"):
             palette.append([int(x.strip(",")) for x in line.split()[:3]])
 
-        ir108 = self.sat.get_array("IR_108")
-        clipped_ir108 = numpy.clip(ir108,200,320)
+        ir108 = self.sat.IR_108.data
+        clipped_ir108 = numpy.clip(ir108.filled(200),200,320)
 
         # Map ir108 to a palette
         palmin = 200
@@ -565,8 +648,8 @@ class HrvEnhancedIr(Product):
         for line in open("bluered-palette.txt"):
             palette.append([int(x.strip(",")) for x in line.split()[:3]])
 
-        hrvr = self.sat.get_array("HRVr")
-        ir108 = self.sat.get_array("IR_108")
+        hrvr = self.sat.HRV.reflectance
+        ir108 = self.sat.IR_108.data
 
         # Map ir108 to a palette
         palmin = 200
@@ -584,6 +667,7 @@ class HrvEnhancedIr(Product):
         make_g = numpy.vectorize(lambda val: bt_to_palette(val, 1))
         make_b = numpy.vectorize(lambda val: bt_to_palette(val, 2))
 
+        ir108 = ir108.filled(ir108.min())
         palr = make_r(ir108)
         palg = make_g(ir108)
         palb = make_b(ir108)
@@ -592,7 +676,7 @@ class HrvEnhancedIr(Product):
         upscaledg = scipy.misc.imresize(palg, hrvr.shape)
         upscaledb = scipy.misc.imresize(palb, hrvr.shape)
 
-        hrvnorm = rescale(hrvr.astype(numpy.float), hrvr.min(), hrvr.max(), 0.0, 1.0)
+        hrvnorm = rescale(hrvr, hrvr.min(), hrvr.max(), 0.0, 1.0)
 
         return upscaledr * hrvnorm, upscaledg * hrvnorm, upscaledb * hrvnorm
 
@@ -608,8 +692,8 @@ class HrvNearNatural(Product):
 	Blue  HRV               0 ... 100%   0.9  1.0
         """
 
-        hrvr = self.sat.get_array("HRVr")
-        ir016r = self.sat.get_array("IR_016r")
+        hrvr = self.sat.HRV.reflectance
+        ir016r = self.sat.IR_016.reflectance
 
         ir016r_rescaled = (rescale(ir016r, 0,  100, 0, 1) ** (1/1.2)) * 255
 
@@ -630,9 +714,9 @@ class HrvSevereStorms(Product):
 	Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
         """
 
-        hrvr = self.sat.get_array("HRVr")
-        ir108 = self.sat.get_array("IR_108")
-        ir039 = self.sat.get_array("IR_039")
+        hrvr = self.sat.HRV.reflectance
+        ir108 = self.sat.IR_108.data
+        ir039 = self.sat.IR_039.data
 
         blue_rescaled = (rescale(ir108 - ir039,  -60,  -40, 0, 1) ** (1/2.0)) * 255
 
