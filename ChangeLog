@@ -1,3 +1,12 @@
+2013-10-29  enrico@enricozini.org
+	* Version 1.4
+	* Fixed bug in solar zenith angle computation
+	* Added virtual channel for solar zenith angle data
+	* in python script "products":
+	  - Improved channels caching in python script products
+	  - Implemented solar masking for visible channels when sun is below
+	   a given threshold
+
 2013-05-13  enrico@enricozini.org
 	* Version 1.3
 	* Fixed bug in contrast stretching
