@@ -113,7 +113,7 @@ void to::test<3>()
     rb = datasetr->GetRasterBand(1);
     float valr;
     rb->RasterIO(GF_Read, 2000, 350, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0);
-    gen_ensure_similar(valr, 22.6191, 0.0001);
+    gen_ensure_similar(valr, 22.3242, 0.0001);
 }
 
 // Test opening channel 12 (HRV, with reflectance)
