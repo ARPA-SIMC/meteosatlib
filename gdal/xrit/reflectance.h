@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+ * Copyright (C) 2012--2013  ARPA-SIM <urpsim@smr.arpa.emr.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,11 +37,10 @@ public:
     // Utility class that converts pixel coordinates to lat,lon
     PixelToLatlon* p2ll;
 
-    // Day time
-    int ye, mo, da, ho, mi;
-
     // Julian day
-    double jday;
+    int jday;
+    // Time of day in fractional hours
+    double daytime;
 
     double rad_slope;
     double rad_offset;

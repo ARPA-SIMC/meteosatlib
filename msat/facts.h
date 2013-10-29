@@ -111,7 +111,36 @@ double defaultScaledMissing(int channel);
 int significantDigitsForChannel(int channel);
 
 /// Compute the satellite zenith angle at a given location
-double sat_za(float lat, float lon);
+double sat_za(double lat, double lon);
+
+/// Julian day from a gregorian calendar date
+int jday(int yr, int month, int day);
+
+/**
+ * Compute the cosine of the solar zenith angle at a given time and location
+ *
+ * Time is given using a normal gregorian calendar date in UTC
+ */
+double cos_sol_za(int yr, int month, int day, int hour, int minute,
+           double lat, double lon);
+
+/**
+ * Compute the cosine of the solar zenith angle at a given time and location
+ *
+ * Time is given using UTC time and julian day
+ *
+ * See http://en.wikipedia.org/wiki/Solar_zenith_angle
+ */
+double cos_sol_za(int jday, int hour, int minute, double dlat, double dlon);
+
+/**
+ * Compute the cosine of the solar zenith angle at a given time and location
+ *
+ * Time is given using UTC fractional hour and julian day
+ *
+ * See http://en.wikipedia.org/wiki/Solar_zenith_angle
+ */
+double cos_sol_za(int jday, double hour, double dlat, double dlon);
 
 }
 }

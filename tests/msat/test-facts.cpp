@@ -99,6 +99,113 @@ void to::test<2>()
     gen_ensure_equals(round(facts::sat_za(50, 50) / M_PI * 180), 74);
 }
 
+// Test the solar zenith angle calculation
+// FIXME: data not validated against known values, but seems to make sense)
+template<> template<>
+void to::test<3>()
+{
+    // At an equinox
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 0), 1, 0.001);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 90, 0), 0, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -90, 0), 0, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 180, 0), -1, 0.001);
+
+    // Move north along the Greenwich meridian
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 10, 0), 0.98, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 20, 0), 0.94, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 30, 0), 0.86, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 40, 0), 0.76, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 45, 0), 0.71, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 50, 0), 0.64, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 60, 0), 0.50, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 70, 0), 0.34, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 80, 0), 0.17, 0.01);
+
+    // Move south along the Greenwich meridian
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -10, 0), 0.98, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -20, 0), 0.94, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -30, 0), 0.86, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -40, 0), 0.76, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -45, 0), 0.71, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -50, 0), 0.64, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -60, 0), 0.50, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -70, 0), 0.34, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, -80, 0), 0.17, 0.01);
+
+    // Move east along the equator
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  20), 0.95, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  40), 0.79, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  60), 0.53, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  80), 0.21, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  90), 0.03, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 100), -0.14, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 120), -0.47, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 140), -0.75, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 160), -0.93, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 180), -1, 0.01);
+
+    // Move west along the equator
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  -20), 0.93, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  -40), 0.75, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  -60), 0.47, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  -80), 0.14, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0,  -90), -0.03, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, -100), -0.21, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, -120), -0.53, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, -140), -0.79, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, -160), -0.95, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, -180), -1, 0.01);
+
+    // Hours of the day
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 0, 0, 0, 0),  -1   , 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 3, 0, 0, 0),  -0.73, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, 0),  -0.03, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 9, 0, 0, 0),   0.68, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 12, 0, 0, 0),  1   , 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 15, 0, 0, 0),  0.73, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 18, 0, 0, 0),  0.03, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 21, 0, 0, 0), -0.68, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 22, 0, 0, 0, 0),  -1   , 0.01);
+
+    // Move east along the equator, at 6UTC
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,   0), -0.03, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  20),  0.31, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  40),  0.62, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  60),  0.85, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  80),  0.98, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  90),  1.00, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, 100),  0.99, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, 120),  0.88, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, 140),  0.66, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, 160),  0.37, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, 180),  0.03, 0.01);
+
+    // Move west along the equator, at 6UTC
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  -20), -0.37, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  -40), -0.66, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  -60), -0.88, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  -80), -0.99, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0,  -90), -1.00, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, -100), -0.98, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, -120), -0.85, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, -140), -0.62, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, -160), -0.31, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, 0, -180),  0.03, 0.01);
+
+    // Move south, at 6UTC UTC+6: should be the same as moving south at 12UTC
+    // along the Greenwich meridian
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -10, 90), 0.98, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -20, 90), 0.94, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -30, 90), 0.86, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -40, 90), 0.76, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -45, 90), 0.71, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -50, 90), 0.64, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -60, 90), 0.50, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -70, 90), 0.34, 0.01);
+    gen_ensure_similar(facts::cos_sol_za(2013, 3, 21, 6, 0, -80, 90), 0.17, 0.01);
+
+}
+
 }
 
 /* vim:set ts=4 sw=4: */

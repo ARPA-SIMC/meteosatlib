@@ -31,6 +31,7 @@
 #include <cstring>
 #include <iomanip>
 #include <cmath>
+#include <msat/facts.h>
 #include <msat/hrit/MSG_data_RadiometricProc.h>
 
 std::string MSG_image_quality_flag(t_enum_MSG_image_quality_flag iqf)
@@ -646,60 +647,6 @@ void MSG_data_RadiometricProc::get_slope_offset(int channel, double& slope, doub
   }
 }
 
-double jday(int yr, int month, int day)
-{
-  bool leap;
-  double j = 0.0;
-
-  if (((yr%4) == 0 && (yr%100) != 0) || (yr%400) == 0)
-    leap = true;
-  else
-    leap = false;
-  
-  if (month == 1) j = 0.0;
-  if (month == 2) j = 31.0;
-  if (month == 3) j = 59.0;
-  if (month == 4) j = 90.0;
-  if (month == 5) j = 120.0;
-  if (month == 6) j = 151.0;
-  if (month == 7) j = 181.0;
-  if (month == 8) j = 212.0;
-  if (month == 9) j = 243.0;
-  if (month == 10) j = 273.0;
-  if (month == 11) j = 304.0;
-  if (month == 12) j = 334.0;
-  if (month > 2 && leap) j = j + 1.0;
-
-  j = j + day;
-  return j;
-}
-
-double cozena(double day, double hour, double dlat, double dlon)
-{
-  double coz;
-
-  const double sinob = 0.3978;
-  const double dpy = 365.242;
-  const double dph = 15.0;
-  
-  double rpd = M_PI/180.0;
-
-  double dpr = 1.0/rpd;
-  double dang = 2.0*M_PI*(day-1.0)/dpy;
-  double homp = 12.0 + 0.123570*sin(dang) - 0.004289*cos(dang) +
-                0.153809*sin(2.0*dang) + 0.060783*cos(2.0*dang);
-  double hang = dph* (hour-homp) - dlon;
-  double ang = 279.9348*rpd + dang;
-  double sigma = (ang*dpr+0.4087*sin(ang)+1.8724*cos(ang)-
-                 0.0182*sin(2.0*ang)+0.0083*cos(2.0*ang))*rpd;
-  double sindlt = sinob*sin(sigma);
-  double cosdlt = sqrt(1.0-sindlt*sindlt);
-
-  coz = sindlt*sin(rpd*dlat) + cosdlt*cos(rpd*dlat)*cos(rpd*hang);
-
-  return coz;
-}
-
 double scan2zen(double scan, double satheight)
 {
   const double rearth = 6357.0;
@@ -712,22 +659,6 @@ double scan2zen(double scan, double satheight)
 // cos(80deg)
 #define cos80 0.173648178
 
-double sza(int yr, int month, int day, int hour, int minute,
-           float lat, float lon)
-{
-  double hourz = (float) hour + ((float) minute) / 60.0;
-  double jd = jday(yr, month, day);
-  double zenith;
-
-  zenith = cozena(jd, hourz,(double) lat, (double) lon);
-
-  // Use cos(80°) as lower bound, to avoid division by zero
-  if (zenith < cos80)
-    return cos80;
-
-  return zenith;
-}
-
 float radiance_to_reflectance(int chnum, float radiance,
                               int year, int month, int day,
                               int hour, int minute,
@@ -739,12 +670,16 @@ float radiance_to_reflectance(int chnum, float radiance,
     throw;
   }
 
-  double jd = jday(year, month, day);
+  int jd = msat::facts::jday(year, month, day);
   double esd = 1.0 - 0.0167 * cos( 2.0 * M_PI * (jd - 3) / 365.0);
   double oneoveresdsquare = 1.0 / (esd*esd);
   double torad[4] = { 20.76 * oneoveresdsquare, 23.24 * oneoveresdsquare,
                       19.85 * oneoveresdsquare, 25.11 * oneoveresdsquare };
 
   double tr = (chnum < 4) ? torad[chnum-1] : torad[3];
-  return 100.0 * radiance / tr / sza(year, month, day, hour, minute, lat, lon);
+  double cos_sza = msat::facts::cos_sol_za(year, month, day, hour, minute, lat, lon);
+  // Use cos(80°) as lower bound, to avoid division by zero
+  if (cos_sza < cos80)
+    return cos80;
+  return 100.0 * radiance / tr / cos_sza;
 }

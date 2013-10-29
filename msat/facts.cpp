@@ -519,7 +519,7 @@ int significantDigitsForChannel(int channel)
         return 0;
 }
 
-double sat_za(float lat, float lon)
+double sat_za(double lat, double lon)
 {
     // Convert to radians
     double rlat = lat * M_PI / 180.0;
@@ -547,6 +547,87 @@ double sat_za(float lat, float lon)
 
     // Zenith angle
     return M_PI/2 - ele;
+}
+
+int jday(int yr, int month, int day)
+{
+  bool leap;
+  double j = 0.0;
+
+  if (((yr%4) == 0 && (yr%100) != 0) || (yr%400) == 0)
+    leap = true;
+  else
+    leap = false;
+  
+  if (month == 1) j = 0.0;
+  if (month == 2) j = 31.0;
+  if (month == 3) j = 59.0;
+  if (month == 4) j = 90.0;
+  if (month == 5) j = 120.0;
+  if (month == 6) j = 151.0;
+  if (month == 7) j = 181.0;
+  if (month == 8) j = 212.0;
+  if (month == 9) j = 243.0;
+  if (month == 10) j = 273.0;
+  if (month == 11) j = 304.0;
+  if (month == 12) j = 334.0;
+  if (month > 2 && leap) j = j + 1.0;
+
+  j = j + day;
+  return j;
+}
+
+
+// From MSG_data_RadiometricProc.cpp
+double cos_sol_za(int yr, int month, int day, int hour, int minute,
+           double lat, double lon)
+{
+  double hourz = (double)hour + ((double)minute) / 60.0;
+  double jd = jday(yr, month, day);
+  double zenith;
+
+  zenith = cos_sol_za(jd, hourz, lat, lon);
+
+  return zenith;
+}
+
+double cos_sol_za(int jday, int hour, int minute, double dlat, double dlon)
+{
+  double hourz = (double)hour + ((double)minute) / 60.0;
+  return cos_sol_za(jday, hourz, dlat, dlon);
+}
+
+double cos_sol_za(int jday, double hour, double dlat, double dlon)
+{
+  // http://en.wikipedia.org/wiki/Solar_zenith_angle
+  double coz;
+
+  const double sinob = 0.3978;
+  // Days per year
+  const double dpy = 365.242;
+  // Degrees per hour, speed of earth rotation
+  const double dph = 15.0;
+  // From degrees to radians
+  const double rpd = M_PI/180.0;
+  // From radians to degrees
+  const double dpr = 1.0/rpd;
+  // Angle in earth orbit in radians, 0 = the beginning of the year
+  double dang = 2.0*M_PI*(double)(jday-1)/dpy;
+  double homp = 12.0 + 0.123570*sin(dang) - 0.004289*cos(dang) +
+                0.153809*sin(2.0*dang) + 0.060783*cos(2.0*dang);
+  // Hour angle in the local solar time (degrees)
+  double hang = dph* (hour-homp) + dlon;
+  double ang = 279.9348*rpd + dang;
+  double sigma = (ang*dpr+0.4087*sin(ang)+1.8724*cos(ang)-
+                 0.0182*sin(2.0*ang)+0.0083*cos(2.0*ang))*rpd;
+  // Sin of sun declination
+  double sindlt = sinob*sin(sigma);
+  // Cos of sun declination
+  double cosdlt = sqrt(1.0-sindlt*sindlt);
+
+  coz = sindlt*sin(rpd*dlat) + cosdlt*cos(rpd*dlat)*cos(rpd*hang);
+
+  return coz;
 }
 
 

@@ -215,8 +215,6 @@ class MSG_data_RadiometricProc {
     real_4                   StraylightCorrection[12][8][8];
 };
 
-double cozena(double day, double hour, double lat, double lon);
-double jday(int yr, int month, int day);
 double scan2zen(double scan, double satheight);
 
 float radiance_to_reflectance(int chnum, float radiance,

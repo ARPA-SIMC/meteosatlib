@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+ * Copyright (C) 2012--2013  ARPA-SIM <urpsim@smr.arpa.emr.it>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,19 +35,6 @@ namespace xrit {
 
 // cos(80deg)
 #define cos80 0.173648178
-
-// From MSG_data_RadiometricProc.cpp
-static double sza(int yr, int month, int day, int hour, int minute,
-           float lat, float lon)
-{
-  double hourz = (float) hour + ((float) minute) / 60.0;
-  double jd = jday(yr, month, day);
-  double zenith;
-
-  zenith = cozena(jd, hourz,(double) lat, (double) lon);
-
-  return zenith;
-}
 
 struct PixelToLatlon
 {
@@ -129,11 +116,14 @@ bool BaseReflectanceRasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG
 
     eDataType = GDT_Float32;
 
+    // Day time
+    int ye, mo, da, ho, mi;
     if (sscanf(xds->fa.timing.c_str(), "%04d%02d%02d%02d%02d",
             &ye, &mo, &da, &ho, &mi) != 5)
         throw std::runtime_error("cannot parse file time");
 
-    jday = ::jday(ye, mo, da);
+    jday = msat::facts::jday(ye, mo, da);
+    daytime = (double)ho + ((double)mi) / 60.0;
 
     rad_slope  = PRO_data.prologue->radiometric_proc.ImageCalibration[channel_id-1].Cal_Slope;
     rad_offset = PRO_data.prologue->radiometric_proc.ImageCalibration[channel_id-1].Cal_Offset;
@@ -204,8 +194,8 @@ CPLErr SZARasterBand::IReadBlock(int xblock, int yblock, void *buf)
     float* dest = (float*) buf;
     for (int i = 0; i < nBlockXSize * nBlockYSize; ++i)
     {
-        // From radiance to reflectance
-        dest[i] = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        // Just the solar zenith angle
+        dest[i] = facts::cos_sol_za(jday, daytime, lats[i], lons[i]);
         // Normalise outliars
         switch (fpclassify(dest[i]))
         {
@@ -308,7 +298,7 @@ CPLErr ReflectanceRasterBand::IReadBlock(int xblock, int yblock, void *buf)
     {
         // From counts to radiance
         double radiance = raw[i] * rad_slope + rad_offset;
-        double cossza = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        double cossza = facts::cos_sol_za(jday, daytime, lats[i], lons[i]);
         // Use cos(80°) as lower bound, to avoid division by zero
         if (cossza < cos80) cossza = cos80;
         // From radiance to reflectance
@@ -452,7 +442,7 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
 
         double R39_corr = pow((BT108 - 0.25 * (BT108 - BT134)) / BT108, 4);
         double R_therm = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
-        double cosTETA = sza(ye, mo, da, ho, mi, lats[i], lons[i]);
+        double cosTETA = facts::cos_sol_za(jday, daytime, lats[i], lons[i]);
         // Use cos(80°) as lower bound, to avoid division by zero
         if (cosTETA < cos80) cosTETA = cos80;
         double SAT = facts::sat_za(lats[i], lons[i]);
