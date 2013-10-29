@@ -21,7 +21,6 @@
 
 import gdal, ogr
 from gdalconst import *
-from PIL import Image
 import datetime
 import sys
 import os
@@ -38,7 +37,7 @@ def rescale(arr, imin, imax, omin, omax, out=None):
     Rescale values of the array from [imin, imax] to [omin, omax], clipping
     outliers to omin or omax
     """
-    # FIXME: is there a numpy function that does this already?    
+    # FIXME: is there a numpy function that does this already?
     if imin <= imax:
         res = numpy.clip(arr, imin, imax, out)
         res -= imin
@@ -93,17 +92,6 @@ class Satellite(object):
         # Mask away no-data values
         return numpy.ma.masked_equal(arr, band.GetNoDataValue(), copy=False)
 
-    def save_rgb(self, name, r, g, b):
-        r = scipy.misc.toimage(r)
-        g = scipy.misc.toimage(g)
-        b = scipy.misc.toimage(b)
-
-        res = Image.merge("RGB", (r, g, b))
-        d = os.path.dirname(name)
-        fname = os.path.join(d, self.dt.strftime("%Y%m%d%H%M-") + name + ".png")
-        log.info("Saving %s ...", fname)
-        res.save(fname)
-
     def new_dataset(self, channel_name, fname, driver, bands=3, gdtype=gdal.GDT_Byte):
         """
         Create a new empty dataset
@@ -128,7 +116,7 @@ class Satellite(object):
         # Open the data source
         shp = ogr.Open(fname)
         shp_layer = shp.GetLayer(0)
-        
+
         if bs == 1:
             err = gdal.RasterizeLayer(tgtds, (1,), shp_layer, burn_values=(255,))
 
@@ -153,10 +141,10 @@ class Satellite(object):
         res = maker.compute()
         if isinstance(res, tuple):
             bs=3
-            r, g, b = maker.compute()
+            r, g, b = res
         else:
             bs=1
-            v = maker.compute()
+            v = res
 
         # Create the output dataset. If the dataset only supports CreateCopy,
         # work around it by using a temporary dataset in RAM
@@ -165,7 +153,7 @@ class Satellite(object):
             outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=tmpdriver, bands=bs, gdtype=gdal.GDT_Byte)
         else:
             outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=d, bands=bs, gdtype=gdal.GDT_Byte)
-        
+
 
         if isinstance(res, tuple):
             outds.GetRasterBand(1).WriteArray(r)
@@ -173,7 +161,7 @@ class Satellite(object):
             outds.GetRasterBand(3).WriteArray(b)
         else:
             outds.GetRasterBand(1).WriteArray(v)
-            
+
         if shp:
             self.rasterize(outds, bs, shp)
 
@@ -579,7 +567,7 @@ class HrvEnhancedIr(Product):
 
         hrvr = self.sat.get_array("HRVr")
         ir108 = self.sat.get_array("IR_108")
-        
+
         # Map ir108 to a palette
         palmin = 200
         palmax = 240
