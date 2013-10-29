@@ -59,8 +59,8 @@ void do_help(const char* argv0, ostream& out)
             << "  -q, --quiet      Work silently." << endl
             << "  --view           View the contents of a file." << endl
             << "  --viewmore       View the contents of a file, including computed pixel information." << endl
-            << "  -c, --conv FMT   Convert to the given format (see gdalinfo --formats for a list)" << endl
-            << "  --copymd FILE    Amend the dataset with the metadata from the given file" << endl
+            << "  -c, --conv=FMT   Convert to the given format (see gdalinfo --formats for a list)" << endl
+            << "  --copymd=FILE    Amend the dataset with the metadata from the given file" << endl
 #ifdef HAVE_MAGICKPP
             << "  --jpg            Convert to JPEG (with gray scale normalization)." << endl
             << "  --png            Convert to PNG (with gray scale normalization)." << endl
@@ -78,7 +78,7 @@ void do_help(const char* argv0, ostream& out)
             << endl
             << " $ msat --display --Area=30,60,-10,40 file.grb" << endl
             << " $ msat --jpg file.grb" << endl
-            << " $ msat --conv MsatGRIB dir/H:MSG1:HRV:200611130800" << endl
+            << " $ msat --conv=MsatGRIB dir/H:MSG1:HRV:200611130800" << endl
             << endl
             << "Report bugs to " << PACKAGE_BUGREPORT << endl;
         ;
