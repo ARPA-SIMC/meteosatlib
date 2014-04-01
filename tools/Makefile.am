@@ -62,7 +62,7 @@ endif
 if HAVE_MAGICK
 bin_PROGRAMS += hrit/XRIT2Image
 hrit_XRIT2Image_CPPFLAGS = $(MAGICKPP_CFLAGS)
-hrit_XRIT2Image_LDADD = -lMagick++ ../msat/libmsat.la
+hrit_XRIT2Image_LDADD = $(MAGICKPP_LIBS) ../msat/libmsat.la
 hrit_XRIT2Image_SOURCES = hrit/XRIT2Image.cpp
 endif
 
@@ -79,7 +79,7 @@ msg_native_nativedump_SOURCES = msg-native/nativedump.cpp
 if HAVE_MAGICK
 bin_PROGRAMS += msg-native/native2Image
 msg_native_native2Image_CXXFLAGS = $(MAGICKPP_CFLAGS)
-msg_native_native2Image_LDADD = -lMagick++ ../msat/libmsat.la
+msg_native_native2Image_LDADD = $(MAGICKPP_LIBS) ../msat/libmsat.la
 msg_native_native2Image_SOURCES = msg-native/native2Image.cpp
 endif
 
@@ -133,7 +133,7 @@ thornsds_db1_db1_to_netcdf_SOURCES = thornsds_db1/db1_to_netcdf.cpp
 if HAVE_MAGICK
 bin_PROGRAMS += thornsds_db1/db1_to_image
 thornsds_db1_db1_to_image_CPPFLAGS = $(MAGICKPP_CFLAGS)
-thornsds_db1_db1_to_image_LDADD = ../msat/libmsat.la -lMagick++
+thornsds_db1_db1_to_image_LDADD = ../msat/libmsat.la $(MAGICKPP_LIBS)
 thornsds_db1_db1_to_image_SOURCES = thornsds_db1/db1_to_image.cpp
 endif
 endif

@@ -85,6 +85,8 @@ PKG_CHECK_EXISTS(ImageMagick++,[
     AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
     AC_DEFINE([MSAT_HAVE_MAGICKPP], 1, [Magick++ functions are available])
     PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
+    AC_SUBST(MAGICKPP_CFLAGS)
+    AC_SUBST(MAGICKPP_LIBS)
 ], [
     have_libmagick=no
     if test "$enable_hrit" == "yes" -o "$enable_thornsds_db1" == "yes"; then
