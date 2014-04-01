@@ -99,7 +99,7 @@ rm -rf $RPM_BUILD_ROOT
 ## WARNING (GDAL PLUGINS PATH in RHEL/Fedora/CentOS)
 ## Gdal plugins path may vary accordingly to gdal versions and architecture:
 ## - plugins so lib are not versioned in gdal 1.6 and 1.7
-## - in x86_64 gdal looks for plugin in /usr/lib and not /usr/lib64
+## - in x86_64 gdal 1.7 looks for plugin in /usr/lib and not /usr/lib64
 ## (for further info:
 ##  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=508340 )
 ## so you might want to intercept the plugins and put them in the right place:
@@ -113,7 +113,20 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %doc AUTHORS ChangeLog COPYING INSTALL
 %doc PublicDecompWT_LICENSE README TODO
-%{_bindir}
+%{_bindir}/HRI2NetCDF
+%{_bindir}/OpenMTP-IDS_debug
+%{_bindir}/OpenMTP-IDS_sector
+%{_bindir}/OpenMTP-IDS_to_pgm
+%{_bindir}/OpenMTP-IDS_write
+%{_bindir}/OpenMTP_info
+%{_bindir}/OpenMTP_to_NetCDF
+%{_bindir}/XRIT2Image
+%{_bindir}/XRIT2NetCDF
+%{_bindir}/db1_to_image
+%{_bindir}/db1_to_netcdf
+%{_bindir}/native2Image
+%{_bindir}/nativedump
+%{_bindir}/xritdump
 %{_libdir}/libmsat.so*
 
 %files devel
@@ -124,18 +137,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files gdal
 %defattr(-,root,root,-)
-%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.a
-%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.la
-%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so
-%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so.0
-%{_libdir}/gdalplugins/1.7/gdal_Meteosatlib.so.0.0.0
+%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.a
+%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.la
+%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.so
+%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.so.0
+%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.so.0.0.0
 %doc examples/products examples/add_palette
 %doc examples/contrast-stretch examples/make-composite
 %doc examples/bluered-palette.txt examples/ndvi
 
 %files tools
 %defattr(-,root,root,-)
-%{_bindir}
 %{_bindir}/msat
 %{_bindir}/msat-view
 %{_mandir}/man1/msat-view.1.gz
@@ -143,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Apr 1 2014 Daniele Branchini <dbranchini@arpa.emr.it> - 1.4-1
+- minor corrections on specfile for compliance with recent versions of rpm managers
+
 * Wed Feb 27 2013 Daniele Branchini <dbranchini@arpa.emr.it> - 1.2-1
 - Adding example python scripts, some corrections
 
