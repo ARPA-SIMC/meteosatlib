@@ -21,7 +21,7 @@ bin_PROGRAMS = msat
 
 dist_bin_SCRIPTS = msat-view
 
-INCLUDES = -I$(top_srcdir) -I$(top_builddir) $(GDAL_CFLAGS) $(MAGICKPP_CFLAGS) $(MSAT_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) $(GDAL_CFLAGS) $(MAGICKPP_CFLAGS) $(MSAT_CFLAGS)
 
 msat_LDADD = $(GDAL_LIBS) $(MAGICKPP_LIBS) $(MSAT_LIBS) ../msat/libmsat.la
 msat_SOURCES = msat.cpp
@@ -40,7 +40,7 @@ if HAVE_NETCDF
 bin_PROGRAMS += hri/HRI2NetCDF
 hri_HRI2NetCDF_LDFLAGS = $(NETCDF_LIBS)
 hri_HRI2NetCDF_LDADD = ../msat/libmsat.la
-hri_HRI2NetCDF_CPPFLAGS = $(NETCDF_CFLAGS)
+hri_HRI2NetCDF_CPPFLAGS = $(AM_CPPFLAGS) $(NETCDF_CFLAGS)
 hri_HRI2NetCDF_SOURCES = hri/HRI2NetCDF.cpp
 endif
 endif
@@ -54,14 +54,14 @@ hrit_xritdump_SOURCES = hrit/xritdump.cpp
 
 if HAVE_NETCDF
 bin_PROGRAMS += hrit/XRIT2NetCDF
-hrit_XRIT2NetCDF_CPPFLAGS = $(NETCDF_CFLAGS)
+hrit_XRIT2NetCDF_CPPFLAGS = $(AM_CPPFLAGS) $(NETCDF_CFLAGS)
 hrit_XRIT2NetCDF_LDADD = $(NETCDF_LIBS) ../msat/libmsat.la
 hrit_XRIT2NetCDF_SOURCES = hrit/XRIT2NetCDF.cpp
 endif
 
 if HAVE_MAGICK
 bin_PROGRAMS += hrit/XRIT2Image
-hrit_XRIT2Image_CPPFLAGS = $(MAGICKPP_CFLAGS)
+hrit_XRIT2Image_CPPFLAGS = $(AM_CPPFLAGS) $(MAGICKPP_CFLAGS)
 hrit_XRIT2Image_LDADD = $(MAGICKPP_LIBS) ../msat/libmsat.la
 hrit_XRIT2Image_SOURCES = hrit/XRIT2Image.cpp
 endif
@@ -117,7 +117,7 @@ openmtp_OpenMTP_info_SOURCES = openmtp/OpenMTP_info.cc
 if HAVE_NETCDF
 bin_PROGRAMS += openmtp/OpenMTP_to_NetCDF
 openmtp_OpenMTP_to_NetCDF_LDADD = ../msat/libmsat.la $(NETCDF_LIBS)
-openmtp_OpenMTP_to_NetCDF_CPPFLAGS = $(NETCDF_CFLAGS)
+openmtp_OpenMTP_to_NetCDF_CPPFLAGS = $(AM_CPPFLAGS) $(NETCDF_CFLAGS)
 openmtp_OpenMTP_to_NetCDF_SOURCES = openmtp/OpenMTP_to_NetCDF.cpp
 endif
 
@@ -127,12 +127,12 @@ endif
 if THORNSDS_DB1
 bin_PROGRAMS += thornsds_db1/db1_to_netcdf
 thornsds_db1_db1_to_netcdf_LDADD = ../msat/libmsat.la $(NETCDF_LIBS)
-thornsds_db1_db1_to_netcdf_CPPFLAGS = $(NETCDF_CFLAGS)
+thornsds_db1_db1_to_netcdf_CPPFLAGS = $(AM_CPPFLAGS) $(NETCDF_CFLAGS)
 thornsds_db1_db1_to_netcdf_SOURCES = thornsds_db1/db1_to_netcdf.cpp
 
 if HAVE_MAGICK
 bin_PROGRAMS += thornsds_db1/db1_to_image
-thornsds_db1_db1_to_image_CPPFLAGS = $(MAGICKPP_CFLAGS)
+thornsds_db1_db1_to_image_CPPFLAGS = $(AM_CPPFLAGS) $(MAGICKPP_CFLAGS)
 thornsds_db1_db1_to_image_LDADD = ../msat/libmsat.la $(MAGICKPP_LIBS)
 thornsds_db1_db1_to_image_SOURCES = thornsds_db1/db1_to_image.cpp
 endif

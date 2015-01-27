@@ -156,18 +156,24 @@ else
 fi
 enable_grib=$have_gribapi
 
-dnl HDF5 (which does not use pkg-config)
-have_hdf5=yes
-AC_CHECK_LIB([hdf5], [H5Fis_hdf5], [], [have_hdf5=no])
-AC_CHECK_HEADER([hdf5.h], [], [have_hdf5=no])
-if test x"$enable_hdf5" = x"no"; then
-	AC_MSG_WARN("*** hdf5 support disabled")
+dnl Check for hdf5 support
+PKG_CHECK_MODULES([HDF5], [hdf5-serial], [have_hdf5=yes], [have_hdf5=no])
+if test $have_hdf5 = yes
+then
+    PKG_CHECK_MODULES([HDF5],[hdf5-serial])
 else
-	AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
-	HDF5_CFLAGS=""
-	HDF5_LIBS="-lhdf5"
-	AC_SUBST(HDF5_CFLAGS)
-	AC_SUBST(HDF5_LIBS)
+    AX_LIB_HDF5
+    if test "$with_hdf5" = yes
+    then
+        have_hdf5=yes
+    else
+	AC_MSG_WARN("*** hdf5 support disabled")
+    fi
+fi
+if test $have_hdf5 = yes
+then
+    AC_DEFINE([HAVE_HDF5], 1, [hdf5 format enabled])
+    AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
 fi
 enable_safh5=$have_hdf5
 
