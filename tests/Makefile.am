@@ -20,8 +20,12 @@ check_PROGRAMS = msatlib_test
 
 dist_check_SCRIPTS = runtest
 
-TESTS = $(check_PROGRAMS)
 TESTS_ENVIRONMENT = $(srcdir)/runtest
+
+check-local:
+	for test in $(check_PROGRAMS); do \
+		$(TESTS_ENVIRONMENT) $$test ; \
+	done
 
 dist_noinst_HEADERS = \
     tut.h \
