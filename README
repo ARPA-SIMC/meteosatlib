@@ -1,4 +1,8 @@
- * About
+Meteosatlib
+===============================================================
+
+Introduction
+------------
 
 This is a set of libraries, tools and GDAL plugins to read and write Meteosat
 images in several formats.
@@ -12,11 +16,11 @@ Use at Your own risk and for any purposes.
 
 See AUTHORS file for contact information.
 
-See http://sourceforge.net/p/meteosatlib/wiki/Home/ for more examples and
+See https://github.com/ARPA-SIMC/meteosatlib/wiki for more examples and
 troubleshooting.
 
-
- * Installation instructions
+Installation instructions
+-------------------------
 
 **IMPORTANT** about HRIT support:
 
@@ -35,13 +39,14 @@ Besides the optional PublicDecompWT.zip requisite described above, meteosatlib
 is a standard autotools package. See the INSTALL file for detailed
 instructions, which generally can be summarised as tue usual:
 
-  ./configure
-  make
-  make check # optional
-  make install
+    ./configure
+    make
+    make check # optional
+    make install
 
 
- * Package contents
+Package contents
+----------------
 
 decompress/  put PublicDecompWT.zip here. The directory contains scripts and
              patches to convince it to build.
@@ -59,3 +64,8 @@ tools/       command line tools using the library.
 examples/    example code using the low-level libraries and the GDAL plugin.
 
 
+License
+-------
+
+Meteosatlib is licensed under the terms of the GNU General Public License version
+2.  Please see the file COPYING for details.

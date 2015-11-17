@@ -10,8 +10,8 @@ Build-Depends:
  libmsat-dev (>= 0.6),
  libmagick++-dev
 Standards-Version: 3.7.3.0
-Homepage: http://meteosatlib.sourceforge.net
-Vcs-Svn: https://meteosatlib.svn.sourceforge.net/svnroot/meteosatlib/trunk
+Homepage: https://github.com/ARPA-SIMC/meteosatlib
+
 
 Package: libmsat1
 Section: libs
