@@ -15,6 +15,9 @@ endif
 
 man_MANS = msat.1 msat-view.1
 
+msat.1: msat
+	./regenerate-msat-manpage
+
 EXTRA_DIST = msat.1 msat-view.1 regenerate-msat-manpage image.h msat2gdal
 
 # HRI
