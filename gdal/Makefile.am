@@ -3,7 +3,7 @@
 noinst_LTLIBRARIES = libmsatdrv.la
 dist_noinst_HEADERS =
 libmsatdrv_la_SOURCES =
-libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
+libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -Werror
 libmsatdrv_la_CXXFLAGS =
 libmsatdrv_la_LIBADD = ../msat/libmsat.la
 

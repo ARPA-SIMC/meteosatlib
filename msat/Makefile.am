@@ -34,6 +34,7 @@ gdal_includedir = $(msat_includedir)/gdal
 
 dist_gdal_include_HEADERS = \
     gdal/clean_cpl_error.h \
+    gdal/clean_gdal_priv.h \
     gdal/const.h \
     gdal/points.h \
     gdal/dataset.h \

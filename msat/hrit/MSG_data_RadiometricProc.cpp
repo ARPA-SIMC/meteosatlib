@@ -442,7 +442,7 @@ std::ostream& operator<< ( std::ostream& os, MSG_BlackBodyDataUsed &b )
   for (int i = 0; i < 15; i ++)
     os << "PU Bias " << std::setw(2) << std::setfill('0') << i+1
        << "         : " << b.PUBias[i] << std::endl;
-  for (int i = 0; i < 42; i ++)
+  for (int i = 0; i < 12; i ++)
     os << "DCR Values " << std::setw(2) << std::setfill('0') << i+1
        << "       : "
        << std::setw(3) << std::setfill('0') << std::hex << b.DCRValues[i].Value

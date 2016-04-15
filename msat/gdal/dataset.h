@@ -20,8 +20,8 @@
  * Author: Enrico Zini <enrico@enricozini.com>
  */
 
-#include <gdal/gdal_priv.h>
-#include "points.h"
+#include <msat/gdal/clean_gdal_priv.h>
+#include <msat/gdal/points.h>
 
 struct OGRSpatialReference;
 struct OGRCoordinateTransformation;

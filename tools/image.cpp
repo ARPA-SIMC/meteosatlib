@@ -1,7 +1,6 @@
+#include "msat/gdal/clean_gdal_priv.h"
 #include "image.h"
-#include <gdal.h>
-#include <gdal_priv.h>
-#include <stdint.h>
+#include <cstdint>
 #include "config.h"
 #include <Magick++.h>
 

@@ -285,7 +285,7 @@ GDALDataset* GRIBCreateCopy(const char* pszFilename, GDALDataset* src,
 
 		Grib grib;
 #if 1
-		grib.new_from_template(NULL, "GRIB1");
+		grib.new_from_samples(NULL, "GRIB2");
 		if (strcmp(templateName, "msat/ecmwf") == 0)
 		{
 			grib.set_long("editionNumber",1);
@@ -640,9 +640,9 @@ GDALDataset* GRIBCreateCopy(const char* pszFilename, GDALDataset* src,
 		grib.write(pszFilename);
 
 		return (GDALDataset*)GDALOpen(pszFilename, GA_ReadOnly);
-	} catch (griberror& e) {
-		return false;
-	}
+    } catch (griberror& e) {
+        return nullptr;
+    }
 }
 
 }

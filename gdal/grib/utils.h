@@ -117,6 +117,19 @@ struct Grib
         return res;
     }
 
+    CPLErr new_from_samples(grib_context* c, const char* name)
+    {
+        gh = grib_handle_new_from_samples(c, name);
+        trace("h = grib_handle_new_from_samples(%p, \"%s\"); /* %p */", c, name, gh);
+        if (gh == NULL)
+        {
+            CPLError(CE_Failure, CPLE_AppDefined, "Cannot create handle from samples %s", name);
+            return CE_Failure;
+        }
+        return CE_None;
+    }
+
+#if 0
     CPLErr new_from_template(grib_context* c, const char* name)
     {
         gh = grib_handle_new_from_template(c, name);
@@ -128,6 +141,7 @@ struct Grib
         }
         return CE_None;
     }
+#endif
 
     CPLErr new_from_file(grib_context* c, const char* name)
     {
@@ -423,6 +437,4 @@ inline void grib_read_values<double>(Grib& grib, double* buf, size_t* length)
 }
 
 #undef trace
-
-// vim:set ts=2 sw=2:
 #endif

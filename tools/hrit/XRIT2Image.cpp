@@ -145,11 +145,11 @@ int main(int argc, char *argv[ ])
   else filename = ".";
 
   filename = filename + PATH_SEPARATOR + resolution;
-  filename = filename + "-???-??????-";
+  filename = filename + "-\?\?\?-\?\?\?\?\?\?-";
   filename = filename + underscoreit(productid1, 12) + "-";
   filename = filename + underscoreit(productid2, 9) + "-";
-  filename = filename + "0?????___" + "-";
-  filename = filename + timing + "-" + "?_";
+  filename = filename + "0\?\?\?\?\?___" + "-";
+  filename = filename + timing + "-" + "\?_";
 
   glob_t globbuf;
   globbuf.gl_offs = 1;

@@ -44,7 +44,7 @@ using namespace std;
 CPL_CVSID("$Id: gdal_translate.cpp 15640 2008-10-29 20:19:56Z rouault $");
 
 static void AttachMetadata( GDALDatasetH, char ** );
-static int bSubCall = FALSE;
+// static int bSubCall = FALSE;
 
 GDALTranslate::GDALTranslate()
 {
@@ -108,7 +108,7 @@ GDALDataset* GDALTranslate::translate(GDALDatasetH hDataset)
     // int                 bQuiet = FALSE;
     // GDALProgressFunc    pfnProgress = GDALTermProgress;
     // int                 iSrcFileArg = -1, iDstFileArg = -1;
-    int                 bCopySubDatasets = FALSE;
+    // int                 bCopySubDatasets = FALSE;
 
     /* Check strict compilation and runtime library version as we use C++ API */
     if (! GDAL_CHECK_VERSION("GDALTranslate"))

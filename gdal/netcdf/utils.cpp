@@ -192,95 +192,97 @@ CPLErr NetCDFRasterBand::IReadBlock(int xblock, int yblock, void *buf)
 template<typename DTYPE>
 bool copy_data(NcVar& dst, GDALRasterBand& src, GDALDataType outType)
 {
-        DTYPE* pixels = new DTYPE[src.GetXSize()*src.GetYSize()];
-        if (src.RasterIO(GF_Read, 0, 0, src.GetXSize(), src.GetYSize(), pixels, src.GetXSize(), src.GetYSize(), outType, 0, 0) != CE_None)
-        {
-                delete[] pixels;
-                return false;
-        }
-        if (!dst.put(pixels, 1, src.GetYSize(), src.GetXSize()))
-        {
-                delete[] pixels;
-                CPLError(CE_Failure, CPLE_AppDefined, "Cannot write image values");
-                return false;
-        }
+    DTYPE* pixels = new DTYPE[src.GetXSize()*src.GetYSize()];
+    if (src.RasterIO(GF_Read, 0, 0, src.GetXSize(), src.GetYSize(), pixels, src.GetXSize(), src.GetYSize(), outType, 0, 0) != CE_None)
+    {
         delete[] pixels;
-        return true;
+        return false;
+    }
+    if (!dst.put(pixels, 1, src.GetYSize(), src.GetXSize()))
+    {
+        delete[] pixels;
+        CPLError(CE_Failure, CPLE_AppDefined, "Cannot write image values");
+        return false;
+    }
+    delete[] pixels;
+    return true;
 }
 
 NcVar* rasterBandToNcVar(GDALRasterBand* rb, NcFile& ncf, NcDim* tdim, NcDim* ldim, NcDim* cdim)
 {
-        NcError nce(NcError::silent_nonfatal);
-        GDALDataType dtype = rb->GetRasterDataType();
-        NcType dtdst;
-        GDALDataType gdaldst;
-        // See http://www.unidata.ucar.edu/software/netcdf/docs/BestPractices.html#Unsigned%20Data
-        bool _Unsigned = false;
-        switch (dtype)
-        {
-                case GDT_Unknown:
-                        CPLError(CE_Failure, CPLE_AppDefined, "Source raster band has unknown data type");
-                        return NULL;
-                case GDT_Byte: dtdst = ncByte; gdaldst = GDT_Byte; _Unsigned = true; break;
-                case GDT_Int16: dtdst = ncShort; gdaldst = GDT_Int16; break;
-                case GDT_UInt16: dtdst = ncShort; gdaldst = GDT_UInt16; _Unsigned = true; break;
-                case GDT_Int32: dtdst = ncInt; gdaldst = GDT_Int32; break;
-                case GDT_UInt32: dtdst = ncInt; gdaldst = GDT_UInt32; _Unsigned = true; break;
-                case GDT_Float32: dtdst = ncFloat; gdaldst = GDT_Float32; break;
-                case GDT_Float64: dtdst = ncDouble; gdaldst = GDT_Float64; break;
-                case GDT_CInt16:
-                case GDT_CInt32:
-                case GDT_CFloat32:
-                case GDT_CFloat64:
-                        CPLError(CE_Failure, CPLE_AppDefined, "Source raster band has complex data type, not supported by NetCDF");
-                        return NULL;
-                default:
-                        CPLError(CE_Failure, CPLE_AppDefined, "Source raster band has unknown data type");
-                        return NULL;
-        }
+    NcError nce(NcError::silent_nonfatal);
+    GDALDataType dtype = rb->GetRasterDataType();
+    NcType dtdst;
+    GDALDataType gdaldst;
+    // See http://www.unidata.ucar.edu/software/netcdf/docs/BestPractices.html#Unsigned%20Data
+    bool _Unsigned = false;
+    switch (dtype)
+    {
+        case GDT_Unknown:
+            CPLError(CE_Failure, CPLE_AppDefined, "Source raster band has unknown data type");
+            return NULL;
+        case GDT_Byte: dtdst = ncByte; gdaldst = GDT_Byte; _Unsigned = true; break;
+        case GDT_Int16: dtdst = ncShort; gdaldst = GDT_Int16; break;
+        case GDT_UInt16: dtdst = ncShort; gdaldst = GDT_UInt16; _Unsigned = true; break;
+        case GDT_Int32: dtdst = ncInt; gdaldst = GDT_Int32; break;
+        case GDT_UInt32: dtdst = ncInt; gdaldst = GDT_UInt32; _Unsigned = true; break;
+        case GDT_Float32: dtdst = ncFloat; gdaldst = GDT_Float32; break;
+        case GDT_Float64: dtdst = ncDouble; gdaldst = GDT_Float64; break;
+        case GDT_CInt16:
+        case GDT_CInt32:
+        case GDT_CFloat32:
+        case GDT_CFloat64:
+            CPLError(CE_Failure, CPLE_AppDefined, "Source raster band has complex data type, not supported by NetCDF");
+            return NULL;
+        default:
+            CPLError(CE_Failure, CPLE_AppDefined, "Source raster band has unknown data type");
+            return NULL;
+    }
 
-        NcVar *ivar = ncf.add_var(rb->GetDescription(), dtdst, tdim, ldim, cdim);
-        if (!ivar || !ivar->is_valid())
-        {
-                CPLError(CE_Failure, CPLE_AppDefined, "Cannot add variable '%s': %s", rb->GetDescription(), nce.get_errmsg());
-                return NULL;
-        }
-        if (!ncfAddAttr(*ivar, "add_offset", rb->GetOffset())) return NULL;
-        if (!ncfAddAttr(*ivar, "scale_factor", rb->GetScale())) return NULL;
-        if (!ncfAddAttr(*ivar, "units", rb->GetUnitType())) return NULL;
-        if (_Unsigned)
-                if (!ncfAddAttr(*ivar, "_Unsigned", "true")) return NULL;
+    NcVar *ivar = ncf.add_var(rb->GetDescription(), dtdst, tdim, ldim, cdim);
+    if (!ivar || !ivar->is_valid())
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Cannot add variable '%s': %s", rb->GetDescription(), nce.get_errmsg());
+        return NULL;
+    }
+    if (!ncfAddAttr(*ivar, "add_offset", rb->GetOffset())) return NULL;
+    if (!ncfAddAttr(*ivar, "scale_factor", rb->GetScale())) return NULL;
+    if (!ncfAddAttr(*ivar, "units", rb->GetUnitType())) return NULL;
+    if (_Unsigned)
+        if (!ncfAddAttr(*ivar, "_Unsigned", "true")) return NULL;
 
-        // Write output values
-        //cerr << "output." << endl;
-        bool res = false;
-        switch (dtdst)
-        {
-                case ncByte:
-                        if (!ncfAddAttr(*ivar, "_FillValue", (int8_t)rb->GetNoDataValue())) return NULL;
-                        res = copy_data<ncbyte>(*ivar, *rb, gdaldst);
-                        break;
-                case ncShort:
-                        if (!ncfAddAttr(*ivar, "_FillValue", (int16_t)rb->GetNoDataValue())) return NULL;
-                        res = copy_data<int16_t>(*ivar, *rb, gdaldst);
-                        break;
-                case ncInt:
-                        if (!ncfAddAttr(*ivar, "_FillValue", (int32_t)rb->GetNoDataValue())) return NULL;
-                        res = copy_data<int32_t>(*ivar, *rb, gdaldst);
-                        break;
-                case ncFloat:
-                        if (!ncfAddAttr(*ivar, "_FillValue", (float)rb->GetNoDataValue())) return NULL;
-                        res = copy_data<float>(*ivar, *rb, gdaldst);
-                        break;
-                case ncDouble:
-                        if (!ncfAddAttr(*ivar, "_FillValue", (double)rb->GetNoDataValue())) return NULL;
-                        res = copy_data<double>(*ivar, *rb, gdaldst);
-                        break;
-                default:
-                        CPLError(CE_Failure, CPLE_AppDefined, "programming error: an unsupported target data type has been selected");
-                        return NULL;
-        }
-        return ivar;
+    // Write output values
+    //cerr << "output." << endl;
+    bool res = false;
+    switch (dtdst)
+    {
+        case ncByte:
+            if (!ncfAddAttr(*ivar, "_FillValue", (int8_t)rb->GetNoDataValue())) return NULL;
+            res = copy_data<ncbyte>(*ivar, *rb, gdaldst);
+            break;
+        case ncShort:
+            if (!ncfAddAttr(*ivar, "_FillValue", (int16_t)rb->GetNoDataValue())) return NULL;
+            res = copy_data<int16_t>(*ivar, *rb, gdaldst);
+            break;
+        case ncInt:
+            if (!ncfAddAttr(*ivar, "_FillValue", (int32_t)rb->GetNoDataValue())) return NULL;
+            res = copy_data<int32_t>(*ivar, *rb, gdaldst);
+            break;
+        case ncFloat:
+            if (!ncfAddAttr(*ivar, "_FillValue", (float)rb->GetNoDataValue())) return NULL;
+            res = copy_data<float>(*ivar, *rb, gdaldst);
+            break;
+        case ncDouble:
+            if (!ncfAddAttr(*ivar, "_FillValue", (double)rb->GetNoDataValue())) return NULL;
+            res = copy_data<double>(*ivar, *rb, gdaldst);
+            break;
+        default:
+            CPLError(CE_Failure, CPLE_AppDefined, "programming error: an unsupported target data type has been selected");
+            return NULL;
+    }
+    if (!res)
+        return nullptr;
+    return ivar;
 }
 
 }

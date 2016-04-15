@@ -150,7 +150,7 @@ int main( int argc, char* argv[] )
   else filename = ".";
 
   filename = filename + PATH_SEPARATOR + resolution;
-  filename = filename + "-???-??????-";
+  filename = filename + "-\?\?\?-\?\?\?\?\?\?-";
   filename = filename + underscoreit(productid1, 12) + "-";
   filename = filename + underscoreit("_", 9) + "-";
   filename = filename + "PRO______-";
@@ -190,7 +190,7 @@ int main( int argc, char* argv[] )
   else filename = ".";
 
   filename = filename + PATH_SEPARATOR + resolution;
-  filename = filename + "-???-??????-";
+  filename = filename + "-\?\?\?-\?\?\?\?\?\?-";
   filename = filename + underscoreit(productid1, 12) + "-";
   filename = filename + underscoreit(productid2, 9) + "-";
   filename = filename + "0?????___" + "-";

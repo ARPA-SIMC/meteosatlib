@@ -27,6 +27,7 @@
 //
 //-----------------------------------------------------------------------------
 #include <msat/hri/HRI_machine.h>
+#include <cstdint>
 
 HRI_machine::HRI_machine()
 {
@@ -178,10 +179,13 @@ static inline void rightshift(unsigned long *pnt, int n)
 
 float HRI_machine::r4_from_buff( const unsigned char *buff )
 {
-   unsigned long uval;
-   unsigned long *pnt, sign, fraction;
-   long exponent;
-   unsigned char swp[4];
+    union {
+        uint32_t i;
+        float f;
+    } uval;
+    unsigned long *pnt, sign, fraction;
+    long exponent;
+    unsigned char swp[4];
 
    if (isbig)
      pnt = (unsigned long *) buff;
@@ -218,22 +222,25 @@ float HRI_machine::r4_from_buff( const unsigned char *buff )
 
    fraction &= 0x007FFFFF;
    if ((exponent += 127) >= 255)
-      uval = sign | 0x7F7FFFFF;
+      uval.i = sign | 0x7F7FFFFF;
    else if (exponent <= 0)
-      uval = sign;
+      uval.i = sign;
    else
-      uval = sign | (exponent << 23) | fraction;
+      uval.i = sign | (exponent << 23) | fraction;
 
-   return *((float *) (&uval));
+   return uval.f;
 }
 
 double HRI_machine::r8_from_buff( const unsigned char *buff )
 {
-   int idxh, idxl;
-   unsigned long tmp, sign, fraction[2], *pnt;
-   unsigned long uval[2];
-   long exponent;
-   unsigned char swp[8];
+    int idxh, idxl;
+    unsigned long tmp, sign, fraction[2], *pnt;
+    union {
+        uint32_t i[2];
+        double d;
+    } uval;
+    long exponent;
+    unsigned char swp[8];
 
    if (isbig)
      pnt = (unsigned long *) buff;
@@ -256,9 +263,9 @@ double HRI_machine::r8_from_buff( const unsigned char *buff )
    tmp = pnt[0];
    if ((tmp & 0x7FFFFFFF) == 0)
    {
-     uval[idxl] = pnt[0];
-     uval[idxh] = pnt[1];
-     return *((double *) uval);
+     uval.i[idxl] = pnt[0];
+     uval.i[idxh] = pnt[1];
+     return uval.d;
    }
 
    sign        = pnt[0] & 0x80000000;
@@ -285,38 +292,56 @@ double HRI_machine::r8_from_buff( const unsigned char *buff )
    fraction[0] &= 0x000FFFFF;
    if ((exponent += 1023) >= 2047)
    {
-      uval[idxl] = sign | 0X7FEFFFFF;
-      uval[idxh] = 0xFFFFFFFF;
+      uval.i[idxl] = sign | 0X7FEFFFFF;
+      uval.i[idxh] = 0xFFFFFFFF;
    }
    else if (exponent <= 0)
    {
-      uval[idxl] = sign;
-      uval[idxh] = 0;
+      uval.i[idxl] = sign;
+      uval.i[idxh] = 0;
    }
    else
    {
-      uval[idxl] = sign | (exponent << 20) | fraction[0];
-      uval[idxh] = fraction[1];
+      uval.i[idxl] = sign | (exponent << 20) | fraction[0];
+      uval.i[idxh] = fraction[1];
    }
-   return *((double *) uval);
+   return uval.d;
 }
 
 short int HRI_machine::i2_from_buff( const unsigned char *buff )
 {
-  if (isbig) return *((short int *) buff);
-  unsigned char sw[2];
-  sw[0] = buff[1];
-  sw[1] = buff[0];
-  return *((int *) sw);
+  union {
+      uint8_t c[2];
+      int16_t i;
+  } sw;
+  if (isbig)
+  {
+      sw.c[0] = buff[0];
+      sw.c[1] = buff[1];
+  } else {
+      sw.c[0] = buff[1];
+      sw.c[1] = buff[0];
+  }
+  return sw.i;
 }
 
 int HRI_machine::i4_from_buff( const unsigned char *buff )
 {
-  if (isbig) return *((int *) buff);
-  unsigned char sw[4];
-  sw[0] = buff[3];
-  sw[1] = buff[2];
-  sw[2] = buff[1];
-  sw[3] = buff[0];
-  return *((int *) sw);
+  union {
+      uint8_t c[4];
+      int32_t i;
+  } sw;
+  if (isbig)
+  {
+      sw.c[0] = buff[0];
+      sw.c[1] = buff[1];
+      sw.c[2] = buff[2];
+      sw.c[3] = buff[3];
+  } else {
+      sw.c[0] = buff[3];
+      sw.c[1] = buff[2];
+      sw.c[2] = buff[1];
+      sw.c[3] = buff[0];
+  }
+  return sw.i;
 }
