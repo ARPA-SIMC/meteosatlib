@@ -223,8 +223,11 @@ bool NetCDFDataset::init()
 GDALDataset* NetCDFOpen(GDALOpenInfo* info)
 {
     // We want a real file
-    if (info->fpL == NULL)
-        return NULL;
+#if GDAL_VERSION_MAJOR == 2
+    if (info->fpL == NULL) return NULL;
+#else
+    if (info->fp == NULL) return NULL;
+#endif
 
     NcError nce(NcError::silent_nonfatal);
 
