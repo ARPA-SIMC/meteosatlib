@@ -241,31 +241,31 @@ bool NetCDFDataset::init()
 
 GDALDataset* NetCDFOpen(GDALOpenInfo* info)
 {
-        // We want a real file
-        if (info->fp == NULL)
-                return NULL;
+    // We want a real file
+    if (info->fpL == NULL)
+        return NULL;
 
-        NcError nce(NcError::silent_nonfatal);
+    NcError nce(NcError::silent_nonfatal);
 
-        // Try opening and seeing if it is a NetCDF file
-        auto_ptr<NcFile> nc;
-        try {
-                nc.reset(new NcFile(info->pszFilename, NcFile::ReadOnly));
-                if (!nc->is_valid()) return NULL;
-                if (nc->get_att("Satellite") == NULL)
-                        return NULL;
-        } catch (...) {
-                return NULL;
-        }
+    // Try opening and seeing if it is a NetCDF file
+    auto_ptr<NcFile> nc;
+    try {
+        nc.reset(new NcFile(info->pszFilename, NcFile::ReadOnly));
+        if (!nc->is_valid()) return NULL;
+        if (nc->get_att("Satellite") == NULL)
+            return NULL;
+    } catch (...) {
+        return NULL;
+    }
 
-        // Create the dataset
-        auto_ptr<NetCDFDataset> ds(new NetCDFDataset(nc.release()));
+    // Create the dataset
+    auto_ptr<NetCDFDataset> ds(new NetCDFDataset(nc.release()));
 
-        // Initialise the generic dataset bits using information from the
-        // NetCDF data
-        if (!ds->init()) return NULL;
+    // Initialise the generic dataset bits using information from the
+    // NetCDF data
+    if (!ds->init()) return NULL;
 
-        return ds.release();
+    return ds.release();
 }
 
 GDALDataset* NetCDFCreateCopy(const char* pszFilename, GDALDataset* src, 

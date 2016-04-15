@@ -1,22 +1,3 @@
-/*
- * Copyright (C) 2005--2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
-
 #include "grib.h"
 #include "utils.h"
 #include <msat/gdal/const.h>
@@ -93,7 +74,7 @@ public:
 	int spacecraft_id;
 	string projWKT;
 
-	GRIBDataset(grib_handle* gh) : grib(gh) {}
+    GRIBDataset(Grib&& grib) : grib(move(grib)) {}
 
 	bool init()
 	{
@@ -199,7 +180,7 @@ GRIBRasterBand::GRIBRasterBand(GRIBDataset* ds, int idx /*, GDALDataType dt */)
 GDALDataset* GRIBOpen(GDALOpenInfo* info)
 {
 	// We want a real file
-	if (info->fp == NULL)	
+	if (info->fpL == NULL)
 		return NULL;
 
 	if (info->nHeaderBytes < 4)
@@ -212,12 +193,12 @@ GDALDataset* GRIBOpen(GDALOpenInfo* info)
 
 	string filename(info->pszFilename);
 
-	Grib grib;
-	if (grib.new_from_file(NULL, info->pszFilename, info->fp) != CE_None)
-		return NULL;
-	
+    Grib grib;
+    if (grib.new_from_file(NULL, info->pszFilename) != CE_None)
+        return NULL;
+
 	// Create the dataset
-	auto_ptr<GRIBDataset> ds(new GRIBDataset(grib.release_handle()));
+	auto_ptr<GRIBDataset> ds(new GRIBDataset(move(grib)));
 
         // Initialise the dataset
 	if (!ds->init()) return NULL;

@@ -360,30 +360,30 @@ bool SAFH5Dataset::init()
 
 GDALDataset* SAFH5Open(GDALOpenInfo* info)
 {
-        // We want a real file
-        if (info->fp == NULL)   
-                return NULL;
+    // We want a real file
+    if (info->fpL == NULL)
+        return NULL;
 
-        string filename(info->pszFilename);
+    string filename(info->pszFilename);
 
-        // Open the file and fiddle around to see if everything is there
-        mh5::File h5;
-        try {
-            if (!mh5::File::is_hdf5(filename))
-                return NULL;
-            h5.open(filename, H5F_ACC_RDONLY);
-            if (!h5.has_attr("/", "SAF"))
-                return NULL;
-        } catch (mh5::Error& e) {
-            //e.printError(stderr);
+    // Open the file and fiddle around to see if everything is there
+    mh5::File h5;
+    try {
+        if (!mh5::File::is_hdf5(filename))
             return NULL;
-        }
+        h5.open(filename, H5F_ACC_RDONLY);
+        if (!h5.has_attr("/", "SAF"))
+            return NULL;
+    } catch (mh5::Error& e) {
+        //e.printError(stderr);
+        return NULL;
+    }
 
-        std::auto_ptr<SAFH5Dataset> ds(new SAFH5Dataset(h5));
+    std::auto_ptr<SAFH5Dataset> ds(new SAFH5Dataset(h5));
 
-        if (!ds->init()) return NULL;
+    if (!ds->init()) return NULL;
 
-        return ds.release();
+    return ds.release();
 }
 
 }

@@ -239,31 +239,31 @@ bool NetCDF24Dataset::init()
 
 GDALDataset* NetCDF24Open(GDALOpenInfo* info)
 {
-        // We want a real file
-        if (info->fp == NULL)   
-                return NULL;
+    // We want a real file
+    if (info->fpL == NULL)
+        return NULL;
 
-        NcError nce(NcError::silent_nonfatal);
+    NcError nce(NcError::silent_nonfatal);
 
-        // Try opening and seeing if it is a NetCDF24 file
-        auto_ptr<NcFile> nc;
-        try {
-                nc.reset(new NcFile(info->pszFilename, NcFile::ReadOnly));
-                if (!nc->is_valid()) return NULL;
-                if (nc->get_att("GribEditionNumber") == NULL)
-                        return NULL;
-        } catch (...) {
-                return NULL;
-        }
+    // Try opening and seeing if it is a NetCDF24 file
+    auto_ptr<NcFile> nc;
+    try {
+        nc.reset(new NcFile(info->pszFilename, NcFile::ReadOnly));
+        if (!nc->is_valid()) return NULL;
+        if (nc->get_att("GribEditionNumber") == NULL)
+            return NULL;
+    } catch (...) {
+        return NULL;
+    }
 
-        // Create the dataset
-        auto_ptr<NetCDF24Dataset> ds(new NetCDF24Dataset(nc.release()));
+    // Create the dataset
+    auto_ptr<NetCDF24Dataset> ds(new NetCDF24Dataset(nc.release()));
 
-        // Initialise the generic dataset bits using information from the
-        // NetCDF data
-        if (!ds->init()) return NULL;
+    // Initialise the generic dataset bits using information from the
+    // NetCDF data
+    if (!ds->init()) return NULL;
 
-        return ds.release();
+    return ds.release();
 }
 
 GDALDataset* NetCDF24CreateCopy(const char* pszFilename, GDALDataset* src, 

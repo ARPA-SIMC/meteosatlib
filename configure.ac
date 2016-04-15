@@ -74,6 +74,9 @@ AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_LANG_CPLUSPLUS
 
+dnl Use c++11
+AX_CXX_COMPILE_STDCXX_11(noext)
+
 dnl --------------------------------------------------------------------
 dnl Checks for libraries.
 
