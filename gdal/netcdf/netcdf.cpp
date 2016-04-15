@@ -248,7 +248,7 @@ GDALDataset* NetCDFOpen(GDALOpenInfo* info)
     NcError nce(NcError::silent_nonfatal);
 
     // Try opening and seeing if it is a NetCDF file
-    auto_ptr<NcFile> nc;
+    unique_ptr<NcFile> nc;
     try {
         nc.reset(new NcFile(info->pszFilename, NcFile::ReadOnly));
         if (!nc->is_valid()) return NULL;
@@ -259,7 +259,7 @@ GDALDataset* NetCDFOpen(GDALOpenInfo* info)
     }
 
     // Create the dataset
-    auto_ptr<NetCDFDataset> ds(new NetCDFDataset(nc.release()));
+    unique_ptr<NetCDFDataset> ds(new NetCDFDataset(nc.release()));
 
     // Initialise the generic dataset bits using information from the
     // NetCDF data
@@ -543,20 +543,20 @@ extern "C" {
 
 void GDALRegister_MsatNetCDF()
 {
-        if (! GDAL_CHECK_VERSION("MsatNetCDF"))
-                return;
+    if (!GDAL_CHECK_VERSION("MsatNetCDF"))
+        return;
 
-        if (GDALGetDriverByName("MsatNetCDF") == NULL)
-        {
-                auto_ptr<GDALDriver> driver(new GDALDriver());
-                driver->SetDescription("MsatNetCDF");
-                driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosatlib NetCDF");
-                //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
-                driver->SetMetadataItem(GDAL_DMD_EXTENSION, "nc");
-                driver->pfnOpen = msat::netcdf::NetCDFOpen;
-                driver->pfnCreateCopy = msat::netcdf::NetCDFCreateCopy;
-                GetGDALDriverManager()->RegisterDriver(driver.release());
-        }
+    if (GDALGetDriverByName("MsatNetCDF") == NULL)
+    {
+        unique_ptr<GDALDriver> driver(new GDALDriver());
+        driver->SetDescription("MsatNetCDF");
+        driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosatlib NetCDF");
+        //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
+        driver->SetMetadataItem(GDAL_DMD_EXTENSION, "nc");
+        driver->pfnOpen = msat::netcdf::NetCDFOpen;
+        driver->pfnCreateCopy = msat::netcdf::NetCDFCreateCopy;
+        GetGDALDriverManager()->RegisterDriver(driver.release());
+    }
 }
 
 }

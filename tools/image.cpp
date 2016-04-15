@@ -1,24 +1,3 @@
-/*
- * image - Image conversion/display functions
- *
- * Copyright (C) 2005--2010  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
-
 #include "image.h"
 #include <gdal.h>
 #include <gdal_priv.h>
@@ -79,116 +58,114 @@ uint8_t* Stretch::rescale(GDALRasterBand& band, const T* vals, T vmin, T vmax)
   return res8;
 }
 
-static std::auto_ptr<Magick::Image> imageToMagick(GDALRasterBand& band, Stretch& s)
+static std::unique_ptr<Magick::Image> imageToMagick(GDALRasterBand& band, Stretch& s)
 {
-        auto_ptr<Magick::Image> image;
-        size_t sx = band.GetXSize();
-        size_t sy = band.GetYSize();
-        size_t tx = sx;
-        size_t ty = sy;
+    unique_ptr<Magick::Image> image;
+    size_t sx = band.GetXSize();
+    size_t sy = band.GetYSize();
+    size_t tx = sx;
+    size_t ty = sy;
 
-        // Read the image data
-        switch (band.GetRasterDataType())
-        {
-                case GDT_Byte: {
-                        uint8_t* res = new uint8_t[tx * sy];
-                        if (band.RasterIO(GF_Read, 0, 0, sx, sy, res, tx, ty, GDT_Byte, 0, 0) != CE_None)
-                        {
-                                delete[] res;
-                                return std::auto_ptr<Magick::Image>(0);
-                        }
+    // Read the image data
+    switch (band.GetRasterDataType())
+    {
+        case GDT_Byte: {
+            uint8_t* res = new uint8_t[tx * sy];
+            if (band.RasterIO(GF_Read, 0, 0, sx, sy, res, tx, ty, GDT_Byte, 0, 0) != CE_None)
+            {
+                delete[] res;
+                return std::unique_ptr<Magick::Image>();
+            }
 
-                        // Compute min and max values
-                        uint8_t vmin;
-                        uint8_t vmax;
-                        s.compute_if_needed(band, res, vmin, vmax);
+            // Compute min and max values
+            uint8_t vmin;
+            uint8_t vmax;
+            s.compute_if_needed(band, res, vmin, vmax);
 
-                        // Rescale to 8 bits
-                        uint8_t* res8 = s.rescale(band, res, vmin, vmax);
-                        delete[] res;
+            // Rescale to 8 bits
+            uint8_t* res8 = s.rescale(band, res, vmin, vmax);
+            delete[] res;
 
-                        image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
-                        delete[] res8;
-                        break;
-                }
-                case GDT_UInt16: {
-                        uint16_t* res = new uint16_t[tx * sy];
-                        if (band.RasterIO(GF_Read, 0, 0, sx, sy, res, tx, ty, GDT_UInt16, 0, 0) != CE_None)
-                        {
-                                delete[] res;
-                                return std::auto_ptr<Magick::Image>(0);
-                        }
-
-                        // Compute min and max values
-                        uint16_t vmin;
-                        uint16_t vmax;
-                        s.compute_if_needed(band, res, vmin, vmax);
-
-                        // Rescale to 8 bits
-                        uint8_t* res8 = s.rescale(band, res, vmin, vmax);
-                        delete[] res;
-
-                        image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
-                        delete[] res8;
-                        break;
-                }
-                default: {
-                        float* res = new float[tx * ty];
-                        if (band.RasterIO(GF_Read, 0, 0, sx, sy, res, tx, ty, GDT_Float32, 0, 0) != CE_None)
-                        {
-                                delete[] res;
-                                return std::auto_ptr<Magick::Image>(0);
-                        }
-
-                        // Compute min and max values
-                        float vmin = 0;
-                        float vmax = 0;
-                        s.compute_if_needed(band, res, vmin, vmax);
-
-                        // Rescale to 8 bits
-                        uint8_t* res8 = s.rescale(band, res, vmin, vmax);
-                        delete[] res;
-
-                        image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
-                        delete[] res8;
-                        break;
-                }
+            image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
+            delete[] res8;
+            break;
         }
+        case GDT_UInt16: {
+            uint16_t* res = new uint16_t[tx * sy];
+            if (band.RasterIO(GF_Read, 0, 0, sx, sy, res, tx, ty, GDT_UInt16, 0, 0) != CE_None)
+            {
+                delete[] res;
+                return std::unique_ptr<Magick::Image>();
+            }
 
-        return image;
+            // Compute min and max values
+            uint16_t vmin;
+            uint16_t vmax;
+            s.compute_if_needed(band, res, vmin, vmax);
+
+            // Rescale to 8 bits
+            uint8_t* res8 = s.rescale(band, res, vmin, vmax);
+            delete[] res;
+
+            image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
+            delete[] res8;
+            break;
+        }
+        default: {
+            float* res = new float[tx * ty];
+            if (band.RasterIO(GF_Read, 0, 0, sx, sy, res, tx, ty, GDT_Float32, 0, 0) != CE_None)
+            {
+                delete[] res;
+                return std::unique_ptr<Magick::Image>();
+            }
+
+            // Compute min and max values
+            float vmin = 0;
+            float vmax = 0;
+            s.compute_if_needed(band, res, vmin, vmax);
+
+            // Rescale to 8 bits
+            uint8_t* res8 = s.rescale(band, res, vmin, vmax);
+            delete[] res;
+
+            image.reset(new Magick::Image(tx, ty, "I", Magick::CharPixel, res8));
+            delete[] res8;
+            break;
+        }
+    }
+
+    return image;
 }
 
 bool export_image(GDALRasterBand* band, const std::string& fileName, Stretch& s)
 {
-        // ProgressTask p("Exporting image to " + fileName);
+    // ProgressTask p("Exporting image to " + fileName);
 
-        size_t pos = fileName.rfind('.');
-        if (pos == string::npos)
-        {
-                CPLError(CE_Failure, CPLE_AppDefined, "file name %s has no extension, so I cannot guess the file format", fileName.c_str());
-                return false;
-        }
+    size_t pos = fileName.rfind('.');
+    if (pos == string::npos)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "file name %s has no extension, so I cannot guess the file format", fileName.c_str());
+        return false;
+    }
 
-        auto_ptr<Magick::Image> image = imageToMagick(*band, s);
+    unique_ptr<Magick::Image> image = imageToMagick(*band, s);
 
-        // p.activity("Writing image to file");
-        image->write(fileName);
-        return true;
+    // p.activity("Writing image to file");
+    image->write(fileName);
+    return true;
 }
 
 bool display_image(GDALRasterBand* band, Stretch& s)
 {
-        //ProgressTask p("Displaying image " + defaultFilename(band));
-        auto_ptr<Magick::Image> image = imageToMagick(*band, s);
+    //ProgressTask p("Displaying image " + defaultFilename(band));
+    unique_ptr<Magick::Image> image = imageToMagick(*band, s);
 
-        if (image.get() == 0) return false;
+    if (image.get() == 0) return false;
 
-        //p.activity("Displaying image");
-        image->display();
+    //p.activity("Displaying image");
+    image->display();
 
-        return true;
+    return true;
 }
 
 }
-
-// vim:set ts=2 sw=2:

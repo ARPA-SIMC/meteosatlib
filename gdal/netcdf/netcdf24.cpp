@@ -246,7 +246,7 @@ GDALDataset* NetCDF24Open(GDALOpenInfo* info)
     NcError nce(NcError::silent_nonfatal);
 
     // Try opening and seeing if it is a NetCDF24 file
-    auto_ptr<NcFile> nc;
+    unique_ptr<NcFile> nc;
     try {
         nc.reset(new NcFile(info->pszFilename, NcFile::ReadOnly));
         if (!nc->is_valid()) return NULL;
@@ -257,7 +257,7 @@ GDALDataset* NetCDF24Open(GDALOpenInfo* info)
     }
 
     // Create the dataset
-    auto_ptr<NetCDF24Dataset> ds(new NetCDF24Dataset(nc.release()));
+    unique_ptr<NetCDF24Dataset> ds(new NetCDF24Dataset(nc.release()));
 
     // Initialise the generic dataset bits using information from the
     // NetCDF data
@@ -557,20 +557,20 @@ extern "C" {
 
 void GDALRegister_MsatNetCDF24()
 {
-        if (! GDAL_CHECK_VERSION("MsatNetCDF24"))
-                return;
+    if (!GDAL_CHECK_VERSION("MsatNetCDF24"))
+        return;
 
-        if (GDALGetDriverByName("MsatNetCDF24") == NULL)
-        {
-                auto_ptr<GDALDriver> driver(new GDALDriver());
-                driver->SetDescription("MsatNetCDF24");
-                driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosatlib NetCDF24");
-                //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
-                driver->SetMetadataItem(GDAL_DMD_EXTENSION, "nc24");
-                driver->pfnOpen = msat::netcdf::NetCDF24Open;
-                driver->pfnCreateCopy = msat::netcdf::NetCDF24CreateCopy;
-                GetGDALDriverManager()->RegisterDriver(driver.release());
-        }
+    if (GDALGetDriverByName("MsatNetCDF24") == NULL)
+    {
+        unique_ptr<GDALDriver> driver(new GDALDriver());
+        driver->SetDescription("MsatNetCDF24");
+        driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosatlib NetCDF24");
+        //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
+        driver->SetMetadataItem(GDAL_DMD_EXTENSION, "nc24");
+        driver->pfnOpen = msat::netcdf::NetCDF24Open;
+        driver->pfnCreateCopy = msat::netcdf::NetCDF24CreateCopy;
+        GetGDALDriverManager()->RegisterDriver(driver.release());
+    }
 }
 
 }

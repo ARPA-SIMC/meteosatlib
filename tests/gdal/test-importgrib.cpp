@@ -168,35 +168,35 @@ static msat::proj::ImageBox cropArea(msat::proj::ImagePoint(100, 100), msat::pro
 template<> template<>
 void to::test<1>()
 {
-	auto_ptr<GDALDataset> dataset = openDS();
-	gen_ensure(dataset.get() != 0);
-	gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatGRIB");
-	gen_ensure_equals(dataset->GetRasterCount(), 1);
+    unique_ptr<GDALDataset> dataset = openDS();
+    gen_ensure(dataset.get() != 0);
+    gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatGRIB");
+    gen_ensure_equals(dataset->GetRasterCount(), 1);
 }
 
 // Test reading image
 template<> template<>
 void to::test<2>()
 {
-	test_tag("fullGrib");
-	auto_ptr<GDALDataset> dataset = openPlain();
-	test_untag();
+    test_tag("fullGrib");
+    unique_ptr<GDALDataset> dataset = openPlain();
+    test_untag();
 }
 
 // Try CreateCopy with msat/msat
 template<> template<>
 void to::test<3>()
 {
-	test_tag("fullGribRecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("fullGribRecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
 #if 0
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_similar(img->data->slope, 0.1, 0.001);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 11);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -204,16 +204,16 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-	test_tag("fullGribRecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("fullGribRecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
 #if 0
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_similar(img->data->slope, 0.1, 0.001);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 11);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -221,17 +221,17 @@ void to::test<4>()
 template<> template<>
 void to::test<5>()
 {
-	test_tag("croppedGribRecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("croppedGribRecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
 #if 0
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_similar(img->data->offset, -91, 0.001);
-	gen_ensure_equals(img->data->bpp, 8);
-	gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_similar(img->data->slope, 0.1, 0.001);
+    gen_ensure_similar(img->data->offset, -91, 0.001);
+    gen_ensure_equals(img->data->bpp, 8);
+    gen_ensure_equals(img->data->scalesToInt, true);
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -239,17 +239,17 @@ void to::test<5>()
 template<> template<>
 void to::test<8>()
 {
-	test_tag("croppedGribRecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("croppedGribRecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
 #if 0
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_similar(img->data->offset, -91, 0.001);
-	gen_ensure_equals(img->data->bpp, 8);
-	gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_similar(img->data->slope, 0.1, 0.001);
+    gen_ensure_similar(img->data->offset, -91, 0.001);
+    gen_ensure_equals(img->data->bpp, 8);
+    gen_ensure_equals(img->data->scalesToInt, true);
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -257,16 +257,16 @@ void to::test<8>()
 template<> template<>
 void to::test<9>()
 {
-	test_tag("fullGribRecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
-	test_untag();
+    test_tag("fullGribRecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
+    test_untag();
 
 #if 0
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_similar(img->data->slope, 0.1, 0.001);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 11);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -274,16 +274,16 @@ void to::test<9>()
 template<> template<>
 void to::test<10>()
 {
-	test_tag("croppedGribRecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
-	test_untag();
+    test_tag("croppedGribRecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
+    test_untag();
 
 #if 0
-	gen_ensure_similar(img->data->slope, 0.1, 0.001);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 11);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_similar(img->data->slope, 0.1, 0.001);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 11);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -291,16 +291,16 @@ void to::test<10>()
 template<> template<>
 void to::test<11>()
 {
-	test_tag("fullGribRecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
-	test_untag();
+    test_tag("fullGribRecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -308,16 +308,16 @@ void to::test<11>()
 template<> template<>
 void to::test<12>()
 {
-	test_tag("croppedGribRecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
-	test_untag();
+    test_tag("croppedGribRecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -325,31 +325,31 @@ void to::test<12>()
 template<> template<>
 void to::test<13>()
 {
-	FOR_DRIVER("MsatGRIB");
+    FOR_DRIVER("MsatGRIB");
 #if 0
     // Open the source file. 
-	auto_ptr<msat::Image> dataset = openro(TESTFILE);
+    unique_ptr<msat::Image> dataset = openro(TESTFILE);
 
-	test_tag("fullGribReprojectedNetCDF");
+    test_tag("fullGribReprojectedNetCDF");
 
     // Create output with same datatype as first input band. 
     GDALDataType eDT = GDALGetRasterDataType(GDALGetRasterBand(dataset.get(),1));
 
     // Get output driver (GeoTIFF format)
     GDALDriverH hDriver = GDALGetDriverByName("MsatNetCDF");
-	gen_ensure(hDriver != NULL);
+    gen_ensure(hDriver != NULL);
 
     // Get Source coordinate system. 
     const char *pszSrcWKT = GDALGetProjectionRef(dataset.get());
     gen_ensure(pszSrcWKT != NULL);
-	gen_ensure(strlen(pszSrcWKT) > 0);
+    gen_ensure(strlen(pszSrcWKT) > 0);
 
     // Setup output coordinate system that is UTM 11 WGS84. 
     OGRSpatialReference oSRS;
-	oSRS.SetGeogCS( NULL, NULL, NULL, 6378169, 295.488065897, NULL, 0, NULL, 0 );
+    oSRS.SetGeogCS( NULL, NULL, NULL, 6378169, 295.488065897, NULL, 0, NULL, 0 );
     //oSRS.SetUTM(11, TRUE);
     //oSRS.SetWellKnownGeogCS("WGS84");
-	char* pszDstWKT = 0;
+    char* pszDstWKT = 0;
     oSRS.exportToWkt(&pszDstWKT);
 
     // Create a transformer that maps from source pixel/line coordinates
@@ -357,7 +357,7 @@ void to::test<13>()
     // pixel line).  We do that by omitting the destination dataset
     // handle (setting it to NULL). 
     void *hTransformArg = GDALCreateGenImgProjTransformer(
-		dataset.get(), pszSrcWKT, NULL, pszDstWKT, FALSE, 0, 1 );
+            dataset.get(), pszSrcWKT, NULL, pszDstWKT, FALSE, 0, 1 );
     gen_ensure(hTransformArg != NULL);
 
     // Get approximate output georeferenced bounds and resolution for file. 
@@ -365,21 +365,21 @@ void to::test<13>()
     int nPixels=0, nLines=0;
 
     CPLErr eErr = GDALSuggestedWarpOutput(dataset.get(), 
-                                    GDALGenImgProjTransform, hTransformArg, 
-                                    adfDstGeoTransform, &nPixels, &nLines );
+            GDALGenImgProjTransform, hTransformArg, 
+            adfDstGeoTransform, &nPixels, &nLines );
     gen_ensure_equals(eErr, CE_None);
 
     GDALDestroyGenImgProjTransformer(hTransformArg);
 
     // Create the output file.  
     GDALDataset* hDstDS = (GDALDataset*)GDALCreate(hDriver, "out.nc", nPixels, nLines, 
-                         GDALGetRasterCount(dataset.get()), eDT, NULL );
+            GDALGetRasterCount(dataset.get()), eDT, NULL );
     gen_ensure(hDstDS != NULL);
 
-	gen_ensure_equals(hDstDS->GetRasterBand(1)->GetAccess(), GA_Update);
-	
-	// Setup warp options. 
-    
+    gen_ensure_equals(hDstDS->GetRasterBand(1)->GetAccess(), GA_Update);
+
+    // Setup warp options. 
+
     GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
 
     psWarpOptions->hSrcDS = dataset.get();
@@ -401,10 +401,10 @@ void to::test<13>()
 
     psWarpOptions->pTransformerArg = 
         GDALCreateGenImgProjTransformer( dataset.get(), 
-                                         GDALGetProjectionRef(dataset.get()), 
-                                         hDstDS,
-                                         GDALGetProjectionRef(hDstDS), 
-                                         FALSE, 0.0, 1 );
+                GDALGetProjectionRef(dataset.get()), 
+                hDstDS,
+                GDALGetProjectionRef(hDstDS), 
+                FALSE, 0.0, 1 );
     psWarpOptions->pfnTransformer = GDALGenImgProjTransform;
 
 
@@ -415,13 +415,13 @@ void to::test<13>()
     GDALWarpOperation oOperation;
     oOperation.Initialize(psWarpOptions);
     oOperation.ChunkAndWarpImage(0, 0, 
-                                  GDALGetRasterXSize(hDstDS), 
-                                  GDALGetRasterYSize(hDstDS));
+            GDALGetRasterXSize(hDstDS), 
+            GDALGetRasterYSize(hDstDS));
     GDALDestroyGenImgProjTransformer(psWarpOptions->pTransformerArg);
     GDALDestroyWarpOptions(psWarpOptions);
     GDALClose(hDstDS);
 
-	test_untag();
+    test_untag();
 #endif
 }
 

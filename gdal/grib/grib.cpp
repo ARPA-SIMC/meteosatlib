@@ -197,13 +197,13 @@ GDALDataset* GRIBOpen(GDALOpenInfo* info)
     if (grib.new_from_file(NULL, info->pszFilename) != CE_None)
         return NULL;
 
-	// Create the dataset
-	auto_ptr<GRIBDataset> ds(new GRIBDataset(move(grib)));
+    // Create the dataset
+    unique_ptr<GRIBDataset> ds(new GRIBDataset(move(grib)));
 
-        // Initialise the dataset
-	if (!ds->init()) return NULL;
+    // Initialise the dataset
+    if (!ds->init()) return NULL;
 
-	return ds.release();
+    return ds.release();
 }
 
 #if 0
@@ -652,20 +652,20 @@ extern "C" {
 
 void GDALRegister_MsatGRIB()
 {
-	if (!GDAL_CHECK_VERSION("MsatGRIB"))
-		return;
+    if (!GDAL_CHECK_VERSION("MsatGRIB"))
+        return;
 
-	if (GDALGetDriverByName("MsatGRIB") == NULL)
-	{
-		auto_ptr<GDALDriver> driver(new GDALDriver());
-		driver->SetDescription("MsatGRIB");
-		driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosatlib GRIB via grib_api");
-		//driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
-		driver->SetMetadataItem(GDAL_DMD_EXTENSION, "grib");
-		driver->pfnOpen = msat::grib::GRIBOpen;
-		driver->pfnCreateCopy = msat::grib::GRIBCreateCopy;
-		GetGDALDriverManager()->RegisterDriver(driver.release());
-	}
+    if (GDALGetDriverByName("MsatGRIB") == NULL)
+    {
+        unique_ptr<GDALDriver> driver(new GDALDriver());
+        driver->SetDescription("MsatGRIB");
+        driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosatlib GRIB via grib_api");
+        //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
+        driver->SetMetadataItem(GDAL_DMD_EXTENSION, "grib");
+        driver->pfnOpen = msat::grib::GRIBOpen;
+        driver->pfnCreateCopy = msat::grib::GRIBCreateCopy;
+        GetGDALDriverManager()->RegisterDriver(driver.release());
+    }
 }
 
 }

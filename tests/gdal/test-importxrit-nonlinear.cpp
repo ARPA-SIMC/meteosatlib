@@ -1,22 +1,3 @@
-/*
- * Copyright (C) 2005--2010  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
-
 #include "test-utils.h"
 
 #define PERFORM_SLOW_TESTS
@@ -215,38 +196,38 @@ static msat::proj::ImageBox cropArea(msat::proj::ImagePoint(2540, 2950), msat::p
 template<> template<>
 void to::test<1>()
 {
-	auto_ptr<GDALDataset> dataset = openDS();
-	gen_ensure(dataset.get() != 0);
-	gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatXRIT");
+    unique_ptr<GDALDataset> dataset = openDS();
+    gen_ensure(dataset.get() != 0);
+    gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatXRIT");
 
-	// Check that we have a raster band of the proper type
-	gen_ensure_equals(dataset->GetRasterCount(), 1);
+    // Check that we have a raster band of the proper type
+    gen_ensure_equals(dataset->GetRasterCount(), 1);
 }
 
 // Import a full XRIT product
 template<> template<>
 void to::test<2>()
 {
-	test_tag("fullXRIT");
-	auto_ptr<GDALDataset> dataset = openPlain();
-	test_untag();
+    test_tag("fullXRIT");
+    unique_ptr<GDALDataset> dataset = openPlain();
+    test_untag();
 
 
-	////gen_ensure_equals(img->name, ""); // unverified
-	//gen_ensure_equals(img->column_res, 40927014*exp2(-16));
-	//gen_ensure_equals(img->line_res, 40927014*exp2(-16));
+    ////gen_ensure_equals(img->name, ""); // unverified
+    //gen_ensure_equals(img->column_res, 40927014*exp2(-16));
+    //gen_ensure_equals(img->line_res, 40927014*exp2(-16));
 
-	//test_tag("fullXRIT");
-	//checkFullImageData(*img);
-	//test_untag();
+    //test_tag("fullXRIT");
+    //checkFullImageData(*img);
+    //test_untag();
 
 #if 0
-	-- look for nonempty values
-	using namespace std;
-	for (size_t y = 0; y < img->data->lines; ++y)
-		for (size_t x = 0; x < img->data->columns; ++x)
-			if (img->data->scaled(x, y) != 0)
-				cout << "(" << x << ", " << y << "): " << img->data->scaled(x, y) << endl;
+    -- look for nonempty values
+        using namespace std;
+    for (size_t y = 0; y < img->data->lines; ++y)
+        for (size_t x = 0; x < img->data->columns; ++x)
+            if (img->data->scaled(x, y) != 0)
+                cout << "(" << x << ", " << y << "): " << img->data->scaled(x, y) << endl;
 #endif
 }
 
@@ -254,25 +235,25 @@ void to::test<2>()
 template<> template<>
 void to::test<3>()
 {
-	FOR_DRIVER("MsatXRIT");
+    FOR_DRIVER("MsatXRIT");
 #if 0
-	ImageVector imgs(*croppedImporter());
-	gen_ensure_equals(imgs.size(), 1u);
-	std::auto_ptr<Image> img = imgs.shift();
+    ImageVector imgs(*croppedImporter());
+    gen_ensure_equals(imgs.size(), 1u);
+    std::unique_ptr<Image> img = imgs.shift();
 
-	gen_ensure_equals(img->defaultFilename, "H_MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "H_MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, 40927014*exp2(-16));
-	gen_ensure_equals(img->line_res, 40927014*exp2(-16));
-	gen_ensure_similar(img->data->slope, 0.0319993, 0.00001);
-	gen_ensure_similar(img->data->offset, -1.6319643, 0.00001);
-	gen_ensure_equals(img->data->bpp, 10); // unverified
-	gen_ensure_equals(img->data->scalesToInt, true);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_res, 40927014*exp2(-16));
+    gen_ensure_equals(img->line_res, 40927014*exp2(-16));
+    gen_ensure_similar(img->data->slope, 0.0319993, 0.00001);
+    gen_ensure_similar(img->data->offset, -1.6319643, 0.00001);
+    gen_ensure_equals(img->data->bpp, 10); // unverified
+    gen_ensure_equals(img->data->scalesToInt, true);
 
-	test_tag("croppedXRIT");
-	checkCroppedImageData(*img);
-	test_untag();
+    test_tag("croppedXRIT");
+    checkCroppedImageData(*img);
+    test_untag();
 #endif
 }
 
@@ -281,19 +262,19 @@ template<> template<>
 void to::test<4>()
 {
 #ifdef PERFORM_SLOW_TESTS
-	test_tag("fullHritRecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("fullHritRecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
 #if 0
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
+    gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32); // unverified
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 #endif
 }
@@ -303,19 +284,19 @@ template<> template<>
 void to::test<5>()
 {
 #ifdef PERFORM_SLOW_TESTS
-	test_tag("fullHritRecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("fullHritRecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
 #if 0
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
-	gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_factor, Image::columnFactorFromSeviriDX(Image::seviriDXFromColumnFactor(40927014)));
+    gen_ensure_equals(img->line_factor, Image::lineFactorFromSeviriDY(Image::seviriDYFromLineFactor(40927014)));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32); // unverified
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 #endif
 }
@@ -324,23 +305,23 @@ void to::test<5>()
 template<> template<>
 void to::test<6>()
 {
-	test_tag("croppedXRITRecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("croppedXRITRecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
-	gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
-	//gen_ensure_equals(img->data->offset, -3.3f);
-	gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
-	gen_ensure_equals(img->data->bpp, 16); // unverified
-	gen_ensure_equals(img->data->scalesToInt, true);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
+    gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
+    //gen_ensure_equals(img->data->offset, -3.3f);
+    gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
+    gen_ensure_equals(img->data->bpp, 16); // unverified
+    gen_ensure_equals(img->data->scalesToInt, true);
 
-	gen_ensure_imagedata_similar(*img->data, *origimg->data, 0.01);
+    gen_ensure_imagedata_similar(*img->data, *origimg->data, 0.01);
 #endif
 }
 
@@ -348,23 +329,23 @@ void to::test<6>()
 template<> template<>
 void to::test<7>()
 {
-	test_tag("croppedXRITRecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("croppedXRITRecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
-	gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
-	//gen_ensure_equals(img->data->offset, -3.3f);
-	gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
-	gen_ensure_equals(img->data->bpp, 16); // unverified
-	gen_ensure_equals(img->data->scalesToInt, true);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
+    gen_ensure_similar(img->data->slope, 0.0001, 0.0000001);
+    //gen_ensure_equals(img->data->offset, -3.3f);
+    gen_ensure_similar(img->data->offset, -3.2959, 0.00001);
+    gen_ensure_equals(img->data->bpp, 16); // unverified
+    gen_ensure_equals(img->data->scalesToInt, true);
 
-	gen_ensure_imagedata_similar(*img->data, *origimg->data, 0.01);
+    gen_ensure_imagedata_similar(*img->data, *origimg->data, 0.01);
 #endif
 }
 
@@ -373,21 +354,21 @@ template<> template<>
 void to::test<8>()
 {
 #ifdef PERFORM_SLOW_TESTS
-	test_tag("fulliHritRecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
-	test_untag();
+    test_tag("fulliHritRecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, 40927014);
-	gen_ensure_equals(img->line_factor, 40927014);
-	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
-	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_factor, 40927014);
+    gen_ensure_equals(img->line_factor, 40927014);
+    gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
+    gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
+    gen_ensure_equals(img->data->bpp, 32); // unverified
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 #endif
 }
@@ -396,22 +377,22 @@ void to::test<8>()
 template<> template<>
 void to::test<9>()
 {
-	test_tag("croppedXRITRecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
-	test_untag();
+    test_tag("croppedXRITRecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
-	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
-	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
-	gen_ensure_equals(img->data->bpp, 9);
-	gen_ensure_equals(img->data->scalesToInt, true);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(40927014*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::lineResFromSeviriDY(Image::seviriDYFromLineRes(40927014*exp2(-16))));
+    gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
+    gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
+    gen_ensure_equals(img->data->bpp, 9);
+    gen_ensure_equals(img->data->scalesToInt, true);
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -420,22 +401,22 @@ template<> template<>
 void to::test<10>()
 {
 #ifdef PERFORM_SLOW_TESTS
-	test_tag("fullHritRecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
-	test_untag();
+    test_tag("fullHritRecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_factor, 40927014);
-	gen_ensure_equals(img->line_factor, 40927014);
-	gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
-	gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
-	gen_ensure_equals(img->data->bpp, 32); // unverified
-	gen_ensure_equals(img->data->scalesToInt, false);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_factor, 40927014);
+    gen_ensure_equals(img->line_factor, 40927014);
+    gen_ensure_similar(img->data->slope, 0.031999f, 0.00001);
+    gen_ensure_similar(img->data->offset, -1.63196f, 0.00001);
+    gen_ensure_equals(img->data->bpp, 32); // unverified
+    gen_ensure_equals(img->data->scalesToInt, false);
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 #endif
 }
@@ -444,25 +425,23 @@ void to::test<10>()
 template<> template<>
 void to::test<11>()
 {
-	test_tag("croppedXRITRecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
-	test_untag();
+    test_tag("croppedXRITRecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
+    test_untag();
 
 #if 0
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_HRV_channel_20061114_1200");
 
-	//gen_ensure_equals(img->name, ""); // unverified
-	gen_ensure_equals(img->column_res, 40927014*exp2(-16));
-	gen_ensure_equals(img->line_res, 40927014*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
+    //gen_ensure_equals(img->name, ""); // unverified
+    gen_ensure_equals(img->column_res, 40927014*exp2(-16));
+    gen_ensure_equals(img->line_res, 40927014*exp2(-16));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32);
+    gen_ensure_equals(img->data->scalesToInt, false);
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
 }
-
-/* vim:set ts=4 sw=4: */

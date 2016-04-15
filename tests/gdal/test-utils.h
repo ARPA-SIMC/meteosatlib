@@ -42,7 +42,7 @@ namespace tut {
 
 bool hasDriver(const std::string& name);
 
-std::auto_ptr<GDALDataset> openro(const char* name);
+std::unique_ptr<GDALDataset> openro(const char* name);
 
 static inline int32_t readInt32(GDALRasterBand* rb, int x, int y)
 {
@@ -75,17 +75,17 @@ struct GDALInit
 };
 */
 
-std::auto_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,
-	const char* driver,
-	const std::string& opt1 = std::string(),
-	const std::string& opt2 = std::string(),
-	const std::string& opt3 = std::string());
+std::unique_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,
+    const char* driver,
+    const std::string& opt1 = std::string(),
+    const std::string& opt2 = std::string(),
+    const std::string& opt3 = std::string());
 
-std::auto_ptr<GDALDataset> recode(GDALDataset* ds, const msat::proj::ImageBox& cropArea, bool leaveFile,
-	const char* driver,
-	const std::string& opt1 = std::string(),
-	const std::string& opt2 = std::string(),
-	const std::string& opt3 = std::string());
+std::unique_ptr<GDALDataset> recode(GDALDataset* ds, const msat::proj::ImageBox& cropArea, bool leaveFile,
+    const char* driver,
+    const std::string& opt1 = std::string(),
+    const std::string& opt2 = std::string(),
+    const std::string& opt3 = std::string());
 
 class GeoReferencer
 {
@@ -125,55 +125,55 @@ public:
 
 
 #if 0
-std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile = false);
-std::auto_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile = false);
-std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile = false);
+std::unique_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile = false);
+std::unique_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile = false);
+std::unique_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile = false);
 #endif
 
 struct ImportTest
 {
-	const char* driver;
-	const char* testfile;
+    const char* driver;
+    const char* testfile;
 
-	ImportTest(const char* driver, const char* testfile)
-		: driver(driver), testfile(testfile) {}
+    ImportTest(const char* driver, const char* testfile)
+        : driver(driver), testfile(testfile) {}
 
-	virtual void checkFullImageData(GDALDataset* dataset) = 0;
-	virtual void checkCroppedImageData(GDALDataset* dataset) = 0;
+    virtual void checkFullImageData(GDALDataset* dataset) = 0;
+    virtual void checkCroppedImageData(GDALDataset* dataset) = 0;
 
-	std::auto_ptr<GDALDataset> openDS()
-	{
-		FOR_DRIVER(driver);
-		return openro(testfile);
-	}
+    std::unique_ptr<GDALDataset> openDS()
+    {
+        FOR_DRIVER(driver);
+        return openro(testfile);
+    }
 
-	std::auto_ptr<GDALDataset> openPlain()
-	{
-		FOR_DRIVER(driver);
-		std::auto_ptr<GDALDataset> dataset = openro(testfile);
-		checkFullImageData(dataset.get());
-		return dataset;
-	}
+    std::unique_ptr<GDALDataset> openPlain()
+    {
+        FOR_DRIVER(driver);
+        std::unique_ptr<GDALDataset> dataset = openro(testfile);
+        checkFullImageData(dataset.get());
+        return dataset;
+    }
 
-	std::auto_ptr<GDALDataset> openRecoded(const char* other, bool leaveFile=false, const std::string& opt1 = std::string())
-	{
-		FOR_DRIVER(driver);
-		FOR_DRIVER(other);
-		std::auto_ptr<GDALDataset> dataset0 = openro(testfile);
-		std::auto_ptr<GDALDataset> dataset1 = recode(dataset0.get(), leaveFile, other, opt1);
-		checkFullImageData(dataset1.get());
-		return dataset1;
-	}
+    std::unique_ptr<GDALDataset> openRecoded(const char* other, bool leaveFile=false, const std::string& opt1 = std::string())
+    {
+        FOR_DRIVER(driver);
+        FOR_DRIVER(other);
+        std::unique_ptr<GDALDataset> dataset0 = openro(testfile);
+        std::unique_ptr<GDALDataset> dataset1 = recode(dataset0.get(), leaveFile, other, opt1);
+        checkFullImageData(dataset1.get());
+        return dataset1;
+    }
 
-	std::auto_ptr<GDALDataset> openRecodedCropped(const msat::proj::ImageBox& cropArea, const char* other, bool leaveFile=false, const std::string& opt1 = std::string())
-	{
-		FOR_DRIVER(driver);
-		FOR_DRIVER(other);
-		std::auto_ptr<GDALDataset> dataset0 = openro(testfile);
-		std::auto_ptr<GDALDataset> dataset1 = recode(dataset0.get(), cropArea, leaveFile, other, opt1);
-		checkCroppedImageData(dataset1.get());
-		return dataset1;
-	}
+    std::unique_ptr<GDALDataset> openRecodedCropped(const msat::proj::ImageBox& cropArea, const char* other, bool leaveFile=false, const std::string& opt1 = std::string())
+    {
+        FOR_DRIVER(driver);
+        FOR_DRIVER(other);
+        std::unique_ptr<GDALDataset> dataset0 = openro(testfile);
+        std::unique_ptr<GDALDataset> dataset1 = recode(dataset0.get(), cropArea, leaveFile, other, opt1);
+        checkCroppedImageData(dataset1.get());
+        return dataset1;
+    }
 };
 
 }

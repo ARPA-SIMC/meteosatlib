@@ -1,22 +1,3 @@
-/*
- * Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
-
 #include "test-utils.h"
 #include <stdint.h>
 
@@ -49,7 +30,7 @@ TESTGRP(xrit_reflectance);
 template<> template<>
 void to::test<1>()
 {
-    auto_ptr<GDALDataset> dataset = openro(TESTFILE01);
+    unique_ptr<GDALDataset> dataset = openro(TESTFILE01);
     gen_ensure(dataset.get() != 0);
     gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatXRIT");
 
@@ -62,7 +43,7 @@ void to::test<1>()
     rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0);
     gen_ensure_equals(val, 96);
 
-    auto_ptr<GDALDataset> datasetr = openro(TESTFILE01r);
+    unique_ptr<GDALDataset> datasetr = openro(TESTFILE01r);
     gen_ensure(datasetr.get() != 0);
     gen_ensure_equals(string(GDALGetDriverShortName(datasetr->GetDriver())), "MsatXRIT");
 
@@ -80,7 +61,7 @@ template<> template<>
 void to::test<2>()
 {
     try {
-        auto_ptr<GDALDataset> dataset = openro(TESTFILE04i);
+        unique_ptr<GDALDataset> dataset = openro(TESTFILE04i);
         gen_ensure(false);
     } catch (...) {
     }
@@ -90,7 +71,7 @@ void to::test<2>()
 template<> template<>
 void to::test<3>()
 {
-    auto_ptr<GDALDataset> dataset = openro(TESTFILE04);
+    unique_ptr<GDALDataset> dataset = openro(TESTFILE04);
     gen_ensure(dataset.get() != 0);
     gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatXRIT");
 
@@ -103,7 +84,7 @@ void to::test<3>()
     rb->RasterIO(GF_Read, 2000, 350, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0);
     gen_ensure_equals(val, 287);
 
-    auto_ptr<GDALDataset> datasetr = openro(TESTFILE04r);
+    unique_ptr<GDALDataset> datasetr = openro(TESTFILE04r);
     gen_ensure(datasetr.get() != 0);
     gen_ensure_equals(string(GDALGetDriverShortName(datasetr->GetDriver())), "MsatXRIT");
 
@@ -120,7 +101,7 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-    auto_ptr<GDALDataset> dataset = openro(TESTFILE12);
+    unique_ptr<GDALDataset> dataset = openro(TESTFILE12);
     gen_ensure(dataset.get() != 0);
     gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatXRIT");
 
@@ -129,5 +110,3 @@ void to::test<4>()
 }
 
 }
-
-/* vim:set ts=4 sw=4: */

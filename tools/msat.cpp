@@ -586,17 +586,17 @@ int Msat::main()
 {
     for (vector<string>::const_iterator i = input_files.begin(); i != input_files.end(); ++i)
     {
-            auto_ptr<GDALDataset> dataset((GDALDataset*)GDALOpen(i->c_str(), GA_ReadOnly));
+            unique_ptr<GDALDataset> dataset((GDALDataset*)GDALOpen(i->c_str(), GA_ReadOnly));
             if (dataset.get() == NULL)
             {
                     cerr << CPLGetLastErrorMsg() << endl;
                     return 1;
             }
 
-            auto_ptr<GDALDataset> ds_orig;
+            unique_ptr<GDALDataset> ds_orig;
             if (force_calibration)
             {
-                ds_orig = dataset;
+                ds_orig = move(dataset);
                 dataset.reset(new msat::dataset::CalibratedDataset(*ds_orig));
             }
 
@@ -691,7 +691,7 @@ int Msat::main()
 
             if (!mdtemplate.empty())
             {
-                    auto_ptr<GDALDataset> mdds((GDALDataset*)GDALOpen(mdtemplate.c_str(), GA_ReadOnly));
+                    unique_ptr<GDALDataset> mdds((GDALDataset*)GDALOpen(mdtemplate.c_str(), GA_ReadOnly));
 
                     // Copy metadata from mdds to vds
                     vds->SetDescription(mdds->GetDescription());

@@ -84,7 +84,7 @@ public:
 
     operator hid_t() { return h; }
 
-    // auto_ptr-type copy semantics
+    // unique_ptr-type copy semantics
     DataType(const DataType& dt);
     DataType& operator=(const DataType&);
 

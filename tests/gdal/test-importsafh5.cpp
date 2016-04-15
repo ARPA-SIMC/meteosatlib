@@ -1,22 +1,3 @@
-/*
- * Copyright (C) 2005--2010  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
-
 #include "test-utils.h"
 
 using namespace std;
@@ -156,22 +137,22 @@ static msat::proj::ImageBox cropArea(msat::proj::ImagePoint(100, 50), msat::proj
 template<> template<>
 void to::test<1>()
 {
-	auto_ptr<GDALDataset> dataset = openDS();
-	gen_ensure(dataset.get() != 0);
-	gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatSAFH5");
-	gen_ensure_equals(dataset->GetRasterCount(), 3);
+    unique_ptr<GDALDataset> dataset = openDS();
+    gen_ensure(dataset.get() != 0);
+    gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatSAFH5");
+    gen_ensure_equals(dataset->GetRasterCount(), 3);
 }
 
 // Import a full SAFH5 product
 template<> template<>
 void to::test<2>()
 {
-	test_tag("fullSAFH5");
-	auto_ptr<GDALDataset> dataset = openPlain();
-	test_untag();
+    test_tag("fullSAFH5");
+    unique_ptr<GDALDataset> dataset = openPlain();
+    test_untag();
 
-	// TODO msat::Band* b = dynamic_cast<msat::Band*>(dataset->GetRasterBand(1));
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO msat::Band* b = dynamic_cast<msat::Band*>(dataset->GetRasterBand(1));
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 8);
 }
 
 #if 0
@@ -179,25 +160,25 @@ void to::test<2>()
 template<> template<>
 void to::test<3>()
 {
-	std::auto_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
-	imp->cropImgArea = safCropArea;
-	ImageVector imgs;
-	imp->read(imgs);
+    std::unique_ptr<ImageImporter> imp(createSAFH5Importer(DATA_DIR "/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"));
+    imp->cropImgArea = safCropArea;
+    ImageVector imgs;
+    imp->read(imgs);
 
-	gen_ensure_equals(imgs.size(), 3u);
-	Image* img = imgs[0];
+    gen_ensure_equals(imgs.size(), 3u);
+    Image* img = imgs[0];
 
-	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 3);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "SAF_MSGEURO_CRR_20051205_0615");
+    gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+    gen_ensure_equals(img->line_res, 13642337*exp2(-16));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 3);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "SAF_MSGEURO_CRR_20051205_0615");
 
-	test_tag("croppedSAFH5");
-	checkCroppedImageData(*img);
-	test_untag();
+    test_tag("croppedSAFH5");
+    checkCroppedImageData(*img);
+    test_untag();
 }
 #endif
 
@@ -205,22 +186,22 @@ void to::test<3>()
 template<> template<>
 void to::test<3>()
 {
-	test_tag("fullSAFH5RecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("fullSAFH5RecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
-        //GDALRasterBand* b = dataset->GetRasterBand(1);
-	//gen_ensure_equals(b->getOriginalBpp(), 8);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //GDALRasterBand* b = dataset->GetRasterBand(1);
+    //gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 3);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 3);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -228,22 +209,22 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-	test_tag("fullSAFH5RecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("fullSAFH5RecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
-        //GDALRasterBand* b = dataset->GetRasterBand(1);
-	//gen_ensure_equals(b->getOriginalBpp(), 8);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //GDALRasterBand* b = dataset->GetRasterBand(1);
+    //gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 3);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 3);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -251,23 +232,23 @@ void to::test<4>()
 template<> template<>
 void to::test<5>()
 {
-	test_tag("croppedSAFH5RecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("croppedSAFH5RecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
-        //GDALRasterBand* b = dataset->GetRasterBand(1);
-	//gen_ensure_equals(b->getOriginalBpp(), 8);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //GDALRasterBand* b = dataset->GetRasterBand(1);
+    //gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 2);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 2);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -275,23 +256,23 @@ void to::test<5>()
 template<> template<>
 void to::test<6>()
 {
-	test_tag("croppedSAFH5RecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("croppedSAFH5RecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
-        //GDALRasterBand* b = dataset->GetRasterBand(1);
-	//gen_ensure_equals(b->getOriginalBpp(), 8);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //GDALRasterBand* b = dataset->GetRasterBand(1);
+    //gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 2);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 2);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -299,23 +280,23 @@ void to::test<6>()
 template<> template<>
 void to::test<7>()
 {
-	test_tag("fullSAFH5RecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
-	test_untag();
+    test_tag("fullSAFH5RecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
+    test_untag();
 
-        GDALRasterBand* b = dataset->GetRasterBand(1);
-	ensure_equals(b->GetRasterDataType(), GDT_Byte);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    ensure_equals(b->GetRasterDataType(), GDT_Byte);
 
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 8);
 #if 0
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 3);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 3);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -323,24 +304,24 @@ void to::test<7>()
 template<> template<>
 void to::test<8>()
 {
-	test_tag("croppedSAFH5RecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
-	test_untag();
+    test_tag("croppedSAFH5RecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
+    test_untag();
 
-        GDALRasterBand* b = dataset->GetRasterBand(1);
-	ensure_equals(b->GetRasterDataType(), GDT_Byte);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    ensure_equals(b->GetRasterDataType(), GDT_Byte);
 
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 8);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 8);
 #if 0
-	gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 2);
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_equals(img->column_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->line_res, Image::columnResFromSeviriDX(Image::seviriDXFromColumnRes(13642337*exp2(-16))));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 2);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -348,21 +329,21 @@ void to::test<8>()
 template<> template<>
 void to::test<9>()
 {
-	test_tag("fullSAFH5RecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
-	test_untag();
+    test_tag("fullSAFH5RecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
+    test_untag();
 
-	//GDALRasterBand* b = dataset1->GetRasterBand(1);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 8);
+    //GDALRasterBand* b = dataset1->GetRasterBand(1);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 8);
 #if 0
-	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+    gen_ensure_equals(img->line_res, 13642337*exp2(-16));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -370,29 +351,27 @@ void to::test<9>()
 template<> template<>
 void to::test<10>()
 {
-	test_tag("croppedSAFH5RecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
-	test_untag();
+    test_tag("croppedSAFH5RecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Byte);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Byte);
 
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 8);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 8);
 #if 0
-	gen_ensure_equals(img->column_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->line_res, 13642337*exp2(-16));
-	gen_ensure_equals(img->data->slope, 1);
-	gen_ensure_equals(img->data->offset, 0);
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
+    gen_ensure_equals(img->column_res, 13642337*exp2(-16));
+    gen_ensure_equals(img->line_res, 13642337*exp2(-16));
+    gen_ensure_equals(img->data->slope, 1);
+    gen_ensure_equals(img->data->offset, 0);
+    gen_ensure_equals(img->data->bpp, 32);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_equals(img->defaultFilename, "MSG1_Seviri_CRR_channel_20051205_0615");
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
 }
-
-/* vim:set ts=4 sw=4: */

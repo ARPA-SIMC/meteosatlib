@@ -128,25 +128,25 @@ bool XRITDataset::init()
             // Virtual reflectance raster band, where available
             if (header.segment_id->spectral_channel_id == MSG_SEVIRI_1_5_IR_3_9)
             {
-                auto_ptr<Reflectance39RasterBand> rb(new Reflectance39RasterBand(this, 1));
+                unique_ptr<Reflectance39RasterBand> rb(new Reflectance39RasterBand(this, 1));
                 if (!rb->init(PRO_data, EPI_data, header)) return false;
                 SetBand(1, rb.release());
             } else {
-                auto_ptr<ReflectanceRasterBand> rb(new ReflectanceRasterBand(this, 1));
+                unique_ptr<ReflectanceRasterBand> rb(new ReflectanceRasterBand(this, 1));
                 if (!rb->init(PRO_data, EPI_data, header)) return false;
                 SetBand(1, rb.release());
             }
             break;
         case PP_SZA:
         {
-            auto_ptr<SZARasterBand> rb(new SZARasterBand(this, 1));
+            unique_ptr<SZARasterBand> rb(new SZARasterBand(this, 1));
             if (!rb->init(PRO_data, EPI_data, header)) return false;
             SetBand(1, rb.release());
             break;
         }
         default:
             // Real raster band
-            auto_ptr<XRITRasterBand> rb(new XRITRasterBand(this, 1));
+            unique_ptr<XRITRasterBand> rb(new XRITRasterBand(this, 1));
             if (!rb->init(PRO_data, EPI_data, header)) return false;
             SetBand(1, rb.release());
             break;

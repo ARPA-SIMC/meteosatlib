@@ -204,158 +204,158 @@ public:
 
 bool SAFH5Dataset::init()
 {
-        char buf[25];
+    char buf[25];
 
-        group = h5.group("/");
-        nRasterXSize = group.attr("NC").as_int();
-        nRasterYSize = group.attr("NL").as_int();
+    group = h5.group("/");
+    nRasterXSize = group.attr("NC").as_int();
+    nRasterYSize = group.attr("NL").as_int();
 
-        // Get the group name
-        std::string groupName = group.attr("PRODUCT_NAME").as_string();
-        // Trim trailing '_' characters
-        while (groupName.size() > 0 && groupName[groupName.size() - 1] == '_')
-                groupName.resize(groupName.size() - 1);
-
-
-        /// Spacecraft
-        spacecraft_id = facts::spacecraftIDFromHRIT(group.attr("GP_SC_ID").as_int());
-        snprintf(buf, 25, "%d", spacecraft_id);
-        if (SetMetadataItem(MD_MSAT_SPACECRAFT_ID, buf, MD_DOMAIN_MSAT) != CE_None)
-                return false;
-        string spacecraft_name = facts::spacecraftName(spacecraft_id);
-        if (SetMetadataItem(MD_MSAT_SPACECRAFT, spacecraft_name.c_str(), MD_DOMAIN_MSAT) != CE_None)
-                return false;
+    // Get the group name
+    std::string groupName = group.attr("PRODUCT_NAME").as_string();
+    // Trim trailing '_' characters
+    while (groupName.size() > 0 && groupName[groupName.size() - 1] == '_')
+        groupName.resize(groupName.size() - 1);
 
 
-        /// Image time
-        std::string datetime = group.attr("IMAGE_ACQUISITION_TIME").as_string();
-        int year, month, day, hour, minute;
-        if (sscanf(datetime.c_str(), "%04d%02d%02d%02d%02d", &year, &month, &day, &hour, &minute) != 5)
-        {
-                CPLError(CE_Failure, CPLE_AppDefined, "Unable to parse datetime %s", datetime.c_str());
-                return false;
-        }
-        snprintf(buf, 20, "%04d-%02d-%02d %02d:%02d:00", year, month, day, hour, minute);
-        if (SetMetadataItem(MD_MSAT_DATETIME, buf, MD_DOMAIN_MSAT) != CE_None)
-                return false;
+    /// Spacecraft
+    spacecraft_id = facts::spacecraftIDFromHRIT(group.attr("GP_SC_ID").as_int());
+    snprintf(buf, 25, "%d", spacecraft_id);
+    if (SetMetadataItem(MD_MSAT_SPACECRAFT_ID, buf, MD_DOMAIN_MSAT) != CE_None)
+        return false;
+    string spacecraft_name = facts::spacecraftName(spacecraft_id);
+    if (SetMetadataItem(MD_MSAT_SPACECRAFT, spacecraft_name.c_str(), MD_DOMAIN_MSAT) != CE_None)
+        return false;
 
 
-        /// Projection
-        string proj = group.attr("PROJECTION_NAME").as_string();
-        if (proj.size() < 8)
-        {
-                CPLError(CE_Failure, CPLE_AppDefined, "projection name '%s' is too short to contain subsatellite longitude", proj.c_str());
-                return false;
-        }
-        const char* s = proj.c_str() + 6;
-        // skip initial zeros
-        while (*(s+1) && *(s+1) == '0') ++s;
-        double sublon;
-        if (sscanf(s, "%lf", &sublon) != 1)
-        {
-                CPLError(CE_Failure, CPLE_AppDefined, "cannot read subsatellite longitude");
-                return false;
-        }
-        projWKT = dataset::spaceviewWKT(sublon);
+    /// Image time
+    std::string datetime = group.attr("IMAGE_ACQUISITION_TIME").as_string();
+    int year, month, day, hour, minute;
+    if (sscanf(datetime.c_str(), "%04d%02d%02d%02d%02d", &year, &month, &day, &hour, &minute) != 5)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Unable to parse datetime %s", datetime.c_str());
+        return false;
+    }
+    snprintf(buf, 20, "%04d-%02d-%02d %02d:%02d:00", year, month, day, hour, minute);
+    if (SetMetadataItem(MD_MSAT_DATETIME, buf, MD_DOMAIN_MSAT) != CE_None)
+        return false;
 
 
-        // Datasets
-        int next_rb = 1;
-        for (hsize_t i = 0; i < group.get_num_objs(); ++i)
-        {
-                string name = group.get_objname_by_idx(i);
-                mh5::Dataset dataset = group.dataset(name);
-                string c = dataset.attr("CLASS").as_string();
-                if (c != "IMAGE") continue;
+    /// Projection
+    string proj = group.attr("PROJECTION_NAME").as_string();
+    if (proj.size() < 8)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "projection name '%s' is too short to contain subsatellite longitude", proj.c_str());
+        return false;
+    }
+    const char* s = proj.c_str() + 6;
+    // skip initial zeros
+    while (*(s+1) && *(s+1) == '0') ++s;
+    double sublon;
+    if (sscanf(s, "%lf", &sublon) != 1)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "cannot read subsatellite longitude");
+        return false;
+    }
+    projWKT = dataset::spaceviewWKT(sublon);
 
-                auto_ptr<SAFH5RasterBand> rb(new SAFH5RasterBand(this, next_rb, dataset));
-                rb->init(this, name);
-                SetBand(next_rb, rb.release());
-                ++next_rb;
-        }
+
+    // Datasets
+    int next_rb = 1;
+    for (hsize_t i = 0; i < group.get_num_objs(); ++i)
+    {
+        string name = group.get_objname_by_idx(i);
+        mh5::Dataset dataset = group.dataset(name);
+        string c = dataset.attr("CLASS").as_string();
+        if (c != "IMAGE") continue;
+
+        unique_ptr<SAFH5RasterBand> rb(new SAFH5RasterBand(this, next_rb, dataset));
+        rb->init(this, name);
+        SetBand(next_rb, rb.release());
+        ++next_rb;
+    }
 
 
 #if 0
-        // Consistency checks
+    // Consistency checks
 
-        // Check that slope, offset and bpp match the ones that we have in
-        // Utils, otherwise warning that the conversion can be irreversible
-        if (ci == NULL)
-                cerr << "Warning: unknown channel informations for product " << name << endl;
-        else {
-                if (ci->slope != img->data->slope)
-                        cerr << "Warning: slope for image (" << img->data->slope << ") is different from the usual one (" << ci->slope << ")" << endl;
-                if (ci->offset != img->data->offset)
-                        cerr << "Warning: offset for image (" << img->data->offset << ") is different from the usual one (" << ci->offset << ")" << endl;
-                if (ci->bpp < img->data->bpp)
-                        cerr << "Warning: bpp for image (" << img->data->bpp << ") is more than the usual one (" << ci->bpp << ")" << endl;
-        }
+    // Check that slope, offset and bpp match the ones that we have in
+    // Utils, otherwise warning that the conversion can be irreversible
+    if (ci == NULL)
+        cerr << "Warning: unknown channel informations for product " << name << endl;
+    else {
+        if (ci->slope != img->data->slope)
+            cerr << "Warning: slope for image (" << img->data->slope << ") is different from the usual one (" << ci->slope << ")" << endl;
+        if (ci->offset != img->data->offset)
+            cerr << "Warning: offset for image (" << img->data->offset << ") is different from the usual one (" << ci->offset << ")" << endl;
+        if (ci->bpp < img->data->bpp)
+            cerr << "Warning: bpp for image (" << img->data->bpp << ") is more than the usual one (" << ci->bpp << ")" << endl;
+    }
 
 
-        // Output file name should be SAF_{REGION_NAME}_{nome dataset}_{date}.*
-        string regionName;
-        try {
-                regionName = readStringAttribute(group, "REGION_NAME");
-        } catch (...) {
-                regionName = "unknown";
-        }
-        char datestring[15];
-        snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", img->year, img->month, img->day, img->hour, img->minute);
-  img->defaultFilename = "SAF_" + regionName + "_" + name + "_" + datestring;
+    // Output file name should be SAF_{REGION_NAME}_{nome dataset}_{date}.*
+    string regionName;
+    try {
+        regionName = readStringAttribute(group, "REGION_NAME");
+    } catch (...) {
+        regionName = "unknown";
+    }
+    char datestring[15];
+    snprintf(datestring, 14, "%04d%02d%02d_%02d%02d", img->year, img->month, img->day, img->hour, img->minute);
+    img->defaultFilename = "SAF_" + regionName + "_" + name + "_" + datestring;
 
 #endif
 
 
 
 #if 0
-        virtual int getOriginalBpp()
+    virtual int getOriginalBpp()
+    {
+#if 0
+        if (originalBPP == -1)
         {
-                #if 0
-                if (originalBPP == -1)
-                {
-                        if (scalesToInt())
-                        {
-                                T* buf = 0;
-                                try {
-                                        buf = new T[nBlockXSize * nBlockYSize];
-                                        IReadBlock(0, 0, buf);
-                                        // Compute the maximum value
-                                        T max = buf[0];
-                                        for (int i = 1; i < nBlockXSize * nBlockYSize; ++i)
-                                                if (buf[i] > max)
-                                                        max = buf[i];
-                                        originalBPP = (int)ceil(log2(max + 1));
-                                } catch (...) {
-                                        originalBPP = sizeof(T) * 8;
-                                }
-                        }
-                        else
-                                originalBPP = sizeof(T) * 8;
+            if (scalesToInt())
+            {
+                T* buf = 0;
+                try {
+                    buf = new T[nBlockXSize * nBlockYSize];
+                    IReadBlock(0, 0, buf);
+                    // Compute the maximum value
+                    T max = buf[0];
+                    for (int i = 1; i < nBlockXSize * nBlockYSize; ++i)
+                        if (buf[i] > max)
+                            max = buf[i];
+                    originalBPP = (int)ceil(log2(max + 1));
+                } catch (...) {
+                    originalBPP = sizeof(T) * 8;
                 }
-                return originalBPP;
-                #endif
-                return originalBPP = sizeof(T) * 8;
+            }
+            else
+                originalBPP = sizeof(T) * 8;
         }
+        return originalBPP;
+#endif
+        return originalBPP = sizeof(T) * 8;
+    }
 
-        virtual void fillMetadata(const std::string& filename, const std::string& name)
-        {
-                #if 0
-                // SAF images do not have missing values
-                missing = missing_value<Sample>();
-                #endif
+    virtual void fillMetadata(const std::string& filename, const std::string& name)
+    {
+#if 0
+        // SAF images do not have missing values
+        missing = missing_value<Sample>();
+#endif
 
-                #if 0
+#if 0
         // Compute real number of BPPs
         Sample max = res->pixels[0];
         for (size_t i = 1; i < res->columns * res->lines; ++i)
-                if (res->pixels[i] > max)
-                        max = res->pixels[i];
+            if (res->pixels[i] > max)
+                max = res->pixels[i];
         res->bpp = (int)ceil(log2(max + 1));
-                #endif
-        }
+#endif
+    }
 #endif
 
-        return true;
+    return true;
 }
 
 GDALDataset* SAFH5Open(GDALOpenInfo* info)
@@ -379,7 +379,7 @@ GDALDataset* SAFH5Open(GDALOpenInfo* info)
         return NULL;
     }
 
-    std::auto_ptr<SAFH5Dataset> ds(new SAFH5Dataset(h5));
+    std::unique_ptr<SAFH5Dataset> ds(new SAFH5Dataset(h5));
 
     if (!ds->init()) return NULL;
 
@@ -393,19 +393,19 @@ extern "C" {
 
 void GDALRegister_MsatSAFH5()
 {
-        if (! GDAL_CHECK_VERSION("MsatSAFH5"))
-                return;
+    if (!GDAL_CHECK_VERSION("MsatSAFH5"))
+        return;
 
-        if (GDALGetDriverByName("MsatSAFH5") == NULL)
-        {
-                auto_ptr<GDALDriver> driver(new GDALDriver());
-                driver->SetDescription("MsatSAFH5");
-                driver->SetMetadataItem(GDAL_DMD_LONGNAME, "SAF HDF5 (via Meteosatlib)");
-                //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
-                //driver->SetMetadataItem(GDAL_DMD_EXTENSION, "mem");
-                driver->pfnOpen = msat::safh5::SAFH5Open;
-                GetGDALDriverManager()->RegisterDriver(driver.release());
-        }
+    if (GDALGetDriverByName("MsatSAFH5") == NULL)
+    {
+        unique_ptr<GDALDriver> driver(new GDALDriver());
+        driver->SetDescription("MsatSAFH5");
+        driver->SetMetadataItem(GDAL_DMD_LONGNAME, "SAF HDF5 (via Meteosatlib)");
+        //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
+        //driver->SetMetadataItem(GDAL_DMD_EXTENSION, "mem");
+        driver->pfnOpen = msat::safh5::SAFH5Open;
+        GetGDALDriverManager()->RegisterDriver(driver.release());
+    }
 }
 
 }

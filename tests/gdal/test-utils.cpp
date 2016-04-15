@@ -121,9 +121,9 @@ bool hasDriver(const std::string& name)
 	return dm->GetDriverByName(name.c_str()) != 0;
 }
 
-auto_ptr<GDALDataset> openro(const char* name)
+unique_ptr<GDALDataset> openro(const char* name)
 {
-	return auto_ptr<GDALDataset>((GDALDataset*)GDALOpen(name, GA_ReadOnly));
+    return unique_ptr<GDALDataset>((GDALDataset*)GDALOpen(name, GA_ReadOnly));
 }
 
 /*
@@ -144,86 +144,86 @@ TempRWDataset::~TempRWDataset()
 }
 */
 
-std::auto_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,
-	const char* driverName, const std::string& opt1, const std::string& opt2, const std::string& opt3)
+std::unique_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,
+        const char* driverName, const std::string& opt1, const std::string& opt2, const std::string& opt3)
 {
-        GDALDriver* driver = (GDALDriver*)GDALGetDriverByName(driverName);
-        TempTestFile tf(leaveFile);
-        auto_ptr<GDALDataset> dataset((GDALDataset*)GDALCreateCopy(driver, tf.name().c_str(), ds,
-				TRUE, NULL,
-				GDALDummyProgress, NULL));
-	return dataset;
+    GDALDriver* driver = (GDALDriver*)GDALGetDriverByName(driverName);
+    TempTestFile tf(leaveFile);
+    unique_ptr<GDALDataset> dataset((GDALDataset*)GDALCreateCopy(driver, tf.name().c_str(), ds,
+                TRUE, NULL,
+                GDALDummyProgress, NULL));
+    return dataset;
 }
 
-std::auto_ptr<GDALDataset> recode(GDALDataset* ds, const msat::proj::ImageBox& cropArea, bool leaveFile,
-	const char* driverName, const std::string& opt1, const std::string& opt2, const std::string& opt3)
+std::unique_ptr<GDALDataset> recode(GDALDataset* ds, const msat::proj::ImageBox& cropArea, bool leaveFile,
+        const char* driverName, const std::string& opt1, const std::string& opt2, const std::string& opt3)
 {
-	TempTestFile file(leaveFile);
+    TempTestFile file(leaveFile);
 
-	GDALDriver* driver = GetGDALDriverManager()->GetDriverByName(driverName);
-	ensure(driver != 0);
+    GDALDriver* driver = GetGDALDriverManager()->GetDriverByName(driverName);
+    ensure(driver != 0);
 
-	msat::dataset::recode(ds, cropArea, file.name(), driver, opt1, opt2, opt3);
+    msat::dataset::recode(ds, cropArea, file.name(), driver, opt1, opt2, opt3);
 
-	return openro(file.name().c_str());
+    return openro(file.name().c_str());
 }
 
 #if 0
-std::auto_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile)
+std::unique_ptr<msat::Image> recodeThroughGrib(msat::Image& img, bool leaveFile)
 {
-	using namespace msat;
+    using namespace msat;
 
-	TempTestFile file(leaveFile);
+    TempTestFile file(leaveFile);
 
-	// Write the grib
-	GRIB_FILE gf;
-	if (gf.OpenWrite(file.name()) != 0)
-		return std::auto_ptr<Image>();
-	ExportGRIB(img, gf);
-	if (gf.Close() != 0)
-		return std::auto_ptr<Image>();
+    // Write the grib
+    GRIB_FILE gf;
+    if (gf.OpenWrite(file.name()) != 0)
+        return std::unique_ptr<Image>();
+    ExportGRIB(img, gf);
+    if (gf.Close() != 0)
+        return std::unique_ptr<Image>();
 
-	// Reread the grib
-	ImageVector imgs(*createGribImporter(file.name()));
-	if (imgs.empty())
-		return std::auto_ptr<Image>();
-	return imgs.shift();
+    // Reread the grib
+    ImageVector imgs(*createGribImporter(file.name()));
+    if (imgs.empty())
+        return std::unique_ptr<Image>();
+    return imgs.shift();
 }
 
-std::auto_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile)
+std::unique_ptr<msat::Image> recodeThroughNetCDF(msat::Image& img, bool leaveFile)
 {
-	using namespace msat;
+    using namespace msat;
 
-	TempTestFile file(leaveFile);
+    TempTestFile file(leaveFile);
 
-	// Write the NetCDF24
-	ExportNetCDF(img, file.name());
+    // Write the NetCDF24
+    ExportNetCDF(img, file.name());
 
-	// Reread the NetCDF24
-	std::auto_ptr<ImageImporter> imp(createNetCDFImporter(file.name()));
-	ImageVector imgs;
-	imp->read(imgs);
-	if (imgs.empty())
-		return std::auto_ptr<Image>();
-	return imgs.shift();
+    // Reread the NetCDF24
+    std::unique_ptr<ImageImporter> imp(createNetCDFImporter(file.name()));
+    ImageVector imgs;
+    imp->read(imgs);
+    if (imgs.empty())
+        return std::unique_ptr<Image>();
+    return imgs.shift();
 }
 
-std::auto_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile)
+std::unique_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveFile)
 {
-	using namespace msat;
+    using namespace msat;
 
-	TempTestFile file(leaveFile);
+    TempTestFile file(leaveFile);
 
-	// Write the NetCDF24
-	ExportNetCDF24(img, file.name());
+    // Write the NetCDF24
+    ExportNetCDF24(img, file.name());
 
-	// Reread the NetCDF24
-	std::auto_ptr<ImageImporter> imp(createNetCDF24Importer(file.name()));
-	ImageVector imgs;
-	imp->read(imgs);
-	if (imgs.empty())
-		return std::auto_ptr<Image>();
-	return imgs.shift();
+    // Reread the NetCDF24
+    std::unique_ptr<ImageImporter> imp(createNetCDF24Importer(file.name()));
+    ImageVector imgs;
+    imp->read(imgs);
+    if (imgs.empty())
+        return std::unique_ptr<Image>();
+    return imgs.shift();
 }
 #endif
 

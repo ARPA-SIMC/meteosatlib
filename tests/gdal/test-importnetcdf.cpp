@@ -157,51 +157,51 @@ static msat::proj::ImageBox cropArea(msat::proj::ImagePoint(100, 100), msat::pro
 template<> template<>
 void to::test<1>()
 {
-	FOR_DRIVER("MsatNetCDF");
-	auto_ptr<GDALDataset> dataset = openDS();
-	gen_ensure(dataset.get() != 0);
-	gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatNetCDF");
-	gen_ensure_equals(dataset->GetRasterCount(), 1);
+    FOR_DRIVER("MsatNetCDF");
+    unique_ptr<GDALDataset> dataset = openDS();
+    gen_ensure(dataset.get() != 0);
+    gen_ensure_equals(string(GDALGetDriverShortName(dataset->GetDriver())), "MsatNetCDF");
+    gen_ensure_equals(dataset->GetRasterCount(), 1);
 }
 
 // Import a full NetCDF product
 template<> template<>
 void to::test<2>()
 {
-	test_tag("fullNetCDF");
-	auto_ptr<GDALDataset> dataset = openPlain();
-	test_untag();
+    test_tag("fullNetCDF");
+    unique_ptr<GDALDataset> dataset = openPlain();
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 32);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 32);
 }
 
 // Try reimporting an exported grib (msat/msat)
 template<> template<>
 void to::test<3>()
 {
-	test_tag("fullNetCDFRecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("fullNetCDFRecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
-	// Set it here because in the test data it's missing
-	// TODO dataset->GetRasterBand(1)->SetNoDataValue(1);
+    // Set it here because in the test data it's missing
+    // TODO dataset->GetRasterBand(1)->SetNoDataValue(1);
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
 
-	//gen_ensure_similar(b->GetOffset(), -1, 0.00001);
-	gen_ensure_similar(b->GetOffset(), 0, 0.00001);
-	//gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
-	gen_ensure_similar(b->GetScale(), 1, 0.0001);
-	//gen_ensure_equals(b->getOriginalBpp(), 15);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //gen_ensure_similar(b->GetOffset(), -1, 0.00001);
+    gen_ensure_similar(b->GetOffset(), 0, 0.00001);
+    //gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
+    gen_ensure_similar(b->GetScale(), 1, 0.0001);
+    //gen_ensure_equals(b->getOriginalBpp(), 15);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -209,25 +209,25 @@ void to::test<3>()
 template<> template<>
 void to::test<4>()
 {
-	test_tag("fullNetCDFRecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("fullNetCDFRecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
 
-	// Set it here because in the test data it's missing
-	// TODO dataset->GetRasterBand(1)->SetNoDataValue(1);
+    // Set it here because in the test data it's missing
+    // TODO dataset->GetRasterBand(1)->SetNoDataValue(1);
 
-	//gen_ensure_similar(b->GetOffset(), -1, 0.00001);
-	gen_ensure_similar(b->GetOffset(), 0, 0.00001);
-	//gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
-	gen_ensure_similar(b->GetScale(), 1, 0.0001);
-	//gen_ensure_equals(b->getOriginalBpp(), 15);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //gen_ensure_similar(b->GetOffset(), -1, 0.00001);
+    gen_ensure_similar(b->GetOffset(), 0, 0.00001);
+    //gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
+    gen_ensure_similar(b->GetScale(), 1, 0.0001);
+    //gen_ensure_equals(b->getOriginalBpp(), 15);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -235,22 +235,22 @@ void to::test<4>()
 template<> template<>
 void to::test<5>()
 {
-	test_tag("croppedNetCDFRecodedGribMsat");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
-	test_untag();
+    test_tag("croppedNetCDFRecodedGribMsat");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/msat");
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
 
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
-	//gen_ensure_similar(b->GetOffset(), -247.6, 0.00001);
-	//gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
-	//gen_ensure_equals(b->getOriginalBpp(), 12);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
+    //gen_ensure_similar(b->GetOffset(), -247.6, 0.00001);
+    //gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
+    //gen_ensure_equals(b->getOriginalBpp(), 12);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -258,23 +258,23 @@ void to::test<5>()
 template<> template<>
 void to::test<6>()
 {
-	test_tag("croppedNetCDFRecodedGribEcmwf");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
-	test_untag();
+    test_tag("croppedNetCDFRecodedGribEcmwf");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatGRIB", false, "TEMPLATE=msat/ecmwf");
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float64);
 
-	//gen_ensure_similar(b->GetOffset(), -247.6, 0.00001);
-	gen_ensure_similar(b->GetOffset(), 0, 0.00001);
-	//gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
-	gen_ensure_similar(b->GetScale(), 1, 0.0001);
-	//gen_ensure_equals(b->getOriginalBpp(), 12);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 16);
+    //gen_ensure_similar(b->GetOffset(), -247.6, 0.00001);
+    gen_ensure_similar(b->GetOffset(), 0, 0.00001);
+    //gen_ensure_similar(b->GetScale(), 0.01, 0.0001);
+    gen_ensure_similar(b->GetScale(), 1, 0.0001);
+    //gen_ensure_equals(b->getOriginalBpp(), 12);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 16);
 
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, true);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, true);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -282,19 +282,19 @@ void to::test<6>()
 template<> template<>
 void to::test<7>()
 {
-	test_tag("fullNetCDFRecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
-	test_untag();
+    test_tag("fullNetCDFRecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF24", false);
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
 
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 32);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 32);
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -302,19 +302,19 @@ void to::test<7>()
 template<> template<>
 void to::test<8>()
 {
-	test_tag("croppedNetCDFRecodedNetCDF24");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
-	test_untag();
+    test_tag("croppedNetCDFRecodedNetCDF24");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF24", false);
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
 
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 32);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 32);
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -322,18 +322,18 @@ void to::test<8>()
 template<> template<>
 void to::test<9>()
 {
-	test_tag("fullNetCDFRecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
-	test_untag();
+    test_tag("fullNetCDFRecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecoded("MsatNetCDF", false);
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
-	// TODO gen_ensure_equals(b->getOriginalBpp(), 32);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
+    // TODO gen_ensure_equals(b->getOriginalBpp(), 32);
 #if 0
-	gen_ensure_equals(img->data->scalesToInt, false);
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
@@ -341,23 +341,21 @@ void to::test<9>()
 template<> template<>
 void to::test<10>()
 {
-	test_tag("croppedNetCDFRecodedNetCDF");
-        auto_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
-	test_untag();
+    test_tag("croppedNetCDFRecodedNetCDF");
+    unique_ptr<GDALDataset> dataset = openRecodedCropped(cropArea, "MsatNetCDF", false);
+    test_untag();
 
-	GDALRasterBand* b = dataset->GetRasterBand(1);
-	gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
+    GDALRasterBand* b = dataset->GetRasterBand(1);
+    gen_ensure_equals(b->GetRasterDataType(), GDT_Float32);
 
-	gen_ensure_equals(b->GetOffset(), 0);
-	gen_ensure_equals(b->GetScale(), 1);
+    gen_ensure_equals(b->GetOffset(), 0);
+    gen_ensure_equals(b->GetScale(), 1);
 #if 0
-	gen_ensure_equals(img->data->bpp, 32);
-	gen_ensure_equals(img->data->scalesToInt, false);
+    gen_ensure_equals(img->data->bpp, 32);
+    gen_ensure_equals(img->data->scalesToInt, false);
 
-	gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
+    gen_ensure_imagedata_similar(*img->data, *imgs[0]->data, 0.0001);
 #endif
 }
 
 }
-
-/* vim:set ts=4 sw=4: */

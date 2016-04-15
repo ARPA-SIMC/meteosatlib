@@ -52,7 +52,7 @@ GDALDataset* XRITOpen(GDALOpenInfo* info)
     }
 
     // Create the dataset
-    std::auto_ptr<XRITDataset> ds(new XRITDataset(fname, effect));
+    std::unique_ptr<XRITDataset> ds(new XRITDataset(fname, effect));
 
 	// Initialise the dataset
 	if (!ds->init()) return NULL;
@@ -67,19 +67,19 @@ extern "C" {
 
 void GDALRegister_MsatXRIT()
 {
-	if (! GDAL_CHECK_VERSION("MsatXRIT"))
-		return;
+    if (!GDAL_CHECK_VERSION("MsatXRIT"))
+        return;
 
-	if (GDALGetDriverByName("MsatXRIT") == NULL)
-	{
-		auto_ptr<GDALDriver> driver(new GDALDriver());
-		driver->SetDescription("MsatXRIT");
-		driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosat xRIT (via Meteosatlib)");
-		//driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
-		//driver->SetMetadataItem(GDAL_DMD_EXTENSION, "mem");
-		driver->pfnOpen = msat::xrit::XRITOpen;
-		GetGDALDriverManager()->RegisterDriver(driver.release());
-	}
+    if (GDALGetDriverByName("MsatXRIT") == NULL)
+    {
+        unique_ptr<GDALDriver> driver(new GDALDriver());
+        driver->SetDescription("MsatXRIT");
+        driver->SetMetadataItem(GDAL_DMD_LONGNAME, "Meteosat xRIT (via Meteosatlib)");
+        //driver->SetMetadataItem(GDAL_DMD_HELPTOPIC, "frmt_various.html#JDEM");
+        //driver->SetMetadataItem(GDAL_DMD_EXTENSION, "mem");
+        driver->pfnOpen = msat::xrit::XRITOpen;
+        GetGDALDriverManager()->RegisterDriver(driver.release());
+    }
 }
 
 }

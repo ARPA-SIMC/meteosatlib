@@ -25,10 +25,10 @@
 namespace msat {
 
 /**
- * auto_ptr style smart pointer, which automatically allocates and delete[]s
+ * unique_ptr style smart pointer, which automatically allocates and delete[]s
  * arrays.
  *
- * auto_ptr-stype copy semantics not implemented yet, as they have not been
+ * unique_ptr-stype copy semantics not implemented yet, as they have not been
  * needed so far.
  */
 template<typename T>
