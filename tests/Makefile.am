@@ -31,6 +31,12 @@ msat_test_SOURCES = \
     msat/test-facts.cpp \
     ../msat/utils/tests-main.cc
 
+if HRIT
+msat_test_SOURCES += \
+    msat/test-fileaccess.cpp \
+    msat/test-dataaccess.cpp
+endif
+
 
 msatlib_test_CPPFLAGS = \
     -I$(top_srcdir) -I$(top_builddir) \
@@ -45,12 +51,6 @@ msatlib_test_SOURCES = \
     tut-main.cpp \
     test-utils.cpp \
     msat/test-utils.cpp
-
-if HRIT
-msatlib_test_SOURCES += \
-    msat/test-fileaccess.cpp \
-    msat/test-dataaccess.cpp
-endif
 
 if HAVE_GDAL
 msatlib_test_SOURCES += \
