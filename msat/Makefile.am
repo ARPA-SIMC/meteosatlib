@@ -8,7 +8,10 @@ dist_msat_include_HEADERS = \
     iniparser.h \
     Progress.h \
     auto_arr_ptr.h \
-    facts.h
+    facts.h \
+    utils/string.h \
+    utils/sys.h \
+    utils/tests.h
 
 lib_LTLIBRARIES = libmsat.la
 
@@ -27,7 +30,10 @@ libmsat_la_SOURCES = \
     iniparser.c \
     Progress.cpp \
     auto_arr_ptr.cpp \
-    facts.cpp
+    facts.cpp \
+    utils/string.cc \
+    utils/sys.cc \
+    utils/tests.cc
 
 if HAVE_GDAL
 gdal_includedir = $(msat_includedir)/gdal

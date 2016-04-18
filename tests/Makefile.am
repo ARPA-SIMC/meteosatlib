@@ -1,22 +1,6 @@
 # Process this file with automake to produce Makefile.in.
-#
-# Copyright (C) 2010--2012 Enrico Zini <enrico@enricozini.org>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2, or (at your option)
-# any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software Foundation,
-# Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-check_PROGRAMS = msatlib_test
+check_PROGRAMS = msatlib_test msat_test
 
 dist_check_SCRIPTS = runtest
 
@@ -35,6 +19,19 @@ dist_noinst_HEADERS = \
     msat/test-utils.h \
     gdal/test-utils.h
 
+msat_test_CPPFLAGS = \
+    -I$(top_srcdir) -I$(top_builddir) \
+    -DDATA_DIR=\"`pwd`/$(top_srcdir)/tests/data\" \
+    -DWORK_DIR=\"`pwd`/$(top_builddir)/tests/work/\" \
+    $(GDAL_CFLAGS) $(MSAT_CFLAGS) $(NETCDF_CFLAGS)
+msat_test_LDADD = ../msat/libmsat.la
+msat_test_LDFLAGS =
+
+msat_test_SOURCES = \
+    msat/test-facts.cpp \
+    ../msat/utils/tests-main.cc
+
+
 msatlib_test_CPPFLAGS = \
     -I$(top_srcdir) -I$(top_builddir) \
     -DDATA_DIR=\"`pwd`/$(top_srcdir)/tests/data\" \
@@ -47,8 +44,7 @@ msatlib_test_LDFLAGS =
 msatlib_test_SOURCES = \
     tut-main.cpp \
     test-utils.cpp \
-    msat/test-utils.cpp \
-    msat/test-facts.cpp
+    msat/test-utils.cpp
 
 if HRIT
 msatlib_test_SOURCES += \
