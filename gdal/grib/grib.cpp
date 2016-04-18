@@ -281,16 +281,57 @@ GDALDataset* GRIBCreateCopy(const char* pszFilename, GDALDataset* src,
                               int bStrict, char** papszOptions, 
                               GDALProgressFunc pfnProgress, void* pProgressData)
 {
-	try {
-		const char* templateName = CSLFetchNameValue(papszOptions, "TEMPLATE");
-		if (templateName == NULL)
-			templateName = "msat/ecmwf";
+    try {
+        const char* templateName = CSLFetchNameValue(papszOptions, "TEMPLATE");
+        if (templateName == NULL)
+            templateName = "msat/ecmwf";
 
-		Grib grib;
-#if 1
-		grib.new_from_samples(NULL, "GRIB2");
-		if (strcmp(templateName, "msat/ecmwf") == 0)
-		{
+        Grib grib;
+        grib.new_from_samples(NULL, "GRIB2");
+        if (strcmp(templateName, "msat/wmo") == 0)
+        {
+            // http://www.cosmo-model.org/content/model/documentation/grib/pdtemplate_4.32.htm
+            grib.set_long("tablesVersion", 4);
+
+            grib.set_long("NV", 0);
+            grib.set_long("productDefinitionTemplateNumber", 32);
+
+            grib.set_long("centre", GRIB_META_CENTRE);
+            grib.set_long("subCentre",0);
+
+            // TODO: actually choose it wisely from:
+            // 0    Temperature
+            // 1    Moisture
+            // 2    Momentum
+            // 3    Mass
+            // 4    Short-wave radiation
+            // 5    Long-wave radiation
+            // 6    Cloud
+            // 20   Atmospheric chemical constituents
+            grib.set_long("parameterCategory", 0);
+            // TODO: actually choose it wisely from:
+            // Parameter number according to Code Table 4.2: For every
+            // discipline and category there is a group of parameter numbers.
+            // Please see the official WMO Tables or the ECMWF Manual Pages for
+            // these numbers.
+            grib.set_long("parameterNumber", 0);
+            grib.set_long("typeOfGeneratingProcess", 0);
+            //grib.set_long("backgroundProcess", 0);
+            //grib.set_long("generatingProcessIdentifier", 0);
+            //grib.set_long("hoursAfterDataCutoff", 0);
+            //grib.set_long("minutesAfterDataCutoff", 0);
+            grib.set_long("indicatorOfUnitOfTimeRange", 0);
+            grib.set_long("forecastTime", 0);
+            grib.set_long("NB", 1);
+
+            grib.set_long("satelliteSeries", 333);
+            grib.set_long("satelliteNumber", 56);
+            grib.set_long("instrumentType",207);
+
+            // scaleFactorOfCentralWaveNumber Scale factor of central wave number of band nb
+            // scaledValueOfCentralWaveNumber Scaled value of central wave number of band nb (units: m-1)
+
+        } else if (strcmp(templateName, "msat/ecmwf") == 0) {
 			grib.set_long("editionNumber",1);
 			grib.set_long("gribTablesVersionNo",1);
 
@@ -449,9 +490,6 @@ GDALDataset* GRIBCreateCopy(const char* pszFilename, GDALDataset* src,
 			CPLError(CE_Failure, CPLE_AppDefined, "Unsupported template name '%s'", templateName);
 			return NULL;
 		}
-#else
-		grib.new_from_template(NULL, templateName);
-#endif
 
 		//fprintf(stderr, "nXYSize: %d %d\n", nXSize, nYSize);
 		grib.set_long("numberOfPointsAlongXAxis", src->GetRasterXSize());
