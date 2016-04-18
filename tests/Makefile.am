@@ -17,6 +17,7 @@ dist_noinst_HEADERS = \
     tut_restartable.h \
     test-utils.h \
     msat/test-utils.h \
+    gdal/utils.h \
     gdal/test-utils.h
 
 msat_test_CPPFLAGS = \
@@ -37,6 +38,15 @@ msat_test_SOURCES += \
     msat/test-dataaccess.cpp
 endif
 
+if HAVE_GDAL
+msat_test_SOURCES += \
+    gdal/utils.cc \
+    gdal/test-georef-grib.cpp \
+    gdal/test-importgrib.cpp \
+    gdal/test-importnetcdf.cpp
+
+msat_test_LDFLAGS += $(GDAL_LIBS) $(NETCDF_LIBS)
+endif
 
 msatlib_test_CPPFLAGS = \
     -I$(top_srcdir) -I$(top_builddir) \
@@ -56,16 +66,13 @@ if HAVE_GDAL
 msatlib_test_SOURCES += \
     gdal/test-utils.cpp \
     gdal/test-importsafh5.cpp \
-    gdal/test-importnetcdf.cpp \
     gdal/test-importxrit.cpp \
     gdal/test-importxrit-nonlinear.cpp \
     gdal/test-importxrithrv.cpp \
-    gdal/test-importgrib.cpp \
     gdal/test-georef-safh5.cpp \
     gdal/test-georef-netcdf.cpp \
     gdal/test-georef-xrit.cpp \
     gdal/test-georef-xrithrv.cpp \
-    gdal/test-georef-grib.cpp \
     gdal/test-xrit-reflectance.cpp \
     gdal/test-xrit-solar-za.cpp
 

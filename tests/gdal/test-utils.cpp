@@ -227,53 +227,13 @@ std::unique_ptr<msat::Image> recodeThroughNetCDF24(msat::Image& img, bool leaveF
 }
 #endif
 
-/**
- * Invert a standard 3x2 "GeoTransform" style matrix with an
- * implicit [1 0 0] final row.
- */
-void invertGeoTransform(double* normal, double* inverted);
-
-void invertGeoTransform(double* normal, double* inverted)
-{
-	// From Frank Warmerdam <warmerdam@pobox.com>
-	// As posted at http://lists.maptools.org/pipermail/gdal-dev/2004-June/002852.html
-
-	// We assume a 3rd row that is [1 0 0]
-
-	// Compute determinate
-	double det = normal[1] * normal[5] - normal[2] * normal[4];
-
-	if (fabs(det) < 0.000000000000001)
-	{
-		stringstream str;
-		str << "geotransform matrix "
-			<< normal[0] << ", " << normal[1] << ", " << normal[2] << "; "
-			<< normal[3] << ", " << normal[4] << ", " << normal[5]
-			<< " is not invertible";
-		throw std::runtime_error(str.str());
-	}
-
-	double inv_det = 1.0 / det;
-
-	/* Compute adjoint, and divide by determinate */
-
-	inverted[1] =  normal[5] * inv_det;
-	inverted[4] = -normal[4] * inv_det;
-
-	inverted[2] = -normal[2] * inv_det;
-	inverted[5] =  normal[1] * inv_det;
-
-	inverted[0] = ( normal[2] * normal[3] - normal[0] * normal[5]) * inv_det;
-	inverted[3] = (-normal[1] * normal[3] + normal[0] * normal[4]) * inv_det;
-}
-
 GeoReferencer::GeoReferencer(GDALDataset* ds)
 	: ds(ds), proj(0), latlon(0), toLatLon(0), fromLatLon(0)
 {
 	if (ds->GetGeoTransform(geoTransform) != CE_None)
 		throw std::runtime_error("no geotransform found in input dataset");
 
-	invertGeoTransform(geoTransform, invGeoTransform);
+    msat::dataset::invertGeoTransform(geoTransform, invGeoTransform);
 
 	const char* projname = ds->GetProjectionRef();
 	if (!projname || !projname[0])
