@@ -1,146 +1,109 @@
-/*
- * Copyright (C) 2005--2010  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
+#include "utils.h"
 
-#include "test-utils.h"
+using namespace msat::tests;
 
-namespace tut {
+namespace {
 
 #define TESTFILE "SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5"
 
-struct msat_georef_safh5_shar
+class Tests : public FixtureTestCase<GDALFixture>
 {
-	GDALDataset* ds;
-	GeoReferencer* gr;
+    using FixtureTestCase::FixtureTestCase;
 
-	msat_georef_safh5_shar() : ds(0), gr(0)
-	{
-	}
+    void register_tests() override;
+} test("gdal_georef_safh5", "MsatSAFH5", TESTFILE);
 
-	~msat_georef_safh5_shar()
-	{
-		if (ds) delete ds;
-		if (gr) delete gr;
-	}
-
-	void start()
-        {
-                FOR_DRIVER("MsatSAFH5");
-                if (!ds) ds = openro(TESTFILE).release();
-                if (!gr) gr = new GeoReferencer(ds);
-        }
-};
-TESTGRP(msat_georef_safh5);
+void Tests::register_tests()
+{
 
 // Test the subsatellite point
-template<> template<>
-void to::test<1>()
-{
-        start();
-	double lat, lon, px, py;
-	int x, y;
+add_method("subsatellite", [](Fixture& f) {
+    GeoReferencer gr(f.dataset());
+    double lat, lon, px, py;
+    int x, y;
 
-	// Middle point maps to 0
-	gr->pixelToProjected(1856-1500, 1856-200, px, py);
-        gen_ensure_similar(px, 0, 0.000000001);
-        gen_ensure_similar(py, 0, 0.000000001);
+    // Middle point maps to 0
+    gr.pixelToProjected(1856-1500, 1856-200, px, py);
+    wassert(actual(px).almost_equal(0, 9));
+    wassert(actual(py).almost_equal(0, 9));
 
-        gr->projectedToLatlon(0, 0, lat, lon);
-        gen_ensure_equals(lat, 0);
-        gen_ensure_equals(lon, 0);
+    gr.projectedToLatlon(0, 0, lat, lon);
+    wassert(actual(lat) == 0);
+    wassert(actual(lon) == 0);
 
-        gr->latlonToProjected(0, 0, px, py);
-        gen_ensure_equals(px, 0);
-        gen_ensure_equals(py, 0);
+    gr.latlonToProjected(0, 0, px, py);
+    wassert(actual(px) == 0);
+    wassert(actual(py) == 0);
 
-        gr->projectedToPixel(0, 0, x, y);
-        gen_ensure_equals(x, 1856-1500);
-        gen_ensure_equals(y, 1856-200);
+    gr.projectedToPixel(0, 0, x, y);
+    wassert(actual(x) == 1856-1500);
+    wassert(actual(y) == 1856-200);
 
-        gr->pixelToLatlon(1856-1500, 1856-200, lat, lon);
-        gen_ensure_similar(lat, 0, 0.000000001);
-        gen_ensure_similar(lon, 0, 0.000000001);
+    gr.pixelToLatlon(1856-1500, 1856-200, lat, lon);
+    wassert(actual(lat).almost_equal(0, 9));
+    wassert(actual(lon).almost_equal(0, 9));
 
-        gr->latlonToPixel(0, 0, x, y);
-	gen_ensure_equals(x, 1856-1500);
-	gen_ensure_equals(y, 1856-200);
-}
+    gr.latlonToPixel(0, 0, x, y);
+    wassert(actual(x) == 1856-1500);
+    wassert(actual(y) == 1856-200);
+});
 
 // Test known points
-template<> template<>
-void to::test<2>()
-{
-        start();
-	double lat, lon;
+add_method("known1", [](Fixture& f) {
+    GeoReferencer gr(f.dataset());
+    double lat, lon;
 
-        gr->pixelToLatlon(0, 0, lat, lon);
-        gen_ensure_similar(lat,  59.482613, 0.0001);
-        gen_ensure_similar(lon, -21.091290, 0.0001);
+    gr.pixelToLatlon(0, 0, lat, lon);
+    wassert(actual(lat).almost_equal( 59.482613, 3));
+    wassert(actual(lon).almost_equal(-21.091290, 3));
 
-        gr->pixelToLatlon(10, 10, lat, lon);
-        gen_ensure_similar(lat,  58.659716, 0.0001);
-        gen_ensure_similar(lon, -19.914807, 0.0001);
+    gr.pixelToLatlon(10, 10, lat, lon);
+    wassert(actual(lat).almost_equal( 58.659716, 3));
+    wassert(actual(lon).almost_equal(-19.914807, 3));
 
-        gr->pixelToLatlon(100, 100, lat, lon);
-        gen_ensure_similar(lat,  52.458281, 0.0001);
-        gen_ensure_similar(lon, -12.205514, 0.0001);
+    gr.pixelToLatlon(100, 100, lat, lon);
+    wassert(actual(lat).almost_equal( 52.458281, 3));
+    wassert(actual(lon).almost_equal(-12.205514, 3));
 
-        gr->pixelToLatlon(1000, 1000, lat, lon);
-        gen_ensure_similar(lat, 18.485677, 0.0001);
-        gen_ensure_similar(lon, 18.995697, 0.0001);
+    gr.pixelToLatlon(1000, 1000, lat, lon);
+    wassert(actual(lat).almost_equal(18.485677, 3));
+    wassert(actual(lon).almost_equal(18.995697, 3));
 
-        gr->pixelToLatlon(1000, 100, lat, lon);
-        gen_ensure_similar(lat, 53.906167, 0.0001);
-        gen_ensure_similar(lon, 34.082836, 0.0001);
+    gr.pixelToLatlon(1000, 100, lat, lon);
+    wassert(actual(lat).almost_equal(53.906167, 3));
+    wassert(actual(lon).almost_equal(34.082836, 3));
 
-        gr->pixelToLatlon(300, 100, lat, lon);
-        gen_ensure_similar(lat, 52.243525, 0.0001);
-        gen_ensure_similar(lon, -2.630467, 0.0001);
+    gr.pixelToLatlon(300, 100, lat, lon);
+    wassert(actual(lat).almost_equal(52.243525, 3));
+    wassert(actual(lon).almost_equal(-2.630467, 3));
 
-        gr->pixelToLatlon(100, 300, lat, lon);
-        gen_ensure_similar(lat, 42.487134, 0.0001);
-	gen_ensure_similar(lon, -9.845648, 0.0001);
-}
+    gr.pixelToLatlon(100, 300, lat, lon);
+    wassert(actual(lat).almost_equal(42.487134, 3));
+    wassert(actual(lon).almost_equal(-9.845648, 3));
+});
 
 // Test known points
-template<> template<>
-void to::test<3>()
-{
-        start();
-	int x, y;
+add_method("known2", [](Fixture& f) {
+    GeoReferencer gr(f.dataset());
+    int x, y;
 
-        gr->latlonToPixel(40, 10, x, y);
-        gen_ensure_equals(x, 627);
-        gen_ensure_equals(y, 359);
+    gr.latlonToPixel(40, 10, x, y);
+    wassert(actual(x) == 627);
+    wassert(actual(y) == 359);
 
-        gr->latlonToPixel(10, 10, x, y);
-        gen_ensure_equals(x, 718);
-        gen_ensure_equals(y, 1292);
+    gr.latlonToPixel(10, 10, x, y);
+    wassert(actual(x) == 718);
+    wassert(actual(y) == 1292);
 
-        gr->latlonToPixel(10, 40, x, y);
-        gen_ensure_equals(x, 1640);
-        gen_ensure_equals(y, 1307);
+    gr.latlonToPixel(10, 40, x, y);
+    wassert(actual(x) == 1640);
+    wassert(actual(y) == 1307);
 
-        gr->latlonToPixel(40, -10, x, y);
-	gen_ensure_equals(x, 85);
-	gen_ensure_equals(y, 359);
-}
+    gr.latlonToPixel(40, -10, x, y);
+    wassert(actual(x) == 85);
+    wassert(actual(y) == 359);
+});
 
 }
 
-/* vim:set ts=4 sw=4: */
+}

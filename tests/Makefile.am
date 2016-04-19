@@ -42,6 +42,10 @@ if HAVE_GDAL
 msat_test_SOURCES += \
     gdal/utils.cc \
     gdal/test-georef-grib.cpp \
+    gdal/test-georef-netcdf.cpp \
+    gdal/test-georef-safh5.cpp \
+    gdal/test-georef-xrit.cpp \
+    gdal/test-georef-xrithrv.cpp \
     gdal/test-importgrib.cpp \
     gdal/test-importnetcdf.cpp \
     gdal/test-importsafh5.cpp \
@@ -69,10 +73,6 @@ msatlib_test_SOURCES = \
 if HAVE_GDAL
 msatlib_test_SOURCES += \
     gdal/test-utils.cpp \
-    gdal/test-georef-safh5.cpp \
-    gdal/test-georef-netcdf.cpp \
-    gdal/test-georef-xrit.cpp \
-    gdal/test-georef-xrithrv.cpp \
     gdal/test-xrit-reflectance.cpp \
     gdal/test-xrit-solar-za.cpp
 
