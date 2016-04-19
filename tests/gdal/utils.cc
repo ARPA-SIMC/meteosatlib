@@ -69,9 +69,17 @@ std::unique_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,
 {
     GDALDriver* driver = (GDALDriver*)GDALGetDriverByName(driverName);
     TempTestFile tf(leaveFile);
+
+    char** options = 0;
+    if (!opt1.empty()) options = CSLAddString(options, opt1.c_str());
+    if (!opt2.empty()) options = CSLAddString(options, opt2.c_str());
+    if (!opt3.empty()) options = CSLAddString(options, opt3.c_str());
+
     unique_ptr<GDALDataset> dataset((GDALDataset*)GDALCreateCopy(driver, tf.name().c_str(), ds,
-                TRUE, NULL,
-                GDALDummyProgress, NULL));
+                TRUE, options, GDALDummyProgress, NULL));
+
+    CSLDestroy(options);
+
     return dataset;
 }
 
