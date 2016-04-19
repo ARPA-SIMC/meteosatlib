@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in.
 
-check_PROGRAMS = msatlib_test msat_test
+check_PROGRAMS = msat_test
 
 dist_check_SCRIPTS = runtest
 
@@ -51,32 +51,11 @@ msat_test_SOURCES += \
     gdal/test-importsafh5.cpp \
     gdal/test-importxrit.cpp \
     gdal/test-importxrit-nonlinear.cpp \
-    gdal/test-importxrithrv.cpp
-
-msat_test_LDFLAGS += $(GDAL_LIBS) $(NETCDF_LIBS)
-endif
-
-msatlib_test_CPPFLAGS = \
-    -I$(top_srcdir) -I$(top_builddir) \
-    -DDATA_DIR=\"`pwd`/$(top_srcdir)/tests/data\" \
-    -DWORK_DIR=\"`pwd`/$(top_builddir)/tests/work/\" \
-    $(GDAL_CFLAGS) $(MSAT_CFLAGS) $(NETCDF_CFLAGS)
-
-msatlib_test_LDADD = ../msat/libmsat.la
-msatlib_test_LDFLAGS =
-
-msatlib_test_SOURCES = \
-    tut-main.cpp \
-    test-utils.cpp \
-    msat/test-utils.cpp
-
-if HAVE_GDAL
-msatlib_test_SOURCES += \
-    gdal/test-utils.cpp \
+    gdal/test-importxrithrv.cpp \
     gdal/test-xrit-reflectance.cpp \
     gdal/test-xrit-solar-za.cpp
 
-msatlib_test_LDFLAGS += $(GDAL_LIBS) $(NETCDF_LIBS)
+msat_test_LDFLAGS += $(GDAL_LIBS) $(NETCDF_LIBS)
 endif
 
 EXTRA_DIST = \
