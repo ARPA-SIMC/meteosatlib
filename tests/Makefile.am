@@ -12,13 +12,7 @@ check-local:
 	done
 
 dist_noinst_HEADERS = \
-    tut.h \
-    tut_reporter.h \
-    tut_restartable.h \
-    test-utils.h \
-    msat/test-utils.h \
-    gdal/utils.h \
-    gdal/test-utils.h
+    gdal/utils.h
 
 msat_test_CPPFLAGS = \
     -I$(top_srcdir) -I$(top_builddir) \
