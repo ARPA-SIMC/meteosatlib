@@ -45,7 +45,9 @@ msat_test_SOURCES += \
     gdal/test-importgrib.cpp \
     gdal/test-importnetcdf.cpp \
     gdal/test-importsafh5.cpp \
-    gdal/test-importxrit.cpp
+    gdal/test-importxrit.cpp \
+    gdal/test-importxrit-nonlinear.cpp \
+    gdal/test-importxrithrv.cpp
 
 msat_test_LDFLAGS += $(GDAL_LIBS) $(NETCDF_LIBS)
 endif
@@ -67,8 +69,6 @@ msatlib_test_SOURCES = \
 if HAVE_GDAL
 msatlib_test_SOURCES += \
     gdal/test-utils.cpp \
-    gdal/test-importxrit-nonlinear.cpp \
-    gdal/test-importxrithrv.cpp \
     gdal/test-georef-safh5.cpp \
     gdal/test-georef-netcdf.cpp \
     gdal/test-georef-xrit.cpp \
