@@ -145,6 +145,12 @@ struct ImportTest : public FixtureTestCase<Fixture>
             wassert(f.check_full_image_data(recoded.get()));
         });
 
+        // Try CreateCopy with GRIB msat/wmo
+        this->add_method("recode_grib_wmo", [](Fixture& f) {
+            std::unique_ptr<GDALDataset> recoded = wcallchecked(gdal::recode(f.dataset(), false, "MsatGRIB", "TEMPLATE=msat/wmo"));
+            wassert(f.check_full_image_data(recoded.get()));
+        });
+
         // Try CreateCopy with NetCDF
         this->add_method("recode_grib_netcdf", [](Fixture& f) {
             std::unique_ptr<GDALDataset> recoded = wcallchecked(gdal::recode(f.dataset(), false, "MsatNetCDF"));
@@ -166,6 +172,12 @@ struct ImportTest : public FixtureTestCase<Fixture>
         // Try reimporting a subarea exported to GRIB with the msat/ecmwf template
         this->add_method("crop_recode_grib_ecmwf", [](Fixture& f) {
             std::unique_ptr<GDALDataset> recoded = wcallchecked(gdal::recode(f.dataset(), f.get_crop_area(), false, "MsatGRIB", "TEMPLATE=msat/ecmwf"));
+            wassert(f.check_cropped_image_data(recoded.get()));
+        });
+
+        // Try reimporting a subarea exported to GRIB with the msat/ecmwf template
+        this->add_method("crop_recode_grib_wmo", [](Fixture& f) {
+            std::unique_ptr<GDALDataset> recoded = wcallchecked(gdal::recode(f.dataset(), f.get_crop_area(), false, "MsatGRIB", "TEMPLATE=msat/wmo"));
             wassert(f.check_cropped_image_data(recoded.get()));
         });
 
