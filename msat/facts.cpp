@@ -1,15 +1,5 @@
 #include "facts.h"
-
-#if 0
-#include <sstream>
-#include <iomanip>
-#include <iostream>
 #include <stdexcept>
-#include <math.h>
-#include <limits.h>
-#include <cstdlib>
-#include "proj/const.h"
-#endif
 #include <limits>
 
 // For HRIT satellite IDs
@@ -489,6 +479,71 @@ const char* channelLevel(int spacecraftID, int channelID)
                 }
         }
         return "";
+}
+
+double channel_central_wavelength(int spacecraftID, int channelID)
+{
+    switch (spacecraftID)
+    {
+        case 55:
+        case 56:
+        case 57:
+            switch (channelID)
+            {
+                case MSG_SEVIRI_1_5_VIS_0_6:    return  0.6;
+                case MSG_SEVIRI_1_5_VIS_0_8:    return  0.8;
+                case MSG_SEVIRI_1_5_IR_1_6:     return  1.6;
+                case MSG_SEVIRI_1_5_IR_3_9:     return  3.9;
+                case MSG_SEVIRI_1_5_WV_6_2:     return  6.2;
+                case MSG_SEVIRI_1_5_WV_7_3:     return  7.3;
+                case MSG_SEVIRI_1_5_IR_8_7:     return  8.7;
+                case MSG_SEVIRI_1_5_IR_9_7:     return  9.7;
+                case MSG_SEVIRI_1_5_IR_10_8:    return 10.8;
+                case MSG_SEVIRI_1_5_IR_12_0:    return 12.0;
+                case MSG_SEVIRI_1_5_IR_13_4:    return 13.4;
+                case MSG_SEVIRI_1_5_HRV:        return  0.7;
+            }
+            break;
+    }
+    throw std::runtime_error("central wavelength unknown for satellite " + to_string(spacecraftID) + " and channel " + to_string(channelID));
+}
+
+double channel_central_wave_number(int spacecraftID, int channelID)
+{
+    double wavelength = channel_central_wavelength(spacecraftID, channelID);
+    // Inverse of the wavelength in meters
+    return 1.0 / (wavelength * 0.000001);
+}
+
+int channel_from_central_wavelength(int spacecraftID, double wavelength)
+{
+    if (spacecraftID < 55 || spacecraftID > 57)
+        throw std::runtime_error("only satellite IDs from 55, 56 and 57 are supported (got: " + to_string(spacecraftID) + ")");
+
+    int val = round(wavelength * 10.0);
+    switch (val)
+    {
+        case   6: return MSG_SEVIRI_1_5_VIS_0_6;
+        case   8: return MSG_SEVIRI_1_5_VIS_0_8;
+        case  16: return MSG_SEVIRI_1_5_IR_1_6;
+        case  39: return MSG_SEVIRI_1_5_IR_3_9;
+        case  62: return MSG_SEVIRI_1_5_WV_6_2;
+        case  73: return MSG_SEVIRI_1_5_WV_7_3;
+        case  87: return MSG_SEVIRI_1_5_IR_8_7;
+        case  97: return MSG_SEVIRI_1_5_IR_9_7;
+        case 108: return MSG_SEVIRI_1_5_IR_10_8;
+        case 120: return MSG_SEVIRI_1_5_IR_12_0;
+        case 134: return MSG_SEVIRI_1_5_IR_13_4;
+        case   7: return MSG_SEVIRI_1_5_HRV;
+    }
+
+    throw std::runtime_error("unknown central wavelength " + to_string(val));
+}
+
+int channel_from_central_wave_number(int spacecraftID, double wave_number)
+{
+    double wavelength = (1 / wave_number) * 1000000;
+    return channel_from_central_wavelength(spacecraftID, wavelength);
 }
 
 double defaultPackedMissing(int channel_id)

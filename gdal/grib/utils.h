@@ -8,7 +8,7 @@
 
 // Define this if you want to create a foile /tmp/trace-gribapi with a trace of
 // all grib_api operations
-// #define TRACE_GRIBAPI
+#define TRACE_GRIBAPI
 
 #ifdef TRACE_GRIBAPI
 #include <cstdio>
@@ -83,7 +83,7 @@ struct Grib
 #endif
     }
     ~Grib() {
-        trace("close");
+        if (trace) trace("close");
         if (gh) grib_handle_delete(gh);
 #ifdef TRACE_GRIBAPI
         if (trace) fclose(trace);
@@ -170,6 +170,18 @@ struct Grib
         trace("GRIB_CHECK(grib_get_long(h, \"%s\", &lval), %d); /* -> %ld */", key, err, res);
         checked(err, key, "get_long");
         return res;
+    }
+
+    bool get_long_ifexists(const char* key, long* res)
+    {
+        int err = grib_get_long(gh, key, res);
+        trace("GRIB_CHECK(grib_get_long(h, \"%s\", &lval), %d); /* -> %ld */", key, err, *res);
+        if (err == GRIB_SUCCESS)
+            return true;
+        if (err == GRIB_NOT_FOUND)
+            return false;
+        CPLError(CE_Failure, CPLE_AppDefined, "get_long_ifexists %s: %s", key, grib_get_error_message(err));
+        throw griberror();
     }
 
     long get_long_oneof(const char* key, ...)

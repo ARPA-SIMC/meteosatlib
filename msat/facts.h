@@ -101,6 +101,18 @@ const char* channelUnit(int spacecraftID, int channelID);
 /// Get the data level string "1", "1.5", "2", "3"... for the given channel
 const char* channelLevel(int spacecraftID, int channelID);
 
+/// Get the central wavelength (in µm) for the given channel
+double channel_central_wavelength(int spacecraftID, int channelID);
+
+/// Get the central wave number (m**-1) for the given channel
+double channel_central_wave_number(int spacecraftID, int channelID);
+
+/// Get the channel number given the central wavelength in µm
+int channel_from_central_wavelength(int spacecraftID, double wavelength);
+
+/// Get the channel number given the central wave number (m**-1)
+int channel_from_central_wave_number(int spacecraftID, double wave_number);
+
 /// Get the default missing value that can be used for the given channel
 double defaultPackedMissing(int channel);
 
