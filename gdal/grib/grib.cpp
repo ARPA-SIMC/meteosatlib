@@ -833,7 +833,7 @@ GDALDataset* GRIBCreateCopy(const char* pszFilename, GDALDataset* src,
     try {
         const char* templateName = CSLFetchNameValue(papszOptions, "TEMPLATE");
         if (templateName == NULL)
-            templateName = "msat/ecmwf";
+            templateName = "msat/wmo";
 
         Grib grib;
         if (strcmp(templateName, "msat/wmo") == 0)
