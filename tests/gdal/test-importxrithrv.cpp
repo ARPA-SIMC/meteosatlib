@@ -15,14 +15,14 @@ struct Fixture : public GDALFixture
 {
     using GDALFixture::GDALFixture;
 
-    msat::proj::ImageBox get_crop_area() override
+    msat::proj::ImageBox get_crop_area()
     {
         return msat::proj::ImageBox(msat::proj::ImagePoint(9000, 2900), msat::proj::ImagePoint(9000+150, 2900+300));
     }
 
     void check_general_image_data(GDALDataset* dataset);
-    void check_full_image_data(GDALDataset* dataset) override;
-    void check_cropped_image_data(GDALDataset* dataset) override;
+    void check_full_image_data(GDALDataset* dataset);
+    void check_cropped_image_data(GDALDataset* dataset);
 };
 
 

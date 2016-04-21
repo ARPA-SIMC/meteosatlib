@@ -108,10 +108,6 @@ struct GDALFixture : public Fixture
     void test_setup();
 
     GDALDataset* dataset();
-
-    virtual msat::proj::ImageBox get_crop_area() { throw std::runtime_error("get_crop_area called on a test fixture where it has not been implemented"); }
-    virtual void check_full_image_data(GDALDataset* dataset) {}
-    virtual void check_cropped_image_data(GDALDataset* dataset) {}
 };
 
 template<typename Fixture>
