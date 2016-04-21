@@ -21,7 +21,6 @@
  */
 
 #include <gdal/gdal.h>
-#include "safh5/safh5.h"
 #include "xrit/xrit.h"
 #include "netcdf/netcdf.h"
 #include "netcdf/netcdf24.h"
@@ -34,17 +33,14 @@ void GDALAllRegister(void);
 
 void GDALAllRegister(void)
 {
-	static void (*func)(void) = 0;
-	if(!func)
-		func = (void (*)(void)) dlsym(RTLD_NEXT, "GDALAllRegister");
+    static void (*func)(void) = 0;
+    if(!func)
+        func = (void (*)(void)) dlsym(RTLD_NEXT, "GDALAllRegister");
 
-	GDALRegister_MsatXRIT();
-	GDALRegister_MsatSAFH5();
-	GDALRegister_MsatNetCDF();
-	GDALRegister_MsatNetCDF24();
-	GDALRegister_MsatGRIB();
+    GDALRegister_MsatXRIT();
+    GDALRegister_MsatNetCDF();
+    GDALRegister_MsatNetCDF24();
+    GDALRegister_MsatGRIB();
 
-	func();
+    func();
 }
-
-// vim:set ts=2 sw=2:

@@ -9,7 +9,6 @@ have_omtpids=@enable_omtp_ids@
 have_openmtp=@enable_openmtp@
 have_thornsdsdb1=@enable_thornsds_db1@
 have_grib=@enable_grib@
-have_safh5=@enable_safh5@
 
 Name: libmsat
 Description: Handle Meteosat images in various formats, directly or via GDAL

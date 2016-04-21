@@ -69,7 +69,7 @@ void usage(char *pname)
              << pname << "<output option> file(s)..."
              << endl << endl
              << "Examples: " << endl << "\t" << pname
-             << "  " << pname << " --grib Data0.nc SAFNWC_MSG1_CT___04356_051_EUROPE______.h5 hritdir/H:MSG1:HRV:200605031200"
+             << "  " << pname << " --grib Data0.nc hritdir/H:MSG1:HRV:200605031200"
              << endl;
         return;
 }

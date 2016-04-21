@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Enrico Zini <enrico@debian.org>
 Build-Depends:
  debhelper (>= 7.0.50~), dh-buildinfo,
- libnetcdf-dev, libhdf5-serial-dev | libhdf5-dev,
+ libnetcdf-dev,
  libgrib-api-dev,
  libgdal1-dev (>= 1.6.0),
  libmsat-dev (>= 0.6),
@@ -67,7 +67,6 @@ Description: GDAL drivers based on Meteosatlib
  It adds support for these new formats:
  .
   - MsatXRIT (ro): xRIT (if enabled in meteosatlib)
-  - MsatSAFH5 (ro): SAF HDF5
   - MsatNetCDF (rw): Meteosatlib NetCDF
   - MsatNetCDF24 (rw): Meteosatlib NetCDF24
   - MsatGRIB (rw): GRIB via grib_api

@@ -10,7 +10,7 @@ images in several formats.
 There are low-level functions to work with: HRIT/LRIT, HRI, OpenMTP, and
 OpenMTP-IDS.
 
-The GDAL driver can work with xRIT, SAF HDF5, two NetCDF dialects, GRIB.
+The GDAL driver can work with xRIT, two NetCDF dialects, GRIB.
 
 Use at Your own risk and for any purposes.
 

@@ -20,7 +20,6 @@
  * Author: Enrico Zini <enrico@enricozini.org>
  */
 
-#include "safh5/safh5.h"
 #include "xrit/xrit.h"
 #include "netcdf/netcdf.h"
 #include "netcdf/netcdf24.h"
@@ -29,12 +28,9 @@
 extern "C" {
 void GDALRegister_Meteosatlib(void)
 {
-	GDALRegister_MsatXRIT();
-	GDALRegister_MsatSAFH5();
-	GDALRegister_MsatNetCDF();
-	GDALRegister_MsatNetCDF24();
-	GDALRegister_MsatGRIB();
+    GDALRegister_MsatXRIT();
+    GDALRegister_MsatNetCDF();
+    GDALRegister_MsatNetCDF24();
+    GDALRegister_MsatGRIB();
 }
 }
-
-// vim:set ts=2 sw=2:

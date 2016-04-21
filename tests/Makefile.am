@@ -37,12 +37,10 @@ msat_test_SOURCES += \
     gdal/utils.cc \
     gdal/test-georef-grib.cpp \
     gdal/test-georef-netcdf.cpp \
-    gdal/test-georef-safh5.cpp \
     gdal/test-georef-xrit.cpp \
     gdal/test-georef-xrithrv.cpp \
     gdal/test-importgrib.cpp \
     gdal/test-importnetcdf.cpp \
-    gdal/test-importsafh5.cpp \
     gdal/test-importxrit.cpp \
     gdal/test-importxrit-nonlinear.cpp \
     gdal/test-importxrithrv.cpp \
@@ -68,5 +66,4 @@ EXTRA_DIST = \
     data/H-000-MSG2__-MSG2________-IR_108___-000008___-201001191200-C_ \
     data/H-000-MSG2__-MSG2________-IR_134___-000008___-201001191200-C_ \
     data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc \
-    data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb \
-    data/SAFNWC_MSG1_CRR__05339_025_MSGEURO_____.h5
+    data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb

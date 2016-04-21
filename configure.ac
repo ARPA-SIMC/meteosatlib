@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-AC_INIT([meteosatlib], [1.4], [enrico@enricozini.org])
+AC_INIT([meteosatlib], [1.5], [enrico@enricozini.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([foreign subdir-objects nostdinc])
@@ -159,28 +159,6 @@ else
 fi
 enable_grib=$have_gribapi
 
-dnl Check for hdf5 support
-PKG_CHECK_MODULES([HDF5], [hdf5-serial], [have_hdf5=yes], [have_hdf5=no])
-if test $have_hdf5 = yes
-then
-    PKG_CHECK_MODULES([HDF5],[hdf5-serial])
-else
-    AX_LIB_HDF5
-    if test "$with_hdf5" = yes
-    then
-        have_hdf5=yes
-    else
-	AC_MSG_WARN("*** hdf5 support disabled")
-    fi
-fi
-if test $have_hdf5 = yes
-then
-    AC_DEFINE([HAVE_HDF5], 1, [hdf5 format enabled])
-    AC_DEFINE([HAVE_HDF5], 1, [HDF5 functions are available])
-fi
-enable_safh5=$have_hdf5
-
-
 dnl --------------------------------------------------------------------
 dnl Checks for typedefs, structures, and compiler characteristics.
 
@@ -236,7 +214,6 @@ AM_CONDITIONAL([HAVE_NETCDF], [test x"$have_libnetcdf" = x"yes"])
 AM_CONDITIONAL([HAVE_MAGICK], [test x"$have_libmagick" = x"yes"])
 AM_CONDITIONAL([HAVE_GRIBAPI], [test x"$have_gribapi" = x"yes"])
 AM_CONDITIONAL([HAVE_GDAL], [test x"$have_gdal" = x"yes"])
-AM_CONDITIONAL([HAVE_HDF5], [test x"$have_hdf5" = x"yes"])
 AM_CONDITIONAL([OLD_GRIB], [test x"$enable_grib" = x"yes"])
 
 AC_SUBST(enable_hri)
@@ -246,7 +223,6 @@ AC_SUBST(enable_omtp_ids)
 AC_SUBST(enable_openmtp)
 AC_SUBST(enable_thornsds_db1)
 AC_SUBST(enable_grib)
-AC_SUBST(enable_safh5)
 
 dnl --------------------------------------------------------------------
 dnl Extra defines
@@ -307,5 +283,4 @@ AS_HELP_STRING([thornsds_db1:], [$enable_thornsds_db1])
 AS_HELP_STRING([magick++:], [$have_libmagick])
 AS_HELP_STRING([GDAL:], [$have_gdal])
 AS_HELP_STRING([grib_api:], [$have_gribapi])
-AS_HELP_STRING([hdf5:], [$have_hdf5])
 ===================================================])

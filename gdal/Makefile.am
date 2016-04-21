@@ -29,17 +29,6 @@ libmsatdrv_la_SOURCES += \
 libmsatdrv_la_LIBADD += $(GDAL_LIBS) $(MSAT_LIBS) $(NETCDF_LIBS)
 endif
 
-if HAVE_HDF5
-dist_noinst_HEADERS += \
-    safh5/utils.h \
-    safh5/safh5.h
-libmsatdrv_la_CPPFLAGS += $(HDF5_CFLAGS) $(GDAL_CFLAGS) $(MSAT_CFLAGS)
-libmsatdrv_la_SOURCES += \
-    safh5/utils.cpp \
-    safh5/safh5.cpp
-libmsatdrv_la_LIBADD += $(HDF5_LIBS) $(GDAL_LIBS) $(MSAT_LIBS)
-endif
-
 if HRIT
 dist_noinst_HEADERS += \
     xrit/xrit.h \

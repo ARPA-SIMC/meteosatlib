@@ -1,6 +1,3 @@
-/* HDF5 functions are available */
-#undef MSAT_HAVE_HDF5
-
 /* XRIT functions are available */
 #undef MSAT_HAVE_HRIT
 
