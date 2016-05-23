@@ -215,25 +215,28 @@ void DataAccess::line_read(size_t line, MSG_SAMPLE* buf) const
     size_t segnum = 0;
     size_t segline = 0;
 
-        if (hrv)
-        {
-                line = 11136 - line;
-                segnum = (line - LowerSouthLineActual) / seglines;
-                segline = (line - LowerSouthLineActual) % seglines;
-        }
-        else
-        {
-                line = 3712 - line;
-                segnum = (line - SouthLineActual) / seglines;
-                segline = (line - SouthLineActual) % seglines;
-        }
+    MSG_data* d = nullptr;
 
-        MSG_data* d = segment(segnum);
-        if (d == 0)
-        {
-                bzero(buf, columns * sizeof(MSG_SAMPLE));
-                return;
-        }
+    if (hrv)
+    {
+        line = MaxLineActual - line - 1;
+        segnum = line / seglines;
+        segline = line % seglines;
+        d = segment(segnum);
+    }
+    else
+    {
+        line = 3712 - line;
+        segnum = (line - SouthLineActual) / seglines;
+        segline = (line - SouthLineActual) % seglines;
+        d = segment(segnum);
+    }
+
+    if (d == nullptr)
+    {
+        bzero(buf, columns * sizeof(MSG_SAMPLE));
+        return;
+    }
 
     if (swapX)
     {
