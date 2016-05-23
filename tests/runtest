@@ -28,10 +28,16 @@ cd "$TESTDIR"
 
 # Put data in test inbound area
 cp -a "$TOP_SRCDIR/tests/data/"* .
-tar -C "$TOP_SRCDIR/tests" --exclude=".*" -cf - data | tar xf -
 
 ## Clean up the test environment at exit unless asked otherwise
 cleanup() {
+    if [ ! -z "$PAUSE" ]
+    then
+        echo "Post-test inspection requested."
+        echo "Exit this shell to cleanup the test environment."
+        bash
+    fi
+
 	test -z "$PRESERVE" && rm -r "$TESTDIR"
 }
 trap cleanup EXIT
@@ -54,13 +60,6 @@ else
 	echo "Running $DEBUGGER $CMD $ARGS"
 	$DEBUGGER $CMD $ARGS
 	RES=$?
-fi
-
-if [ ! -z "$PAUSE" ]
-then
-	echo "Post-test inspection requested."
-	echo "Exit this shell to cleanup the test environment."
-	bash
 fi
 
 exit $RES
