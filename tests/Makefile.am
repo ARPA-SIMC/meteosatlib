@@ -42,6 +42,7 @@ msat_test_SOURCES += \
     gdal/test-importgrib.cpp \
     gdal/test-importnetcdf.cpp \
     gdal/test-importxrit.cpp \
+    gdal/test-importxrit-rss.cpp \
     gdal/test-importxrit-nonlinear.cpp \
     gdal/test-importxrithrv.cpp \
     gdal/test-xrit-reflectance.cpp \
