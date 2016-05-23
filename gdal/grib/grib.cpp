@@ -351,14 +351,12 @@ struct CreateGRIB
         // next occurrence of the Data Section.
         if (count_missing)
         {
-            grib.set_long("bitMapIndicator", 0);
             grib.set_long("bitmapPresent", 1);
             // TODO: does it get computed automatically if we set missingValue,
             // or do we need to compute the bitmap ourselves?
             grib.set_double("missingValue", grib_missing);
         } else {
             // 255 = A bit map does not apply to this product (grib2/tables/4/6.0.table)
-            grib.set_long("bitMapIndicator", 255);
             grib.set_long("bitmapPresent", 0);
         }
         return true;
@@ -769,23 +767,6 @@ struct CreateGRIB1 : public CreateGRIB
         grib.set_long("Xo", x0);
         grib.set_long("Yo", y0);
 
-        return true;
-    }
-
-    bool bit_map_section() override
-    {
-        // The purpose of the Bit-Map Section is to indicate the presence or
-        // absence of data at each of the grid points, as applicable, in the
-        // next occurrence of the Data Section.
-        if (count_missing)
-        {
-            grib.set_long("bitmapPresent", 1);
-            // TODO: does it get computed automatically if we set missingValue,
-            // or do we need to compute the bitmap ourselves?
-            grib.set_double("missingValue", grib_missing);
-        } else {
-            grib.set_long("bitmapPresent", 0);
-        }
         return true;
     }
 
