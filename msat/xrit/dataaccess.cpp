@@ -198,7 +198,7 @@ MSG_data* DataAccess::segment(size_t idx) const
 size_t DataAccess::line_start(size_t line) const
 {
     if (!hrv) return WestColumnActual - 1;
-    if (line >= UpperNorthLineActual) return 0;
+    if (line >= MaxLineActual) return 0;
 
     // Bring line in the domain of the HRV reference grid
     line = MaxLineActual - line;
