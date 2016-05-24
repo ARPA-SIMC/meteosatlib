@@ -232,26 +232,26 @@ std::string FileAccess::epilogueFile() const
 
 std::vector<std::string> FileAccess::segmentFiles() const
 {
-  string filename = directory
-					 + PATH_SEPARATOR
-					 + resolution
-           + "-???" "-??????" "-"	// Split to avoid warnings on trigraphs
-           + underscoreit(productid1, 12) + "-"
-           + underscoreit(productid2, 9) + "-"
-           + "0?????___" + "-"
-           + timing + "-" + "C_";
+    string filename = directory
+        + PATH_SEPARATOR
+        + resolution
+        + "-???" "-??????" "-"  // Split to avoid warnings on trigraphs
+        + underscoreit(productid1, 12) + "-"
+        + underscoreit(productid2, 9) + "-"
+        + "0?????___" + "-"
+        + timing + "-" + "C_";
 
-  glob_t globbuf;
-  globbuf.gl_offs = 1;
+    glob_t globbuf;
+    globbuf.gl_offs = 1;
 
-  if ((glob(filename.c_str( ), GLOB_DOOFFS, NULL, &globbuf)) != 0)
-    throw std::runtime_error("No such file(s)");
+    if ((glob(filename.c_str( ), GLOB_DOOFFS, NULL, &globbuf)) != 0)
+        throw std::runtime_error("No such file(s)");
 
-	std::vector<std::string> res;
-	for (size_t i = 0; i < globbuf.gl_pathc; ++i)
-		res.push_back(globbuf.gl_pathv[i+1]);
-  globfree(&globbuf);
-	return res;
+    std::vector<std::string> res;
+    for (size_t i = 0; i < globbuf.gl_pathc; ++i)
+        res.push_back(globbuf.gl_pathv[i+1]);
+    globfree(&globbuf);
+    return res;
 }
 
 std::string FileAccess::toString() const

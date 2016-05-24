@@ -1,0 +1,159 @@
+#!/usr/bin/python3
+# coding: utf8
+
+import gdal, ogr
+import gdalconst
+import argparse
+import subprocess
+import tempfile
+import sys
+import os
+import re
+import shlex
+import logging
+
+class Engine:
+    def __init__(self):
+        # Cache directory
+        self.cachedir = "draw_coastlines_cache"
+        # Working directory
+        self.workdir = "."
+        # Output boundaries: xmin, ymin, xmax, ymax
+        self.clip = [-10, 30, 30, 60]
+        # Output spatial reference system
+        self.srs = "+proj=latlong"
+        # Source shapefile with coastlines
+        self.shp = None
+        # Source raster file
+        self.raster = None
+        # Destination file
+        self.output = None
+        # Output file format
+        self.output_format = "GTiff"
+
+        # Create cache directory if missing
+        os.makedirs(self.cachedir, exist_ok=True)
+
+    @property
+    def work_shapefile_fname(self):
+        parts = ["shape", os.path.basename(self.shp), self.srs, "_".join(str(x) for x in self.clip)]
+        clean = re.compile("[^a-zA-Z0-9]+")
+        return "-".join(clean.sub("_", x) for x in parts) + ".shp"
+
+    @property
+    def work_shapefile(self):
+        return os.path.join(self.cachedir, self.work_shapefile_fname)
+
+    @property
+    def work_rasterfile_fname(self):
+        parts = ["raster", os.path.basename(self.raster), self.srs, "_".join(str(x) for x in self.clip)]
+        clean = re.compile("[^a-zA-Z0-9]+")
+        return "-".join(clean.sub("_", x) for x in parts) + ".tiff"
+
+    @property
+    def work_rasterfile(self):
+        return os.path.join(self.cachedir, self.work_rasterfile_fname)
+
+    def read_shp(self):
+        fname = self.work_shapefile
+        if os.path.exists(fname):
+            logging.info("Reusing cached shapefile from %s", fname)
+            return
+
+        logging.info("Importing shapefile %s to %s", self.shp, fname)
+        cmd = ["ogr2ogr", fname, "-f", "ESRI Shapefile", "-t_srs", self.srs, "-clipdst"]
+        cmd += [str(x) for x in self.clip]
+        cmd += [self.shp]
+        logging.debug("Running %s", " ".join(shlex.quote(x) for x in cmd))
+        subprocess.check_call(cmd)
+
+    def read_raster(self):
+        fname = self.work_rasterfile
+        if os.path.exists(fname):
+            logging.info("Reusing cached rasterfile from %s", fname)
+            return
+
+        logging.info("Importing raster %s to %s", self.raster, fname)
+        cmd = ["gdalwarp", "-t_srs", self.srs, "-te"]
+        cmd += [str(x) for x in self.clip]
+        cmd += ["-of", "GTiff", self.raster, fname]
+        logging.debug("Running %s", " ".join(shlex.quote(x) for x in cmd))
+        subprocess.check_call(cmd)
+
+    def run(self):
+        if self.shp: self.read_shp()
+        self.read_raster()
+
+        logging.info("Computing %s", self.output)
+
+        d = gdal.GetDriverByName(self.output_format)
+
+        # Copy the input dataset to the output
+        inds = gdal.Open(self.work_rasterfile, gdalconst.GA_ReadOnly)
+        vmin, vmax = inds.GetRasterBand(1).ComputeRasterMinMax()
+        outds = d.CreateCopy(self.output, inds, 0)
+
+        # Rasterize the shapefile over it
+        shp = ogr.Open(self.work_shapefile)
+        shp_layer = shp.GetLayer(0)
+        err = gdal.RasterizeLayer(outds, (1,), shp_layer, burn_values=(vmax,))
+        if err != 0:
+            raise RuntimeError("error rasterizing layer: %s" % err)
+
+
+class BadOption(Exception):
+    pass
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Reproject a satellite image and draw coastlines over it")
+    parser.add_argument("--verbose", "-v", action="store_true", help="verbose output")
+    parser.add_argument("--debug", action="store_true", help="debug output")
+    parser.add_argument("--shp", help="shapefile with coastlines")
+    parser.add_argument("--area", default="-10,30,30,60", help="area to render ('xmin,ymin,xmax,ymax')")
+    parser.add_argument("--srs", default="+proj=latlong", help="output spatial reference system")
+    parser.add_argument("--format", "-f", default="GTiff", help="output file format")
+    parser.add_argument("src", help="source image")
+    parser.add_argument("dst", help="source image")
+    args = parser.parse_args()
+
+    # Setup logging
+    FORMAT = "%(asctime)-15s %(levelname)s %(message)s"
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG, stream=sys.stderr, format=FORMAT)
+    elif args.verbose:
+        logging.basicConfig(level=logging.INFO, stream=sys.stderr, format=FORMAT)
+    else:
+        logging.basicConfig(level=logging.WARN, stream=sys.stderr, format=FORMAT)
+
+    engine = Engine()
+
+    try:
+        engine.clip = [int(x) for x in args.area.split(",")]
+    except ValueError:
+        raise BadOption("--area should be a comma separate list of 4 integer values")
+    if len(engine.clip) != 4:
+        raise BadOption("--area should be a comma separate list of 4 integer values")
+
+    engine.srs = args.srs
+    engine.shp = args.shp
+    engine.raster = args.src
+    engine.output = args.dst
+    engine.output_format = args.format
+
+    with tempfile.TemporaryDirectory(suffix='', prefix='tmp', dir=".") as tmpdir:
+        engine.workdir = tmpdir
+        engine.run()
+
+    sys.exit(0)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except BadOption as e:
+        print("Bad option: {}".format(e), file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

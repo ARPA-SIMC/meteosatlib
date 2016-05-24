@@ -86,6 +86,14 @@ public:
         size_t UpperSouthLineActual;
         size_t UpperWestColumnActual;
         size_t UpperNorthLineActual;
+        /**
+         * Maximum line number, computed as max(LowerNorthLineActual, UpperNorthLineActual)
+         *
+         * This is because HRV defines the Africa scan as "Lower" image and the
+         * Europe scan as the "Upper" image, while HRV-RSS has only Europe
+         * defined as the "Lower" image.
+         */
+        size_t MaxLineActual;
 
         /// non-HRV reference grid (meaningless if HRV)
         size_t SouthLineActual;

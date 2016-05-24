@@ -45,14 +45,22 @@ uint8_t* Stretch::rescale(GDALRasterBand& band, const T* vals, T vmin, T vmax)
   size_t sx = band.GetXSize();
   size_t sy = band.GetYSize();
   uint8_t* res8 = new uint8_t[sx * sy];
-  for (size_t i = 0; i < sx * sy; ++i)
+  if (vmax == vmin)
   {
-    if (vals[i] < vmin)
-      res8[i] = 0;
-    else if (vals[i] > vmax)
-      res8[i] = 255;
-    else
-      res8[i] = (vals[i] - vmin) * 255 / (vmax - vmin);
+      for (size_t i = 0; i < sx * sy; ++i)
+          res8[i] = vmin;
+  }
+  else
+  {
+      for (size_t i = 0; i < sx * sy; ++i)
+      {
+        if (vals[i] < vmin)
+          res8[i] = 0;
+        else if (vals[i] > vmax)
+          res8[i] = 255;
+        else
+          res8[i] = (vals[i] - vmin) * 255 / (vmax - vmin);
+      }
   }
   return res8;
 }

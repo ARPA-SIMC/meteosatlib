@@ -42,8 +42,10 @@ msat_test_SOURCES += \
     gdal/test-importgrib.cpp \
     gdal/test-importnetcdf.cpp \
     gdal/test-importxrit.cpp \
+    gdal/test-importxrit-rss.cpp \
     gdal/test-importxrit-nonlinear.cpp \
     gdal/test-importxrithrv.cpp \
+    gdal/test-importxrit-rsshrv.cpp \
     gdal/test-xrit-reflectance.cpp \
     gdal/test-xrit-solar-za.cpp
 
@@ -66,4 +68,9 @@ EXTRA_DIST = \
     data/H-000-MSG2__-MSG2________-IR_108___-000008___-201001191200-C_ \
     data/H-000-MSG2__-MSG2________-IR_134___-000008___-201001191200-C_ \
     data/MSG_Seviri_1_5_Infrared_10_8_channel_20051219_1415.nc \
-    data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb
+    data/MSG_Seviri_1_5_Infrared_9_7_channel_20060426_1945.grb \
+    data/rss/H-000-MSG2__-MSG2_RSS____-_________-PRO______-201604281230-__ \
+    data/rss/H-000-MSG2__-MSG2_RSS____-HRV______-000024___-201604281230-C_ \
+    data/rss/H-000-MSG2__-MSG2_RSS____-IR_039___-000008___-201604281230-C_ \
+    data/rss/H-000-MSG2__-MSG2_RSS____-VIS006___-000008___-201604281230-C_ \
+    data/rss/H-000-MSG2__-MSG2_RSS____-_________-EPI______-201604281230-__
