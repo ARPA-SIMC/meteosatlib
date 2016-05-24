@@ -6,3 +6,4 @@
 * Added support for WMO GRIB2 template 4.31 images. This is now the default for
   GRIB output.
 * Unit tests do not need libtut to compile anymore.
+* Added support for MSG2 Rapid Scan System (RSS)
