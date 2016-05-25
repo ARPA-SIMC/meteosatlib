@@ -45,6 +45,7 @@ struct FileAccess
 
     FileAccess() : directory(".") {}
     FileAccess(const std::string& filename);
+    FileAccess(const FileAccess& fa) = default;
     FileAccess(const FileAccess& fa, const std::string& chan);
 
     /// Initialize parsing a file name

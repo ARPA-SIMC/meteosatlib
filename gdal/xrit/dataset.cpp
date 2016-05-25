@@ -12,8 +12,8 @@ using namespace std;
 namespace msat {
 namespace xrit {
 
-XRITDataset::XRITDataset(const std::string& fname, Effect effect)
-    : fa(fname), spacecraft_id(0), effect(effect)
+XRITDataset::XRITDataset(const xrit::FileAccess& fa, Effect effect)
+    : fa(fa), spacecraft_id(0), effect(effect)
 {
 }
 

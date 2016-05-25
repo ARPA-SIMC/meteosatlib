@@ -1,11 +1,10 @@
 #include "reflectance.h"
-#include "dataset.h"
-#include "rasterband.h"
 #include <msat/auto_arr_ptr.h>
 #include <msat/gdal/const.h>
 #include <msat/facts.h>
 #include <ogr_spatialref.h>
-#include <msat/hrit/MSG_data_RadiometricProc.h>
+//#include <msat/hrit/MSG_data_RadiometricProc.h>
+#include <msat/hrit/MSG_channel.h>
 #include <string>
 #include <stdexcept>
 #include <stdint.h>
@@ -13,7 +12,82 @@
 using namespace std;
 
 namespace msat {
-namespace xrit {
+namespace utils {
+
+ReflectanceDataset::ReflectanceDataset(int channel_id)
+    : channel_id(channel_id)
+{
+}
+
+ReflectanceDataset::~ReflectanceDataset()
+{
+    for (auto& ds: owned_datasets)
+        delete ds;
+}
+
+const char* ReflectanceDataset::GetProjectionRef()
+{
+    return projWKT.c_str();
+}
+
+CPLErr ReflectanceDataset::GetGeoTransform(double* tr)
+{
+    memcpy(tr, geotransform, 6 * sizeof(double));
+    return CE_None;
+}
+
+void ReflectanceDataset::add_source(GDALDataset* ds, bool take_ownership)
+{
+    for (int i = 1; i <= ds->GetRasterCount(); ++i)
+    {
+        GDALRasterBand* rb = ds->GetRasterBand(i);
+        const char* str_id = rb->GetMetadataItem(MD_MSAT_CHANNEL_ID, MD_DOMAIN_MSAT);
+        if (str_id == nullptr) continue;
+        // 1-based channel ID
+        int id = strtoul(str_id, nullptr, 10);
+        if (id < 1 || (unsigned)id > sources.size()) continue;
+
+        const char* proj = ds->GetProjectionRef();
+        if (proj == nullptr)
+            throw std::runtime_error("ReflectanceDataset: trying to add source without a projection definition");
+
+        double gt[6];
+        if (ds->GetGeoTransform(gt) == CE_Failure)
+            throw std::runtime_error("ReflectanceDataset: trying to add source without affine geotransform coefficients");
+
+        const char* mdtime = ds->GetMetadataItem(MD_MSAT_DATETIME, MD_DOMAIN_MSAT);
+        if (mdtime == nullptr)
+            throw std::runtime_error("ReflectanceDataset: trying to add source without " MD_DOMAIN_MSAT "/" MD_MSAT_DATETIME " metadata");
+
+        if (!has_sources)
+        {
+            projWKT = proj;
+            memcpy(geotransform, gt, 6 * sizeof(double));
+            char** metadata = ds->GetMetadata(MD_DOMAIN_MSAT);
+            if (metadata == nullptr)
+                throw std::runtime_error("ReflectanceDataset: trying to add source without " MD_DOMAIN_MSAT " metadata");
+            if (SetMetadata(metadata, MD_DOMAIN_MSAT) == CE_Failure)
+                throw std::runtime_error("ReflectanceDataset: cannot set metadata from source dataset");
+            datetime = mdtime;
+
+            nRasterXSize = ds->GetRasterXSize();
+            nRasterYSize = ds->GetRasterYSize();
+        } else {
+            if (projWKT != proj)
+                throw std::runtime_error("ReflectanceDataset: inconsistent projection definitions in source datasets");
+            if (memcmp(geotransform, gt, 6 * sizeof(double)) != 0)
+                throw std::runtime_error("ReflectanceDataset: inconsistent affine geotransform coefficients in source datasets");
+            if (datetime != mdtime)
+                throw std::runtime_error("ReflectanceDataset: inconsistent datetime in source datasets");
+        }
+
+        sources[id - 1] = rb;
+        if (take_ownership)
+            owned_datasets.insert(ds);
+        has_sources = true;
+    }
+}
+
 
 // cos(80deg)
 #define cos80 0.173648178
@@ -81,65 +155,61 @@ struct PixelToLatlon
     }
 };
 
-BaseReflectanceRasterBand::BaseReflectanceRasterBand(XRITDataset* ds, int idx)
-    : XRITRasterBand(ds, idx), p2ll(0)
-{
-}
 
-BaseReflectanceRasterBand::~BaseReflectanceRasterBand()
+ReflectanceRasterBand::ReflectanceRasterBand(ReflectanceDataset* ds, int idx)
 {
-    if (p2ll) delete p2ll;
-}
-
-bool BaseReflectanceRasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header)
-{
-    if (!XRITRasterBand::init(PRO_data, EPI_data, header))
-        return false;
-
+    poDS = ds;
+    nBand = idx;
     eDataType = GDT_Float32;
 
     // Day time
-    int ye, mo, da, ho, mi;
-    if (sscanf(xds->fa.timing.c_str(), "%04d%02d%02d%02d%02d",
-            &ye, &mo, &da, &ho, &mi) != 5)
+    int ye, mo, da, ho, mi, se;
+    if (sscanf(ds->datetime.c_str(), "%04d-%02d-%02d %02d:%02d:%02d",
+            &ye, &mo, &da, &ho, &mi, &se) != 6)
         throw std::runtime_error("cannot parse file time");
-
     jday = msat::facts::jday(ye, mo, da);
     daytime = (double)ho + ((double)mi) / 60.0;
 
-    rad_slope  = PRO_data.prologue->radiometric_proc.ImageCalibration[channel_id-1].Cal_Slope;
-    rad_offset = PRO_data.prologue->radiometric_proc.ImageCalibration[channel_id-1].Cal_Offset;
+#if 0
+    rad_slope  = PRO_data.prologue->radiometric_proc.ImageCalibration[channel_id - 1].Cal_Slope;
+    rad_offset = PRO_data.prologue->radiometric_proc.ImageCalibration[channel_id - 1].Cal_Offset;
+#endif
 
-    p2ll = new PixelToLatlon(poDS);
-
-    return true;
+    p2ll = new PixelToLatlon(ds);
 }
 
-const char* BaseReflectanceRasterBand::GetUnitType()
+ReflectanceRasterBand::~ReflectanceRasterBand()
+{
+    delete p2ll;
+}
+
+const char* ReflectanceRasterBand::GetUnitType()
 {
     return "%";
 }
 
-double BaseReflectanceRasterBand::GetOffset(int* pbSuccess)
+double ReflectanceRasterBand::GetOffset(int* pbSuccess)
 {
     if (pbSuccess) *pbSuccess = TRUE;
     return 0.0;
 }
 
-double BaseReflectanceRasterBand::GetScale(int* pbSuccess)
+double ReflectanceRasterBand::GetScale(int* pbSuccess)
 {
     if (pbSuccess) *pbSuccess = TRUE;
     return 1.0;
 }
 
-double BaseReflectanceRasterBand::GetNoDataValue(int* pbSuccess)
+double ReflectanceRasterBand::GetNoDataValue(int* pbSuccess)
 {
     if (pbSuccess) *pbSuccess = TRUE;
     return 0.0;
 }
 
+#if 0
+
 SZARasterBand::SZARasterBand(XRITDataset* ds, int idx)
-    : BaseReflectanceRasterBand(ds, idx)
+    : ReflectanceRasterBand(ds, idx)
 {
 }
 
@@ -154,7 +224,7 @@ const char* SZARasterBand::GetUnitType()
 
 bool SZARasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header)
 {
-    if (!BaseReflectanceRasterBand::init(PRO_data, EPI_data, header))
+    if (!ReflectanceRasterBand::init(PRO_data, EPI_data, header))
         return false;
 
     return true;
@@ -189,10 +259,91 @@ CPLErr SZARasterBand::IReadBlock(int xblock, int yblock, void *buf)
 
     return CE_None;
 }
+#endif
 
+SingleChannelReflectanceRasterBand::SingleChannelReflectanceRasterBand(ReflectanceDataset* ds, int idx)
+    : ReflectanceRasterBand(ds, idx)
+{
+    source_rb = ds->sources[ds->channel_id - 1];
+    if (!source_rb)
+        throw std::runtime_error("SingleChannelReflectanceRasterBand: GDALRasterBand not found for channel " + std::to_string(ds->channel_id) + " metadata");
+
+    source_rb->GetBlockSize(&nBlockXSize, &nBlockYSize);
+
+    // Initialize metadata from source raster band
+    char** metadata = source_rb->GetMetadata(MD_DOMAIN_MSAT);
+    if (metadata == nullptr)
+        throw std::runtime_error("SingleChannelReflectanceRasterBand: trying to use a source GDALRasterBand without " MD_DOMAIN_MSAT " metadata");
+    if (SetMetadata(metadata, MD_DOMAIN_MSAT) == CE_Failure)
+        throw std::runtime_error("SingleChannelReflectanceRasterBand: cannot set metadata from source raster band");
+
+    // Pre-cache slope and offset
+    int success;
+    rad_slope = source_rb->GetScale(&success);
+    if (!success) throw std::runtime_error("SingleChannelReflectanceRasterBand: source raster band has no meaningful Scale information");
+    rad_offset = source_rb->GetOffset(&success);
+    if (!success) throw std::runtime_error("SingleChannelReflectanceRasterBand: source raster band has no meaningful Offset information");
+
+    // Compute pre-cached tr factor
+    double esd = 1.0 - 0.0167 * cos( 2.0 * M_PI * (jday - 3) / 365.0);
+    switch (ds->channel_id)
+    {
+        case MSG_SEVIRI_1_5_VIS_0_6: tr = 20.76 / (esd*esd); break;
+        case MSG_SEVIRI_1_5_VIS_0_8: tr = 23.24 / (esd*esd); break;
+        case MSG_SEVIRI_1_5_IR_1_6:  tr = 19.85 / (esd*esd); break;
+        case MSG_SEVIRI_1_5_HRV:     tr = 25.11 / (esd*esd); break;
+        default: throw std::runtime_error("SingleChannelReflectanceRasterBand: computing reflectance for channel " + std::to_string(ds->channel_id) + " is not implemented");
+    }
+}
+
+SingleChannelReflectanceRasterBand::~SingleChannelReflectanceRasterBand()
+{
+}
+
+CPLErr SingleChannelReflectanceRasterBand::IReadBlock(int xblock, int yblock, void *buf)
+{
+    // Read the raw data
+    std::vector<uint16_t> raw(nBlockXSize * nBlockYSize);
+    if (source_rb->ReadBlock(xblock, yblock, raw.data()) == CE_Failure)
+        return CE_Failure;
+
+    // Precompute pixel georeferentiation
+    std::vector<double> lats(nBlockXSize * nBlockYSize);
+    std::vector<double> lons(nBlockXSize * nBlockYSize);
+    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats.data(), lons.data());
+
+    // Compute reflectances
+    float* dest = (float*)buf;
+    for (int i = 0; i < nBlockXSize * nBlockYSize; ++i)
+    {
+        // From counts to radiance
+        double radiance = raw[i] * rad_slope + rad_offset;
+        double cossza = facts::cos_sol_za(jday, daytime, lats[i], lons[i]);
+        // Use cos(80°) as lower bound, to avoid division by zero
+        if (cossza < cos80) cossza = cos80;
+        // From radiance to reflectance
+        dest[i] = 100.0 * radiance / tr / cossza;
+        // Normalise outliars
+        switch (fpclassify(dest[i]))
+        {
+            case FP_NAN:
+            case FP_SUBNORMAL:
+            case FP_ZERO: dest[i] = 0.0; break;
+            case FP_INFINITE:
+            case FP_NORMAL:
+                if (dest[i] < 0.0) dest[i] = 0.0;
+                if (dest[i] > 100.0) dest[i] = 100.0;
+                break;
+        }
+    }
+
+    return CE_None;
+}
+
+#if 0
 
 Reflectance39RasterBand::Reflectance39RasterBand(XRITDataset* ds, int idx)
-    : BaseReflectanceRasterBand(ds, idx), cal108(0), cal134(0)
+    : ReflectanceRasterBand(ds, idx), cal108(0), cal134(0)
 {
 }
 
@@ -204,7 +355,7 @@ Reflectance39RasterBand::~Reflectance39RasterBand()
 
 bool Reflectance39RasterBand::init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header)
 {
-    if (!BaseReflectanceRasterBand::init(PRO_data, EPI_data, header))
+    if (!ReflectanceRasterBand::init(PRO_data, EPI_data, header))
         return false;
 
     fa_ir108.parse(xds->fa, "IR_108");
@@ -348,6 +499,27 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
     }
 
     return CE_None;
+}
+
+#endif
+
+void ReflectanceDataset::init_rasterband()
+{
+    switch (channel_id)
+    {
+        case MSG_SEVIRI_1_5_VIS_0_6:
+        case MSG_SEVIRI_1_5_VIS_0_8:
+        case MSG_SEVIRI_1_5_IR_1_6:
+        case MSG_SEVIRI_1_5_HRV:
+            SetBand(1, new SingleChannelReflectanceRasterBand(this, 1));
+            return;
+        case MSG_SEVIRI_1_5_IR_3_9:
+            // if (cal108) delete[] cal108;
+            // if (cal134) delete[] cal134;
+            throw std::runtime_error("ReflectanceDataset: computing reflectance for channel " + std::to_string(channel_id) + " is not yet implemented");
+        default:
+            throw std::runtime_error("ReflectanceDataset: computing reflectance for channel " + std::to_string(channel_id) + " is not implemented");
+    }
 }
 
 }
