@@ -11,6 +11,8 @@ namespace tests {
 
 namespace gdal {
 
+void init();
+
 bool has_driver(const std::string& name);
 
 std::unique_ptr<GDALDataset> open_ro(const std::string& name);
