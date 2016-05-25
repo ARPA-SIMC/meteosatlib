@@ -2,7 +2,7 @@
 #include "dataset.h"
 #include "rasterband.h"
 #include "gdal/reflectance/reflectance.h"
-
+#include "gdal/reflectance/sza.h"
 #include <string>
 #include <memory>
 #include <cctype>
@@ -20,28 +20,39 @@ GDALDataset* XRITOpen(GDALOpenInfo* info)
 
     // Check for a special product suffix referring to a computed version of
     // the channel
-    XRITDataset::Effect effect = XRITDataset::PP_NONE;
+    bool do_reflectance = false;
+    bool do_sza = false;
     FileAccess fa(info->pszFilename);
     if (!fa.productid2.empty())
     {
         switch (fa.productid2[fa.productid2.size() - 1])
         {
-            case 'r': effect = XRITDataset::PP_REFLECTANCE; break;
-            case 'a': effect = XRITDataset::PP_SZA; break;
+            case 'r': do_reflectance = true; break;
+            case 'a': do_sza = true; break;
         }
 
         // Remove the suffix
-        if (effect != XRITDataset::PP_NONE)
+        if (do_reflectance || do_sza)
             fa.productid2.resize(fa.productid2.size() - 1);
     }
 
-    if (effect == XRITDataset::PP_REFLECTANCE)
+    if (do_reflectance)
     {
         if (fa.productid2 == "IR_039")
         {
-            std::unique_ptr<XRITDataset> ds(new XRITDataset(fa, effect));
-            if (!ds->init()) return NULL;
-            return ds.release();
+            std::unique_ptr<XRITDataset> ds039(new XRITDataset(fa));
+            if (!ds039->init()) return NULL;
+            std::unique_ptr<XRITDataset> ds108(new XRITDataset(FileAccess(fa, "IR_108")));
+            if (!ds108->init()) return NULL;
+            std::unique_ptr<XRITDataset> ds134(new XRITDataset(FileAccess(fa, "IR_134")));
+            if (!ds134->init()) return NULL;
+
+            unique_ptr<msat::utils::ReflectanceDataset> rds(new msat::utils::ReflectanceDataset(MSG_SEVIRI_1_5_IR_3_9));
+            rds->add_source(ds039.release(), true);
+            rds->add_source(ds108.release(), true);
+            rds->add_source(ds134.release(), true);
+            rds->init_rasterband();
+            return rds.release();
         } else {
             std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));
             if (!ds->init()) return NULL;
@@ -51,8 +62,13 @@ GDALDataset* XRITOpen(GDALOpenInfo* info)
             rds->init_rasterband();
             return rds.release();
         }
+    } else if (do_sza) {
+        std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));
+        if (!ds->init()) return NULL;
+        unique_ptr<msat::utils::SZADataset> rds(new msat::utils::SZADataset(ds.get()));
+        return rds.release();
     } else {
-        std::unique_ptr<XRITDataset> ds(new XRITDataset(fa, effect));
+        std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));
         if (!ds->init()) return NULL;
         return ds.release();
     }

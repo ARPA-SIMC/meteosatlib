@@ -2,9 +2,15 @@
 
 noinst_LTLIBRARIES = libmsatdrv.la
 dist_noinst_HEADERS = \
-    reflectance/reflectance.h
+    reflectance/pixeltolatlon.h \
+    reflectance/base.h \
+    reflectance/reflectance.h \
+    reflectance/sza.h
 libmsatdrv_la_SOURCES = \
-    reflectance/reflectance.cpp
+    reflectance/pixeltolatlon.cpp \
+    reflectance/base.cpp \
+    reflectance/reflectance.cpp \
+    reflectance/sza.cpp
 libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -Werror
 libmsatdrv_la_CXXFLAGS =
 libmsatdrv_la_LIBADD = ../msat/libmsat.la
@@ -35,14 +41,12 @@ if HRIT
 dist_noinst_HEADERS += \
     xrit/xrit.h \
     xrit/dataset.h \
-    xrit/rasterband.h \
-    xrit/reflectance.h
+    xrit/rasterband.h
 libmsatdrv_la_CPPFLAGS += $(GDAL_CFLAGS) $(MSAT_CFLAGS)
 libmsatdrv_la_SOURCES += \
     xrit/xrit.cpp \
     xrit/dataset.cpp \
-    xrit/rasterband.cpp \
-    xrit/reflectance.cpp
+    xrit/rasterband.cpp
 libmsatdrv_la_LIBADD += $(GDAL_LIBS) $(MSAT_LIBS)
 endif
 
