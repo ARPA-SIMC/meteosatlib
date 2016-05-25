@@ -54,20 +54,6 @@ public:
     virtual const char* GetUnitType();
 };
 
-class ReflectanceRasterBand : public BaseReflectanceRasterBand
-{
-public:
-    // tr factor from MSG_data_RadiometricProc.cpp radiance_to_reflectance
-    double tr;
-
-    ReflectanceRasterBand(XRITDataset* ds, int idx);
-    ~ReflectanceRasterBand();
-
-    bool init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header);
-
-    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
-};
-
 class Reflectance39RasterBand : public BaseReflectanceRasterBand
 {
 protected:
@@ -90,5 +76,4 @@ public:
 }
 }
 
-// vim:set sw=4:
 #endif

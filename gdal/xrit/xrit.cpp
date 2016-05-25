@@ -1,24 +1,7 @@
-/*
- * Copyright (C) 2010--2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- *
- * Author: Enrico Zini <enrico@enricozini.com>
- */
-
 #include "xrit.h"
 #include "dataset.h"
+#include "rasterband.h"
+#include "gdal/reflectance/reflectance.h"
 
 #include <string>
 #include <memory>
@@ -31,33 +14,48 @@ namespace xrit {
 
 GDALDataset* XRITOpen(GDALOpenInfo* info)
 {
-	// Se if it looks like a XRIT filename
-	if (!msat::xrit::isValid(info->pszFilename))
-		return NULL;
+    // Se if it looks like a XRIT filename
+    if (!msat::xrit::isValid(info->pszFilename))
+        return NULL;
 
-    // Check if the file name has been tweaked with the request of some
-    // alternate dataset for this channel, and cleanup the file name
-    string fname = info->pszFilename;
-    size_t pos = fname.rfind(':');
+    // Check for a special product suffix referring to a computed version of
+    // the channel
     XRITDataset::Effect effect = XRITDataset::PP_NONE;
-    if (pos != string::npos && pos > 0 && islower(fname[pos-1]))
+    FileAccess fa(info->pszFilename);
+    if (!fa.productid2.empty())
     {
-        switch (fname[pos-1])
+        switch (fa.productid2[fa.productid2.size() - 1])
         {
             case 'r': effect = XRITDataset::PP_REFLECTANCE; break;
             case 'a': effect = XRITDataset::PP_SZA; break;
         }
+
         // Remove the suffix
-        fname.erase(pos-1, 1);
+        if (effect != XRITDataset::PP_NONE)
+            fa.productid2.resize(fa.productid2.size() - 1);
     }
 
-    // Create the dataset
-    std::unique_ptr<XRITDataset> ds(new XRITDataset(fname, effect));
-
-	// Initialise the dataset
-	if (!ds->init()) return NULL;
-
-	return ds.release();
+    if (effect == XRITDataset::PP_REFLECTANCE)
+    {
+        if (fa.productid2 == "IR_039")
+        {
+            std::unique_ptr<XRITDataset> ds(new XRITDataset(fa, effect));
+            if (!ds->init()) return NULL;
+            return ds.release();
+        } else {
+            std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));
+            if (!ds->init()) return NULL;
+            XRITRasterBand* rb = dynamic_cast<XRITRasterBand*>(ds->GetRasterBand(1));
+            unique_ptr<msat::utils::ReflectanceDataset> rds(new msat::utils::ReflectanceDataset(rb->channel_id));
+            rds->add_source(ds.release(), true);
+            rds->init_rasterband();
+            return rds.release();
+        }
+    } else {
+        std::unique_ptr<XRITDataset> ds(new XRITDataset(fa, effect));
+        if (!ds->init()) return NULL;
+        return ds.release();
+    }
 }
 
 }

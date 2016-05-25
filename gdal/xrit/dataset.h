@@ -24,7 +24,7 @@ public:
     double geotransform[6];
     Effect effect;
 
-    XRITDataset(const std::string& fname, Effect effect=PP_NONE);
+    XRITDataset(const xrit::FileAccess& fa, Effect effect=PP_NONE);
 
     virtual bool init();
 

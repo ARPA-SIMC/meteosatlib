@@ -1,8 +1,10 @@
 # Process this file with automake to produce Makefile.in.
 
 noinst_LTLIBRARIES = libmsatdrv.la
-dist_noinst_HEADERS =
-libmsatdrv_la_SOURCES =
+dist_noinst_HEADERS = \
+    reflectance/reflectance.h
+libmsatdrv_la_SOURCES = \
+    reflectance/reflectance.cpp
 libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -Werror
 libmsatdrv_la_CXXFLAGS =
 libmsatdrv_la_LIBADD = ../msat/libmsat.la
