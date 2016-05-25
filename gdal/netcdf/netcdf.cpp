@@ -6,7 +6,7 @@
 #include <gdal.h>
 #include <gdal_priv.h>
 #include <gdal/ogr_spatialref.h>
-
+#include "gdal/utils.h"
 #include <string>
 #include <sstream>
 #include <memory>
@@ -14,7 +14,6 @@
 #include <cstdio>
 #include <stdexcept>
 #include <math.h>
-
 #include "config.h"
 
 using namespace std;
@@ -249,7 +248,7 @@ GDALDataset* NetCDFOpen(GDALOpenInfo* info)
     // NetCDF data
     if (!ds->init()) return NULL;
 
-    return ds.release();
+    return msat::gdal::add_extras(ds.release(), info);
 }
 
 GDALDataset* NetCDFCreateCopy(const char* pszFilename, GDALDataset* src, 

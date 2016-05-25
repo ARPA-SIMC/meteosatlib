@@ -3,6 +3,7 @@
 #include "rasterband.h"
 #include "gdal/reflectance/reflectance.h"
 #include "gdal/reflectance/sza.h"
+#include "gdal/utils.h"
 #include <string>
 #include <memory>
 #include <cctype>
@@ -70,7 +71,7 @@ GDALDataset* XRITOpen(GDALOpenInfo* info)
     } else {
         std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));
         if (!ds->init()) return NULL;
-        return ds.release();
+        return msat::gdal::add_extras(ds.release(), info);
     }
 }
 

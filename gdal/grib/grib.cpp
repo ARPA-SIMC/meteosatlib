@@ -5,6 +5,7 @@
 #include <msat/facts.h>
 #include <gdal/gdal_priv.h>
 #include <gdal/ogr_spatialref.h>
+#include "gdal/utils.h"
 #include <memory>
 
 #include "config.h"
@@ -216,7 +217,7 @@ GDALDataset* GRIBOpen(GDALOpenInfo* info)
     // Initialise the dataset
     if (!ds->init()) return NULL;
 
-    return ds.release();
+    return msat::gdal::add_extras(ds.release(), info);
 }
 
 #if 0
