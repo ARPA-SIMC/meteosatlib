@@ -24,7 +24,7 @@ msat_test_LDFLAGS =
 
 msat_test_SOURCES = \
     msat/test-facts.cpp \
-    ../msat/utils/tests-main.cc
+    tests-main.cc
 
 if HRIT
 msat_test_SOURCES += \

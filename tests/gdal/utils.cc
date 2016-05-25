@@ -53,6 +53,14 @@ static void throwExceptionsOnGDALErrors(CPLErr eErrClass, int err_no, const char
 
 static bool initialized = false;
 
+void init()
+{
+    if (gdal::initialized) return;
+    GDALAllRegister();
+    CPLSetErrorHandler(gdal::throwExceptionsOnGDALErrors);
+    gdal::initialized = true;
+}
+
 bool has_driver(const std::string& name)
 {
     GDALDriverManager* dm = GetGDALDriverManager();
@@ -175,12 +183,7 @@ GDALFixture::~GDALFixture()
 
 void GDALFixture::test_setup()
 {
-    if (!gdal::initialized)
-    {
-        GDALAllRegister();
-        CPLSetErrorHandler(gdal::throwExceptionsOnGDALErrors);
-        gdal::initialized = true;
-    }
+    gdal::init();
 
     if (!gdal::has_driver(driver))
         throw TestFailed("driver " + driver + " is not available");
