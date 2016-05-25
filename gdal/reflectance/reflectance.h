@@ -1,30 +1,18 @@
 #ifndef MSAT_GDALDRIVER_REFLECTANCE_H
 #define MSAT_GDALDRIVER_REFLECTANCE_H
 
-#include <gdal/gdal_priv.h>
+#include <gdal/reflectance/base.h>
 #include <memory>
 #include <set>
 
 namespace msat {
 namespace utils {
 
-class ReflectanceDataset : public GDALDataset
+class ReflectanceDataset : public ProxyDataset
 {
 public:
     /// Channel for which we compute reflectance
     int channel_id;
-
-    /// True when at least one source has been added
-    bool has_sources = false;
-
-    /// Projection WKT string returned by GetProjectionRef
-    std::string projWKT;
-
-    /// Affine geotransform returned by GetGeoTransform
-    double geotransform[6];
-
-    /// Datetime metadata string
-    std::string datetime;
 
     /**
      * Datasets that are been entrusted to this one for memory management, and
@@ -57,14 +45,11 @@ public:
      * reflectance GDALRasterBand for this dataset.
      */
     void init_rasterband();
-
-    const char* GetProjectionRef() override;
-    CPLErr GetGeoTransform(double* tr) override;
 };
 
 struct PixelToLatlon;
 
-class ReflectanceRasterBand : public GDALRasterBand
+class ReflectanceRasterBand : public ProxyRasterBand
 {
 public:
     // Utility class that converts pixel coordinates to lat,lon
@@ -83,25 +68,6 @@ public:
     double GetScale(int* pbSuccess=NULL) override;
     double GetNoDataValue(int* pbSuccess=NULL) override;
 };
-
-#if 0
-/// Rasterband returning cosine of satellite zenith angle
-class SZARasterBand : public ReflectanceRasterBand
-{
-public:
-    // tr factor from MSG_data_RadiometricProc.cpp radiance_to_reflectance
-    double tr;
-
-    SZARasterBand(XRITDataset* ds, int idx);
-    ~SZARasterBand();
-
-    bool init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header);
-
-    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
-
-    virtual const char* GetUnitType();
-};
-#endif
 
 class SingleChannelReflectanceRasterBand : public ReflectanceRasterBand
 {
@@ -123,26 +89,28 @@ public:
     CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
 
-#if 0
 class Reflectance39RasterBand : public ReflectanceRasterBand
 {
 protected:
-    xrit::FileAccess fa_ir108;
-    xrit::FileAccess fa_ir134;
-    xrit::DataAccess da_ir108;
-    xrit::DataAccess da_ir134;
-    float* cal108;
-    float* cal134;
+    GDALRasterBand* source_ir039 = nullptr;
+    GDALRasterBand* source_ir108 = nullptr;
+    GDALRasterBand* source_ir134 = nullptr;
+
+    // Cached slope and offsets for the three source bands
+
+    double ir039_slope;
+    double ir039_offset;
+    double ir108_slope;
+    double ir108_offset;
+    double ir134_slope;
+    double ir134_offset;
 
 public:
-    Reflectance39RasterBand(XRITDataset* ds, int idx);
+    Reflectance39RasterBand(ReflectanceDataset* ds, int idx);
     ~Reflectance39RasterBand();
 
-    bool init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header);
-
-    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
+    CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
-#endif
 
 }
 }
