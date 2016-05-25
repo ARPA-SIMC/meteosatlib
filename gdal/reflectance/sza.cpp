@@ -13,22 +13,6 @@ using namespace std;
 namespace msat {
 namespace utils {
 
-#if 0
-/// Rasterband returning cosine of satellite zenith angle
-class SZARasterBand : public ReflectanceRasterBand
-{
-public:
-    // tr factor from MSG_data_RadiometricProc.cpp radiance_to_reflectance
-    double tr;
-
-    SZARasterBand(ReflectanceDataset* ds, int idx);
-    ~SZARasterBand();
-
-    bool init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header);
-
-};
-#endif
-
 class SZARasterBand : public ProxyRasterBand
 {
 public:
@@ -105,43 +89,6 @@ SZADataset::SZADataset(GDALDataset* prototype)
 
     SetBand(1, new SZARasterBand(this, 1, prototype->GetRasterBand(1)));
 }
-
-#if 0
-
-
-SZARasterBand::SZARasterBand(ReflectanceDataset* ds, int idx)
-    : ReflectanceRasterBand(ds, idx)
-{
-    GDALRasterBand* source_rb = ds->sources[ds->channel_id - 1];
-    if (!source_rb)
-        throw std::runtime_error("SingleChannelReflectanceRasterBand: GDALRasterBand not found for channel " + std::to_string(ds->channel_id) + " metadata");
-
-    source_rb->GetBlockSize(&nBlockXSize, &nBlockYSize);
-
-    // Initialize metadata from source raster band
-    char** metadata = source_rb->GetMetadata(MD_DOMAIN_MSAT);
-    if (metadata == nullptr)
-        throw std::runtime_error("SingleChannelReflectanceRasterBand: trying to use a source GDALRasterBand without " MD_DOMAIN_MSAT " metadata");
-    if (SetMetadata(metadata, MD_DOMAIN_MSAT) == CE_Failure)
-        throw std::runtime_error("SingleChannelReflectanceRasterBand: cannot set metadata from source raster band");
-
-    // Compute pre-cached tr factor
-    double esd = 1.0 - 0.0167 * cos( 2.0 * M_PI * (jday - 3) / 365.0);
-    switch (ds->channel_id)
-    {
-        case MSG_SEVIRI_1_5_VIS_0_6: tr = 20.76 / (esd*esd); break;
-        case MSG_SEVIRI_1_5_VIS_0_8: tr = 23.24 / (esd*esd); break;
-        case MSG_SEVIRI_1_5_IR_1_6:  tr = 19.85 / (esd*esd); break;
-        case MSG_SEVIRI_1_5_HRV:     tr = 25.11 / (esd*esd); break;
-        default: throw std::runtime_error("SingleChannelReflectanceRasterBand: computing reflectance for channel " + std::to_string(ds->channel_id) + " is not implemented");
-    }
-}
-
-SZARasterBand::~SZARasterBand()
-{
-}
-
-#endif
 
 }
 }
