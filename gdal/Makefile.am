@@ -2,11 +2,13 @@
 
 noinst_LTLIBRARIES = libmsatdrv.la
 dist_noinst_HEADERS = \
+    utils.h \
     reflectance/pixeltolatlon.h \
     reflectance/base.h \
     reflectance/reflectance.h \
     reflectance/sza.h
 libmsatdrv_la_SOURCES = \
+    utils.cpp \
     reflectance/pixeltolatlon.cpp \
     reflectance/base.cpp \
     reflectance/reflectance.cpp \

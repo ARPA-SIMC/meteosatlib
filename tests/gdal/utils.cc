@@ -67,9 +67,14 @@ bool has_driver(const std::string& name)
     return dm->GetDriverByName(name.c_str()) != 0;
 }
 
-std::unique_ptr<GDALDataset> open_ro(const std::string& name)
+std::unique_ptr<GDALDataset> open_ro(const std::string& name, const char* const* open_options)
 {
-    return std::unique_ptr<GDALDataset>((GDALDataset*)GDALOpen(name.c_str(), GA_ReadOnly));
+    if (open_options)
+    {
+        return std::unique_ptr<GDALDataset>((GDALDataset*)GDALOpenEx(name.c_str(), GA_ReadOnly, nullptr, open_options, nullptr));
+    } else {
+        return std::unique_ptr<GDALDataset>((GDALDataset*)GDALOpen(name.c_str(), GA_ReadOnly));
+    }
 }
 
 std::unique_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,

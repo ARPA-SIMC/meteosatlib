@@ -15,7 +15,7 @@ void init();
 
 bool has_driver(const std::string& name);
 
-std::unique_ptr<GDALDataset> open_ro(const std::string& name);
+std::unique_ptr<GDALDataset> open_ro(const std::string& name, const char* const* open_options=nullptr);
 
 static inline int32_t read_int32(GDALRasterBand* rb, int x, int y)
 {

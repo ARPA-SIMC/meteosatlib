@@ -7,3 +7,6 @@
   GRIB output.
 * Unit tests do not need libtut to compile anymore.
 * Added support for MSG2 Rapid Scan System (RSS)
+* Reflectance calculations are enabled for all MeteosatLib dataset types,
+  passing `MSAT_COMPUTE=reflectance` as an open option
+  (like in `gdalwarp -oo MSAT_COMPUTE=reflectance`)
