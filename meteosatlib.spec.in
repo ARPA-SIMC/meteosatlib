@@ -155,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed May 25 2016 Daniele Branchini <dbranchini@arpa.emr.it> - 1.6-1
+- fixed RSS HRV channel import problem (#1)
+
 * Thu Apr 28 2016 Daniele Branchini <dbranchini@arpa.emr.it> - 1.5-1
 - grib implementation rewrite (github bug #2)
 - port to GDAL 2.0 (#3)
