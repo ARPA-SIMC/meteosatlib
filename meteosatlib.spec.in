@@ -155,6 +155,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jul 22 2016 Daniele Branchini <dbranchini@arpae.it> - 1.7-1
+- Implemented reflectance calculations for all datasets
+
 * Wed May 25 2016 Daniele Branchini <dbranchini@arpa.emr.it> - 1.6-1
 - fixed RSS HRV channel import problem (#1)
 
