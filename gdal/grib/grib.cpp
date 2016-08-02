@@ -160,32 +160,32 @@ GRIBRasterBand::GRIBRasterBand(GRIBDataset* ds, int idx /*, GDALDataType dt */)
     // Channel
     long channel_id;
     if (!grib.get_long_ifexists("channelNumber", &channel_id))
-        if (!grib.get_long_ifexists("level", &channel_id))
+      if (!grib.get_long_ifexists("level", &channel_id))
         {
-            long cw_scale = grib.get_long("scaleFactorOfCentralWaveNumber");
-            long cw_val = grib.get_long("scaledValueOfCentralWaveNumber");
-
-            double central_vave_number = (double)cw_val * exp10(-cw_scale);
-            channel_id = facts::channel_from_central_wave_number(ds->spacecraft_id, central_vave_number);
+	  long cw_scale = grib.get_long("scaleFactorOfCentralWaveNumber");
+	  long cw_val = grib.get_long("scaledValueOfCentralWaveNumber");
+	  
+	  double central_vave_number = (double)cw_val * exp10(-cw_scale);
+	  channel_id = facts::channel_from_central_wave_number(ds->spacecraft_id, central_vave_number);
         }
-
-	char buf[25];
-	snprintf(buf, 25, "%ld", channel_id);
-	SetMetadataItem(MD_MSAT_CHANNEL_ID, buf, MD_DOMAIN_MSAT);
-	string channelName = facts::channelName(ds->spacecraft_id, channel_id);
-	SetMetadataItem(MD_MSAT_CHANNEL, channelName.c_str(), MD_DOMAIN_MSAT);
-
-	SetDescription(channelName.c_str());
-
-	unit = facts::channelUnit(ds->spacecraft_id, channel_id);
-
-	// TODO glb_preferredBPP = grib.get_long("numberOfBitsContainingEachPackedValue");
-	// TODO // This is pointless, as grib won't store it
-
-	// Invent a suitable missing value instead of 9999 or whatever grib_api
-	// has as default
-	missing = facts::defaultScaledMissing(channel_id);
-	grib.set_double("missingValue", missing);
+    
+    char buf[25];
+    snprintf(buf, 25, "%ld", channel_id);
+    SetMetadataItem(MD_MSAT_CHANNEL_ID, buf, MD_DOMAIN_MSAT);
+    string channelName = facts::channelName(ds->spacecraft_id, channel_id);
+    SetMetadataItem(MD_MSAT_CHANNEL, channelName.c_str(), MD_DOMAIN_MSAT);
+    
+    SetDescription(channelName.c_str());
+    
+    unit = facts::channelUnit(ds->spacecraft_id, channel_id);
+    
+    // TODO glb_preferredBPP = grib.get_long("numberOfBitsContainingEachPackedValue");
+    // TODO // This is pointless, as grib won't store it
+    
+    // Invent a suitable missing value instead of 9999 or whatever grib_api
+    // has as default
+    missing = facts::defaultScaledMissing(channel_id);
+    grib.set_double("missingValue", missing);
 }
 
 GDALDataset* GRIBOpen(GDALOpenInfo* info)
