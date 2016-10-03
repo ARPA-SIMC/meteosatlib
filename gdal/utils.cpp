@@ -2,6 +2,7 @@
 #include "msat/gdal/const.h"
 #include "msat/hrit/MSG_channel.h"
 #include "gdal/reflectance/reflectance.h"
+#include "gdal/reflectance/sza.h"
 #include "utils.h"
 
 using namespace std;
@@ -28,6 +29,10 @@ GDALDataset* add_extras(GDALDataset* src, GDALOpenInfo* info)
         unique_ptr<msat::utils::ReflectanceDataset> rds(new msat::utils::ReflectanceDataset(channel_id));
         rds->add_source(src, true);
         rds->init_rasterband();
+        return rds.release();
+    } else if (val == "sat_za") {
+        unique_ptr<msat::utils::SZADataset> rds(new msat::utils::SZADataset(src));
+        delete src;
         return rds.release();
     }
 
