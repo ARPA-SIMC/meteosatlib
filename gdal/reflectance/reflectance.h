@@ -1,7 +1,7 @@
 #ifndef MSAT_GDALDRIVER_REFLECTANCE_H
 #define MSAT_GDALDRIVER_REFLECTANCE_H
 
-#include <gdal/reflectance/base.h>
+#include "base.h"
 #include <memory>
 #include <set>
 
@@ -111,6 +111,12 @@ public:
 
     CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
+
+
+CPLErr msat_reflectance_ir039(
+        void **papoSources, int nSources, void *pData, int nXSize, int nYSize,
+        GDALDataType eSrcType, GDALDataType eBufType,
+        int nPixelSpace, int nLineSpace);
 
 }
 }

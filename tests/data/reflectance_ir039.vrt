@@ -1,0 +1,18 @@
+<VRTDataset rasterXSize="11136" rasterYSize="11136">
+  <VRTRasterBand dataType="Float32" band="1" subClass="VRTDerivedRasterBand">
+    <Description>Reflectance</Description>
+    <PixelFunctionType>msat_reflectance_ir039</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">H-000-MSG2__-MSG2________-IR_108___-000008___-201001191200-C_</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">H-000-MSG2__-MSG2________-IR_134___-000008___-201001191200-C_</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">H-000-MSG2__-MSG2________-IR_039___-000008___-201001191200-C_</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>

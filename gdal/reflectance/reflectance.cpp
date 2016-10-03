@@ -333,5 +333,31 @@ void ReflectanceDataset::init_rasterband()
     }
 }
 
+CPLErr msat_reflectance_ir039(
+        void **papoSources, int nSources, void *pData, int nXSize, int nYSize,
+        GDALDataType eSrcType, GDALDataType eBufType,
+        int nPixelSpace, int nLineSpace)
+{
+    if (nSources != 3) return CE_Failure;
+
+    // TODO: this is a dummy implementation just to see if it works
+
+    for (int line = 0; line < nYSize; ++line)
+        for (int col = 0; col < nXSize; ++col)
+        {
+            unsigned ii = line * nXSize + col;
+            /* Source raster pixels may be obtained with SRCVAL macro */
+            double x0 = SRCVAL(papoSources[0], eSrcType, ii);
+            double x1 = SRCVAL(papoSources[1], eSrcType, ii);
+            double x2 = SRCVAL(papoSources[2], eSrcType, ii);
+            double pix_val = (x0 + x1 + x2) / 3.0;
+            GDALCopyWords(&pix_val, GDT_Float64, 0,
+                    ((GByte *)pData) + nLineSpace * line + col * nPixelSpace,
+                    eBufType, nPixelSpace, 1);
+        }
+
+    return CE_None;
+}
+
 }
 }
