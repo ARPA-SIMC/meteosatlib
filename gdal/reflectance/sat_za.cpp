@@ -1,4 +1,4 @@
-#include "sza.h"
+#include "sat_za.h"
 #include "pixeltolatlon.h"
 #include <msat/gdal/const.h>
 #include <msat/facts.h>
@@ -13,37 +13,29 @@ using namespace std;
 namespace msat {
 namespace utils {
 
-class SZARasterBand : public ProxyRasterBand
+class SatZARasterBand : public ProxyRasterBand
 {
 public:
     // Utility class that converts pixel coordinates to lat,lon
     PixelToLatlon* p2ll = nullptr;
 
-    // Julian day
-    int jday;
-    // Time of day in fractional hours
-    double daytime;
-
-
-    SZARasterBand(SZADataset* ds, int idx, GDALRasterBand* prototype)
+    SatZARasterBand(SatZADataset* ds, int idx, GDALRasterBand* prototype)
     {
         poDS = ds;
         nBand = idx;
-        eDataType = GDT_Float32;
+        eDataType = GDT_Float64;
 
-        add_info(prototype, "SZARasterBand");
+        add_info(prototype, "SatZARasterBand");
 
         // Day time
         int ye, mo, da, ho, mi, se;
         if (sscanf(ds->datetime.c_str(), "%04d-%02d-%02d %02d:%02d:%02d",
                 &ye, &mo, &da, &ho, &mi, &se) != 6)
             throw std::runtime_error("cannot parse file time");
-        jday = msat::facts::jday(ye, mo, da);
-        daytime = (double)ho + ((double)mi) / 60.0;
 
         p2ll = new PixelToLatlon(ds);
     }
-    ~SZARasterBand()
+    ~SatZARasterBand()
     {
         delete p2ll;
     }
@@ -58,11 +50,11 @@ public:
         p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats.data(), lons.data());
 
         // Compute satellite zenith angles
-        float* dest = (float*) buf;
+        double* dest = (double*) buf;
         for (int i = 0; i < nBlockXSize * nBlockYSize; ++i)
         {
             // Just the solar zenith angle
-            dest[i] = facts::cos_sol_za(jday, daytime, lats[i], lons[i]);
+            dest[i] = facts::sat_za(lats[i], lons[i]);
             // Normalise outliars
             switch (fpclassify(dest[i]))
             {
@@ -83,11 +75,11 @@ public:
 
 
 
-SZADataset::SZADataset(GDALDataset* prototype)
+SatZADataset::SatZADataset(GDALDataset* prototype)
 {
-    add_info(prototype, "SZADataset");
+    add_info(prototype, "SatZADataset");
 
-    SetBand(1, new SZARasterBand(this, 1, prototype->GetRasterBand(1)));
+    SetBand(1, new SatZARasterBand(this, 1, prototype->GetRasterBand(1)));
 }
 
 }

@@ -338,9 +338,10 @@ CPLErr msat_reflectance_ir039(
         GDALDataType eSrcType, GDALDataType eBufType,
         int nPixelSpace, int nLineSpace)
 {
-    if (nSources != 3) return CE_Failure;
-
     // TODO: this is a dummy implementation just to see if it works
+    fprintf(stderr, "MRIR039 %d %d %d %d %d\n", nSources, nXSize, nYSize, nPixelSpace, nLineSpace);
+
+    if (nSources != 3) return CE_Failure;
 
     for (int line = 0; line < nYSize; ++line)
         for (int col = 0; col < nXSize; ++col)
@@ -357,6 +358,112 @@ CPLErr msat_reflectance_ir039(
         }
 
     return CE_None;
+#if 0
+    // Read the IR 3.9 data
+    std::vector<double> raw039(nBlockXSize * nBlockYSize);
+    if (source_ir039->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw039.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+        return CE_Failure;
+
+    // Read the IR_10.8 channel
+    std::vector<double> raw108(nBlockXSize * nBlockYSize);
+    if (source_ir108->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw108.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+        return CE_Failure;
+
+    // Read the IR_13.4 channel
+    std::vector<double> raw134(nBlockXSize * nBlockYSize);
+    if (source_ir134->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw134.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+        return CE_Failure;
+
+    // Precompute pixel georeferentiation
+    std::vector<double> lats(nBlockXSize * nBlockYSize);
+    std::vector<double> lons(nBlockXSize * nBlockYSize);
+    p2ll->compute(xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, lats.data(), lons.data());
+
+    // Based on: [MMKM2010]
+    //   "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
+    //   by Meteosat Second Generation. Part II: Use of Visible Reflectance"
+    // by:
+    //   JOHN R. MECIKALSKI AND WAYNE M. MACKENZIE JR.
+    //   Earth Systems Science Center, University of Alabama in Huntsville, Huntsville, Alabama
+    //   MARIANNE KONIG
+    //   European Organisation for the Exploitation of Meteorological Satellites (EUMETSAT), Darmstadt, Germany
+    //   SAM MULLER
+    //   Jupiter’s Call, LLC, Madison, Alabama
+    // published on:
+    //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
+
+    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
+    //   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
+    //   MSGProc - MSG Processing tools for Windows
+    // http://www.eumetsat.int/Home/Main/AboutEUMETSAT/InternationalRelations/EasternEuropeanandBalkanCountries/SP_2011062115544756?l=en
+
+    const double c1 = 0.0000119104;
+    const double c2 = 1.43877;
+    const double Vc = 2569.094;
+    const double A = 0.9959;
+    const double B = 3.471;
+    double esd = 1.0 - 0.0167 * cos( 2.0 * M_PI * (jday - 3) / 365.0);
+
+    // Compute reflectances
+    float* dest = (float*) buf;
+    for (int i = 0; i < nBlockXSize * nBlockYSize; ++i)
+    {
+        // We can compute radiance from counts straight away
+        //double R_tot = (raw039[i] * rad_slope) + rad_offset;
+        // But we use the Brightness Temperature instead, so we can apply CO2
+        // correction
+        double BT039 = raw039[i] * ir039_slope + ir039_offset;
+        double BT108 = raw108[i] * ir108_slope + ir108_offset;
+        double BT134 = raw134[i] * ir134_slope + ir134_offset;
+
+        // Apply CO2 correction to BT039
+        BT039 = pow(pow(BT039, 4)
+                  + pow(BT108, 4)
+                  - pow(BT108 - (BT108 - BT134)/4, 4),
+                  0.25);
+
+        // Apply Planck function to convert the CO2 corrected Brightness
+        // Temperature to Radiance
+        double R_tot = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT039 + B)) - 1) + 0.015;  
+
+        double R39_corr = pow((BT108 - 0.25 * (BT108 - BT134)) / BT108, 4);
+        double R_therm = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
+        double cosTETA = facts::cos_sol_za(jday, daytime, lats[i], lons[i]);
+        // Use cos(80°) as lower bound, to avoid division by zero
+        if (cosTETA < cos80) cosTETA = cos80;
+        double SAT = facts::sat_za(lats[i], lons[i]);
+        // Original from MMKM2010:
+        //double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
+        // Version from MSGProc:
+        double TOARAD = 4.92 / (esd*esd)
+                      * pow(cosTETA, 0.75)
+                      * exp(-(1-R39_corr) * cosTETA)
+                      * exp(-(1-R39_corr) / cos(SAT));
+        if (R_tot <= R_therm) R_tot = R_therm + 0.0000001;
+        if (TOARAD <= R_therm) TOARAD = R_therm + 0.0000001;
+
+        // Original from MMKM2010
+        //double REFL = 200 * (R_tot - R_therm) / (TOARAD - R_therm);
+        // Version from MSGProc:
+        double REFL = 100 * (R_tot - R_therm) / (TOARAD);
+        dest[i] = REFL;
+
+        // Normalise outliars
+        switch (fpclassify(dest[i]))
+        {
+            case FP_NAN:
+            case FP_SUBNORMAL:
+            case FP_ZERO: dest[i] = 0.0; break;
+            case FP_INFINITE:
+            case FP_NORMAL:
+                if (dest[i] < 0.0) dest[i] = 0.0;
+                if (dest[i] > 100.0) dest[i] = 100.0;
+                break;
+        }
+    }
+
+    return CE_None;
+#endif
 }
 
 }

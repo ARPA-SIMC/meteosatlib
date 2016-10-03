@@ -136,8 +136,25 @@ add_method("new_ir039_sat_za", []{
     wassert(actual(dataset->GetRasterCount()) == 1);
 
     GDALRasterBand* rb = dataset->GetRasterBand(1);
-    float valr;
-    wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0)) == CE_None);
+    double valr;
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Float64, 0, 0)) == CE_None);
+    wassert(actual((double)valr).almost_equal(1, 3));
+});
+
+// Test opening channel 4 (IR 0.39), computing cosine of solar zenith angle
+add_method("new_ir039_cos_sol_za", []{
+    CPLStringList opts(nullptr);
+    opts.SetNameValue("MSAT_COMPUTE", "cos_sol_za");
+    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
+    wassert(actual(dataset.get() != 0).istrue());
+    wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
+
+    // Check that we have the real and the virtual raster bands
+    wassert(actual(dataset->GetRasterCount()) == 1);
+
+    GDALRasterBand* rb = dataset->GetRasterBand(1);
+    double valr;
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Float64, 0, 0)) == CE_None);
     wassert(actual((double)valr).almost_equal(0.623, 3));
 });
 
