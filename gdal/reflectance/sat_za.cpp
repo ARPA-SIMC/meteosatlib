@@ -27,12 +27,6 @@ public:
 
         add_info(prototype, "SatZARasterBand");
 
-        // Day time
-        int ye, mo, da, ho, mi, se;
-        if (sscanf(ds->datetime.c_str(), "%04d-%02d-%02d %02d:%02d:%02d",
-                &ye, &mo, &da, &ho, &mi, &se) != 6)
-            throw std::runtime_error("cannot parse file time");
-
         p2ll = new PixelToLatlon(ds);
     }
     ~SatZARasterBand()

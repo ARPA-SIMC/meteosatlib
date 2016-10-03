@@ -124,6 +124,23 @@ add_method("new_vis06", []{
 });
 
 
+// Test opening channel 4 (IR 0.39), computing julian day
+add_method("new_ir039_jday", []{
+    CPLStringList opts(nullptr);
+    opts.SetNameValue("MSAT_COMPUTE", "jday");
+    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
+    wassert(actual(dataset.get() != 0).istrue());
+    wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
+
+    // Check that we have the real and the virtual raster bands
+    wassert(actual(dataset->GetRasterCount()) == 1);
+
+    GDALRasterBand* rb = dataset->GetRasterBand(1);
+    int16_t valr;
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Int16, 0, 0)) == CE_None);
+    wassert(actual(valr) == 317);
+});
+
 // Test opening channel 4 (IR 0.39), computing satellite zenith angle
 add_method("new_ir039_sat_za", []{
     CPLStringList opts(nullptr);

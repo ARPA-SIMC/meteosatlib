@@ -4,6 +4,7 @@
 #include "gdal/reflectance/reflectance.h"
 #include "gdal/reflectance/sat_za.h"
 #include "gdal/reflectance/cos_sol_za.h"
+#include "gdal/reflectance/jday.h"
 #include "utils.h"
 
 using namespace std;
@@ -39,6 +40,14 @@ GDALDataset* add_extras(GDALDataset* src, GDALOpenInfo* info)
         unique_ptr<msat::utils::CosSolZADataset> rds(new msat::utils::CosSolZADataset(src));
         delete src;
         return rds.release();
+    } else if (val == "jday") {
+        unique_ptr<msat::utils::JDayDataset> rds(new msat::utils::JDayDataset(src));
+        delete src;
+        return rds.release();
+    } else {
+        delete src;
+        CPLError(CE_Failure, CPLE_AppDefined, "Unsupported value '%s' for MSAT_COMPUTE", val.c_str());
+        return nullptr;
     }
 
     return src;

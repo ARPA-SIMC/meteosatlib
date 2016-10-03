@@ -7,14 +7,16 @@ dist_noinst_HEADERS = \
     reflectance/base.h \
     reflectance/reflectance.h \
     reflectance/cos_sol_za.h \
-    reflectance/sat_za.h
+    reflectance/sat_za.h \
+    reflectance/jday.h
 libmsatdrv_la_SOURCES = \
     utils.cpp \
     reflectance/pixeltolatlon.cpp \
     reflectance/base.cpp \
     reflectance/reflectance.cpp \
     reflectance/cos_sol_za.cpp \
-    reflectance/sat_za.cpp
+    reflectance/sat_za.cpp \
+    reflectance/jday.cpp
 libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -Werror
 libmsatdrv_la_CXXFLAGS =
 libmsatdrv_la_LIBADD = ../msat/libmsat.la
