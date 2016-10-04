@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = msat
 
-dist_bin_SCRIPTS = msat-view
+dist_bin_SCRIPTS = msat-view msat-reflectance-ir39
 
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) $(GDAL_CFLAGS) $(MAGICKPP_CFLAGS) $(MSAT_CFLAGS) -Werror
 
