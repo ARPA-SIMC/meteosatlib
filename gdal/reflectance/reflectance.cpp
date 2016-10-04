@@ -333,46 +333,16 @@ void ReflectanceDataset::init_rasterband()
     }
 }
 
-CPLErr msat_reflectance_ir039(
-        void **papoSources, int nSources, void *pData, int nXSize, int nYSize,
-        GDALDataType eSrcType, GDALDataType eBufType,
-        int nPixelSpace, int nLineSpace)
+namespace {
+template<typename T>
+void compute_reflectance_ir039(void **papoSources, void* pData, int nXSize, int nYSize, GDALDataType eBufType, int nPixelSpace, int nLineSpace)
 {
-    if (nSources != 6)
-    {
-        CPLError(CE_Failure, CPLE_AppDefined, "Computing IR 3.9 reflectance needs 5 source raster bands (%d found)", nSources);
-        return CE_Failure;
-    }
-    if (eSrcType != GDT_Float64)
-    {
-        CPLError(CE_Failure, CPLE_AppDefined, "Computing IR 3.9 reflectance, source type is not GDT_Float64");
-        return CE_Failure;
-    }
-
-    // Based on: [MMKM2010]
-    //   "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
-    //   by Meteosat Second Generation. Part II: Use of Visible Reflectance"
-    // by:
-    //   JOHN R. MECIKALSKI AND WAYNE M. MACKENZIE JR.
-    //   Earth Systems Science Center, University of Alabama in Huntsville, Huntsville, Alabama
-    //   MARIANNE KONIG
-    //   European Organisation for the Exploitation of Meteorological Satellites (EUMETSAT), Darmstadt, Germany
-    //   SAM MULLER
-    //   Jupiter’s Call, LLC, Madison, Alabama
-    // published on:
-    //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
-
-    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
-    //   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
-    //   MSGProc - MSG Processing tools for Windows
-    // http://www.eumetsat.int/Home/Main/AboutEUMETSAT/InternationalRelations/EasternEuropeanandBalkanCountries/SP_2011062115544756?l=en
-
-    double* ir039 = (double*)papoSources[0];
-    double* jday = (double*)papoSources[1];
-    double* sat_za = (double*)papoSources[2];
-    double* cos_sol_za = (double*)papoSources[3];
-    double* ir108 = (double*)papoSources[4];
-    double* ir134 = (double*)papoSources[5];
+    const T* ir039((T*)papoSources[0]);
+    const T* jday((T*)papoSources[1]);
+    const T* sat_za((T*)papoSources[2]);
+    const T* cos_sol_za((T*)papoSources[3]);
+    const T* ir108((T*)papoSources[4]);
+    const T* ir134((T*)papoSources[5]);
 
     const double c1 = 0.0000119104;
     const double c2 = 1.43877;
@@ -441,6 +411,47 @@ CPLErr msat_reflectance_ir039(
                     ((GByte *)pData) + nLineSpace * line + col * nPixelSpace,
                     eBufType, nPixelSpace, 1);
         }
+}
+}
+
+CPLErr msat_reflectance_ir039(
+        void **papoSources, int nSources, void *pData, int nXSize, int nYSize,
+        GDALDataType eSrcType, GDALDataType eBufType,
+        int nPixelSpace, int nLineSpace)
+{
+    if (nSources != 6)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Computing IR 3.9 reflectance needs 5 source raster bands (%d found)", nSources);
+        return CE_Failure;
+    }
+    if (eSrcType != GDT_Float32 && eSrcType != GDT_Float64)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Computing IR 3.9 reflectance, source type is %d instead of GDT_Float32 or GDT_Float64", eSrcType);
+        return CE_Failure;
+    }
+
+    // Based on: [MMKM2010]
+    //   "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
+    //   by Meteosat Second Generation. Part II: Use of Visible Reflectance"
+    // by:
+    //   JOHN R. MECIKALSKI AND WAYNE M. MACKENZIE JR.
+    //   Earth Systems Science Center, University of Alabama in Huntsville, Huntsville, Alabama
+    //   MARIANNE KONIG
+    //   European Organisation for the Exploitation of Meteorological Satellites (EUMETSAT), Darmstadt, Germany
+    //   SAM MULLER
+    //   Jupiter’s Call, LLC, Madison, Alabama
+    // published on:
+    //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
+
+    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
+    //   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
+    //   MSGProc - MSG Processing tools for Windows
+    // http://www.eumetsat.int/Home/Main/AboutEUMETSAT/InternationalRelations/EasternEuropeanandBalkanCountries/SP_2011062115544756?l=en
+
+    if (eSrcType == GDT_Float32)
+        compute_reflectance_ir039<float>(papoSources, pData, nXSize, nYSize, eBufType, nPixelSpace, nLineSpace);
+    else
+        compute_reflectance_ir039<double>(papoSources, pData, nXSize, nYSize, eBufType, nPixelSpace, nLineSpace);
 
     return CE_None;
 }
