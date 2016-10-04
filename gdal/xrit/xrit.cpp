@@ -2,7 +2,7 @@
 #include "dataset.h"
 #include "rasterband.h"
 #include "gdal/reflectance/reflectance.h"
-#include "gdal/reflectance/sza.h"
+#include "gdal/reflectance/cos_sol_za.h"
 #include "gdal/utils.h"
 #include <string>
 #include <memory>
@@ -66,7 +66,7 @@ GDALDataset* XRITOpen(GDALOpenInfo* info)
     } else if (do_sza) {
         std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));
         if (!ds->init()) return NULL;
-        unique_ptr<msat::utils::SZADataset> rds(new msat::utils::SZADataset(ds.get()));
+        unique_ptr<msat::utils::CosSolZADataset> rds(new msat::utils::CosSolZADataset(ds.get()));
         return rds.release();
     } else {
         std::unique_ptr<XRITDataset> ds(new XRITDataset(fa));

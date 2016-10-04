@@ -24,6 +24,7 @@
 #include "netcdf/netcdf.h"
 #include "netcdf/netcdf24.h"
 #include "grib/grib.h"
+#include "reflectance/reflectance.h"
 
 extern "C" {
 void GDALRegister_Meteosatlib(void)
@@ -32,5 +33,6 @@ void GDALRegister_Meteosatlib(void)
     GDALRegister_MsatNetCDF();
     GDALRegister_MsatNetCDF24();
     GDALRegister_MsatGRIB();
+    GDALAddDerivedBandPixelFunc("msat_reflectance_ir039", msat::utils::msat_reflectance_ir039);
 }
 }

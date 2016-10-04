@@ -333,5 +333,117 @@ void ReflectanceDataset::init_rasterband()
     }
 }
 
+CPLErr msat_reflectance_ir039(
+        void **papoSources, int nSources, void *pData, int nXSize, int nYSize,
+        GDALDataType eSrcType, GDALDataType eBufType,
+        int nPixelSpace, int nLineSpace)
+{
+    if (nSources != 6)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Computing IR 3.9 reflectance needs 5 source raster bands (%d found)", nSources);
+        return CE_Failure;
+    }
+    if (eSrcType != GDT_Float64)
+    {
+        CPLError(CE_Failure, CPLE_AppDefined, "Computing IR 3.9 reflectance, source type is not GDT_Float64");
+        return CE_Failure;
+    }
+
+    // Based on: [MMKM2010]
+    //   "Cloud-Top Properties of Growing Cumulus prior to Convective Initiation as Measured
+    //   by Meteosat Second Generation. Part II: Use of Visible Reflectance"
+    // by:
+    //   JOHN R. MECIKALSKI AND WAYNE M. MACKENZIE JR.
+    //   Earth Systems Science Center, University of Alabama in Huntsville, Huntsville, Alabama
+    //   MARIANNE KONIG
+    //   European Organisation for the Exploitation of Meteorological Satellites (EUMETSAT), Darmstadt, Germany
+    //   SAM MULLER
+    //   Jupiter’s Call, LLC, Madison, Alabama
+    // published on:
+    //   JOURNAL OF APPLIED METEOROLOGY AND CLIMATOLOGY, VOLUME 49
+
+    // IR 0.39 CO2 corrections and fine tuning from Jan Kanak's work on MSGProc software:
+    //   Jan Kanak - Slovak Hydrometeorological Institute (SHMÚ)
+    //   MSGProc - MSG Processing tools for Windows
+    // http://www.eumetsat.int/Home/Main/AboutEUMETSAT/InternationalRelations/EasternEuropeanandBalkanCountries/SP_2011062115544756?l=en
+
+    double* ir039 = (double*)papoSources[0];
+    double* jday = (double*)papoSources[1];
+    double* sat_za = (double*)papoSources[2];
+    double* cos_sol_za = (double*)papoSources[3];
+    double* ir108 = (double*)papoSources[4];
+    double* ir134 = (double*)papoSources[5];
+
+    const double c1 = 0.0000119104;
+    const double c2 = 1.43877;
+    const double Vc = 2569.094;
+    const double A = 0.9959;
+    const double B = 3.471;
+    double esd = 1.0 - 0.0167 * cos( 2.0 * M_PI * ((int)jday[0] - 3) / 365.0);
+
+    for (int line = 0; line < nYSize; ++line)
+        for (int col = 0; col < nXSize; ++col)
+        {
+            unsigned idx = line * nXSize + col;
+
+            // We can compute radiance from counts straight away
+            //double R_tot = (raw039[i] * rad_slope) + rad_offset;
+            // But we use the Brightness Temperature instead, so we can apply CO2
+            // correction
+            double BT039 = ir039[idx];
+            double BT108 = ir108[idx];
+            double BT134 = ir134[idx];
+            double cosTETA = cos_sol_za[idx];
+            // Use cos(80°) as lower bound, to avoid division by zero
+            if (cosTETA < cos80) cosTETA = cos80;
+            double SAT = sat_za[idx];
+
+            // Apply CO2 correction to BT039
+            BT039 = pow(pow(BT039, 4)
+                      + pow(BT108, 4)
+                      - pow(BT108 - (BT108 - BT134)/4, 4),
+                      0.25);
+
+            // Apply Planck function to convert the CO2 corrected Brightness
+            // Temperature to Radiance
+            double R_tot = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT039 + B)) - 1) + 0.015;
+            double R39_corr = pow((BT108 - 0.25 * (BT108 - BT134)) / BT108, 4);
+            double R_therm = c1 * (Vc*Vc*Vc) / (exp(c2 * Vc / (A * BT108 + B)) - 1) * R39_corr;
+            // Original from MMKM2010:
+            //double TOARAD = 4.92 / (esd*esd) * cosTETA * exp(-(1-R39_corr)) * exp(-(1-R39_corr) * cosTETA / cos(SAT));
+            // Version from MSGProc:
+            double TOARAD = 4.92 / (esd*esd)
+                          * pow(cosTETA, 0.75)
+                          * exp(-(1-R39_corr) * cosTETA)
+                          * exp(-(1-R39_corr) / cos(SAT));
+            if (R_tot <= R_therm) R_tot = R_therm + 0.0000001;
+            if (TOARAD <= R_therm) TOARAD = R_therm + 0.0000001;
+
+            // Original from MMKM2010
+            //double REFL = 200 * (R_tot - R_therm) / (TOARAD - R_therm);
+            // Version from MSGProc:
+            double REFL = 100 * (R_tot - R_therm) / (TOARAD);
+
+            // Normalise outliars
+            switch (fpclassify(REFL))
+            {
+                case FP_NAN:
+                case FP_SUBNORMAL:
+                case FP_ZERO: REFL = 0.0; break;
+                case FP_INFINITE:
+                case FP_NORMAL:
+                    if (REFL < 0.0) REFL = 0.0;
+                    if (REFL > 100.0) REFL = 100.0;
+                    break;
+            }
+
+            GDALCopyWords(&REFL, GDT_Float64, 0,
+                    ((GByte *)pData) + nLineSpace * line + col * nPixelSpace,
+                    eBufType, nPixelSpace, 1);
+        }
+
+    return CE_None;
+}
+
 }
 }

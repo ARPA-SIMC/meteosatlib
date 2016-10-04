@@ -1,0 +1,36 @@
+<VRTDataset rasterXSize="11136" rasterYSize="11136">
+  <VRTRasterBand dataType="Float64" band="1" subClass="VRTDerivedRasterBand">
+    <Description>Reflectance</Description>
+    <PixelFunctionType>msat_reflectance_ir039</PixelFunctionType>
+    <SimpleSource>
+      <SourceFilename shared="0" relativeToVRT="1">H-000-MSG2__-MSG2________-IR_039___-000008___-201001191200-C_</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename shared="0" relativeToVRT="1">H-000-MSG2__-MSG2________-IR_039___-000008___-201001191200-C_</SourceFilename>
+      <OpenOptions>
+          <OOI key="MSAT_COMPUTE">jday</OOI>
+      </OpenOptions>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename shared="0" relativeToVRT="1">H-000-MSG2__-MSG2________-IR_039___-000008___-201001191200-C_</SourceFilename>
+      <OpenOptions>
+          <OOI key="MSAT_COMPUTE">sat_za</OOI>
+      </OpenOptions>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename shared="0" relativeToVRT="1">H-000-MSG2__-MSG2________-IR_039___-000008___-201001191200-C_</SourceFilename>
+      <OpenOptions>
+          <OOI key="MSAT_COMPUTE">cos_sol_za</OOI>
+      </OpenOptions>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">H-000-MSG2__-MSG2________-IR_108___-000008___-201001191200-C_</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+    <SimpleSource>
+      <SourceFilename relativeToVRT="1">H-000-MSG2__-MSG2________-IR_134___-000008___-201001191200-C_</SourceFilename>
+      <SourceBand>1</SourceBand>
+    </SimpleSource>
+  </VRTRasterBand>
+</VRTDataset>
