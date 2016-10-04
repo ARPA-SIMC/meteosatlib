@@ -1,0 +1,106 @@
+#!/usr/bin/python3
+
+import gdal
+from gdalconst import *
+import os
+try:
+    from lxml import etree
+    HAS_PRETTYPRINT = True
+except ImportError:
+    import xml.etree.ElementTree as etree
+    HAS_PRETTYPRINT = False
+
+
+class VRTBuilder:
+    WANTED_SOURCES = ("IR_108", "IR_134", "IR_039")
+
+    def __init__(self):
+        self.sources = {}
+        self.xsize = 0
+        self.ysize = 0
+        self.vrt_ds = etree.Element("VRTDataset")
+        self.vrt_rb = etree.SubElement(self.vrt_ds, "VRTRasterBand")
+
+    def add_dataset(self, relname):
+        ds = gdal.Open(relname, GA_ReadOnly)
+        for band in range(ds.RasterCount):
+            rb = ds.GetRasterBand(band + 1)
+            channel = rb.GetMetadataItem("MSAT_CHANNEL")
+            if channel not in self.WANTED_SOURCES: return
+            self.sources[channel] = {
+                "path": os.path.abspath(relname),
+                "band": band + 1,
+            }
+            if channel == "IR_039":
+                self.xsize = ds.RasterXSize
+                self.ysize = ds.RasterYSize
+
+    def check(self):
+        for s in self.WANTED_SOURCES:
+            if s not in self.sources:
+                raise RuntimeError("Source channel {} not found".format(s))
+
+    def build(self):
+        self.vrt_ds.attrib["rasterXSize"] = str(self.xsize)
+        self.vrt_ds.attrib["rasterYSize"] = str(self.ysize)
+
+        self.vrt_rb.attrib["dataType"] = "Float64"
+        self.vrt_rb.attrib["band"] =  "1"
+        self.vrt_rb.attrib["subClass"] = "VRTDerivedRasterBand"
+
+        etree.SubElement(self.vrt_rb, "Description").text = "IR 3.9 Reflectance"
+        etree.SubElement(self.vrt_rb, "PixelFunctionType").text = "msat_reflectance_ir039"
+
+        self.add_source("IR_039")
+        self.add_source("IR_039", compute="jday")
+        self.add_source("IR_039", compute="sat_za")
+        self.add_source("IR_039", compute="cos_sol_za")
+        self.add_source("IR_108")
+        self.add_source("IR_134")
+
+        return self.vrt_ds
+
+    def add_source(self, channel, compute=None):
+        src = etree.SubElement(self.vrt_rb, "SimpleSource")
+        fn = etree.SubElement(src, "SourceFilename")
+        fn.attrib["shared"] = "0"
+        fn.attrib["relativeToVRT"] = "0"
+        fn.text = self.sources[channel]["path"]
+        etree.SubElement(src, "SourceBand").text = str(self.sources[channel]["band"])
+
+        if compute is not None:
+            oo = etree.SubElement(src, "OpenOptions")
+            ooi = etree.SubElement(oo, "OOI")
+            ooi.attrib["key"] = "MSAT_COMPUTE"
+            ooi.text = compute
+
+        return src
+
+    def print(self, **kw):
+        args = { "encoding": "unicode" }
+        if HAS_PRETTYPRINT:
+            args["pretty_print"] = True
+        print(etree.tostring(self.vrt_ds, **args), **kw)
+
+
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Generate a .vrt dataset with the reflectance value for the IR 3.9 channel")
+    parser.add_argument("sources", nargs=3, help="source datasets (IR 3.9, 10.8, 13.4)")
+    args = parser.parse_args()
+
+    builder = VRTBuilder()
+
+    # Load datasets
+    for relpath in args.sources:
+        builder.add_dataset(relpath)
+
+    # Consistency checks
+    builder.check()
+
+    builder.build()
+
+    builder.print()
+
+if __name__ == "__main__":
+    main()
