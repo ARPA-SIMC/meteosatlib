@@ -131,7 +131,7 @@ CPLErr SingleChannelReflectanceRasterBand::IReadBlock(int xblock, int yblock, vo
 {
     // Read the raw data
     std::vector<double> raw(nBlockXSize * nBlockYSize);
-    if (source_rb->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+    if (source_rb->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0) == CE_Failure)
         return CE_Failure;
 
     // Precompute pixel georeferentiation
@@ -210,17 +210,17 @@ CPLErr Reflectance39RasterBand::IReadBlock(int xblock, int yblock, void *buf)
 {
     // Read the IR 3.9 data
     std::vector<double> raw039(nBlockXSize * nBlockYSize);
-    if (source_ir039->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw039.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+    if (source_ir039->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw039.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0) == CE_Failure)
         return CE_Failure;
 
     // Read the IR_10.8 channel
     std::vector<double> raw108(nBlockXSize * nBlockYSize);
-    if (source_ir108->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw108.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+    if (source_ir108->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw108.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0) == CE_Failure)
         return CE_Failure;
 
     // Read the IR_13.4 channel
     std::vector<double> raw134(nBlockXSize * nBlockYSize);
-    if (source_ir134->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw134.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0, nullptr) == CE_Failure)
+    if (source_ir134->RasterIO(GF_Read, xblock * nBlockXSize, yblock * nBlockYSize, nBlockXSize, nBlockYSize, raw134.data(), nBlockXSize, nBlockYSize, GDT_Float64, 0, 0) == CE_Failure)
         return CE_Failure;
 
     // Precompute pixel georeferentiation
