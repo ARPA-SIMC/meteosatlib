@@ -72,7 +72,7 @@ def test_ventiquattro():
         run(cmd("git", "checkout", "-B", "test_venti", repo.head.commit.hexsha))
         run(cmd("git", "reset", "--hard"))
         run(cmd("git", "clean", "-fx"))
-        run(cmd("cp", "../publicdecompwt/PublicDecompWT-2.06.zip", "decompress/PublicDecompWT.zip"))
+        run(cmd("cp", "../../publicdecompwt/PublicDecompWT-2.06.zip", "decompress/PublicDecompWT.zip"))
         run(cmd("autoreconf", "-if"))
         run(cmd("./configure",
                 "--build=x86_64-redhat-linux-gnu",
