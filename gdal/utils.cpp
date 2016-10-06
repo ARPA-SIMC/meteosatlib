@@ -1,4 +1,5 @@
 #include <cpl_string.h>
+#include <gdal_version.h>
 #include "msat/gdal/const.h"
 #include "msat/hrit/MSG_channel.h"
 #include "gdal/reflectance/reflectance.h"
@@ -14,6 +15,7 @@ namespace gdal {
 
 GDALDataset* add_extras(GDALDataset* src, GDALOpenInfo* info)
 {
+#if GDAL_VERSION_MAJOR >= 2
     int idx = CSLFindName(info->papszOpenOptions, "MSAT_COMPUTE");
     if (idx == -1) return src;
     std::string val(CPLParseNameValue(info->papszOpenOptions[idx], nullptr));
@@ -49,6 +51,7 @@ GDALDataset* add_extras(GDALDataset* src, GDALOpenInfo* info)
         CPLError(CE_Failure, CPLE_AppDefined, "Unsupported value '%s' for MSAT_COMPUTE", val.c_str());
         return nullptr;
     }
+#endif
 
     return src;
 }
