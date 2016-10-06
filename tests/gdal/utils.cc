@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <gdal_priv.h>
+#include <gdal_version.h>
 #include <ogr_spatialref.h>
 
 using namespace std;
@@ -69,12 +70,16 @@ bool has_driver(const std::string& name)
 
 std::unique_ptr<GDALDataset> open_ro(const std::string& name, const char* const* open_options)
 {
+#if GDAL_VERSION_MAJOR >= 2
     if (open_options)
     {
         return std::unique_ptr<GDALDataset>((GDALDataset*)GDALOpenEx(name.c_str(), GA_ReadOnly, nullptr, open_options, nullptr));
     } else {
         return std::unique_ptr<GDALDataset>((GDALDataset*)GDALOpen(name.c_str(), GA_ReadOnly));
     }
+#else
+    return std::unique_ptr<GDALDataset>((GDALDataset*)GDALOpen(name.c_str(), GA_ReadOnly));
+#endif
 }
 
 std::unique_ptr<GDALDataset> recode(GDALDataset* ds, bool leaveFile,
