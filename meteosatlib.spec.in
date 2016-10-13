@@ -5,7 +5,7 @@ Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
 License:        GPL
-URL:            http://meteosatlib.sf.net
+URL:            https://github.com/ARPA-SIMC/meteosatlib
 Source0:        %{name}-%{version}.tar.gz
 Source1:        PublicDecompWT.zip
 NoSource:       1
@@ -13,7 +13,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  netcdf-devel, ImageMagick-c++-devel, gdal-devel >= 1.6, hdf5-devel > 1.8, grib_api >= 1.8, dos2unix
 Vendor:         Enrico Zini <enrico@enricozini.org> 
-Packager:       Daniele Branchini <dbranchini@arpa.emr.it>
+Packager:       Daniele Branchini <dbranchini@arpae.it>
 
 %description
 
@@ -88,6 +88,21 @@ configure_disable=
 @OPENMTP_FALSE@configure_disable="$configure_disable --disable-openmtp"
 @THORNSDS_DB1_FALSE@configure_disable="$configure_disable --disable-thornsds_db1"
 
+%define gdal_pl_version %(gv=$(gdal-config --version); echo ${gv%.*})
+
+## WARNING (GDAL < 1.8 PLUGINS PATH in RHEL/Fedora/CentOS)
+## Gdal plugins path may vary accordingly to gdal versions and architecture:
+## - plugins so lib are not versioned in gdal 1.6 and 1.7
+## - in x86_64 gdal 1.7 looks for plugin in /usr/lib and not /usr/lib64
+## (for further info:
+##  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=508340
+##  and https://trac.osgeo.org/gdal/ticket/2983)
+## so you might want to intercept the plugins and put them in the right place:
+#mkdir -p $RPM_BUILD_ROOT/usr/lib
+#mv $RPM_BUILD_ROOT/usr/lib64/gdalplugins/1.7 $RPM_BUILD_ROOT/usr/lib/gdalplugins
+## ...and REMBEMBER to change "%files gdal" accordingly
+
+
 %configure $configure_disable
 
 make %{?_smp_mflags}
@@ -95,17 +110,6 @@ make %{?_smp_mflags}
 %install
 rm -rf $RPM_BUILD_ROOT
 %makeinstall
-
-## WARNING (GDAL PLUGINS PATH in RHEL/Fedora/CentOS)
-## Gdal plugins path may vary accordingly to gdal versions and architecture:
-## - plugins so lib are not versioned in gdal 1.6 and 1.7
-## - in x86_64 gdal 1.7 looks for plugin in /usr/lib and not /usr/lib64
-## (for further info:
-##  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=508340 )
-## so you might want to intercept the plugins and put them in the right place:
-#mkdir -p $RPM_BUILD_ROOT/usr/lib
-#mv $RPM_BUILD_ROOT/usr/lib64/gdalplugins/1.7 $RPM_BUILD_ROOT/usr/lib/gdalplugins
-## ...and REMBEMBER to change "%files gdal" accordingly
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -137,11 +141,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files gdal
 %defattr(-,root,root,-)
-%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.a
-%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.la
-%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.so
-%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.so.0
-%{_libdir}/gdalplugins/1.10/gdal_Meteosatlib.so.0.0.0
+%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.a
+%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.la
+%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so
+%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so.0
+%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so.0.0.0
 %doc examples/products examples/add_palette
 %doc examples/contrast-stretch examples/make-composite
 %doc examples/bluered-palette.txt examples/ndvi
@@ -150,13 +154,19 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_bindir}/msat
 %{_bindir}/msat-view
+%{_bindir}/msat-reflectance-ir39
 %{_mandir}/man1/msat-view.1.gz
 %{_mandir}/man1/msat.1.gz
 
 
 %changelog
+* Wed Oct 5 2016 Daniele Branchini <dbranchini@arpae.it> - 1.8-1
+- updated wobble
+- implemented distributed IR 3.9 reflectivity calculation (#2)
+- gdal plugins directory semi-auto-discover hack
+
 * Fri Jul 22 2016 Daniele Branchini <dbranchini@arpae.it> - 1.7-1
-- Implemented reflectance calculations for all datasets
+- implemented reflectance calculations for all datasets
 
 * Wed May 25 2016 Daniele Branchini <dbranchini@arpa.emr.it> - 1.6-1
 - fixed RSS HRV channel import problem (#1)
