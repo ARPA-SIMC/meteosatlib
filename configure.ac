@@ -142,10 +142,21 @@ else
     AC_SUBST(GDAL_PLUGIN_DIRNAME)
 fi
 
-dnl grib_api (which does not use pkg-config)
-have_gribapi=yes
-AC_CHECK_LIB([grib_api], [grib_get_api_version], [true], [have_gribapi=no], [-ljasper])
-AC_CHECK_HEADER([grib_api.h], [true], [have_gribapi=no])
+dnl Check for eccodes
+PKG_CHECK_EXISTS([eccodes], [have_gribapi=yes], [have_gribapi=no])
+if test x$have_gribapi = xyes
+then
+	PKG_CHECK_MODULES(GRIBAPI, [eccodes], , [have_gribapi=no])
+fi
+
+if test x$have_gribapi = xno
+then
+        dnl grib_api (which does not use pkg-config)
+        have_gribapi=yes
+        AC_CHECK_LIB([grib_api], [grib_get_api_version], [true], [have_gribapi=no], [-ljasper])
+        AC_CHECK_HEADER([grib_api.h], [true], [have_gribapi=no])
+fi
+
 if test x"$have_gribapi" = xyes
 then
 	AC_DEFINE([HAVE_GRIBAPI], 1, [grib_api functions are available])
