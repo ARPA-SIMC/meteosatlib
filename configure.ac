@@ -155,13 +155,13 @@ then
         have_gribapi=yes
         AC_CHECK_LIB([grib_api], [grib_get_api_version], [true], [have_gribapi=no], [-ljasper])
         AC_CHECK_HEADER([grib_api.h], [true], [have_gribapi=no])
+        GRIBAPI_CFLAGS=
+	GRIBAPI_LIBS="-lgrib_api -ljasper"
 fi
 
 if test x"$have_gribapi" = xyes
 then
 	AC_DEFINE([HAVE_GRIBAPI], 1, [grib_api functions are available])
-	GRIBAPI_CFLAGS=
-	GRIBAPI_LIBS="-lgrib_api -ljasper"
 	AC_SUBST(GRIBAPI_CFLAGS)
 	AC_SUBST(GRIBAPI_LIBS)
 else
