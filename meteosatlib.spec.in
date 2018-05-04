@@ -115,8 +115,8 @@ rm -rf $RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT
 
 %files
-%doc AUTHORS ChangeLog COPYING INSTALL
-%doc PublicDecompWT_LICENSE README TODO
+%doc AUTHORS ChangeLog LICENSE INSTALL
+%doc PublicDecompWT_LICENSE README.md TODO
 %{_bindir}/HRI2NetCDF
 %{_bindir}/OpenMTP-IDS_debug
 %{_bindir}/OpenMTP-IDS_sector

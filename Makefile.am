@@ -21,11 +21,11 @@ EXTRA_DIST = \
     config/clobber \
     $(PACKAGE_NAME).spec \
     AUTHORS \
-    COPYING \
+    LICENSE \
     ChangeLog \
     INSTALL \
     PublicDecompWT_LICENSE \
-    README \
+    README.md \
     m4/netcdf.m4 \
     libmsat.pc.in \
     meteosatlib.spec.in \
