@@ -1,6 +1,6 @@
 Name:           @PACKAGE_NAME@
 Version:        @PACKAGE_VERSION@
-Release:        1
+Release:        3
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
@@ -90,6 +90,11 @@ configure_disable=
 
 %define gdal_pl_version %(gv=$(gdal-config --version); echo ${gv%.*})
 
+%if 0%{?fedora} >= 28
+# seee https://github.com/ARPA-SIMC/meteosatlib/issues/10
+export CXXFLAGS="$RPM_OPT_FLAGS -Wno-error=format-truncation -Wno-error=format-overflow"
+%endif
+
 ## WARNING (GDAL < 1.8 PLUGINS PATH in RHEL/Fedora/CentOS)
 ## Gdal plugins path may vary accordingly to gdal versions and architecture:
 ## - plugins so lib are not versioned in gdal 1.6 and 1.7
@@ -113,6 +118,15 @@ rm -rf $RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
+
+%post
+
+%if 0%{?fedora} >= 28
+# see: https://bugzilla.redhat.com/show_bug.cgi?id=1676966
+mkdir -p /usr/lib/gdalplugins
+ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_version}
+%endif
+
 
 %files
 %doc AUTHORS ChangeLog LICENSE INSTALL
@@ -160,6 +174,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Mar 25 2019 Daniele Branchini  <dbranchini@arpae.it> - 1.8-3
+- patching compilations errors and gdal plugin wrong path on f28
+
 * Wed Oct 5 2016 Daniele Branchini <dbranchini@arpae.it> - 1.8-1
 - updated wobble
 - implemented distributed IR 3.9 reflectivity calculation (#2)
