@@ -1,6 +1,6 @@
 Name:           @PACKAGE_NAME@
 Version:        @PACKAGE_VERSION@
-Release:        3
+Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
@@ -174,7 +174,10 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
-* Mon Mar 25 2019 Daniele Branchini  <dbranchini@arpae.it> - 1.8-3
+* Thu Jun 13 2019 Daniele Branchini <dbranchini@arpae.it> - 1.9-1
+- porting all scripts to python3
+
+* Mon Mar 25 2019 Daniele Branchini <dbranchini@arpae.it> - 1.8-3
 - patching compilations errors and gdal plugin wrong path on f28
 
 * Wed Oct 5 2016 Daniele Branchini <dbranchini@arpae.it> - 1.8-1
