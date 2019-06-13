@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding: utf8
 
 # Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
@@ -51,7 +51,7 @@ in_drv_md = in_drv.GetMetadata()
 
 datatype = in_ds.GetRasterBand(1).DataType
 
-can_create = in_drv_md.has_key(gdal.DCAP_CREATE) and in_drv_md[gdal.DCAP_CREATE] == 'YES'
+can_create = gdal.DCAP_CREATE in in_drv_md and in_drv_md[gdal.DCAP_CREATE] == 'YES'
 
 # Create the output dataset. If the dataset only supports CreateCopy,
 # work around it by using a temporary dataset in RAM

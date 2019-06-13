@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Copyright (C) 2010--2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
 #
@@ -100,7 +100,7 @@ def start_app():
             if self.img: return self.img
             x, y, w, h = self.allocation
             w, h = self.enforce_aspect_ratio(w, h)
-            print "MAKE", w, h
+            print("MAKE", w, h)
 
             #data = self.ds.ReadRaster(0, 0, self.ds.RasterXSize, self.ds.RasterYSize, w, h, gdal.GDT_Byte)
             if self.zoom:
@@ -112,7 +112,7 @@ def start_app():
             arr_min = arr.min()
             arr_max = arr.max()
             arr = (arr - arr_min) * (arr_max / (arr_max - arr_min))
-            print "min", arr_min, "max", arr_max
+            print("min", arr_min, "max", arr_max)
 
             arr = arr.repeat(3)
             arr = arr.reshape((h, w, 3))

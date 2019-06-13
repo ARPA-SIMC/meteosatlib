@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding: utf8
 
 # Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
@@ -32,7 +32,7 @@ def read_palette(fname):
     with open(fname) as fd:
         for line in fd:
             if line.startswith("#"): continue
-            vals = map(int, line.split())
+            vals = list(map(int, line.split()))
             if len(vals) != 4: continue
             r[vals[0]] = vals[1]
             g[vals[0]] = vals[2]

@@ -4,6 +4,7 @@
 *.swp
 *.la
 *~
+\#*\#
 .deps
 .libs
 .dirstamp

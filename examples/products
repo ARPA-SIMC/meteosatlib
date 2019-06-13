@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # coding: utf8
 
 # Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
@@ -221,7 +221,7 @@ class Satellite(object):
         fname = os.path.join(destdir, fname)
 
         metadata = d.GetMetadata()
-        can_create = metadata.has_key(gdal.DCAP_CREATE) and metadata[gdal.DCAP_CREATE] == 'YES'
+        can_create = gdal.DCAP_CREATE in metadata and metadata[gdal.DCAP_CREATE] == 'YES'
 
         res = maker.compute()
         if isinstance(res, tuple):
@@ -795,7 +795,7 @@ if __name__ == "__main__":
     if opts.warp:
         area = None
     else:
-        area = map(int, opts.area.split(","))
+        area = list(map(int, opts.area.split(",")))
         area = (area[0], area[2], area[1], area[3])
 
     if opts.products:
