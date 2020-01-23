@@ -1,5 +1,13 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.9
+
+* All scripts ported to python3
+* Refactored IR 3.9 reflectance calculation via virtual dataset
+* Refactored reflectance calculatuion for all datasets
+* Support RSS data (both HRV and non-HRV)
+* Various building improvements
+
 ## New in version 1.5
 
 * Removed support for SAF HDF5 images: plain GDAL is enough to process them.
