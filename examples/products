@@ -138,7 +138,7 @@ class Satellite(object):
                 opts = shlex.split(self.warp_opts)
                 cmd = ["gdalwarp", "-q", "-of", "GTiff"] + opts + [os.path.join(self.srcdir, fname), cache_fname]
                 log.info("Warping %s using '%s'...", fname, " ".join(cmd))
-                proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
+                proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, universal_newlines=True)
                 stdout, stderr = proc.communicate()
                 retcode = proc.wait()
                 if stderr:
