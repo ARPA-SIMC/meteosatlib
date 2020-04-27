@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # coding: utf8
 
-# Copyright (C) 2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+# Copyright (C) 2012-2020  ARPAE-SIMC <urpsim@arpae.it>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,8 +17,13 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 #
 # Authors: Enrico Zini <enrico@enricozini.com>
-#          Daniele Branchini <dbranchini@arpa.emr.it>
+#          Daniele Branchini <dbranchini@arpae.it>
 
+import numpy
+import numpy.ma
+import scipy
+from scipy import misc
+import math
 import gdal, ogr
 from gdalconst import *
 from PIL import Image
@@ -26,10 +31,6 @@ import datetime
 import sys
 import os
 import os.path
-import numpy
-import numpy.ma
-import scipy
-import math
 import logging
 
 log = logging.getLogger(__name__)
@@ -45,12 +46,12 @@ def rescale(arr, imin, imax, omin, omax, out=None):
     if imin <= imax:
         res = numpy.clip(arr, imin, imax, out)
         res -= imin
-        res *= float(omax-omin) / float(imax-imin)
+        res = numpy.multiply(res, float(omax-omin) / float(imax-imin), casting="unsafe")
         res += omin
     else:
         res = numpy.clip(arr, imax, imin, out)
         res -= imin
-        res *= -(float(omax-omin) / float(imin-imax))
+        res = numpy.multiply(res, -(float(omax-omin) / float(imin-imax)), casting="unsafe")
         res += omin
     return res
 
@@ -118,6 +119,7 @@ class Satellite(object):
         self.area = area
         self.warp_opts = opts.warp
         self.cachedir = opts.cachedir
+        self.msat = opts.msat
         # Build channel accessors
         for chan in "IR_087", "IR_097", "IR_108", "IR_120", "WV_062", "WV_073":
             setattr(self, chan, Channel(self, chan))
@@ -126,9 +128,10 @@ class Satellite(object):
         self.HRV = HRVChannel(self, "HRV")
 
     def gdal_dataset(self, channel_name):
-        fname = "H:MSG3:%s:%s" % (
-                channel_name,
-                self.dt.strftime("%Y%m%d%H%M")
+        fname = "H:%s:%s:%s" % (
+            self.msat,
+            channel_name,
+            self.dt.strftime("%Y%m%d%H%M")
         )
         if self.warp_opts:
             cache_fname = fname.replace(":", "-") + "-latlon.tif"
@@ -138,7 +141,7 @@ class Satellite(object):
                 opts = shlex.split(self.warp_opts)
                 cmd = ["gdalwarp", "-q", "-of", "GTiff"] + opts + [os.path.join(self.srcdir, fname), cache_fname]
                 log.info("Warping %s using '%s'...", fname, " ".join(cmd))
-                proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, universal_newlines=True)
+                proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 retcode = proc.wait()
                 if stderr:
@@ -327,7 +330,7 @@ class DayMicro(Product):
     def compute(self):
         """
         Red     02 (VIS0.8)     0 ...  +65 %   1.0  1.0
-        Green   04r (IR3.9r)    5 ...  +60 %   1.5  1.0
+        Green   04r (IR3.9r)   10 ... +100 %   1.5  1.0
         Blue    09 (IR10.8)  +203 ... +323 K   1.0  1.0
         """
         vis08r = self.sat.VIS008.reflectance
@@ -472,8 +475,8 @@ class Vis006(Product):
         """
         Vis006 channel, gray normalization
         """
-        vis06 = self.sat.VIS006.data
-        v = rescale(vis06, vis06.min(), vis06.max(), 0, 255)
+        vis06 = self.sat.VIS006.reflectance
+        v = rescale(vis06, 0, 100, 0, 255)
         return v
 
 class Vis008(Product):
@@ -528,7 +531,7 @@ class Ir039r(Product):
         """
         ir039r = self.sat.IR_039.reflectance
 
-        v = rescale(ir039r, ir039r.min(), ir039r.max(), 0, 255)
+        v = rescale(ir039r, 0, 100, 0, 255)
 
         return v
 
@@ -543,7 +546,7 @@ class Ir108(Product):
         """
         ir108 = self.sat.IR_108.data
 
-        v = rescale(ir108, ir108.min(), ir108.max(), 0, 255)
+        v = rescale(ir108, ir108.max(), ir108.min(), 0, 255)
 
         return v
 
@@ -559,7 +562,7 @@ class Wv62(Product):
         """
         wv62 = self.sat.WV_062.data
 
-        v = rescale(wv62, wv62.min(), wv62.max(), 0, 255)
+        v = rescale(wv62, wv62.max(), wv62.min(), 0, 255)
 
         return v
 
@@ -573,7 +576,7 @@ class Wv73(Product):
         """
         wv73 = self.sat.WV_073.data
 
-        v = rescale(wv73, wv73.min(), wv73.max(), 0, 255)
+        v = rescale(wv73, wv73.max(), wv73.min(), 0, 255)
 
         return v
 
@@ -585,9 +588,9 @@ class Hrv(Product):
         """
         HRV channel, gray normalization
         """
-        hrv = self.sat.HRV.data
+        hrv = self.sat.HRV.reflectance
 
-        v = rescale(hrv, hrv.min(), hrv.max(), 0, 255)
+        v = rescale(hrv, 0, 100, 0, 255)
 
         return v
 
@@ -712,6 +715,11 @@ class HrvSevereStorms(Product):
 	Red   HRV                   70 ... 100%   1.7  1.0
 	Green HRV                   70 ... 100%   1.7  1.0
 	Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
+
+        alt:
+	Red   HRV                   70 ... 100%   1.0  1.0
+	Green HRV                   70 ... 100%   1.0  1.0
+	Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
         """
 
         hrvr = self.sat.HRV.reflectance
@@ -720,8 +728,10 @@ class HrvSevereStorms(Product):
 
         blue_rescaled = (rescale(ir108 - ir039,  -60,  -40, 0, 1) ** (1/2.0)) * 255
 
-        r = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
-        g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
+        #r = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
+        #g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
+        r = rescale(hrvr, 70, 100, 0, 255)
+        g = rescale(hrvr, 70, 100, 0, 255)
         b = scipy.misc.imresize(blue_rescaled, hrvr.shape)
 
         return r, g, b
@@ -732,7 +742,7 @@ if __name__ == "__main__":
     import sys
     import warnings
 
-    VERSION="0.1"
+    VERSION="0.2"
 
     class Parser(OptionParser):
         def __init__(self, *args, **kwargs):
@@ -745,6 +755,7 @@ if __name__ == "__main__":
 
     default_area = "1350,1400,100,800"
     default_srcdir = "/autofs/scratch1/satope/done/"
+    default_sat = "MSG3"
 
     # Compute a reasonable default for --time
     default_dt = datetime.datetime.utcnow()
@@ -770,6 +781,8 @@ if __name__ == "__main__":
                       help="output file format. See gdalinfo --formats. Default: %default")
     parser.add_option("-d", "--destdir", metavar="dir", action="store", default=".",
                       help="output directory. Default: %default")
+    parser.add_option("--msat", action="store", default=default_sat,
+                      help="satellite to use. Default: %default")
     parser.add_option("--warp", metavar="opts", action="store", default=None,
                       help="gdalwarp options to use to warp input channels before using them."
                            " When used, area cropping is disabled. Default: %default")
@@ -813,6 +826,7 @@ if __name__ == "__main__":
         log.info("Reading from %s at %s", opts.srcdir, dt)
 
     sat = Satellite(opts.srcdir, dt, area, opts=opts)
+
     for prod in (
                 DayNatural,
                 DayMicro,
