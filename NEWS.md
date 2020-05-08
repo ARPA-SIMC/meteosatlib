@@ -1,5 +1,9 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.10
+
+* Added gdal 3 support
+
 ## New in version 1.9
 
 * All scripts ported to python3

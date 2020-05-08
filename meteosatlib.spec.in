@@ -1,6 +1,6 @@
 Name:           @PACKAGE_NAME@
 Version:        @PACKAGE_VERSION@
-Release:        2
+Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
@@ -57,7 +57,6 @@ Summary: GDAL drivers based on Meteosatlib
 
 Group:		Libraries/Meteo
 Summary:	Library of utility functions for working with Meteosat images
-Obsoletes:      meteosatlib-openmtp-devel, meteosatlib-msg-native-devel, meteosatlib-hrit-devel, meteosatlib-thornsds_db1-devel, meteosatlib-hri-devel, meteosatlib-omtp-ids-devel, meteosatlib-msat-devel
 
 %description devel
 Libraries to read Meteosat 7/8 images in various formats.
@@ -67,7 +66,6 @@ This is the library for C++ development.
 
 Group:		Applications/Meteo
 Summary:  	Read, write, convert and display raster satellite images
-Obsoletes:      meteosatlib-gdal-tools
 
 %description tools
  This package provides two tools:
@@ -180,6 +178,9 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Fri May  8 2020 Daniele Branchini <dbranchini@arpae.it> - 1.10-1
+- fixes for gdal 3
+
 * Thu Jan 23 2020 Daniele Branchini  <dbranchini@arpae.it> - 1.9-2
 - enabling CentOS 8 builds
 
