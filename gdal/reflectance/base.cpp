@@ -25,6 +25,7 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     if (!has_sources)
     {
         projWKT = proj;
+        SetProjection(projWKT.c_str());
         memcpy(geotransform, gt, 6 * sizeof(double));
         char** metadata = ds->GetMetadata(MD_DOMAIN_MSAT);
         if (metadata == nullptr)
@@ -49,15 +50,6 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     }
 
     has_sources = true;
-}
-
-#if GDAL_VERSION_MAJOR < 3
-const char* ProxyDataset::GetProjectionRef()
-#else
-const char* ProxyDataset::GetProjectionRef() const
-#endif
-{
-    return projWKT.c_str();
 }
 
 CPLErr ProxyDataset::GetGeoTransform(double* tr)
