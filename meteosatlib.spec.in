@@ -11,7 +11,7 @@ Source1:        PublicDecompWT.zip
 NoSource:       1
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  netcdf-cxx-devel, ImageMagick-c++-devel, gdal-devel >= 1.6, hdf5-devel > 1.8, dos2unix
+BuildRequires:  netcdf-cxx-devel, ImageMagick-c++-devel, gdal-devel >= 1.6, hdf5-devel > 1.8, dos2unix, help2man
 Vendor:         Enrico Zini <enrico@enricozini.org> 
 Packager:       Daniele Branchini <dbranchini@arpae.it>
 
