@@ -18,6 +18,9 @@ man_MANS = msat.1 msat-view.1
 msat.1: msat
 	./regenerate-msat-manpage
 
+msat-view.1: msat-view
+	./regenerate-msat-manpage
+
 EXTRA_DIST = regenerate-msat-manpage image.h msat2gdal
 
 # HRI

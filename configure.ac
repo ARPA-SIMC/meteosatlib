@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-AC_INIT([meteosatlib], [1.9], [enrico@enricozini.org])
+AC_INIT([meteosatlib], [1.10], [enrico@enricozini.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([foreign subdir-objects nostdinc])
@@ -264,6 +264,12 @@ if test "x$MSAT_DEFAULT_INSTITUTION" == "x"; then
 fi
 AC_DEFINE_UNQUOTED([MSAT_DEFAULT_INSTITUTION], ["$MSAT_DEFAULT_INSTITUTION"], [Default institution name])
 AC_MSG_NOTICE([Default institution is $MSAT_DEFAULT_INSTITUTION])
+
+AC_CHECK_PROG([have_help2man], [help2man], [yes], [no])
+if test "x$have_help2man" = xno
+then
+    AC_MSG_ERROR([help2man not found])
+fi
 
 
 dnl --------------------------------------------------------------------
