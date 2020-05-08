@@ -191,7 +191,7 @@ GRIBRasterBand::GRIBRasterBand(GRIBDataset* ds, int idx /*, GDALDataType dt */)
 GDALDataset* GRIBOpen(GDALOpenInfo* info)
 {
     // We want a real file
-#if GDAL_VERSION_MAJOR == 2
+#if GDAL_VERSION_MAJOR >= 2
     if (info->fpL == NULL) return NULL;
 #else
     if (info->fp == NULL) return NULL;
