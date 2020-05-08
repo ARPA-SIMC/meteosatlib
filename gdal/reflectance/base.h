@@ -14,9 +14,6 @@ public:
     /// True when at least one source has been added
     bool has_sources = false;
 
-    /// Projection WKT string returned by GetProjectionRef
-    std::string projWKT;
-
     /// Affine geotransform returned by GetGeoTransform
     double geotransform[6];
 
