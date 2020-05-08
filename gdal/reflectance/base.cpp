@@ -51,7 +51,11 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     has_sources = true;
 }
 
+#if GDAL_VERSION_MAJOR < 3
 const char* ProxyDataset::GetProjectionRef()
+#else
+const char* ProxyDataset::GetProjectionRef() const
+#endif
 {
     return projWKT.c_str();
 }
