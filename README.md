@@ -31,9 +31,9 @@ Installation instructions
   For MSG data decompression, You need the EUMETSAT source code for the
   decompression library for Wavelet, JPEG and T4 images.
   
-  To get it, please fill the form at http://oiswww.eumetsat.int/WEBOPS-cgi/wavelet/register
-  to obtain the source code, and put the resulting PublicDecompWT.zip file
-  under the directory "decompress".
+  To get it, please download the source code from
+  https://gitlab.eumetsat.int/open-source/PublicDecompWT and put the resulting
+  PublicDecompWT.zip file under the directory "decompress".
 
 Besides the optional PublicDecompWT.zip requisite described above, meteosatlib
 is a standard autotools package. See the INSTALL file for detailed
