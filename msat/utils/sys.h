@@ -5,17 +5,19 @@
  * @author Enrico Zini <enrico@enricozini.org>
  * @brief Operating system functions
  *
- * Copyright (C) 2007--2015  Enrico Zini <enrico@debian.org>
+ * Copyright (C) 2007--2018  Enrico Zini <enrico@debian.org>
  */
 
 #include <string>
-//#include <iosfwd>
 #include <memory>
 #include <iterator>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 namespace msat {
 namespace sys {
@@ -84,6 +86,15 @@ bool exists(const std::string& s);
 
 /// Get the absolute path of the current working directory
 std::string getcwd();
+
+/// Change working directory
+void chdir(const std::string& dir);
+
+/// Change root directory
+void chroot(const std::string& dir);
+
+/// Change umask (always succeeds and returns the previous umask)
+mode_t umask(mode_t mask);
 
 /// Get the absolute path of a file
 std::string abspath(const std::string& pathname);
@@ -163,14 +174,36 @@ public:
      */
     [[noreturn]] virtual void throw_runtime_error(const char* desc);
 
+    /// Check if the file descriptor is open (that is, if it is not -1)
+    bool is_open() const;
+
+    /**
+     * Close the file descriptor, setting its value to -1.
+     *
+     * Does nothing if the file descriptor is already closed
+     */
     void close();
 
     void fstat(struct stat& st);
     void fchmod(mode_t mode);
 
+    void futimens(const struct ::timespec ts[2]);
+
+    void fsync();
+    void fdatasync();
+
     int dup();
 
     size_t read(void* buf, size_t count);
+
+    /**
+     * Read `count` bytes into bufr, retrying partial reads, stopping at EOF.
+     *
+     * Return true if `count` bytes have been read, false in case of eof, and
+     * raise an exception in case EOF was found after reading between 0 and
+     * count-1 bytes.
+     */
+    bool read_all_or_retry(void* buf, size_t count);
 
     /**
      * Read all the data into buf, throwing runtime_error in case of a partial
@@ -222,8 +255,64 @@ public:
 
     MMap mmap(size_t length, int prot, int flags, off_t offset=0);
 
+    /**
+     * Open file description locks F_OFD_SETLK operation.
+     *
+     * Returns true if the lock was obtained, false if acquiring the lock
+     * failed.
+     */
+    bool ofd_setlk(struct ::flock&);
+
+    /**
+     * Open file description locks F_OFD_SETLKW operation.
+     *
+     * Returns true if the lock was obtained, false if a signal was received
+     * while waiting for the lock.
+     *
+     * If retry_on_signal is true, acquiring the lock is automatically retried
+     * in case of signals, and the function always returns true.
+     */
+    bool ofd_setlkw(struct ::flock&, bool retry_on_signal=true);
+
+    /**
+     * Open file description locks F_OFD_GETLK operation.
+     *
+     * Returns true if the lock would have been obtainable, false if not.
+     */
+    bool ofd_getlk(struct ::flock&);
+
+    /**
+     * Call sendfile with this file as in_fd, falling back on write if it is
+     * not available.
+     *
+     * Perform retry if data was partially written.
+     */
+    void sendfile(FileDescriptor& out_fd, off_t offset, size_t count);
+
+    /// Get open flags for the file
+    int getfl();
+
+    /// Set open flags for the file
+    void setfl(int flags);
+
     operator int() const { return fd; }
 };
+
+
+/**
+ * RAII mechanism to save restore file times at the end of some file operations
+ */
+class PreserveFileTimes
+{
+protected:
+    FileDescriptor fd;
+    struct ::timespec ts[2];
+
+public:
+    PreserveFileTimes(FileDescriptor fd);
+    ~PreserveFileTimes();
+};
+
 
 
 /**
@@ -251,10 +340,35 @@ public:
     const std::string& name() const { return pathname; }
 };
 
+
+/**
+ * File descriptor that gets automatically closed in the object destructor.
+ */
+struct ManagedNamedFileDescriptor : public NamedFileDescriptor
+{
+    using NamedFileDescriptor::NamedFileDescriptor;
+
+    ManagedNamedFileDescriptor(ManagedNamedFileDescriptor&&) = default;
+    ManagedNamedFileDescriptor(const ManagedNamedFileDescriptor&) = delete;
+
+    /**
+     * The destructor closes the file descriptor, but does not check errors on
+     * ::close().
+     *
+     * In normal program flow, it is a good idea to explicitly call
+     * ManagedNamedFileDescriptor::close() in places where it can throw safely.
+     */
+    ~ManagedNamedFileDescriptor();
+
+    ManagedNamedFileDescriptor& operator=(const ManagedNamedFileDescriptor&) = delete;
+    ManagedNamedFileDescriptor& operator=(ManagedNamedFileDescriptor&&);
+};
+
+
 /**
  * Wrap a path on the file system opened with O_PATH.
  */
-struct Path : public NamedFileDescriptor
+struct Path : public ManagedNamedFileDescriptor
 {
     /**
      * Iterator for directory entries
@@ -306,35 +420,32 @@ struct Path : public NamedFileDescriptor
 
         /// @return true if we refer to a Unix domain socket.
         bool issock() const;
+
+        /// Return a Path object for this entry
+        Path open_path(int flags=0) const;
     };
 
-    using NamedFileDescriptor::NamedFileDescriptor;
+    using ManagedNamedFileDescriptor::ManagedNamedFileDescriptor;
 
     /**
      * Open the given pathname with flags | O_PATH.
      */
-    Path(const char* pathname, int flags=0);
+    Path(const char* pathname, int flags=0, mode_t mode=0777);
     /**
      * Open the given pathname with flags | O_PATH.
      */
-    Path(const std::string& pathname, int flags=0);
+    Path(const std::string& pathname, int flags=0, mode_t mode=0777);
     /**
      * Open the given pathname calling parent.openat, with flags | O_PATH
      */
-    Path(Path& parent, const char* pathname, int flags=0);
+    Path(Path& parent, const char* pathname, int flags=0, mode_t mode=0777);
     Path(const Path&) = delete;
     Path(Path&&) = default;
     Path& operator=(const Path&) = delete;
     Path& operator=(Path&&) = default;
 
-    /**
-     * The destructor closes the file descriptor, but does not check errors on
-     * ::close().
-     *
-     * In normal program flow, it is a good idea to explicitly call
-     * Path::close() in places where it can throw safely.
-     */
-    ~Path();
+    /// Wrapper around open(2) with flags | O_PATH
+    void open(int flags, mode_t mode=0777);
 
     DIR* fdopendir();
 
@@ -346,12 +457,25 @@ struct Path : public NamedFileDescriptor
 
     int openat(const char* pathname, int flags, mode_t mode=0777);
 
+    /// Same as openat, but returns -1 if the file does not exist
+    int openat_ifexists(const char* pathname, int flags, mode_t mode=0777);
+
+    bool faccessat(const char* pathname, int mode, int flags=0);
+
     void fstatat(const char* pathname, struct stat& st);
+
+    /// fstatat, but in case of ENOENT returns false instead of throwing
+    bool fstatat_ifexists(const char* pathname, struct stat& st);
 
     /// fstatat with the AT_SYMLINK_NOFOLLOW flag set
     void lstatat(const char* pathname, struct stat& st);
 
+    /// lstatat, but in case of ENOENT returns false instead of throwing
+    bool lstatat_ifexists(const char* pathname, struct stat& st);
+
     void unlinkat(const char* pathname);
+
+    void mkdirat(const char* pathname, mode_t mode=0777);
 
     /// unlinkat with the AT_REMOVEDIR flag set
     void rmdirat(const char* pathname);
@@ -362,16 +486,20 @@ struct Path : public NamedFileDescriptor
      * The path must point to a directory.
      */
     void rmtree();
+
+    static std::string mkdtemp(const std::string& prefix);
+    static std::string mkdtemp(const char* prefix);
+    static std::string mkdtemp(char* pathname_template);
 };
 
 
 /**
- * open(2) file descriptors
+ * File in the file system
  */
-class File : public NamedFileDescriptor
+class File : public ManagedNamedFileDescriptor
 {
 public:
-    using NamedFileDescriptor::NamedFileDescriptor;
+    using ManagedNamedFileDescriptor::ManagedNamedFileDescriptor;
 
     File(File&&) = default;
     File(const File&) = delete;
@@ -383,15 +511,6 @@ public:
 
     /// Wrapper around open(2)
     File(const std::string& pathname, int flags, mode_t mode=0777);
-
-    /**
-     * The destructor closes the file descriptor, but does not check errors on
-     * ::close().
-     *
-     * In normal program flow, it is a good idea to explicitly call
-     * File::close() in places where it can throw safely.
-     */
-    ~File();
 
     File& operator=(const File&) = delete;
     File& operator=(File&&) = default;
@@ -406,7 +525,56 @@ public:
     bool open_ifexists(int flags, mode_t mode=0777);
 
     static File mkstemp(const std::string& prefix);
+    static File mkstemp(const char* prefix);
+    static File mkstemp(char* pathname_template);
 };
+
+
+/**
+ * Open a temporary file.
+ *
+ * By default, the temporary file will be deleted when the object is deleted.
+ */
+class Tempfile : public File
+{
+protected:
+    bool m_unlink_on_exit = true;
+
+public:
+    Tempfile();
+    Tempfile(const std::string& prefix);
+    Tempfile(const char* prefix);
+    ~Tempfile();
+
+    /// Change the unlink-on-exit behaviour
+    void unlink_on_exit(bool val);
+
+    /// Unlink the file right now
+    void unlink();
+};
+
+
+/**
+ * Open a temporary directory.
+ *
+ * By default, the temporary directory will be deleted when the object is
+ * deleted.
+ */
+class Tempdir : public Path
+{
+protected:
+    bool m_rmtree_on_exit = true;
+
+public:
+    Tempdir();
+    Tempdir(const std::string& prefix);
+    Tempdir(const char* prefix);
+    ~Tempdir();
+
+    /// Change the rmtree-on-exit behaviour
+    void rmtree_on_exit(bool val);
+};
+
 
 /// Read whole file into memory. Throws exceptions on failure.
 std::string read_file(const std::string &file);
@@ -510,63 +678,79 @@ void rmdir(const std::string& pathname);
 /// Delete the directory \a pathname and all its contents.
 void rmtree(const std::string& pathname);
 
-#if 0
-/// Nicely wrap access to directories
-class Directory
+/**
+ * Delete the directory \a pathname and all its contents.
+ *
+ * If the directory does not exist, it returns false, else true.
+ */
+bool rmtree_ifexists(const std::string& pathname);
+
+/**
+ * Rename src_pathname into dst_pathname.
+ *
+ * This is just a wrapper to the rename(2) system call: source and destination
+ * must be on the same file system.
+ */
+void rename(const std::string& src_pathname, const std::string& dst_pathname);
+
+/**
+ * Set mtime and atime for the file
+ */
+void touch(const std::string& pathname, time_t ts);
+
+/**
+ * Call clock_gettime, raising an exception if it fails
+ */
+void clock_gettime(::clockid_t clk_id, struct ::timespec& ts);
+
+/**
+ * Return the time elapsed between two timesec structures, in nanoseconds
+ */
+unsigned long long timesec_elapsed(const struct ::timespec& begin, const struct ::timespec& until);
+
+/**
+ * Access to clock_gettime
+ */
+struct Clock
 {
-protected:
-    /// Directory pathname
-    std::string m_path;
+    ::clockid_t clk_id;
+    struct ::timespec ts;
 
-public:
-    class const_iterator
-    {
-        /// Directory we are iterating
-        const Directory* dir;
-        /// DIR* pointer
-        void* dirp;
-        /// dirent structure used for iterating entries
-        struct dirent* direntbuf;
+    /**
+     * Initialize ts with the value of the given clock
+     */
+    Clock(::clockid_t clk_id);
 
-    public:
-        // Create an end iterator
-        const_iterator();
-        // Create a begin iterator
-        const_iterator(const Directory& dir);
-        // Cleanup properly
-        ~const_iterator();
-
-        /// auto_ptr style copy semantics
-        const_iterator(const const_iterator& i);
-        const_iterator& operator=(const const_iterator& i);
-
-        /// Move to the next directory entry
-        const_iterator& operator++();
-
-        /// @return the current file name
-        std::string operator*() const;
-
-        bool operator==(const const_iterator& iter) const;
-        bool operator!=(const const_iterator& iter) const;
-    };
-
-    Directory(const std::string& path);
-    ~Directory();
-
-    /// Pathname of the directory
-    const std::string& path() const { return m_path; }
-
-    /// Check if the directory exists
-    bool exists() const;
-
-    /// Begin iterator
-    const_iterator begin() const;
-
-    /// End iterator
-    const_iterator end() const;
+    /**
+     * Return the number of nanoseconds elapsed since the last time ts was
+     * updated
+     */
+    unsigned long long elapsed();
 };
 
-#endif
+/**
+ * rlimit wrappers
+ */
+
+/// Call getrlimit, raising an exception if it fails
+void getrlimit(int resource, struct ::rlimit& rlim);
+
+/// Call setrlimit, raising an exception if it fails
+void setrlimit(int resource, const struct ::rlimit& rlim);
+
+/// Override a soft resource limit during the lifetime of the object
+struct OverrideRlimit
+{
+    int resource;
+    struct ::rlimit orig;
+
+    OverrideRlimit(int resource, rlim_t rlim);
+    ~OverrideRlimit();
+
+    /// Change the limit value again
+    void set(rlim_t rlim);
+};
+
 }
 }
 
