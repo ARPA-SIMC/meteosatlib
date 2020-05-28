@@ -4,8 +4,8 @@ Priority: optional
 Maintainer: Enrico Zini <enrico@debian.org>
 Build-Depends:
  debhelper (>= 7.0.50~), dh-buildinfo,
- libnetcdf-dev,
- libgrib-api-dev,
+ libnetcdf-cxx-legacy-dev,
+ libeccodes-dev,
  libgdal1-dev (>= 1.6.0),
  libmsat-dev (>= 0.6),
  libmagick++-dev
