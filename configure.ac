@@ -66,6 +66,13 @@ AC_ARG_ENABLE([openmtp],
     [],
     [enable_openmtp="yes"])
 
+AC_ARG_WITH([system-pdwt],
+    [AS_HELP_STRING([--with-system-pdwt],
+	[use PublicDecomptWt installed in the system instead of bundled one])],
+    [],
+    [with_system_pdwt="no"])
+
+
 dnl --------------------------------------------------------------------
 dnl Checks for programs.
 
@@ -81,6 +88,24 @@ dnl --------------------------------------------------------------------
 dnl Checks for libraries.
 
 PKG_PROG_PKG_CONFIG()
+
+dnl PublicDecompWT
+if test $with_system_pdwt != no; then
+    PKG_CHECK_MODULES(PDWT, [libpublicdecompwt], [
+        AC_SUBST(PDWT_CFLAGS)
+        AC_SUBST(PDWT_LIBS)
+	have_pdwt=yes
+    ], [
+        have_pdwt=no
+        enable_hrit=no
+        AC_MSG_WARN("*** system version of PublicDecompWT not found. You can build without --with-system-pdwt")
+    ])
+
+    AM_CONDITIONAL([BUNDLED_PDWT], [false])
+else
+    AM_CONDITIONAL([BUNDLED_PDWT], [true])
+    have_pdwt=bundled
+fi
 
 dnl ImageMagick++
 PKG_CHECK_EXISTS(ImageMagick++,[
@@ -279,6 +304,7 @@ AC_OUTPUT
 AC_MSG_NOTICE([
 ===================================================
 $PACKAGE_NAME-$PACKAGE_VERSION configuration:
+AS_HELP_STRING([publicdecompwt:], [$have_pdwt])
 AS_HELP_STRING([hri:], [$enable_hri])
 AS_HELP_STRING([hrit:], [$enable_hrit])
 AS_HELP_STRING([msg-native:], [$enable_msg_native])

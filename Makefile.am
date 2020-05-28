@@ -4,7 +4,9 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS =
 if HRIT
+if BUNDLED_PDWT
 SUBDIRS += decompress
+endif
 endif
 SUBDIRS += msat
 if HAVE_GDAL
