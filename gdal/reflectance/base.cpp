@@ -11,7 +11,7 @@ namespace utils {
 void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
 {
     const char* proj = ds->GetProjectionRef();
-    if (proj == nullptr)
+    if (!proj)
         throw std::runtime_error(dsname + ": trying to add source without a projection definition");
 
     double gt[6];
@@ -24,7 +24,7 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
 
     if (!has_sources)
     {
-        SetProjection(proj);
+        projection_ref = proj;
         memcpy(geotransform, gt, 6 * sizeof(double));
         char** metadata = ds->GetMetadata(MD_DOMAIN_MSAT);
         if (metadata == nullptr)
@@ -36,8 +36,7 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
         nRasterXSize = ds->GetRasterXSize();
         nRasterYSize = ds->GetRasterYSize();
     } else {
-        const char* projWKT = GetProjectionRef();
-        if (strcmp(projWKT, proj) != 0)
+        if (projection_ref != proj)
             throw std::runtime_error(dsname + ": inconsistent projection definitions in source datasets");
         if (memcmp(geotransform, gt, 6 * sizeof(double)) != 0)
             throw std::runtime_error(dsname + ": inconsistent affine geotransform coefficients in source datasets");
@@ -50,6 +49,11 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     }
 
     has_sources = true;
+}
+
+const char* ProxyDataset::GetProjectionRef()
+{
+    return projection_ref.c_str();
 }
 
 CPLErr ProxyDataset::GetGeoTransform(double* tr)

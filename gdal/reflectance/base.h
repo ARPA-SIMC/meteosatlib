@@ -10,6 +10,9 @@ namespace utils {
 
 class ProxyDataset : public GDALDataset
 {
+protected:
+    std::string projection_ref;
+
 public:
     /// True when at least one source has been added
     bool has_sources = false;
@@ -26,6 +29,7 @@ public:
      */
     void add_info(GDALDataset* ds, const std::string& dsname);
 
+    const char* GetProjectionRef() override;
     CPLErr GetGeoTransform(double* tr) override;
 };
 
