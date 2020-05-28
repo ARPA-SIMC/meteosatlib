@@ -5,6 +5,7 @@
 #include <msat/facts.h>
 #include <msat/hrit/MSG_HRIT.h>
 #include <memory>
+#include <ctime>
 
 using namespace std;
 
@@ -58,7 +59,7 @@ bool XRITDataset::init()
 
     /// Image time
     struct tm *tmtime = PRO_data.prologue->image_acquisition.PlannedAquisitionTime.TrueRepeatCycleStart.get_timestruct( );
-    snprintf(buf, 20, "%04d-%02d-%02d %02d:%02d:00", tmtime->tm_year+1900, tmtime->tm_mon+1, tmtime->tm_mday, tmtime->tm_hour, tmtime->tm_min);
+    strftime(buf, 20, "%Y-%m-%d %H:%M:00", tmtime);
     if (SetMetadataItem(MD_MSAT_DATETIME, buf, MD_DOMAIN_MSAT) != CE_None)
         return false;
 
