@@ -171,12 +171,6 @@ fi
 enable_grib=$have_gribapi
 
 dnl --------------------------------------------------------------------
-dnl Checks for typedefs, structures, and compiler characteristics.
-
-dnl --------------------------------------------------------------------
-dnl Checks for library functions.
-
-dnl --------------------------------------------------------------------
 dnl Conditional stuff.
 
 if test x"$enable_hri" == x"yes"; then
@@ -197,8 +191,6 @@ if test x"$enable_hrit" == x"yes"; then
         AC_MSG_WARN("*** hrit support disabled")
     fi
     if test x"$enable_hrit" == x"yes"; then
-        make_hrit=hrit/Subdir.mk
-        make_decompress=decompress/Subdir.mk
 	AC_DEFINE([HAVE_HRIT], 1, [XRIT functions are available])
 	AC_DEFINE([MSAT_HAVE_HRIT], 1, [XRIT functions are available])
     fi
@@ -208,10 +200,6 @@ if test x"$enable_thornsds_db1" == x"yes"; then
     if ! test x"$have_libnetcdf" = x"yes" ; then
         enable_thornsds_db1="no"
         AC_MSG_WARN("*** thornsds_db1 support disabled")
-    fi
-    if test x"$enable_thornsds_db1" == x"yes"; then
-        make_thornsds_db1=thornsds_db1/Subdir.mk
-        make_decompress=decompress/Subdir.mk
     fi
 fi
 

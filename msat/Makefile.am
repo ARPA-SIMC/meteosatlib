@@ -169,18 +169,14 @@ libmsat_la_SOURCES += \
     xrit/fileaccess.cpp
 
 libmsat_la_CPPFLAGS += \
-    -I$(top_builddir)/decompress/COMP/Inc \
-    -I$(top_builddir)/decompress/COMP/JPEG/Inc \
-    -I$(top_builddir)/decompress/COMP/T4/Inc \
-    -I$(top_builddir)/decompress/COMP/WT/Inc \
-    -I$(top_builddir)/decompress/DISE
+    -I$(top_builddir)/decompress/PublicDecompWT/COMP/Inc \
+    -I$(top_builddir)/decompress/PublicDecompWT/COMP/JPEG/Inc \
+    -I$(top_builddir)/decompress/PublicDecompWT/COMP/T4/Inc \
+    -I$(top_builddir)/decompress/PublicDecompWT/COMP/WT/Inc \
+    -I$(top_builddir)/decompress/PublicDecompWT/DISE
 
 libmsat_la_LIBADD += \
-    $(top_builddir)/decompress/COMP/JPEG/Src/libJPEG.a \
-    $(top_builddir)/decompress/COMP/WT/Src/libWT.a \
-    $(top_builddir)/decompress/COMP/T4/Src/libT4.a \
-    $(top_builddir)/decompress/COMP/Src/libCOMP.a \
-    $(top_builddir)/decompress/DISE/libDISE.a
+    $(top_builddir)/decompress/libpublicdecompwt.la
 endif
 
 if MSG_NATIVE

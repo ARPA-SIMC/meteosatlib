@@ -24,7 +24,6 @@ EXTRA_DIST = \
     LICENSE \
     ChangeLog \
     INSTALL \
-    PublicDecompWT_LICENSE \
     README.md \
     m4/netcdf.m4 \
     libmsat.pc.in \
