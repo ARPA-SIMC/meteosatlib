@@ -1,7 +1,6 @@
 # Process this file with automake to produce Makefile.in.
 #
-# Copyright (C) 2005, 2006  Deneys S. Maartens  <dsm@tlabs.ac.za>
-# Copyright (C) 2006--2012  Enrico Zini <enrico@enricozini.org>
+# Copyright (C) 2020  Enrico Zini <enrico@enricozini.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,31 +16,48 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-OUR_SOURCES = \
-    LICENSE \
-    patch_EUMETSAT_2.02 \
-    patch_EUMETSAT_2.04 \
-    patch_EUMETSAT_2.06 \
-    PublicDecompWT.sh
+PDWT_SOURCES = \
+	PublicDecompWT/DISE/CxRITFile.cpp \
+	PublicDecompWT/DISE/CxRITFileHeaderRecords.cpp \
+	PublicDecompWT/DISE/CxRITAnnotation.cpp \
+	PublicDecompWT/DISE/ErrorHandling.cpp \
+	PublicDecompWT/DISE/TimeSpan.cpp \
+	PublicDecompWT/DISE/UTCTime.cpp \
+	PublicDecompWT/COMP/Src/CBuffer.cpp \
+	PublicDecompWT/COMP/Src/CImage.cpp \
+	PublicDecompWT/COMP/Src/CQualityMeasures.cpp \
+	PublicDecompWT/COMP/T4/Src/CBitBuffer.cpp \
+	PublicDecompWT/COMP/T4/Src/CompressT4.cpp \
+	PublicDecompWT/COMP/T4/Src/T4Coder.cpp \
+	PublicDecompWT/COMP/T4/Src/T4Codes.cpp \
+	PublicDecompWT/COMP/T4/Src/T4Decoder.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CHOptim.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CHcodec.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CHufftables.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CJBlock.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CJPEGDecoder.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CJPEGLossLessCoder.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CJPEGLossyCoder.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CQuantizationTable.cpp \
+	PublicDecompWT/COMP/JPEG/Src/CompressJPEG.cpp \
+	PublicDecompWT/COMP/WT/Src/CACCoder.cpp \
+	PublicDecompWT/COMP/WT/Src/CACDecoder.cpp \
+	PublicDecompWT/COMP/WT/Src/CACModel.cpp \
+	PublicDecompWT/COMP/WT/Src/CVLCCoder.cpp \
+	PublicDecompWT/COMP/WT/Src/CVLCDecoder.cpp \
+	PublicDecompWT/COMP/WT/Src/CWBlock.cpp \
+	PublicDecompWT/COMP/WT/Src/CWTCoder.cpp \
+	PublicDecompWT/COMP/WT/Src/CWTDecoder.cpp \
+	PublicDecompWT/COMP/WT/Src/CompressWT.cpp
 
-# Also create symbolic links if an out-of-source build
-all: \
-    LICENSE \
-    patch_EUMETSAT_2.02 \
-    patch_EUMETSAT_2.04 \
-    patch_EUMETSAT_2.06 \
-    PublicDecompWT.sh
-	if test $(builddir) != $(srcdir) ; then \
-	    for file in $(OUR_SOURCES); do \
-	        rm -f $$file; \
-	        $(LN_S) $(srcdir)/$$file . ; \
-	    done; \
-	fi
-	test -e PublicDecompWT.zip || $(LN_S) $(srcdir)/PublicDecompWT.zip .
-	./PublicDecompWT.sh
+noinst_LTLIBRARIES = libpublicdecompwt.la
 
-dist_noinst_DATA = $(OUR_SOURCES)
-
-distclean-local:
-	rm -rf COMP DISE
-	rm -f pdwt.patched
+libpublicdecompwt_la_SOURCES = $(PDWT_SOURCES)
+libpublicdecompwt_la_CPPFLAGS = \
+	-Wno-long-long -pedantic \
+	-I$(srcdir)/PublicDecompWT/DISE/ \
+	-I$(srcdir)/PublicDecompWT/COMP/Inc/ \
+	-I$(srcdir)/PublicDecompWT/COMP/Src/Inc/ \
+	-I$(srcdir)/PublicDecompWT/COMP/T4/Inc/ \
+	-I$(srcdir)/PublicDecompWT/COMP/JPEG/Inc/ \
+	-I$(srcdir)/PublicDecompWT/COMP/WT/Inc/

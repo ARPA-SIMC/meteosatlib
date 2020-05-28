@@ -46,7 +46,7 @@ bool NetCDFProduct(char *inname)
 {
   struct tm *tmtime;
   char NcName[1024];
-  char title[64];
+  char title[128];
   char reftime[64];
   char projname[16];
   int wd, hg;
@@ -108,7 +108,7 @@ bool NetCDFProduct(char *inname)
     if (! ncf.add_att("Institution", INSTITUTION) ) return false;
     if (! ncf.add_att("Conventions", "COARDS") ) return false;
     if (! ncf.add_att("history", "Created from raw data") ) return false;
-    sprintf(title, "%s product for %s", hri.get_satellite_name( ), reftime);
+    snprintf(title, 128, "%s product for %s", hri.get_satellite_name( ), reftime);
     if (! ncf.add_att("title", title) ) return false;
 
     // Dimensions

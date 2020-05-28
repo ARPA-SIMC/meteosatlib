@@ -1,0 +1,3 @@
+[submodule "decompress/PublicDecompWT"]
+	path = decompress/PublicDecompWT
+	url = https://gitlab.eumetsat.int/open-source/PublicDecompWT.git

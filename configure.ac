@@ -17,7 +17,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-AC_INIT([meteosatlib], [1.10], [enrico@enricozini.org])
+AC_INIT([meteosatlib], [1.11], [enrico@enricozini.org])
 AC_CONFIG_SRCDIR([configure.ac])
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE([foreign subdir-objects nostdinc])
@@ -171,12 +171,6 @@ fi
 enable_grib=$have_gribapi
 
 dnl --------------------------------------------------------------------
-dnl Checks for typedefs, structures, and compiler characteristics.
-
-dnl --------------------------------------------------------------------
-dnl Checks for library functions.
-
-dnl --------------------------------------------------------------------
 dnl Conditional stuff.
 
 if test x"$enable_hri" == x"yes"; then
@@ -197,8 +191,6 @@ if test x"$enable_hrit" == x"yes"; then
         AC_MSG_WARN("*** hrit support disabled")
     fi
     if test x"$enable_hrit" == x"yes"; then
-        make_hrit=hrit/Subdir.mk
-        make_decompress=decompress/Subdir.mk
 	AC_DEFINE([HAVE_HRIT], 1, [XRIT functions are available])
 	AC_DEFINE([MSAT_HAVE_HRIT], 1, [XRIT functions are available])
     fi
@@ -208,10 +200,6 @@ if test x"$enable_thornsds_db1" == x"yes"; then
     if ! test x"$have_libnetcdf" = x"yes" ; then
         enable_thornsds_db1="no"
         AC_MSG_WARN("*** thornsds_db1 support disabled")
-    fi
-    if test x"$enable_thornsds_db1" == x"yes"; then
-        make_thornsds_db1=thornsds_db1/Subdir.mk
-        make_decompress=decompress/Subdir.mk
     fi
 fi
 

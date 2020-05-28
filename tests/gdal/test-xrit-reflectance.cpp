@@ -25,7 +25,7 @@ void Tests::register_tests()
 
 // Test opening channel 1 (VIS 0.6, with reflectance)
 add_method("vis06", []{
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG2:VIS006:200807150900");
+    std::unique_ptr<GDALDataset> dataset = wcallchecked(gdal::open_ro("H:MSG2:VIS006:200807150900"));
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
 
@@ -33,19 +33,19 @@ add_method("vis06", []{
     wassert(actual(dataset->GetRasterCount()) == 1);
 
     // x:2000,y:3400
-    GDALRasterBand* rb = dataset->GetRasterBand(1);
+    GDALRasterBand* rb = wcallchecked(dataset->GetRasterBand(1));
     uint16_t val;
     wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 96);
 
-    unique_ptr<GDALDataset> datasetr = gdal::open_ro("H:MSG2:VIS006r:200807150900");
+    std::unique_ptr<GDALDataset> datasetr = wcallchecked(gdal::open_ro("H:MSG2:VIS006r:200807150900"));
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(datasetr->GetDriver()))) == "MsatXRIT");
 
     // Check that we have the real and the virtual raster bands
     wassert(actual(datasetr->GetRasterCount()) == 1);
 
-    rb = datasetr->GetRasterBand(1);
+    rb = wcallchecked(datasetr->GetRasterBand(1));
     float valr;
     wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0)) == CE_None);
     wassert(actual((double)valr).almost_equal(25.9648, 3));
@@ -116,7 +116,7 @@ add_method("new_vis06", []{
     wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 96);
 
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "reflectance");
     unique_ptr<GDALDataset> datasetr = gdal::open_ro("H:MSG2:VIS006:200807150900", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -135,7 +135,7 @@ add_method("new_vis06", []{
 // Test opening channel 4 (IR 0.39), computing julian day
 add_method("new_ir039_jday", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "jday");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -153,7 +153,7 @@ add_method("new_ir039_jday", []{
 // Test opening channel 4 (IR 0.39), computing satellite zenith angle
 add_method("new_ir039_sat_za", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "sat_za");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -171,7 +171,7 @@ add_method("new_ir039_sat_za", []{
 // Test opening channel 4 (IR 0.39), computing cosine of solar zenith angle
 add_method("new_ir039_cos_sol_za", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "cos_sol_za");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -190,7 +190,7 @@ add_method("new_ir039_cos_sol_za", []{
 add_method("new_ir039_missing", []{
     only_on_gdal2();
     try {
-        CPLStringList opts(nullptr);
+        CPLStringList opts((char**)nullptr);
         opts.SetNameValue("MSAT_COMPUTE", "reflectance");
         unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
         wassert(actual(false).istrue());
@@ -214,7 +214,7 @@ add_method("new_ir039_vrt_reflectance", []{
 // Test opening channel 12 (HRV, with reflectance)
 add_method("new_hrv", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "reflectance");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:HRV:200611141200", opts);
     wassert(actual(dataset.get() != 0).istrue());

@@ -5,6 +5,7 @@
 #include <msat/gdal/dataset.h>
 #include <msat/utils/tests.h>
 #include <memory>
+#include <cassert>
 
 namespace msat {
 namespace tests {
@@ -20,14 +21,16 @@ std::unique_ptr<GDALDataset> open_ro(const std::string& name, const char* const*
 static inline int32_t read_int32(GDALRasterBand* rb, int x, int y)
 {
     int32_t res;
-    rb->RasterIO(GF_Read, x, y, 1, 1, &res, 1, 1, GDT_Int32, 0, 0);
+    CPLErr err = rb->RasterIO(GF_Read, x, y, 1, 1, &res, 1, 1, GDT_Int32, 0, 0);
+    assert(err == CE_None);
     return res;
 }
 
 static inline float read_float32(GDALRasterBand* rb, int x, int y)
 {
     float res;
-    rb->RasterIO(GF_Read, x, y, 1, 1, &res, 1, 1, GDT_Float32, 0, 0);
+    CPLErr err = rb->RasterIO(GF_Read, x, y, 1, 1, &res, 1, 1, GDT_Float32, 0, 0);
+    assert(err == CE_None);
     return res;
 }
 
