@@ -31,9 +31,9 @@ Installation instructions
   For MSG data decompression, You need the EUMETSAT source code for the
   decompression library for Wavelet, JPEG and T4 images.
   
-  To get it, please download the source code from
-  https://gitlab.eumetsat.int/open-source/PublicDecompWT and put the resulting
-  PublicDecompWT.zip file under the directory "decompress".
+  The source is distributed at https://gitlab.eumetsat.int/open-source/PublicDecompWT
+  and is set up as a git submodule here. Use `git checkout --recurse-submodules` to
+  obtain the sources.
 
 Besides the optional PublicDecompWT.zip requisite described above, meteosatlib
 is a standard autotools package. See the INSTALL file for detailed
@@ -48,8 +48,7 @@ instructions, which generally can be summarised as tue usual:
 Package contents
 ----------------
 
-decompress/  put PublicDecompWT.zip here. The directory contains scripts and
-             patches to convince it to build.
+decompress/  obtain and build the PublicDecompWT library needed to decode HRIT.
 
 msat/        the low-level meteosatlib library. It contains functions to
              directly access all supported formats.
