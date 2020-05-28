@@ -116,7 +116,7 @@ add_method("new_vis06", []{
     wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 96);
 
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "reflectance");
     unique_ptr<GDALDataset> datasetr = gdal::open_ro("H:MSG2:VIS006:200807150900", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -135,7 +135,7 @@ add_method("new_vis06", []{
 // Test opening channel 4 (IR 0.39), computing julian day
 add_method("new_ir039_jday", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "jday");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -153,7 +153,7 @@ add_method("new_ir039_jday", []{
 // Test opening channel 4 (IR 0.39), computing satellite zenith angle
 add_method("new_ir039_sat_za", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "sat_za");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -171,7 +171,7 @@ add_method("new_ir039_sat_za", []{
 // Test opening channel 4 (IR 0.39), computing cosine of solar zenith angle
 add_method("new_ir039_cos_sol_za", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "cos_sol_za");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
@@ -190,7 +190,7 @@ add_method("new_ir039_cos_sol_za", []{
 add_method("new_ir039_missing", []{
     only_on_gdal2();
     try {
-        CPLStringList opts(nullptr);
+        CPLStringList opts((char**)nullptr);
         opts.SetNameValue("MSAT_COMPUTE", "reflectance");
         unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
         wassert(actual(false).istrue());
@@ -214,7 +214,7 @@ add_method("new_ir039_vrt_reflectance", []{
 // Test opening channel 12 (HRV, with reflectance)
 add_method("new_hrv", []{
     only_on_gdal2();
-    CPLStringList opts(nullptr);
+    CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "reflectance");
     unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:HRV:200611141200", opts);
     wassert(actual(dataset.get() != 0).istrue());
