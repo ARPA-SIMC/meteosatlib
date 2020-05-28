@@ -4,6 +4,9 @@
 
 * Updated PublicDecompWT handling now that the code is free and published at
   https://gitlab.eumetsat.int/open-source/PublicDecompWT (#14)
+   - Build with PublicDecompWT bundled as a git submodule
+   - Build with system-installed PublicDecompWT using
+     `./configure --with-system-pdwt`
 * Fixed an issue with new compilers (#10)
 
 ## New in version 1.10
