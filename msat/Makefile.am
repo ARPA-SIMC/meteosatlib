@@ -174,6 +174,7 @@ libmsat_la_SOURCES += \
     xrit/dataaccess.cpp \
     xrit/fileaccess.cpp
 
+if BUNDLED_PDWT
 libmsat_la_CPPFLAGS += \
     -I$(top_builddir)/decompress/PublicDecompWT/COMP/Inc \
     -I$(top_builddir)/decompress/PublicDecompWT/COMP/JPEG/Inc \
@@ -183,6 +184,11 @@ libmsat_la_CPPFLAGS += \
 
 libmsat_la_LIBADD += \
     $(top_builddir)/decompress/libpublicdecompwt.la
+else
+libmsat_la_CPPFLAGS += $(PDWT_CFLAGS)
+libmsat_la_LIBADD += $(PDWT_LIBS)
+endif
+
 endif
 
 if MSG_NATIVE
