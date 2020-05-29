@@ -313,7 +313,7 @@ struct CreateGRIB
         const char *stype = osr.GetAttrValue("PROJECTION");
         if (!stype)
         {
-            CPLError(CE_Failure, CPLE_AppDefined, "GRIB for satellites requires a " SRS_PT_GEOSTATIONARY_SATELLITE " projection, but we have %s", stype);
+            CPLError(CE_Failure, CPLE_AppDefined, "Failed reading PROJECTION attribute or attribute is missing");
             return false;
         }
         if (osr.GetProjParm(SRS_PP_SATELLITE_HEIGHT) != ORBIT_RADIUS_FOR_GDAL)
