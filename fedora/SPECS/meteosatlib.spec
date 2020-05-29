@@ -1,15 +1,13 @@
 Name:           meteosatlib
 Version:        1.11
-Release:        1
+Release:        1%{dist}
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
 License:        GPL
 URL:            https://github.com/ARPA-SIMC/meteosatlib
-Source0:        %{name}-%{version}.tar.gz
-Source1:        PublicDecompWT.zip
-NoSource:       1
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source0:        https://github.com/arpa-simc/%{name}/archive/v%{version}-%{releaseno}.tar.gz#/%{srcarchivename}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 BuildRequires:  netcdf-cxx-devel
 BuildRequires:  ImageMagick-c++-devel
@@ -67,13 +65,8 @@ Summary:  	Read, write, convert and display raster satellite images
   - msat-view: an interactive tool to zoom into satellite images and
     georeference points and areas
 
-
-
 %prep
-%setup -q
-test -f %{SOURCE1} \
-    && ln -s %{SOURCE1} decompress/ \
-    || echo " *** WARNING: source file not found: %{SOURCE1}"
+%setup -q -n %{srcarchivename}
 
 %build
 
@@ -91,13 +84,16 @@ test -f %{SOURCE1} \
 #mv $RPM_BUILD_ROOT/usr/lib64/gdalplugins/1.7 $RPM_BUILD_ROOT/usr/lib/gdalplugins
 ## ...and REMBEMBER to change "%files gdal" accordingly
 
+autoreconf -ifv
 %configure --with-system-pdwt
+%make_build
 
-make %{?_smp_mflags}
+%check
+make check
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%makeinstall
+%make_install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -160,6 +156,7 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 * Fri May 29 2020 Daniele Branchini <dbranchini@arpae.it> - 1.11-1
 - Updated with free version of PublicDecompWT (#14)
 - Fixed issues with new compilers (#10)
+- Added make check
 
 * Fri May  8 2020 Daniele Branchini <dbranchini@arpae.it> - 1.10-1
 - fixes for gdal 3

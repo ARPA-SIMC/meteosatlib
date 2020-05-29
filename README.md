@@ -1,6 +1,16 @@
 Meteosatlib
 ===============================================================
 
+[![Build Status](https://badges.herokuapp.com/travis/ARPA-SIMC/meteosatlib?branch=master&env=DOCKER_IMAGE=centos:7&label=centos7)](https://travis-ci.org/ARPA-SIMC/meteosatlib)
+[![Build Status](https://badges.herokuapp.com/travis/ARPA-SIMC/meteosatlib?branch=master&env=DOCKER_IMAGE=centos:8&label=centos8)](https://travis-ci.org/ARPA-SIMC/meteosatlib)
+[![Build Status](https://badges.herokuapp.com/travis/ARPA-SIMC/meteosatlib?branch=master&env=DOCKER_IMAGE=fedora:30&label=fedora30)](https://travis-ci.org/ARPA-SIMC/meteosatlib)
+[![Build Status](https://badges.herokuapp.com/travis/ARPA-SIMC/meteosatlib?branch=master&env=DOCKER_IMAGE=fedora:31&label=fedora31)](https://travis-ci.org/ARPA-SIMC/meteosatlib)
+[![Build Status](https://badges.herokuapp.com/travis/ARPA-SIMC/meteosatlib?branch=master&env=DOCKER_IMAGE=fedora:32&label=fedora32)](https://travis-ci.org/ARPA-SIMC/meteosatlib)
+[![Build Status](https://badges.herokuapp.com/travis/ARPA-SIMC/meteosatlib?branch=master&env=DOCKER_IMAGE=fedora:rawhide&label=fedorarawhide)](https://travis-ci.org/ARPA-SIMC/meteosatlib)
+
+[![Build Status](https://copr.fedorainfracloud.org/coprs/simc/stable/package/meteosatlib/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/simc/stable/package/meteosatlib/)
+
+
 Introduction
 ------------
 
@@ -35,7 +45,7 @@ Installation instructions
   and is set up as a git submodule here. Use `git checkout --recurse-submodules` to
   obtain the sources.
 
-Besides the optional PublicDecompWT.zip requisite described above, meteosatlib
+Besides PublicDecompWT requisite described above, meteosatlib
 is a standard autotools package. See the INSTALL file for detailed
 instructions, which generally can be summarised as tue usual:
 
@@ -48,19 +58,17 @@ instructions, which generally can be summarised as tue usual:
 Package contents
 ----------------
 
-decompress/  obtain and build the PublicDecompWT library needed to decode HRIT.
-
-msat/        the low-level meteosatlib library. It contains functions to
+`msat/`        the low-level meteosatlib library. It contains functions to
              directly access all supported formats.
 
-gdal/        the GDAL plugin sources, which implement GDAL drivers using the
+`gdal/`        the GDAL plugin sources, which implement GDAL drivers using the
              low-level meteosatlib library.
 
-tests/       unit tests.
+`tests/`       unit tests.
 
-tools/       command line tools using the library.
+`tools/`       command line tools using the library.
 
-examples/    example code using the low-level libraries and the GDAL plugin.
+`examples/`    example code using the low-level libraries and the GDAL plugin.
 
 
 License
