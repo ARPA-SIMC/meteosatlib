@@ -1,14 +1,15 @@
-%global releaseno 1
+# Note: define srcarchivename in Travis build only.
+%{!?srcarchivename: %global srcarchivename %{name}-%{version}-%{release}}
 
 Name:           meteosatlib
 Version:        1.11
-Release:        %{releaseno}%{dist}
+Release:        1%{dist}
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
 License:        GPL
 URL:            https://github.com/ARPA-SIMC/meteosatlib
-Source0:        https://github.com/arpa-simc/%{name}/archive/v%{version}-%{releaseno}.tar.gz#/%{srcarchivename}.tar.gz
+Source0:        https://github.com/arpa-simc/%{name}/archive/v%{version}-%{release}.tar.gz#/%{srcarchivename}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 BuildRequires:  libtool
