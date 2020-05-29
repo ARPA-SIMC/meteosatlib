@@ -30,7 +30,7 @@ BuildRequires:  dos2unix
 BuildRequires:  help2man
 BuildRequires:  PublicDecompWT-devel
 BuildRequires:  eccodes-devel
-BuildRequires: %{python3_vers}-devel
+BuildRequires: %{python3_vers}
 
 Vendor:         Enrico Zini <enrico@enricozini.org> 
 Packager:       Daniele Branchini <dbranchini@arpae.it>
