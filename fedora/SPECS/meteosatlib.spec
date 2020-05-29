@@ -12,6 +12,14 @@ URL:            https://github.com/ARPA-SIMC/meteosatlib
 Source0:        https://github.com/arpa-simc/%{name}/archive/v%{version}-%{release}.tar.gz#/%{srcarchivename}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
+%if 0%{?rhel} == 7
+%define python3_vers python36
+# to have python 3.6 interpreter
+BuildRequires: python3-rpm-macros >= 3-23
+%else
+%define python3_vers python3
+%endif
+
 BuildRequires:  libtool
 BuildRequires:  gcc-c++
 BuildRequires:  netcdf-cxx-devel
@@ -22,6 +30,7 @@ BuildRequires:  dos2unix
 BuildRequires:  help2man
 BuildRequires:  PublicDecompWT-devel
 BuildRequires:  eccodes-devel
+BuildRequires: %{python3_vers}-devel
 
 Vendor:         Enrico Zini <enrico@enricozini.org> 
 Packager:       Daniele Branchini <dbranchini@arpae.it>
@@ -116,7 +125,7 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 %files
 %doc AUTHORS ChangeLog LICENSE INSTALL
-%doc PublicDecompWT_LICENSE README.md
+%doc README.md
 %{_bindir}/HRI2NetCDF
 %{_bindir}/OpenMTP-IDS_debug
 %{_bindir}/OpenMTP-IDS_sector
