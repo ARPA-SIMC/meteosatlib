@@ -15,6 +15,7 @@ BuildRequires:  gdal-devel >= 1.6
 BuildRequires:  hdf5-devel > 1.8
 BuildRequires:  dos2unix
 BuildRequires:  help2man
+BuildRequires:  PublicDecompWT-devel
 
 Vendor:         Enrico Zini <enrico@enricozini.org> 
 Packager:       Daniele Branchini <dbranchini@arpae.it>
