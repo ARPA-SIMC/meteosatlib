@@ -9,6 +9,8 @@ URL:            https://github.com/ARPA-SIMC/meteosatlib
 Source0:        https://github.com/arpa-simc/%{name}/archive/v%{version}-%{releaseno}.tar.gz#/%{srcarchivename}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
+BuildRequires:  libtool
+BuildRequires:  gcc-c++
 BuildRequires:  netcdf-cxx-devel
 BuildRequires:  ImageMagick-c++-devel
 BuildRequires:  gdal-devel >= 1.6
