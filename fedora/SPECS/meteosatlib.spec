@@ -21,6 +21,7 @@ BuildRequires:  hdf5-devel > 1.8
 BuildRequires:  dos2unix
 BuildRequires:  help2man
 BuildRequires:  PublicDecompWT-devel
+BuildRequires:  eccodes-devel
 
 Vendor:         Enrico Zini <enrico@enricozini.org> 
 Packager:       Daniele Branchini <dbranchini@arpae.it>
