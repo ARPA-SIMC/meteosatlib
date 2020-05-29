@@ -297,7 +297,6 @@ AC_CONFIG_FILES([
     examples/Makefile
     tests/Makefile
     libmsat.pc
-    meteosatlib.spec
 ])
 AC_OUTPUT
 

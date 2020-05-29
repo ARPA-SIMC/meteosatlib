@@ -1,5 +1,5 @@
-Name:           @PACKAGE_NAME@
-Version:        @PACKAGE_VERSION@
+Name:           meteosatlib
+Version:        1.11
 Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
@@ -28,14 +28,6 @@ Supported: OpenMTP OpenMTP-IDS HRI HRIT/LRIT.
 
 This library is used to read Meteosat files on a PDUS receiving
 station. No decryption is performed.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-Please fill the form at
-
-   http://www.eumetsat.de/en/dps/helpdesk/tools.html
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 %package gdal
 
@@ -84,20 +76,8 @@ test -f %{SOURCE1} \
     || echo " *** WARNING: source file not found: %{SOURCE1}"
 
 %build
-configure_disable=
-@HRI_FALSE@configure_disable="$configure_disable --disable-hri"
-@HRIT_FALSE@configure_disable="$configure_disable --disable-hrit"
-@MSG_NATIVE_FALSE@configure_disable="$configure_disable --disable-msg-native"
-@OMTP_IDS_FALSE@configure_disable="$configure_disable --disable-omtp-ids"
-@OPENMTP_FALSE@configure_disable="$configure_disable --disable-openmtp"
-@THORNSDS_DB1_FALSE@configure_disable="$configure_disable --disable-thornsds_db1"
 
 %define gdal_pl_version %(gv=$(gdal-config --version); echo ${gv%.*})
-
-%if 0%{?fedora} >= 28 || 0%{?rhel} >= 8
-# seee https://github.com/ARPA-SIMC/meteosatlib/issues/10
-export CXXFLAGS="$RPM_OPT_FLAGS -Wno-error=format-truncation -Wno-error=format-overflow"
-%endif
 
 ## WARNING (GDAL < 1.8 PLUGINS PATH in RHEL/Fedora/CentOS)
 ## Gdal plugins path may vary accordingly to gdal versions and architecture:
@@ -111,8 +91,7 @@ export CXXFLAGS="$RPM_OPT_FLAGS -Wno-error=format-truncation -Wno-error=format-o
 #mv $RPM_BUILD_ROOT/usr/lib64/gdalplugins/1.7 $RPM_BUILD_ROOT/usr/lib/gdalplugins
 ## ...and REMBEMBER to change "%files gdal" accordingly
 
-
-%configure $configure_disable
+%configure --with-system-pdwt
 
 make %{?_smp_mflags}
 
@@ -178,6 +157,10 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Fri May 29 2020 Daniele Branchini <dbranchini@arpae.it> - 1.11-1
+- Updated with free version of PublicDecompWT (#14)
+- Fixed issues with new compilers (#10)
+
 * Fri May  8 2020 Daniele Branchini <dbranchini@arpae.it> - 1.10-1
 - fixes for gdal 3
 

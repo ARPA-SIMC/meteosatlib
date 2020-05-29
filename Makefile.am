@@ -14,14 +14,9 @@ SUBDIRS += gdal
 endif
 SUBDIRS += tools examples tests
 
-.PHONY: dist-rpm
-dist-rpm: distcheck
-	rpmbuild -ta $(distdir).tar.gz
-
 EXTRA_DIST = \
     config/autogen.sh \
     config/clobber \
-    $(PACKAGE_NAME).spec \
     AUTHORS \
     LICENSE \
     ChangeLog \
@@ -29,7 +24,6 @@ EXTRA_DIST = \
     README.md \
     m4/netcdf.m4 \
     libmsat.pc.in \
-    meteosatlib.spec.in \
     run-local
 
 pkgconfigdir = $(libdir)/pkgconfig
