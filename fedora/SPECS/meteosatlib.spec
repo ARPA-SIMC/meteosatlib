@@ -1,6 +1,8 @@
+%global releaseno 1
+
 Name:           meteosatlib
 Version:        1.11
-Release:        1%{dist}
+Release:        %{releaseno}%{dist}
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
