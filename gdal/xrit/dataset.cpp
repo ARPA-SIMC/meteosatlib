@@ -23,11 +23,11 @@ const char* XRITDataset::GetProjectionRef()
     return projWKT.c_str();
 }
 #else
-const char* _GetProjectionRef() {
+const char* XRITDataset::_GetProjectionRef() {
     return projWKT.c_str();
 }
 
-const OGRSpatialReference* GetSpatialRef() const {
+const OGRSpatialReference* XRITDataset::GetSpatialRef() const {
     return GetSpatialRefFromOldGetProjectionRef();
 }
 #endif
