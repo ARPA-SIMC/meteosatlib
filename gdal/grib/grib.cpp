@@ -13,6 +13,12 @@
 // FIXME: make it configurable?
 #define GRIB_META_CENTRE 98
 
+#if ECCODES_VERSION < 21700
+#define ALTITUDE_OF_THE_CAMERA_GRIB_KEY "altitudeOfTheCameraFromTheEarthSCenterMeasuredInUnitsOfTheEarth"
+#else
+#define ALTITUDE_OF_THE_CAMERA_GRIB_KEY "altitudeOfTheCameraFromTheEarthsCentreMeasuredInUnitsOfTheEarthsRadius"
+#endif
+
 using namespace std;
 
 namespace msat {
@@ -770,7 +776,7 @@ struct CreateGRIB1 : public CreateGRIB
 
         // Nr - altitude of the camera from the Earth's centre, measured in
         // units of the Earth's (equatorial)
-        grib.set_long("altitudeOfTheCameraFromTheEarthSCenterMeasuredInUnitsOfTheEarth", (long)nearbyint(SEVIRI_CAMERA_H * 1000000));
+        grib.set_long(ALTITUDE_OF_THE_CAMERA_GRIB_KEY, (long)nearbyint(SEVIRI_CAMERA_H * 1000000));
 
         int x0 = nearbyint(column_offset + gt[0] / gt[1]);
         int y0 = nearbyint(line_offset - gt[3] / -gt[5]);
