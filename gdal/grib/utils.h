@@ -31,7 +31,7 @@ static inline void checked(int error, const char* context = NULL, const char* fu
 {
     if (error != GRIB_SUCCESS)
     {
-        if (func)
+        if (context and func)
             CPLError(CE_Failure, CPLE_AppDefined, "%s %s: %s", func, context, grib_get_error_message(error));
         else if (context)
             CPLError(CE_Failure, CPLE_AppDefined, "%s: %s", context, grib_get_error_message(error));
