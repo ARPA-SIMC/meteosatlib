@@ -51,10 +51,19 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     has_sources = true;
 }
 
+#if GDAL_VERSION_MAJOR < 3
 const char* ProxyDataset::GetProjectionRef()
 {
     return projection_ref.c_str();
 }
+#else
+const char* ProxyDataset::_GetProjectionRef() {
+    return projection_ref.c_str();
+}
+const OGRSpatialReference* ProxyDataset::GetSpatialRef() const {
+    return GetSpatialRefFromOldGetProjectionRef();
+}
+#endif
 
 CPLErr ProxyDataset::GetGeoTransform(double* tr)
 {
