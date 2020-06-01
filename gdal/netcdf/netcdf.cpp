@@ -35,10 +35,20 @@ public:
         }
         virtual bool init();
 
-        virtual const char* GetProjectionRef()
+#if GDAL_VERSION_MAJOR < 3
+        virtual const char* GetProjectionRef() override
         {
                 return projWKT.c_str();
         }
+#else
+        const char* _GetProjectionRef() override {
+            return projWKT.c_str();
+        }
+
+        const OGRSpatialReference* GetSpatialRef() const override {
+            return GetSpatialRefFromOldGetProjectionRef();
+        }
+#endif
 
         virtual CPLErr GetGeoTransform(double* tr)
         {

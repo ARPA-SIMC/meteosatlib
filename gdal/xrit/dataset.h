@@ -22,7 +22,12 @@ public:
 
     virtual bool init();
 
-    virtual const char* GetProjectionRef();
+#if GDAL_VERSION_MAJOR < 3
+    virtual const char* GetProjectionRef() override;
+#else
+    const char* _GetProjectionRef() override;
+    const OGRSpatialReference* GetSpatialRef() const override;
+#endif
     virtual CPLErr GetGeoTransform(double* tr);
 
 };

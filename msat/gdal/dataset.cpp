@@ -269,7 +269,16 @@ const char* ProxyDataset::GetMetadataItem(const char *pszName, const char *pszDo
         return ds.GetMetadataItem(pszName, pszDomain);
 }
 
+#if GDAL_VERSION_MAJOR < 3
 const char* ProxyDataset::GetProjectionRef(void) { return ds.GetProjectionRef(); }
+#else
+const char* _GetProjectionRef() override {
+    return ds.GetProjectionRef();
+}
+const OGRSpatialReference* GetSpatialRef() const override {
+    return GetSpatialRefFromOldGetProjectionRef();
+}
+#endif
 CPLErr ProxyDataset::GetGeoTransform(double* d) { return ds.GetGeoTransform(d); }
 GDALDriver* ProxyDataset::GetDriver(void) { return ds.GetDriver(); }
 char** ProxyDataset::GetFileList(void) { return ds.GetFileList(); }
