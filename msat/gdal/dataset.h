@@ -123,7 +123,12 @@ public:
     virtual const char* GetMetadataItem(const char *pszName, const char *pszDomain="");
 
     // GDALDataset
-    virtual const char* GetProjectionRef(void);
+#if GDAL_VERSION_MAJOR < 3
+    virtual const char* GetProjectionRef(void) override;
+#else
+    const char* _GetProjectionRef() override;
+    const OGRSpatialReference* GetSpatialRef() const override;
+#endif
     virtual CPLErr GetGeoTransform(double*);
     virtual GDALDriver* GetDriver(void);
     virtual char** GetFileList(void);

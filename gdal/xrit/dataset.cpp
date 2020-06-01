@@ -17,10 +17,20 @@ XRITDataset::XRITDataset(const xrit::FileAccess& fa)
 {
 }
 
+#if GDAL_VERSION_MAJOR < 3
 const char* XRITDataset::GetProjectionRef()
 {
     return projWKT.c_str();
 }
+#else
+const char* XRITDataset::_GetProjectionRef() {
+    return projWKT.c_str();
+}
+
+const OGRSpatialReference* XRITDataset::GetSpatialRef() const {
+    return GetSpatialRefFromOldGetProjectionRef();
+}
+#endif
 
 CPLErr XRITDataset::GetGeoTransform(double* tr)
 {
