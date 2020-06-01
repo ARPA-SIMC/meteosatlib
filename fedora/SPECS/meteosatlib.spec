@@ -171,8 +171,11 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 %changelog
 * Fri May 29 2020 Daniele Branchini <dbranchini@arpae.it> - 1.11-1
 - Updated with free version of PublicDecompWT (#14)
-- Fixed issues with new compilers (#10)
+- Fixed issues with new compilers (#10, #16)
 - Added make check
+- Added check for python3 compilers (#17)
+- Fixed issues with gdal 3 (#19)
+- Fixed issue with eccodes key that has been renamed (#20)
 
 * Fri May  8 2020 Daniele Branchini <dbranchini@arpae.it> - 1.10-1
 - fixes for gdal 3

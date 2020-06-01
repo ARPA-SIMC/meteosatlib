@@ -7,7 +7,9 @@
    - Build with PublicDecompWT bundled as a git submodule
    - Build with system-installed PublicDecompWT using
      `./configure --with-system-pdwt`
-* Fixed an issue with new compilers (#10)
+* Fixed issues with new compilers (#10, #16)
+* Fixed issues with gdal 3 (#19)
+* Fixed issue with eccodes key that has been renamed (#20)
 
 ## New in version 1.10
 
