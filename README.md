@@ -54,6 +54,13 @@ instructions, which generally can be summarised as tue usual:
     make check # optional
     make install
 
+If you're familiar with .rpm and .deb packaging you'll find the packaging 
+files in the `debian` and `fedora` directories.
+
+Meteosatlib is also already packaged .rpm formats.
+For CentOS and Fedora, rpm files are hosted in a copr repo:
+https://copr.fedorainfracloud.org/coprs/simc/stable/
+
 
 Package contents
 ----------------
