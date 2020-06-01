@@ -275,7 +275,7 @@ const char* ProxyDataset::GetProjectionRef(void) { return ds.GetProjectionRef();
 const char* ProxyDataset::_GetProjectionRef() override {
     return ds.GetProjectionRef();
 }
-const ProxyDataset::OGRSpatialReference* GetSpatialRef() const override {
+const OGRSpatialReference* ProxyDataset::GetSpatialRef() const override {
     return GetSpatialRefFromOldGetProjectionRef();
 }
 #endif
