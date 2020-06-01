@@ -35,7 +35,7 @@ public:
     const char* _GetProjectionRef() override;
     const OGRSpatialReference* GetSpatialRef() const override;
 #endif
-        GetGeoTransform(double* tr) override;
+    CPLErr GetGeoTransform(double* tr) override;
 };
 
 class ProxyRasterBand : public GDALRasterBand
