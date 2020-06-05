@@ -3,7 +3,7 @@
 
 Name:           meteosatlib
 Version:        1.11
-Release:        1
+Release:        2
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
@@ -169,6 +169,9 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Fri Jun  5 2020 Daniele Branchini <dbranchini@arpae.it> - 1.11-2
+- Bogus release to rebuild against official gdal package for epel8
+
 * Fri May 29 2020 Daniele Branchini <dbranchini@arpae.it> - 1.11-1
 - Updated with free version of PublicDecompWT (#14)
 - Fixed issues with new compilers (#10, #16)
