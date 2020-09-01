@@ -42,13 +42,14 @@ Installation instructions
   decompression library for Wavelet, JPEG and T4 images.
   
   The source is distributed at https://gitlab.eumetsat.int/open-source/PublicDecompWT
-  and is set up as a git submodule here. Use `git checkout --recurse-submodules` to
-  obtain the sources.
+  and is set up as a git submodule here. Use `git clone --recurse-submodules
+  https://github.com/ARPA-SIMC/meteosatlib.git` to obtain the sources.
 
 Besides PublicDecompWT requisite described above, meteosatlib
 is a standard autotools package. See the INSTALL file for detailed
 instructions, which generally can be summarised as tue usual:
 
+    autoreconf -ifv
     ./configure
     make
     make check # optional
