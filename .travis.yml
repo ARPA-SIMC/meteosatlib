@@ -11,6 +11,7 @@ env:
 - DOCKER_IMAGE=fedora:31
 - DOCKER_IMAGE=fedora:32
 - DOCKER_IMAGE=fedora:rawhide
+- DOCKER_IMAGE=fedora:33
 matrix:
   allow_failures:
   - env: DOCKER_IMAGE=fedora:rawhide
