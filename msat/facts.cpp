@@ -340,6 +340,7 @@ const char* sensorName(int spacecraftID)
                 case 55: return "Seviri";
                 case 56: return "Seviri";
                 case 57: return "Seviri";
+                case 70: return "Seviri";
                 default: return "unknown";
         }
 }
@@ -352,6 +353,7 @@ const char* channelName(int spacecraftID, int channelID)
                 case 55:
                 case 56:
                 case 57:
+                case 70:
                 {
                         switch (channelID)
                         {
@@ -382,6 +384,7 @@ const char* channelUnit(int spacecraftID, int channelID)
                 case 55:
                 case 56:
                 case 57:
+                case 70:
                 {
                         switch (channelID)
                         {
@@ -412,6 +415,7 @@ const char* channelLevel(int spacecraftID, int channelID)
                 case 55:
                 case 56:
                 case 57:
+                case 70:
                 {
                         switch (channelID)
                         {
@@ -443,6 +447,7 @@ double channel_central_wavelength(int spacecraftID, int channelID)
         case 55:
         case 56:
         case 57:
+        case 70:
             switch (channelID)
             {
                 case MSG_SEVIRI_1_5_VIS_0_6:    return  0.6;
@@ -472,8 +477,16 @@ double channel_central_wave_number(int spacecraftID, int channelID)
 
 int channel_from_central_wavelength(int spacecraftID, double wavelength)
 {
-    if (spacecraftID < 55 || spacecraftID > 57)
-        throw std::runtime_error("only satellite IDs from 55, 56 and 57 are supported (got: " + to_string(spacecraftID) + ")");
+    switch (spacecraftID)
+    {
+        case 55:
+        case 56:
+        case 57:
+        case 70:
+            break;
+        default:
+            throw std::runtime_error("only satellite IDs from 55, 56 and 57 are supported (got: " + to_string(spacecraftID) + ")");
+    }
 
     int val = round(wavelength * 10.0);
     switch (val)
