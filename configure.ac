@@ -254,7 +254,7 @@ dnl --------------------------------------------------------------------
 dnl Extra defines
 
 dnl Extra warnings are good
-CXXFLAGS="-Wall $CXXFLAGS"
+CXXFLAGS="-Wall -Wextra -Wno-unused-parameter $CXXFLAGS"
 
 dnl --------------------------------------------------------------------
 dnl Substitution variables for the .pc.in files
