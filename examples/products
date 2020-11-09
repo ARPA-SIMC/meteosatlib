@@ -21,7 +21,7 @@
 
 import numpy
 import numpy.ma
-import skimage.transform
+from PIL import Image
 import math
 import gdal
 import ogr
@@ -33,6 +33,22 @@ import os.path
 import logging
 
 log = logging.getLogger(__name__)
+
+
+def to_8bit_normalized(image):
+    """
+    Return an uint8 image array containing the values in image, stretched over
+    all the uint8 domain.
+    """
+    cmin = image.min()
+    cmax = image.max()
+    scale = cmax - cmin
+    if scale == 0:
+        scale = 1
+
+    cscale = float(255) / scale
+    bytedata = (image - cmin) * cscale
+    return (bytedata.clip(0, 255) + 0.5).astype(numpy.uint8)
 
 
 def rescale(arr, imin, imax, omin, omax, out=None):
@@ -698,9 +714,9 @@ class HrvEnhancedIr(Product):
         palg = make_g(ir108)
         palb = make_b(ir108)
 
-        upscaledr = skimage.transform.resize(palr, hrvr.shape, mode="constant", anti_aliasing=True)
-        upscaledg = skimage.transform.resize(palg, hrvr.shape, mode="constant", anti_aliasing=True)
-        upscaledb = skimage.transform.resize(palb, hrvr.shape, mode="constant", anti_aliasing=True)
+        upscaledr = to_8bit_normalized(palr)
+        upscaledg = to_8bit_normalized(palg)
+        upscaledb = to_8bit_normalized(palb)
 
         hrvnorm = rescale(hrvr, hrvr.min(), hrvr.max(), 0.0, 1.0)
 
@@ -723,7 +739,7 @@ class HrvNearNatural(Product):
 
         ir016r_rescaled = (rescale(ir016r, 0,  100, 0, 1) ** (1/1.2)) * 255
 
-        r = skimage.transform.resize(ir016r_rescaled, hrvr.shape, mode="constant", anti_aliasing=True)
+        r = to_8bit_normalized(ir016r_rescaled)
         g = (rescale(hrvr,  0, 100, 0, 1) ** (1/0.9)) * 255
         b = (rescale(hrvr,  0, 100, 0, 1) ** (1/0.9)) * 255
 
@@ -756,7 +772,7 @@ class HrvSevereStorms(Product):
         # g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
         r = rescale(hrvr, 70, 100, 0, 255)
         g = rescale(hrvr, 70, 100, 0, 255)
-        b = skimage.transform.resize(blue_rescaled, hrvr.shape, mode="constant", anti_aliasing=True)
+        b = to_8bit_normalized(blue_rescaled)
 
         return r, g, b
 
