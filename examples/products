@@ -762,19 +762,9 @@ class HrvSevereStorms(Product):
 
 
 if __name__ == "__main__":
-    # Minimal imports so we are always able to print command line help
-    from optparse import OptionParser
+    import argparse
 
     VERSION = "0.2"
-
-    class Parser(OptionParser):
-        def __init__(self, *args, **kwargs):
-            OptionParser.__init__(self, *args, **kwargs)
-
-        def error(self, msg):
-            sys.stderr.write("%s: error: %s\n\n" % (self.get_prog_name(), msg))
-            self.print_help(sys.stderr)
-            sys.exit(2)
 
     default_area = "1350,1400,100,800"
     default_srcdir = "/autofs/scratch1/satope/done/"
@@ -785,70 +775,68 @@ if __name__ == "__main__":
     default_dt = default_dt.replace(minute=int(default_dt.minute / 15) * 15)
     default_dt = default_dt.strftime("%Y%m%d%H%M")
 
-    parser = Parser(usage="usage: %prog [options]",
-                    version="%prog " + VERSION,
-                    description="Generate satellite products")
-    parser.add_option("-q", "--quiet", action="store_true",
-                      help="quiet mode: only output fatal errors")
-    parser.add_option("-v", "--verbose", action="store_true",
-                      help="verbose mode")
-    parser.add_option("-s", "--srcdir", action="store", default=default_srcdir,
-                      help="directory with the HRIT data. Default: %default")
-    parser.add_option("-t", "--time", action="store", default=default_dt,
-                      help="datetime, as 'YYYYMMDDHHMM', default: %default")
-    parser.add_option("-a", "--area", metavar="x,dx,y,dy", action="store", default=default_area,
-                      help="area, default: %default")
-    parser.add_option("--shp", metavar="shapefile", action="store",
-                      help="shapefile to use for coastlines"),
-    parser.add_option("-f", "--format", metavar="fmt", action="store", default="GTiff",
-                      help="output file format. See gdalinfo --formats. Default: %default")
-    parser.add_option("-d", "--destdir", metavar="dir", action="store", default=".",
-                      help="output directory. Default: %default")
-    parser.add_option("--msat", action="store", default=default_sat,
-                      help="satellite to use. Default: %default")
-    parser.add_option("--warp", metavar="opts", action="store", default=None,
-                      help="gdalwarp options to use to warp input channels before using them."
-                           " When used, area cropping is disabled. Default: %default")
-    parser.add_option("--cachedir", metavar="dir", action="store", default=".",
-                      help="cache directory for warped channels. Default: %default")
-    parser.add_option("--products", metavar="names", action="store",
-                      help="comma separated list of products to generate. Default: all of them.")
-    (opts, args) = parser.parse_args()
+    parser = argparse.ArgumentParser(description="Generate satellite products")
+    parser.add_argument("-q", "--quiet", action="store_true",
+                        help="quiet mode: only output fatal errors")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="verbose mode")
+    parser.add_argument("-s", "--srcdir", action="store", default=default_srcdir,
+                        help="directory with the HRIT data. Default: %(default)s")
+    parser.add_argument("-t", "--time", action="store", default=default_dt,
+                        help="datetime, as 'YYYYMMDDHHMM', default: %(default)s")
+    parser.add_argument("-a", "--area", metavar="x,dx,y,dy", action="store", default=default_area,
+                        help="area, default: %(default)s")
+    parser.add_argument("--shp", metavar="shapefile", action="store",
+                        help="shapefile to use for coastlines"),
+    parser.add_argument("-f", "--format", metavar="fmt", action="store", default="GTiff",
+                        help="output file format. See gdalinfo --formats. Default: %(default)s")
+    parser.add_argument("-d", "--destdir", metavar="dir", action="store", default=".",
+                        help="output directory. Default: %(default)s")
+    parser.add_argument("--msat", action="store", default=default_sat,
+                        help="satellite to use. Default: %(default)s")
+    parser.add_argument("--warp", metavar="opts", action="store", default=None,
+                        help="gdalwarp options to use to warp input channels before using them."
+                             " When used, area cropping is disabled. Default: %(default)s")
+    parser.add_argument("--cachedir", metavar="dir", action="store", default=".",
+                        help="cache directory for warped channels. Default: %(default)s")
+    parser.add_argument("--products", metavar="names", action="store",
+                        help="comma separated list of products to generate. Default: all of them.")
+    args = parser.parse_args()
 
     # Configure logging
     LOGFORMAT = "%(asctime)-15s %(levelname)s %(message)s"
-    if opts.quiet:
+    if args.quiet:
         logging.basicConfig(level=logging.ERROR, stream=sys.stderr, format=LOGFORMAT)
-    elif opts.verbose:
+    elif args.verbose:
         logging.basicConfig(level=logging.INFO, stream=sys.stderr, format=LOGFORMAT)
     else:
         logging.basicConfig(level=logging.WARNING, stream=sys.stderr, format=LOGFORMAT)
 
     # Parse datetime
-    dt = datetime.datetime.strptime(opts.time, "%Y%m%d%H%M")
+    dt = datetime.datetime.strptime(args.time, "%Y%m%d%H%M")
 
     # Parse area
-    if opts.warp:
+    if args.warp:
         area = None
     else:
-        area = list(map(int, opts.area.split(",")))
+        area = list(map(int, args.area.split(",")))
         area = (area[0], area[2], area[1], area[3])
 
-    if opts.products:
-        products = frozenset(opts.products.split(","))
+    if args.products:
+        products = frozenset(args.products.split(","))
     else:
         products = frozenset()
 
     # Validate output format
-    if gdal.GetDriverByName(opts.format) is None:
+    if gdal.GetDriverByName(args.format) is None:
         parser.error("Invalid output format. See gdalinfo --formats")
 
     if area:
-        log.info("Reading from %s at %s x:%d, y:%d, w:%d, h:%d", opts.srcdir, dt, *area)
+        log.info("Reading from %s at %s x:%d, y:%d, w:%d, h:%d", args.srcdir, dt, *area)
     else:
-        log.info("Reading from %s at %s", opts.srcdir, dt)
+        log.info("Reading from %s at %s", args.srcdir, dt)
 
-    sat = Satellite(opts.srcdir, dt, area, opts=opts)
+    sat = Satellite(args.srcdir, dt, area, opts=args)
 
     for prod in (
                 DayNatural,
@@ -876,4 +864,4 @@ if __name__ == "__main__":
             ):
         if products and prod.__name__ not in products:
             continue
-        sat.make_product(prod, opts.format, opts.shp, destdir=opts.destdir)
+        sat.make_product(prod, args.format, args.shp, destdir=args.destdir)
