@@ -17,7 +17,7 @@ libmsatdrv_la_SOURCES = \
     reflectance/cos_sol_za.cpp \
     reflectance/sat_za.cpp \
     reflectance/jday.cpp
-libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) -Werror
+libmsatdrv_la_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
 libmsatdrv_la_CXXFLAGS =
 libmsatdrv_la_LIBADD = ../msat/libmsat.la
 

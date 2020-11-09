@@ -4,7 +4,7 @@ bin_PROGRAMS = msat
 
 dist_bin_SCRIPTS = msat-view msat-reflectance-ir39
 
-AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) $(GDAL_CFLAGS) $(MAGICKPP_CFLAGS) $(MSAT_CFLAGS) -Werror
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir) $(GDAL_CFLAGS) $(MAGICKPP_CFLAGS) $(MSAT_CFLAGS)
 
 msat_LDADD = $(GDAL_LIBS) $(MAGICKPP_LIBS) $(MSAT_LIBS) ../msat/libmsat.la
 msat_SOURCES = msat.cpp
