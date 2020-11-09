@@ -21,8 +21,7 @@
 
 import numpy
 import numpy.ma
-import scipy
-from scipy import misc
+import skimage.transform
 import math
 import gdal
 import ogr
@@ -699,9 +698,9 @@ class HrvEnhancedIr(Product):
         palg = make_g(ir108)
         palb = make_b(ir108)
 
-        upscaledr = scipy.misc.imresize(palr, hrvr.shape)
-        upscaledg = scipy.misc.imresize(palg, hrvr.shape)
-        upscaledb = scipy.misc.imresize(palb, hrvr.shape)
+        upscaledr = skimage.transform.resize(palr, hrvr.shape, mode="constant", anti_aliasing=True)
+        upscaledg = skimage.transform.resize(palg, hrvr.shape, mode="constant", anti_aliasing=True)
+        upscaledb = skimage.transform.resize(palb, hrvr.shape, mode="constant", anti_aliasing=True)
 
         hrvnorm = rescale(hrvr, hrvr.min(), hrvr.max(), 0.0, 1.0)
 
@@ -724,7 +723,7 @@ class HrvNearNatural(Product):
 
         ir016r_rescaled = (rescale(ir016r, 0,  100, 0, 1) ** (1/1.2)) * 255
 
-        r = scipy.misc.imresize(ir016r_rescaled, hrvr.shape)
+        r = skimage.transform.resize(ir016r_rescaled, hrvr.shape, mode="constant", anti_aliasing=True)
         g = (rescale(hrvr,  0, 100, 0, 1) ** (1/0.9)) * 255
         b = (rescale(hrvr,  0, 100, 0, 1) ** (1/0.9)) * 255
 
@@ -757,7 +756,7 @@ class HrvSevereStorms(Product):
         # g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
         r = rescale(hrvr, 70, 100, 0, 255)
         g = rescale(hrvr, 70, 100, 0, 255)
-        b = scipy.misc.imresize(blue_rescaled, hrvr.shape)
+        b = skimage.transform.resize(blue_rescaled, hrvr.shape, mode="constant", anti_aliasing=True)
 
         return r, g, b
 
