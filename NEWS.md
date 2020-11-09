@@ -1,5 +1,10 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.12
+
+* fixed handling of MSG-4/Meteosat 11
+* updated scipy.misc imresize with pillow
+
 ## New in version 1.11
 
 * Updated PublicDecompWT handling now that the code is free and published at
