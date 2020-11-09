@@ -24,9 +24,9 @@ import numpy.ma
 import scipy
 from scipy import misc
 import math
-import gdal, ogr
-from gdalconst import *
-from PIL import Image
+import gdal
+import ogr
+from gdalconst import GA_ReadOnly
 import datetime
 import sys
 import os
@@ -34,6 +34,7 @@ import os.path
 import logging
 
 log = logging.getLogger(__name__)
+
 
 def rescale(arr, imin, imax, omin, omax, out=None):
     """
@@ -55,6 +56,7 @@ def rescale(arr, imin, imax, omin, omax, out=None):
         res += omin
     return res
 
+
 class BaseChannel(object):
     def __init__(self, sat, name):
         self.name = name
@@ -65,19 +67,19 @@ class BaseChannel(object):
 
     @property
     def data(self):
-        if self.cached_data is None: 
+        if self.cached_data is None:
             self.cached_data = self.sat.get_array(self.name)
         return self.cached_data
 
     @property
     def reflectance(self):
-        if self.cached_refl is None: 
+        if self.cached_refl is None:
             self.cached_refl = self.sat.get_array(self.name + "r")
         return self.cached_refl
 
     @property
     def solar_mask(self):
-        if self.cached_solar_mask is None: 
+        if self.cached_solar_mask is None:
             self.cached_solar_mask = self.sat.get_solar_mask(self.name)
         return self.cached_solar_mask
 
@@ -87,9 +89,11 @@ class BaseChannel(object):
         mask = numpy.ma.mask_or(data.mask, self.solar_mask)
         return numpy.ma.array(data.data, mask=mask, fill_value=data.fill_value)
 
+
 class Channel(BaseChannel):
     # Share the same solar mask across all non-HRV channels
     cached_solar_mask = None
+
 
 class MaskedChannelMixin(object):
     @property
@@ -104,13 +108,14 @@ class MaskedChannelMixin(object):
         mask = numpy.ma.mask_or(data.mask, self.solar_mask)
         return numpy.ma.array(data.data, mask=mask, fill_value=data.fill_value)
 
+
 class MaskedChannel(MaskedChannelMixin, Channel):
     pass
+
 
 class HRVChannel(MaskedChannelMixin, BaseChannel):
     cached_solar_mask = None
 
-    
 
 class Satellite(object):
     def __init__(self, srcdir, dt, area, opts=None):
@@ -137,7 +142,8 @@ class Satellite(object):
             cache_fname = fname.replace(":", "-") + "-latlon.tif"
             cache_fname = os.path.join(self.cachedir, cache_fname)
             if not os.path.exists(cache_fname):
-                import shlex, subprocess
+                import shlex
+                import subprocess
                 opts = shlex.split(self.warp_opts)
                 cmd = ["gdalwarp", "-q", "-of", "GTiff"] + opts + [os.path.join(self.srcdir, fname), cache_fname]
                 log.info("Warping %s using '%s'...", fname, " ".join(cmd))
@@ -147,10 +153,12 @@ class Satellite(object):
                 if stderr:
                     ignore_errors = frozenset([
                         "ERROR 1: tolerance condition error",
-                        "ERROR 1: Reprojection failed, err = -20, further errors will be supressed on the transform object.",
+                        "ERROR 1: Reprojection failed, err = -20,"
+                        " further errors will be supressed on the transform object.",
                     ])
                     for line in stderr.split("\n"):
-                        if not line or line in ignore_errors: continue
+                        if not line or line in ignore_errors:
+                            continue
                         print("E:{}".format(line))
                 if retcode != 0:
                     print("gdalwarp returned {}:".format(retcode))
@@ -174,7 +182,7 @@ class Satellite(object):
     def get_solar_mask(self, channel, threshold=85):
         """
         Get a mask marking data missing when the sun is below a given angle 'threshold'.
-        
+
         Threshold is the maximum accepted angle, in degrees from the zenith
         """
         cos_sol_za = self.get_array(channel + "a")
@@ -228,10 +236,10 @@ class Satellite(object):
 
         res = maker.compute()
         if isinstance(res, tuple):
-            bs=3
+            bs = 3
             r, g, b = res
         else:
-            bs=1
+            bs = 1
             v = res
 
         # Create the output dataset. If the dataset only supports CreateCopy,
@@ -241,7 +249,6 @@ class Satellite(object):
             outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=tmpdriver, bands=bs, gdtype=gdal.GDT_Byte)
         else:
             outds = self.new_dataset(cls.BASE_CHANNEL, fname, driver=d, bands=bs, gdtype=gdal.GDT_Byte)
-
 
         if isinstance(res, tuple):
             outds.GetRasterBand(1).WriteArray(r)
@@ -258,7 +265,8 @@ class Satellite(object):
 
         return outds
 
-class Product(object):
+
+class Product:
     # Default file name (without extension)
     FNAME = "undefined"
 
@@ -268,6 +276,7 @@ class Product(object):
 
     def __init__(self, sat):
         self.sat = sat
+
 
 class DayNatural(Product):
     FNAME = "day-natural"
@@ -289,6 +298,7 @@ class DayNatural(Product):
         b = rescale(vis6r, 0, 70, 0, 255)
 
         return r, g, b
+
 
 class DaySolar(Product):
     FNAME = "day-solar"
@@ -343,6 +353,7 @@ class DayMicro(Product):
 
         return r, g, b
 
+
 class Airmass(Product):
     FNAME = "airmass"
     BASE_CHANNEL = "WV_062"
@@ -364,6 +375,7 @@ class Airmass(Product):
 
         return r, g, b
 
+
 class NightMicro(Product):
     FNAME = "night-micro"
     BASE_CHANNEL = "IR_039"
@@ -384,6 +396,7 @@ class NightMicro(Product):
 
         return r, g, b
 
+
 class H24Micro(Product):
     FNAME = "h24-micro"
     BASE_CHANNEL = "IR_087"
@@ -403,6 +416,7 @@ class H24Micro(Product):
         b = rescale(ir108,         248, 303, 0, 255)
 
         return r, g, b
+
 
 class ConvectiveStorms(Product):
     FNAME = "convective-storms"
@@ -427,6 +441,7 @@ class ConvectiveStorms(Product):
 
         return r, g, b
 
+
 class Dust(Product):
     FNAME = "dust"
     BASE_CHANNEL = "IR_087"
@@ -446,6 +461,7 @@ class Dust(Product):
         b = rescale(ir108,         261, 289, 0, 255)
 
         return r, g, b
+
 
 class VolcanicAsh(Product):
     FNAME = "volcanic-ash"
@@ -467,6 +483,7 @@ class VolcanicAsh(Product):
 
         return r, g, b
 
+
 class Vis006(Product):
     FNAME = "VIS006"
     BASE_CHANNEL = "VIS006"
@@ -478,6 +495,7 @@ class Vis006(Product):
         vis06 = self.sat.VIS006.reflectance
         v = rescale(vis06, 0, 100, 0, 255)
         return v
+
 
 class Vis008(Product):
     FNAME = "VIS008"
@@ -493,6 +511,7 @@ class Vis008(Product):
 
         return v
 
+
 class Ir016(Product):
     FNAME = "IR_016"
     BASE_CHANNEL = "IR_016"
@@ -507,6 +526,7 @@ class Ir016(Product):
 
         return v
 
+
 class Ir039(Product):
     FNAME = "IR_039"
     BASE_CHANNEL = "IR_039"
@@ -520,6 +540,7 @@ class Ir039(Product):
         v = rescale(ir039, ir039.min(), ir039.max(), 0, 255)
 
         return v
+
 
 class Ir039r(Product):
     FNAME = "IR_039r"
@@ -551,7 +572,6 @@ class Ir108(Product):
         return v
 
 
-
 class Wv62(Product):
     FNAME = "WV_062"
     BASE_CHANNEL = "WV_062"
@@ -565,6 +585,7 @@ class Wv62(Product):
         v = rescale(wv62, wv62.max(), wv62.min(), 0, 255)
 
         return v
+
 
 class Wv73(Product):
     FNAME = "WV_073"
@@ -580,6 +601,7 @@ class Wv73(Product):
 
         return v
 
+
 class Hrv(Product):
     FNAME = "HRV"
     BASE_CHANNEL = "HRV"
@@ -593,6 +615,7 @@ class Hrv(Product):
         v = rescale(hrv, 0, 100, 0, 255)
 
         return v
+
 
 class EnhancedIr(Product):
     FNAME = "enhanced-Ir"
@@ -611,7 +634,7 @@ class EnhancedIr(Product):
             palette.append([int(x.strip(",")) for x in line.split()[:3]])
 
         ir108 = self.sat.IR_108.data
-        clipped_ir108 = numpy.clip(ir108.filled(200),200,320)
+        clipped_ir108 = numpy.clip(ir108.filled(200), 200, 320)
 
         # Map ir108 to a palette
         palmin = 200
@@ -623,8 +646,8 @@ class EnhancedIr(Product):
             if val < palmin or val > palmax:
                 val -= 320
                 val *= 255.0 / float(200 - 320)
-                return  val
-            return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx];
+                return val
+            return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx]
 
         # Create mapping functions that look up the color palette
         make_r = numpy.vectorize(lambda val: bt_to_palette(val, 0))
@@ -636,6 +659,7 @@ class EnhancedIr(Product):
         palb = make_b(clipped_ir108)
 
         return palr, palg, palb
+
 
 class HrvEnhancedIr(Product):
     FNAME = "hrv-enhanced-Ir"
@@ -663,7 +687,7 @@ class HrvEnhancedIr(Product):
         def bt_to_palette(val, idx):
             if val < palmin or val > palmax:
                 return 255
-            return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx];
+            return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx]
 
         # Create mapping functions that look up the color palette
         make_r = numpy.vectorize(lambda val: bt_to_palette(val, 0))
@@ -690,9 +714,9 @@ class HrvNearNatural(Product):
 
     def compute(self):
         """
-	Red   IR 1.6 (upscaled) 0 ... 100%   1.2  1.0
-	Green HRV               0 ... 100%   0.9  1.0
-	Blue  HRV               0 ... 100%   0.9  1.0
+        Red   IR 1.6 (upscaled) 0 ... 100%   1.2  1.0
+        Green HRV               0 ... 100%   0.9  1.0
+        Blue  HRV               0 ... 100%   0.9  1.0
         """
 
         hrvr = self.sat.HRV.reflectance
@@ -706,20 +730,21 @@ class HrvNearNatural(Product):
 
         return r, g, b
 
+
 class HrvSevereStorms(Product):
     FNAME = "hrv-severe-storms"
     BASE_CHANNEL = "HRV"
 
     def compute(self):
         """
-	Red   HRV                   70 ... 100%   1.7  1.0
-	Green HRV                   70 ... 100%   1.7  1.0
-	Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
+        Red   HRV                   70 ... 100%   1.7  1.0
+        Green HRV                   70 ... 100%   1.7  1.0
+        Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
 
         alt:
-	Red   HRV                   70 ... 100%   1.0  1.0
-	Green HRV                   70 ... 100%   1.0  1.0
-	Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
+        Red   HRV                   70 ... 100%   1.0  1.0
+        Green HRV                   70 ... 100%   1.0  1.0
+        Blue  IR10.8-IR3.9 (upsc.) -60 ... -40K   2.0  1.0
         """
 
         hrvr = self.sat.HRV.reflectance
@@ -728,21 +753,20 @@ class HrvSevereStorms(Product):
 
         blue_rescaled = (rescale(ir108 - ir039,  -60,  -40, 0, 1) ** (1/2.0)) * 255
 
-        #r = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
-        #g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
+        # r = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
+        # g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
         r = rescale(hrvr, 70, 100, 0, 255)
         g = rescale(hrvr, 70, 100, 0, 255)
         b = scipy.misc.imresize(blue_rescaled, hrvr.shape)
 
         return r, g, b
 
+
 if __name__ == "__main__":
     # Minimal imports so we are always able to print command line help
     from optparse import OptionParser
-    import sys
-    import warnings
 
-    VERSION="0.2"
+    VERSION = "0.2"
 
     class Parser(OptionParser):
         def __init__(self, *args, **kwargs):
@@ -763,7 +787,7 @@ if __name__ == "__main__":
     default_dt = default_dt.strftime("%Y%m%d%H%M")
 
     parser = Parser(usage="usage: %prog [options]",
-                    version="%prog "+ VERSION,
+                    version="%prog " + VERSION,
                     description="Generate satellite products")
     parser.add_option("-q", "--quiet", action="store_true",
                       help="quiet mode: only output fatal errors")
@@ -774,7 +798,7 @@ if __name__ == "__main__":
     parser.add_option("-t", "--time", action="store", default=default_dt,
                       help="datetime, as 'YYYYMMDDHHMM', default: %default")
     parser.add_option("-a", "--area", metavar="x,dx,y,dy", action="store", default=default_area,
-                      help="datetime, as 'YYYYMMDDHHMM', default: %default")
+                      help="area, default: %default")
     parser.add_option("--shp", metavar="shapefile", action="store",
                       help="shapefile to use for coastlines"),
     parser.add_option("-f", "--format", metavar="fmt", action="store", default="GTiff",
