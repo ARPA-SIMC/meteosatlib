@@ -21,7 +21,6 @@
 
 import numpy
 import numpy.ma
-from PIL import Image
 import math
 import gdal
 import ogr
@@ -31,24 +30,45 @@ import sys
 import os
 import os.path
 import logging
+# Go way too much out of our way to get a good image resize function, see #23 and #26.
+# Eventually, settling on skimage is likely the thing to do, and we could
+# probably use its image processing functions elsewhere, too
+try:
+    import skimage.transform
+    import skimage.util
+
+    def resize_uint8_image(image, shape):
+        """
+        Resize an uint8 image to the given shape.
+        """
+        image = skimage.transform.resize(image, shape, mode="constant", anti_aliasing=True)
+        image = skimage.util.img_as_ubyte(image)
+        return image
+except ModuleNotFoundError:
+    try:
+        import scipy.misc
+        HAS_IMRESIZE = hasattr(scipy.misc, "imresize")
+    except ModuleNotFoundError:
+        HAS_IMRESIZE = False
+
+    if HAS_IMRESIZE:
+        def resize_uint8_image(image, shape):
+            """
+            Resize an uint8 image to the given shape.
+            """
+            return scipy.misc.imresize(image, shape)
+    else:
+        def resize_uint8_image(image, shape):
+            """
+            Resize an uint8 image to the given shape.
+            """
+            from PIL import Image
+            image = Image.frombytes('L', (image.shape[1], image.shape[0]), image.tostring())
+            image = image.resize((shape[1], shape[0]), resample=2)
+            return numpy.array(image)
+
 
 log = logging.getLogger(__name__)
-
-
-def to_8bit_normalized(image):
-    """
-    Return an uint8 image array containing the values in image, stretched over
-    all the uint8 domain.
-    """
-    cmin = image.min()
-    cmax = image.max()
-    scale = cmax - cmin
-    if scale == 0:
-        scale = 1
-
-    cscale = float(255) / scale
-    bytedata = (image - cmin) * cscale
-    return (bytedata.clip(0, 255) + 0.5).astype(numpy.uint8)
 
 
 def rescale(arr, imin, imax, omin, omax, out=None):
@@ -705,18 +725,18 @@ class HrvEnhancedIr(Product):
             return palette[int((paldiff - (val - palmin)) * 255 / paldiff)][idx]
 
         # Create mapping functions that look up the color palette
-        make_r = numpy.vectorize(lambda val: bt_to_palette(val, 0))
-        make_g = numpy.vectorize(lambda val: bt_to_palette(val, 1))
-        make_b = numpy.vectorize(lambda val: bt_to_palette(val, 2))
+        make_r = numpy.vectorize(lambda val: bt_to_palette(val, 0), otypes=[numpy.uint8])
+        make_g = numpy.vectorize(lambda val: bt_to_palette(val, 1), otypes=[numpy.uint8])
+        make_b = numpy.vectorize(lambda val: bt_to_palette(val, 2), otypes=[numpy.uint8])
 
         ir108 = ir108.filled(ir108.min())
         palr = make_r(ir108)
         palg = make_g(ir108)
         palb = make_b(ir108)
 
-        upscaledr = to_8bit_normalized(palr)
-        upscaledg = to_8bit_normalized(palg)
-        upscaledb = to_8bit_normalized(palb)
+        upscaledr = resize_uint8_image(palr, shape=hrvr.shape)
+        upscaledg = resize_uint8_image(palg, shape=hrvr.shape)
+        upscaledb = resize_uint8_image(palb, shape=hrvr.shape)
 
         hrvnorm = rescale(hrvr, hrvr.min(), hrvr.max(), 0.0, 1.0)
 
@@ -737,9 +757,9 @@ class HrvNearNatural(Product):
         hrvr = self.sat.HRV.reflectance
         ir016r = self.sat.IR_016.reflectance
 
-        ir016r_rescaled = (rescale(ir016r, 0,  100, 0, 1) ** (1/1.2)) * 255
+        ir016r_rescaled = ((rescale(ir016r, 0,  100, 0, 1) ** (1/1.2)) * 255).astype(numpy.uint8)
 
-        r = to_8bit_normalized(ir016r_rescaled)
+        r = resize_uint8_image(ir016r_rescaled, shape=hrvr.shape)
         g = (rescale(hrvr,  0, 100, 0, 1) ** (1/0.9)) * 255
         b = (rescale(hrvr,  0, 100, 0, 1) ** (1/0.9)) * 255
 
@@ -766,13 +786,13 @@ class HrvSevereStorms(Product):
         ir108 = self.sat.IR_108.data
         ir039 = self.sat.IR_039.data
 
-        blue_rescaled = (rescale(ir108 - ir039,  -60,  -40, 0, 1) ** (1/2.0)) * 255
+        blue_rescaled = ((rescale(ir108 - ir039,  -60,  -40, 0, 1) ** (1/2.0)) * 255).astype(numpy.uint8)
 
         # r = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
         # g = (rescale(hrvr, 70, 100, 0, 1) ** (1/1.7)) * 255
         r = rescale(hrvr, 70, 100, 0, 255)
         g = rescale(hrvr, 70, 100, 0, 255)
-        b = to_8bit_normalized(blue_rescaled)
+        b = resize_uint8_image(blue_rescaled, shape=hrvr.shape)
 
         return r, g, b
 
