@@ -1,9 +1,13 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.13
+
+* multiple image rescale options in products script (#26)
+
 ## New in version 1.12
 
-* fixed handling of MSG-4/Meteosat 11
-* updated scipy.misc imresize with pillow
+* fixed handling of MSG-4/Meteosat 11 (#24)
+* updated scipy.misc imresize with pillow (#23)
 
 ## New in version 1.11
 

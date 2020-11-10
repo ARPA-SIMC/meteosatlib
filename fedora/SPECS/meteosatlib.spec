@@ -2,7 +2,7 @@
 %{!?srcarchivename: %global srcarchivename %{name}-%{version}-%{release}}
 
 Name:           meteosatlib
-Version:        1.12
+Version:        1.13
 Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
@@ -169,9 +169,12 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Tue Nov 10 2020 Daniele Branchini <dbranchini@arpae.it> - 1.13-1
+- multiple image rescale options in products script (#26)
+
 * Mon Nov  9 2020 Daniele Branchini <dbranchini@arpae.it> - 1.12-1
-- fixed handling of MSG-4/Meteosat 11
-- updated scipy.misc imresize with pillow
+- fixed handling of MSG-4/Meteosat 11 (#24)
+- updated scipy.misc imresize with pillow (#23)
 
 * Fri Jun  5 2020 Daniele Branchini <dbranchini@arpae.it> - 1.11-2
 - Bogus release to rebuild against official gdal package for epel8
