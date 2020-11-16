@@ -343,14 +343,14 @@ def start_app():
 
     # Load the image right now so we know about the aspect ratio
     w = MapWidget()
-    w.load(sys.argv[1])
+    w.load(args.file)
 
     info = ImageInfo()
     w.connect("position-changed", info.on_position_changed)
     w.connect("area-changed", info.on_area_changed)
 
     win = gtk.Window()
-    win.set_title(sys.argv[1])
+    win.set_title(args.file)
     win.connect('delete-event', gtk.main_quit)
     win.set_size_request(500, 400)
 
@@ -385,24 +385,15 @@ def start_app():
     gtk.main()
 
 
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Interactively display a satellite image.")
+    parser.add_argument("file", help="file to display")
+    args = parser.parse_args()
+
+    start_app(args)
+
+
 if __name__ == "__main__":
-    import sys
-    from optparse import OptionParser
-
-    class Parser(OptionParser):
-        "Command line parser"
-        def __init__(self, *args, **kwargs):
-            OptionParser.__init__(self, *args, **kwargs)
-
-        def error(self, msg):
-            sys.stderr.write("%s: error: %s\n\n" % (self.get_prog_name(), msg))
-            self.print_help(sys.stderr)
-            sys.exit(2)
-
-    parser = Parser(usage="usage: %prog [options] file",
-                    version="%prog " + VERSION,
-                    description="Interactively display a satellite image.")
-
-    (opts, args) = parser.parse_args()
-
-    start_app()
+    main()
