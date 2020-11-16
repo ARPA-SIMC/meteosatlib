@@ -73,8 +73,8 @@ def start_app(args):
             # Geotransform matrix to georeference image points
             self.geotrans = None
             # Cached image
-            # self.img: Optional[Gdk.Pixbuf] = None
-            self.img: Optional[cairo.ImageSurface] = None
+            # self.cached_img: Optional[Gdk.Pixbuf] = None
+            self.cached_img: Optional[cairo.ImageSurface] = None
             # Pending timer for an image rescale
             self.refresh_timeout = None
 #
@@ -93,7 +93,7 @@ def start_app(args):
             proj_latlon = self.proj.CloneGeogCS()
             self.to_latlon = osr.CoordinateTransformation(self.proj, proj_latlon)
             self.geotrans = self.dataset.GetGeoTransform()
-#            self.img = None
+            self.cached_img = None
             self.aspect = self.raster_band.XSize / self.raster_band.YSize
 
 #            self.paintedsize = None
@@ -122,8 +122,8 @@ def start_app(args):
             context.fill()
 
         def render_image(self, width, height):
-            if self.img:
-                return self.img
+            if self.cached_img:
+                return self.cached_img
 
             if self.zoom:
                 data = self.raster_band.ReadRaster(
@@ -171,8 +171,8 @@ def start_app(args):
 
             # print(f"min {dmin} → {min(data)}, max {dmax} → {max(data)}  [{width*height*3} {len(data)}]")
 
-            self.img = cairo.ImageSurface.create_for_data(data, cairo.Format.RGB24, width, height)
-            return self.img
+            self.cached_img = cairo.ImageSurface.create_for_data(data, cairo.Format.RGB24, width, height)
+            return self.cached_img
 
         def enforce_aspect_ratio(self, w: int, h: int) -> Tuple[int, int]:
             """
@@ -199,7 +199,7 @@ def start_app(args):
                 self.refresh_timeout = None
 
             def refresh_image():
-                self.img = None
+                self.cached_img = None
                 self.queue_draw()
                 return False
 
@@ -229,7 +229,7 @@ def start_app(args):
 #            # requested coordinates/positions
 #            if self.get_realized():
 #                self.get_window().move_resize(allocation.x, allocation.y, allocation.width, allocation.height)
-#                # self.img = None
+#                # self.cached_img = None
 #
 #        def update_rect(self, event):
 #            rx = min(self.rect_origin[0], event.x)
@@ -315,7 +315,7 @@ def start_app(args):
 #
 #        def zoom_in(self, *args):
 #            if self.rect:
-#                self.img = None
+#                self.cached_img = None
 #                x1, y1 = self.to_pixel_coords(*self.rect[:2])
 #                x2, y2 = self.to_pixel_coords(self.rect[0] + self.rect[2], self.rect[1] + self.rect[3])
 #                self.zoom = (x1, y1, x2-x1, y2-y1)
@@ -323,7 +323,7 @@ def start_app(args):
 #
 #        def zoom_out(self, *args):
 #            if self.zoom:
-#                self.img = None
+#                self.cached_img = None
 #                self.zoom = None
 #                self.queue_draw()
 
