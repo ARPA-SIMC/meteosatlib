@@ -17,7 +17,8 @@
 #
 # Author: Enrico Zini <enrico@enricozini.com>
 
-VERSION="0.3"
+VERSION = "0.3"
+
 
 def start_app():
     import gdal
@@ -29,14 +30,14 @@ def start_app():
 
     import numpy
 
-    class ImagePosition(object):
+    class ImagePosition:
         def __init__(self, px, py, lat, lon):
             self.px = px
             self.py = py
             self.lat = lat
             self.lon = lon
 
-    class ImageArea(object):
+    class ImageArea:
         def __init__(self, pos1, pos2):
             self.pos1 = pos1
             self.pos2 = pos2
@@ -46,6 +47,7 @@ def start_app():
                 "area-changed": (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (object,)),
                 "position-changed": (gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, (object,)),
         }
+
         def __init__(self):
             super(MapWidget, self).__init__()
             self.ds = None
@@ -97,12 +99,13 @@ def start_app():
             return w, h
 
         def make_img(self):
-            if self.img: return self.img
+            if self.img:
+                return self.img
             x, y, w, h = self.allocation
             w, h = self.enforce_aspect_ratio(w, h)
             print("MAKE", w, h)
 
-            #data = self.ds.ReadRaster(0, 0, self.ds.RasterXSize, self.ds.RasterYSize, w, h, gdal.GDT_Byte)
+            # data = self.ds.ReadRaster(0, 0, self.ds.RasterXSize, self.ds.RasterYSize, w, h, gdal.GDT_Byte)
             if self.zoom:
                 data = self.rb.ReadRaster(self.zoom[0], self.zoom[1], self.zoom[2], self.zoom[3], w, h, gdal.GDT_Byte)
             else:
@@ -126,11 +129,11 @@ def start_app():
 
             # In this case, we say that we want to be as big as the
             # text is, plus a little border around it.
-            #width, height = self._layout.get_size()
+            # width, height = self._layout.get_size()
             w, h = self.enforce_aspect_ratio(requisition.width, requisition.height)
 
-            requisition.width = w #// pango.SCALE + BORDER_WIDTH*4
-            requisition.height = h #// pango.SCALE + BORDER_WIDTH*4
+            requisition.width = w  # // pango.SCALE + BORDER_WIDTH*4
+            requisition.height = h  # // pango.SCALE + BORDER_WIDTH*4
 
         def do_size_allocate(self, allocation):
             # The do_size_allocate is called by when the actual size is known
@@ -200,8 +203,8 @@ def start_app():
                 ix, iy = 0, 0
                 iw = self.rb.XSize
                 ih = self.rb.YSize
-            imgx = ix + (x * iw / self.paintedsize[0]);
-            imgy = iy + (y * ih / self.paintedsize[1]);
+            imgx = ix + (x * iw / self.paintedsize[0])
+            imgy = iy + (y * ih / self.paintedsize[1])
             if imgx >= self.rb.XSize:
                 imgx = self.rb.XSize
             if imgy >= self.rb.YSize:
@@ -209,17 +212,17 @@ def start_app():
             return imgx, imgy
 
         def do_motion_notify_event(self, event):
-            x, y, w, h = self.allocation
+            # x, y, w, h = self.allocation
 
             # Extend rectangle if we are dragging
-            if event.state & gdk.BUTTON1_MASK:
+            if event.state & Gdk.ModifierType.BUTTON1_MASK:
                 self.update_rect(event)
                 self.queue_draw()
 
             # Convert to image pixels
             imgx, imgy = self.to_pixel_coords(event.x, event.y)
             lat, lon = self.georeference(imgx, imgy)
-            #print "(%d, %d) -> lat %f lon %f" % (imgx, imgy, lat, lon)
+            # print "(%d, %d) -> lat %f lon %f" % (imgx, imgy, lat, lon)
             self.emit("position-changed", ImagePosition(imgx, imgy, lat, lon))
 
             # TODO: Georeferentiate
@@ -227,8 +230,8 @@ def start_app():
 
         def georeference(self, x, y):
             # Pixel coordinates to spaceview projected coordinates
-            px = self.geotrans[0] + self.geotrans[1] * x + self.geotrans[2] * y;
-            py = self.geotrans[3] + self.geotrans[4] * x + self.geotrans[5] * y;
+            px = self.geotrans[0] + self.geotrans[1] * x + self.geotrans[2] * y
+            py = self.geotrans[3] + self.geotrans[4] * x + self.geotrans[5] * y
 
             # Projected coordinates to latlon
             lon, lat = self.to_latlon.TransformPoint(px, py)[:2]
@@ -243,7 +246,8 @@ def start_app():
             return False
 
         def do_button_release_event(self, event):
-            if not self.rect: return False
+            if not self.rect:
+                return False
             self.update_rect(event)
             self.queue_draw()
             return False
@@ -396,7 +400,7 @@ if __name__ == "__main__":
             sys.exit(2)
 
     parser = Parser(usage="usage: %prog [options] file",
-                    version="%prog "+ VERSION,
+                    version="%prog " + VERSION,
                     description="Interactively display a satellite image.")
 
     (opts, args) = parser.parse_args()
