@@ -121,6 +121,11 @@ def start_app(args):
             context.rectangle(0, 0, img.get_width(), img.get_height())
             context.fill()
 
+#            # Draw selection rectangle
+#            if self.rect:
+#                # Reset cairo transform first?
+#                self.get_window().draw_rectangle(self.get_style().fg_gc[Gtk.STATE_NORMAL], False, *self.rect)
+
         def render_image(self, width, height):
             if self.cached_img:
                 return self.cached_img
