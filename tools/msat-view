@@ -75,7 +75,8 @@ def start_app(args):
             # Cached image
             # self.img: Optional[Gdk.Pixbuf] = None
             self.img: Optional[cairo.ImageSurface] = None
-#            self.refresh_timeout = None
+            # Pending timer for an image rescale
+            self.refresh_timeout = None
 #
 #            self.rect = None
 #            self.rect_origin = None
@@ -102,34 +103,27 @@ def start_app(args):
             Called by Gtk when the widget needs to redraw itself
             """
             allocation = self.get_allocation()
-            print("draw", allocation.x, allocation.y, allocation.width, allocation.height)
 
-            img = self.render_image(allocation.width, allocation.height)
-#            w, h = self.enforce_aspect_ratio(width, height)
-#            if img.get_width() != w or img.get_height() != h:
-#                bigger = img.get_width() < w or img.get_height() < h
-#                img = img.scale_simple(w, h, Gdk.INTERP_NEAREST)
-#                if bigger:
-#                    # Only regenerate image if we need more resolution
-#                    self.schedule_refresh()
-#            self.paintedsize = (w, h)
-#            self.get_window().draw_pixbuf(
-#                    self.get_style().fg_gc[Gtk.STATE_NORMAL],
-#                    img, 0, 0, 0, 0)
+            width, height = self.enforce_aspect_ratio(allocation.width, allocation.height)
+            # Uncomment to center the image
+            # context.translate((allocation.width - width) / 2, (allocation.height - height) / 2)
+            img = self.render_image(width, height)
+            if img.get_width() != width or img.get_height() != height:
+                bigger = img.get_width() < width or img.get_height() < height
+                # Scale the context to fit the image to the widget
+                context.scale(width / img.get_width(), height / img.get_height())
+                if bigger:
+                    # Only regenerate image if we need more resolution
+                    self.schedule_refresh()
+
             # TODO: look into https://pycairo.readthedocs.io/en/latest/reference/patterns.html#class-rastersourcepattern-pattern ?  # noqa
             context.set_source(cairo.SurfacePattern(img))
-            context.rectangle(0, 0, allocation.width, allocation.height)
+            context.rectangle(0, 0, img.get_width(), img.get_height())
             context.fill()
-#
-#            if self.rect:
-#                self.get_window().draw_rectangle(self.get_style().fg_gc[Gtk.STATE_NORMAL], False, *self.rect)
 
         def render_image(self, width, height):
             if self.img:
                 return self.img
-            width, height = self.enforce_aspect_ratio(width, height)
-            # width, height = self.enforce_aspect_ratio(10, 10)
-            print("MAKE", width, height)
 
             if self.zoom:
                 data = self.raster_band.ReadRaster(
@@ -193,17 +187,24 @@ def start_app(args):
                 h = nh
             return round(w), round(h)
 
-#        def schedule_refresh(self):
-#            if self.refresh_timeout:
-#                GObject.source_remove(self.refresh_timeout)
-#                self.refresh_timeout = None
-#            self.refresh_timeout = GObject.timeout_add(1000, self.refresh_image)
-#
-#        def refresh_image(self):
-#            self.img = None
-#            self.queue_draw()
-#            return False
-#
+        def schedule_refresh(self):
+            """
+            Schedule a redraw without a cached image, after a timeout.
+
+            This is used to trigger drawing a higher resolution of the current
+            image, and to coalesce together multiple requests coming in a burst
+            """
+            if self.refresh_timeout:
+                GObject.source_remove(self.refresh_timeout)
+                self.refresh_timeout = None
+
+            def refresh_image():
+                self.img = None
+                self.queue_draw()
+                return False
+
+            self.refresh_timeout = GObject.timeout_add(1000, refresh_image)
+
 #        def do_size_request(self, requisition):
 #            # The do_size_request method Gtk+ is calling on a widget to ask
 #            # it the widget how large it wishes to be. It's not guaranteed
