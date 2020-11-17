@@ -473,7 +473,7 @@ def start_app(args):
 
     box = Gtk.Paned(orientation=Gtk.Orientation.VERTICAL)
     box.pack1(imgframe, True, False)
-    box.pack2(infoframe, True, False)
+    box.pack2(infoframe, False, False)
     box.set_position(300)
 
     vbox.pack_start(box, True, True, 0)
