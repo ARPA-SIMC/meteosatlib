@@ -176,8 +176,11 @@ def start_app(args):
                 arr = numpy.fromiter(data, dtype=numpy.uint8).reshape((height, width))
                 dmin = arr.min()
                 dmax = arr.max()
-                arr -= dmin
-                numpy.multiply(arr, (255 / (dmax - dmin)), out=arr, casting="unsafe")
+                if dmin == dmax:
+                    arr = numpy.full(arr.shape, fill_value=128, dtype=numpy.uint8)
+                else:
+                    arr -= dmin
+                    numpy.multiply(arr, (255 / (dmax - dmin)), out=arr, casting="unsafe")
                 arr = arr.repeat(4, axis=1)
                 data = bytearray(arr.tobytes())
             else:
