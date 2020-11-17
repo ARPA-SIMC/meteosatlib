@@ -50,10 +50,14 @@ def start_app(args):
             self.lat = lat
             self.lon = lon
 
-#    class ImageArea:
-#        def __init__(self, pos1, pos2):
-#            self.pos1 = pos1
-#            self.pos2 = pos2
+    class ImageArea:
+        """
+        Represented a rectangle between two points on the image, both in pixel
+        and in georeferenced coordinates
+        """
+        def __init__(self, pos1: ImagePosition, pos2: ImagePosition):
+            self.pos1 = pos1
+            self.pos2 = pos2
 
     class MapWidget(Gtk.DrawingArea):
         __gtype_name__ = "MapWidget"
@@ -83,12 +87,14 @@ def start_app(args):
             self.cached_img: Optional[cairo.ImageSurface] = None
             # Pending timer for an image rescale
             self.refresh_timeout = None
-#
-#            self.rect = None
-#            self.rect_origin = None
+
+            # Area of the current selection
+            self.selection: Optional[cairo.RectangleInt] = None
+            # (x, y) coordinates of the initial point when drawing an area
+            self.selection_origin: Optional[Tuple[int, int]] = None
             # Aspect ratio of the current image
             self.aspect: float = 1.0
-            self.zoom: Optional[Gdk.Rectangle] = None
+            self.zoom: Optional[cairo.RectangleInt] = None
 
             # self.connect("draw", self.do_draw)
 
@@ -111,26 +117,33 @@ def start_app(args):
             allocation = self.get_allocation()
 
             width, height = self.enforce_aspect_ratio(allocation.width, allocation.height)
-            # Uncomment to center the image
-            # context.translate((allocation.width - width) / 2, (allocation.height - height) / 2)
-            img = self.render_image(width, height)
-            if img.get_width() != width or img.get_height() != height:
-                bigger = img.get_width() < width or img.get_height() < height
-                # Scale the context to fit the image to the widget
-                context.scale(width / img.get_width(), height / img.get_height())
-                if bigger:
-                    # Only regenerate image if we need more resolution
-                    self.schedule_refresh()
+            try:
+                context.save()
+                # Uncomment to center the image
+                # context.translate((allocation.width - width) / 2, (allocation.height - height) / 2)
+                img = self.render_image(width, height)
+                if img.get_width() != width or img.get_height() != height:
+                    bigger = img.get_width() < width or img.get_height() < height
+                    # Scale the context to fit the image to the widget
+                    context.scale(width / img.get_width(), height / img.get_height())
+                    if bigger:
+                        # Only regenerate image if we need more resolution
+                        self.schedule_refresh()
 
-            # TODO: look into https://pycairo.readthedocs.io/en/latest/reference/patterns.html#class-rastersourcepattern-pattern ?  # noqa
-            context.set_source(cairo.SurfacePattern(img))
-            context.rectangle(0, 0, img.get_width(), img.get_height())
-            context.fill()
+                # TODO: look into https://pycairo.readthedocs.io/en/latest/reference/patterns.html#class-rastersourcepattern-pattern ?  # noqa
+                context.set_source(cairo.SurfacePattern(img))
+                context.rectangle(0, 0, img.get_width(), img.get_height())
+                context.fill()
+            finally:
+                context.restore()
 
-#            # Draw selection rectangle
-#            if self.rect:
-#                # Reset cairo transform first?
-#                self.get_window().draw_rectangle(self.get_style().fg_gc[Gtk.STATE_NORMAL], False, *self.rect)
+            # Draw selection rectangle
+            if self.selection:
+                context.rectangle(self.selection.x, self.selection.y, self.selection.width, self.selection.height)
+                context.set_line_width(1)
+                context.stroke_preserve()
+                context.set_source_rgba(1, 1, 1, 0.5)
+                context.fill()
 
         def render_image(self, width, height):
             if self.cached_img:
@@ -241,32 +254,54 @@ def start_app(args):
 #            if self.get_realized():
 #                self.get_window().move_resize(allocation.x, allocation.y, allocation.width, allocation.height)
 #                # self.cached_img = None
-#
-#        def update_rect(self, event):
-#            rx = min(self.rect_origin[0], event.x)
-#            ry = min(self.rect_origin[1], event.y)
-#            rw = abs(self.rect_origin[0] - event.x)
-#            rh = abs(self.rect_origin[1] - event.y)
-#            if rx < 0:
-#                rw += rx
-#                rx = 0
-#            if ry < 0:
-#                rh += ry
-#                ry = 0
-#            if rx + rw >= self.paintedsize[0]:
-#                rw = self.paintedsize[0] - rx - 1
-#            if ry + rh >= self.paintedsize[1]:
-#                rh = self.paintedsize[1] - ry - 1
-#            self.rect = (int(rx), int(ry), int(rw), int(rh))
-#
-#            imgx, imgy = self.to_pixel_coords(rx, ry)
-#            lat, lon = self.georeference(imgx, imgy)
-#            p1 = ImagePosition(imgx, imgy, lat, lon)
-#            imgx, imgy = self.to_pixel_coords(rx + rw, ry + rh)
-#            lat, lon = self.georeference(imgx, imgy)
-#            p2 = ImagePosition(imgx, imgy, lat, lon)
-#
-#            self.emit("area-changed", ImageArea(p1, p2))
+
+        def do_button_press_event(self, event):
+            """
+            When a button is pressed, start drawing an area
+            """
+            x = event.x
+            y = event.y
+            # x = min(self.paintedsize[0]-1, max(0, event.x))
+            # y = min(self.paintedsize[0]-1, max(0, event.y))
+            self.selection = cairo.RectangleInt(x=int(x), y=int(y), width=0, height=0)
+            self.selection_origin = (int(x), int(y))
+            self.queue_draw()
+            return False
+
+        def do_button_release_event(self, event):
+            if not self.selection:
+                return False
+            self.update_rect(event)
+            self.queue_draw()
+            return False
+
+        def update_rect(self, event):
+            ex = max(0, event.x)
+            ey = max(0, event.y)
+            rx = min(self.selection_origin[0], ex)
+            ry = min(self.selection_origin[1], ey)
+            rw = abs(self.selection_origin[0] - ex)
+            rh = abs(self.selection_origin[1] - ey)
+            # if rx < 0:
+            #     rw += rx
+            #     rx = 0
+            # if ry < 0:
+            #     rh += ry
+            #     ry = 0
+            # if rx + rw >= self.paintedsize[0]:
+            #     rw = self.paintedsize[0] - rx - 1
+            # if ry + rh >= self.paintedsize[1]:
+            #     rh = self.paintedsize[1] - ry - 1
+            self.selection = cairo.RectangleInt(x=int(rx), y=int(ry), width=int(rw), height=int(rh))
+
+            imgx, imgy = self.to_pixel_coords(rx, ry)
+            lat, lon = self.georeference(imgx, imgy)
+            p1 = ImagePosition(imgx, imgy, lat, lon)
+            imgx, imgy = self.to_pixel_coords(rx + rw, ry + rh)
+            lat, lon = self.georeference(imgx, imgy)
+            p2 = ImagePosition(imgx, imgy, lat, lon)
+
+            self.emit("area-changed", ImageArea(p1, p2))
 
         def to_pixel_coords(self, x: int, y: int) -> Tuple[int, int]:
             """
@@ -285,13 +320,13 @@ def start_app(args):
                 imgx = self.raster_band.XSize
             if imgy >= self.raster_band.YSize:
                 imgy = self.raster_band.YSize
-            return imgx, imgy
+            return int(imgx), int(imgy)
 
         def do_motion_notify_event(self, event):
-            # # Extend rectangle if we are dragging
-            # if event.state & Gdk.ModifierType.BUTTON1_MASK:
-            #     self.update_rect(event)
-            #     self.queue_draw()
+            # Extend rectangle if we are dragging
+            if event.state & Gdk.ModifierType.BUTTON1_MASK:
+                self.update_rect(event)
+                self.queue_draw()
 
             # Convert to image pixels
             imgx, imgy = self.to_pixel_coords(event.x, event.y)
@@ -313,21 +348,6 @@ def start_app(args):
             lon, lat = self.to_latlon.TransformPoint(px, py)[:2]
             return lat, lon
 
-#        def do_button_press_event(self, event):
-#            x = min(self.paintedsize[0]-1, max(0, event.x))
-#            y = min(self.paintedsize[0]-1, max(0, event.y))
-#            self.rect = (int(x), int(y), 0, 0)
-#            self.rect_origin = (int(x), int(y))
-#            self.queue_draw()
-#            return False
-#
-#        def do_button_release_event(self, event):
-#            if not self.rect:
-#                return False
-#            self.update_rect(event)
-#            self.queue_draw()
-#            return False
-#
 #        def zoom_in(self, *args):
 #            if self.rect:
 #                self.cached_img = None
@@ -396,20 +416,20 @@ def start_app(args):
             self.pos_pix.set_text("%d, %d" % (pos.x, pos.y))
             self.pos_coord.set_text(self.fmtll(pos.lat, pos.lon))
 
-#        def on_area_changed(self, mapview, a):
-#            self.area_pix.set_text("%d, %d to %d, %d" % (a.pos1.px, a.pos1.py, a.pos2.px, a.pos2.py))
-#            self.area_coord.set_text(
-#                    "%s\n%s" % (self.fmtll(a.pos1.lat, a.pos1.lon), self.fmtll(a.pos2.lat, a.pos2.lon)))
-#            latmin = min(a.pos1.lat, a.pos2.lat)
-#            latmax = max(a.pos1.lat, a.pos2.lat)
-#            lonmin = min(a.pos1.lon, a.pos2.lon)
-#            lonmax = max(a.pos1.lon, a.pos2.lon)
-#            self.area_msat_pix.set_text(
-#                    "--area='%d,%d,%d,%d'" % (a.pos1.px, a.pos2.px-a.pos1.px, a.pos1.py, a.pos2.py-a.pos1.py))
-#            self.area_msat_coord.set_text("--Area='%.4f %.4f %.4f %.4f" % (latmin, latmax, lonmin, lonmax))
-#            self.area_gdal_pix.set_text(
-#                    "%d %d %d %d" % (a.pos1.px, a.pos1.py, a.pos2.px-a.pos1.px, a.pos2.py-a.pos1.py))
-#            self.area_gdal_coord.set_text("%.4f %.4f %.4f %.4f" % (lonmin, latmin, lonmax, latmax))
+        def on_area_changed(self, mapview: MapWidget, a: ImageArea):
+            self.area_pix.set_text(f"{a.pos1.x}, {a.pos1.y} to {a.pos2.x}, {a.pos2.y}")
+            self.area_coord.set_text(
+                    f"{self.fmtll(a.pos1.lat, a.pos1.lon)}\n{self.fmtll(a.pos2.lat, a.pos2.lon)}")
+            latmin = min(a.pos1.lat, a.pos2.lat)
+            latmax = max(a.pos1.lat, a.pos2.lat)
+            lonmin = min(a.pos1.lon, a.pos2.lon)
+            lonmax = max(a.pos1.lon, a.pos2.lon)
+            self.area_msat_pix.set_text(
+                    f"--area='{a.pos1.x},{a.pos2.x-a.pos1.x},{a.pos1.y},{a.pos2.y-a.pos1.y}'")
+            self.area_msat_coord.set_text(f"--Area='{latmin:.4f} {latmax:.4f} {lonmin:.4f} {lonmax:.4f}")
+            self.area_gdal_pix.set_text(
+                    f"{a.pos1.x} {a.pos1.y} {a.pos2.x-a.pos1.x} {a.pos2.y-a.pos1.y}")
+            self.area_gdal_coord.set_text(f"{lonmin:.4f} {latmin:.4f} {lonmax:.4f} {latmax:.4f}")
 
     # Load the image right now so we know about the aspect ratio
     w = MapWidget()
@@ -417,7 +437,7 @@ def start_app(args):
 
     info = ImageInfo()
     w.connect("position-changed", info.on_position_changed)
-#    w.connect("area-changed", info.on_area_changed)
+    w.connect("area-changed", info.on_area_changed)
 
     win = Gtk.Window(title=args.file)
     win.connect('destroy', Gtk.main_quit)
