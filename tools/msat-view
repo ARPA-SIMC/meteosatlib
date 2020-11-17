@@ -135,7 +135,6 @@ def start_app(args):
                         # Only regenerate image if we need more resolution
                         self.schedule_refresh()
 
-                # TODO: look into https://pycairo.readthedocs.io/en/latest/reference/patterns.html#class-rastersourcepattern-pattern ?  # noqa
                 context.set_source(cairo.SurfacePattern(img))
                 context.rectangle(0, 0, img.get_width(), img.get_height())
                 context.fill()
@@ -236,31 +235,19 @@ def start_app(args):
 
             self.refresh_timeout = GObject.timeout_add(1000, refresh_image)
 
-#        def do_size_request(self, requisition):
-#            # The do_size_request method Gtk+ is calling on a widget to ask
-#            # it the widget how large it wishes to be. It's not guaranteed
-#            # that gtk+ will actually give this size to the widget
-#
-#            # In this case, we say that we want to be as big as the
-#            # text is, plus a little border around it.
-#            # width, height = self._layout.get_size()
-#            w, h = self.enforce_aspect_ratio(requisition.width, requisition.height)
-#
-#            requisition.width = w  # // pango.SCALE + BORDER_WIDTH*4
-#            requisition.height = h  # // pango.SCALE + BORDER_WIDTH*4
-#
-#        def do_size_allocate(self, allocation):
-#            # The do_size_allocate is called by when the actual size is known
-#            # and the widget is told how much space could actually be allocated
-#
-#            # Save the allocated space
-#            self.allocation = allocation
-#
-#            # If we're realized, move and resize the window to the
-#            # requested coordinates/positions
-#            if self.get_realized():
-#                self.get_window().move_resize(allocation.x, allocation.y, allocation.width, allocation.height)
-#                # self.cached_img = None
+        def do_get_request_mode(self):
+            # Implement height-for-width spacing, using the image aspect ratio
+            return Gtk.SizeRequestMode.HEIGHT_FOR_WIDTH
+
+        def do_get_preferred_height_for_width(self, width):
+            # Implement height-for-width spacing, using the image aspect ratio
+            res = width / self.aspect
+            return res
+
+        def do_get_preferred_width_for_height(self, height):
+            # Implement height-for-width spacing, using the image aspect ratio
+            res = height * self.aspect
+            return res
 
         def do_button_press_event(self, event):
             """
@@ -288,16 +275,6 @@ def start_app(args):
             imgx1, imgy1 = self.to_image_coords(
                     max(self.selection_origin[0], ex),
                     max(self.selection_origin[1], ey))
-            # if rx < 0:
-            #     rw += rx
-            #     rx = 0
-            # if ry < 0:
-            #     rh += ry
-            #     ry = 0
-            # if rx + rw >= self.paintedsize[0]:
-            #     rw = self.paintedsize[0] - rx - 1
-            # if ry + rh >= self.paintedsize[1]:
-            #     rh = self.paintedsize[1] - ry - 1
             self.selection = cairo.RectangleInt(x=imgx, y=imgy, width=imgx1 - imgx, height=imgy1 - imgy)
 
             lat, lon = self.georeference(imgx, imgy)
@@ -421,7 +398,6 @@ def start_app(args):
             Returns the label for the field
             """
             lbl = Gtk.Label(label=label)
-            # lbl.set_justify(Gtk.Justification.RIGHT)
             lbl.set_xalign(1.0)
             self.attach(lbl, left, top, 1, 1)
             field = Gtk.Label()
