@@ -348,19 +348,29 @@ def start_app(args):
             lon, lat = self.to_latlon.TransformPoint(px, py)[:2]
             return lat, lon
 
-#        def zoom_in(self, *args):
-#            if self.rect:
-#                self.cached_img = None
-#                x1, y1 = self.to_pixel_coords(*self.rect[:2])
-#                x2, y2 = self.to_pixel_coords(self.rect[0] + self.rect[2], self.rect[1] + self.rect[3])
-#                self.zoom = (x1, y1, x2-x1, y2-y1)
-#                self.queue_draw()
-#
-#        def zoom_out(self, *args):
-#            if self.zoom:
-#                self.cached_img = None
-#                self.zoom = None
-#                self.queue_draw()
+        def zoom_in(self, *args):
+            """
+            Zoom the image on the current selection
+            """
+            if not self.selection:
+                return
+            print("ZOOMIN")
+            # self.cached_img = None
+            # x1, y1 = self.to_pixel_coords(*self.rect[:2])
+            # x2, y2 = self.to_pixel_coords(self.rect[0] + self.rect[2], self.rect[1] + self.rect[3])
+            # self.zoom = (x1, y1, x2-x1, y2-y1)
+            # self.queue_draw()
+
+        def zoom_out(self, *args):
+            """
+            Reset zoom
+            """
+            if not self.zoom:
+                return
+            print("ZOOMOUT")
+            # self.cached_img = None
+            # self.zoom = None
+            # self.queue_draw()
 
     class ImageInfo(Gtk.Grid):
         def __init__(self):
@@ -453,8 +463,8 @@ def start_app(args):
     toolbar.insert(tb_zoom_out, 1)
     vbox.pack_start(toolbar, False, False, 0)
 
-#    tb_zoom_in.connect("clicked", w.zoom_in)
-#    tb_zoom_out.connect("clicked", w.zoom_out)
+    tb_zoom_in.connect("clicked", w.zoom_in)
+    tb_zoom_out.connect("clicked", w.zoom_out)
 
     imgframe = Gtk.Frame(label="Image")
     imgframe.add(w)
