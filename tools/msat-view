@@ -83,7 +83,6 @@ def start_app(args):
             # Geotransform matrix to georeference image points
             self.geotrans = None
             # Cached image
-            # self.cached_img: Optional[Gdk.Pixbuf] = None
             self.cached_img: Optional[cairo.ImageSurface] = None
             # Pending timer for an image rescale
             self.refresh_timeout = None
@@ -94,10 +93,11 @@ def start_app(args):
             self.selection_origin: Optional[Tuple[int, int]] = None
             # Aspect ratio of the current image
             self.aspect: float = 1.0
+            # Rectangle with the area where the image has been drawn on the
+            # device
+            self.draw_area: Optional[cairo.RectangleInt] = None
             # Zoom area in image coordinates
             self.zoom: Optional[cairo.RectangleInt] = None
-
-            # self.connect("draw", self.do_draw)
 
         def load(self, fname):
             self.dataset = gdal.Open(fname, gdal.GA_ReadOnly)
@@ -108,8 +108,7 @@ def start_app(args):
             self.geotrans = self.dataset.GetGeoTransform()
             self.cached_img = None
             self.aspect = self.raster_band.XSize / self.raster_band.YSize
-
-#            self.paintedsize = None
+            self.draw_area = None
 
         def do_draw(self, context):
             """
@@ -118,6 +117,7 @@ def start_app(args):
             allocation = self.get_allocation()
 
             width, height = self.enforce_aspect_ratio(allocation.width, allocation.height)
+            self.draw_area = cairo.RectangleInt(x=0, y=0, width=width, height=height)
             try:
                 context.save()
                 # Uncomment to center the image
@@ -311,13 +311,16 @@ def start_app(args):
             account the current panning and zooming
             """
             if self.zoom:
-                ix, iy, iw, ih = self.zoom
+                ix = self.zoom.x
+                iy = self.zoom.y
+                iw = self.zoom.width
+                ih = self.zoom.height
             else:
                 ix, iy = 0, 0
                 iw = self.raster_band.XSize
                 ih = self.raster_band.YSize
-            imgx = ix + x  # (x * iw / self.paintedsize[0])
-            imgy = iy + y  # (y * ih / self.paintedsize[1])
+            imgx = ix + (x * iw / self.draw_area.width)
+            imgy = iy + (y * ih / self.draw_area.height)
             if imgx >= self.raster_band.XSize:
                 imgx = self.raster_band.XSize
             if imgy >= self.raster_band.YSize:
@@ -329,8 +332,18 @@ def start_app(args):
             Convert image coordinates to widget coordinates, keeping into
             account the current panning and zooming
             """
-            # TODO: do it
-            return x, y
+            if self.zoom:
+                ix = self.zoom.x
+                iy = self.zoom.y
+                iw = self.zoom.width
+                ih = self.zoom.height
+            else:
+                ix, iy = 0, 0
+                iw = self.raster_band.XSize
+                ih = self.raster_band.YSize
+            x = (x - ix) * self.draw_area.width / iw
+            y = (y - iy) * self.draw_area.height / ih
+            return int(x), int(y)
 
         def do_motion_notify_event(self, event):
             # Extend rectangle if we are dragging
@@ -364,12 +377,10 @@ def start_app(args):
             """
             if not self.selection:
                 return
-            print("ZOOMIN")
-            # self.cached_img = None
-            # x1, y1 = self.to_image_coords(*self.rect[:2])
-            # x2, y2 = self.to_image_coords(self.rect[0] + self.rect[2], self.rect[1] + self.rect[3])
-            # self.zoom = (x1, y1, x2-x1, y2-y1)
-            # self.queue_draw()
+            self.cached_img = None
+            self.zoom = self.selection
+            self.selection = None
+            self.queue_draw()
 
         def zoom_out(self, *args):
             """
@@ -377,10 +388,10 @@ def start_app(args):
             """
             if not self.zoom:
                 return
-            print("ZOOMOUT")
-            # self.cached_img = None
-            # self.zoom = None
-            # self.queue_draw()
+            self.cached_img = None
+            self.zoom = None
+            self.selection = None
+            self.queue_draw()
 
     class ImageInfo(Gtk.Grid):
         def __init__(self):
