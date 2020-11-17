@@ -70,7 +70,8 @@ def start_app(args):
             super().__init__()
             self.add_events(Gdk.EventMask.POINTER_MOTION_MASK
                             | Gdk.EventMask.BUTTON_PRESS_MASK
-                            | Gdk.EventMask.BUTTON_RELEASE_MASK)
+                            | Gdk.EventMask.BUTTON_RELEASE_MASK
+                            | Gdk.EventMask.SCROLL_MASK)
 
             # GDAL dataset for the current image
             self.dataset = None
@@ -269,6 +270,52 @@ def start_app(args):
             self.queue_draw()
             return False
 
+        def clip_image_area(self, area: cairo.RectangleInt):
+            """
+            Given a rectangle in image coordinate, move it if needed so it fits
+            fully inside the image
+            """
+            if area.x < 0:
+                area.x = 0
+            if area.y < 0:
+                area.y = 0
+            if area.x + area.width > self.raster_band.XSize:
+                area.x = self.raster_band.XSize - area.width
+            if area.y + area.height > self.raster_band.YSize:
+                area.y = self.raster_band.YSize - area.height
+
+        def do_scroll_event(self, event):
+            if event.direction == Gdk.ScrollDirection.DOWN:
+                # Weel down, zoom out
+                area = self.zoom
+                if not area:
+                    return
+                cx, cy = self.to_image_coords(event.x, event.y)
+                new_width = min(area.width * 1.2, self.raster_band.XSize)
+                new_height = min(area.height * 1.2, self.raster_band.YSize)
+                area.x = cx - (cx - area.x) * (new_width / area.width)
+                area.y = cy - (cy - area.y) * (new_height / area.height)
+                area.width = new_width
+                area.height = new_height
+                self.clip_image_area(area)
+                self.set_zoom(area)
+            elif event.direction == Gdk.ScrollDirection.UP:
+                # Weel up, zoom in
+                area = self.zoom
+                if not area:
+                    area = cairo.RectangleInt(0, 0, self.raster_band.XSize, self.raster_band.YSize)
+                cx, cy = self.to_image_coords(event.x, event.y)
+                new_width = max(area.width * 0.8, 10)
+                new_height = max(area.height * 0.8, 10 / self.aspect)
+                area.x += (cx - area.x) * (1 - new_width / area.width)
+                area.y += (cy - area.y) * (1 - new_height / area.height)
+                area.width = new_width
+                area.height = new_height
+                self.clip_image_area(area)
+                self.set_zoom(area)
+            # else:
+            #     print(event.direction)
+
         def update_rect(self, event):
             ex = max(0, event.x)
             ey = max(0, event.y)
@@ -353,16 +400,24 @@ def start_app(args):
             lon, lat = self.to_latlon.TransformPoint(px, py)[:2]
             return lat, lon
 
+        def set_zoom(self, area: Optional[cairo.RectangleInt]):
+            """
+            Zoom to the given area in image coordinates
+            """
+            self.cached_img = None
+            self.zoom = area
+            self.queue_draw()
+
         def zoom_in(self, *args):
             """
             Zoom the image on the current selection
             """
             if not self.selection:
                 return
-            self.cached_img = None
-            self.zoom = self.selection
+            w, h = self.enforce_aspect_ratio(self.selection.width, self.selection.height)
+            area = cairo.RectangleInt(x=self.selection.x, y=self.selection.y, width=w, height=h)
+            self.set_zoom(area)
             self.selection = None
-            self.queue_draw()
 
         def zoom_out(self, *args):
             """
@@ -370,10 +425,8 @@ def start_app(args):
             """
             if not self.zoom:
                 return
-            self.cached_img = None
-            self.zoom = None
+            self.set_zoom(None)
             self.selection = None
-            self.queue_draw()
 
     class ImageInfo(Gtk.Grid):
         def __init__(self):
