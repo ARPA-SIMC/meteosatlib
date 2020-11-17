@@ -170,14 +170,12 @@ def start_app(args):
             if True:
                 # Numpy version, faster
                 stride = cairo.ImageSurface.format_stride_for_width(cairo.Format.RGB24, width)
-                stride_pad = stride - (width * 3)
                 arr = numpy.fromiter(data, dtype=numpy.uint8).reshape((height, width))
                 dmin = arr.min()
                 dmax = arr.max()
                 arr -= dmin
                 numpy.multiply(arr, (255 / (dmax - dmin)), out=arr, casting="unsafe")
-                arr = arr.repeat(3, axis=1)
-                arr = numpy.pad(arr, ((0, 0), (0, stride_pad)), mode='constant')
+                arr = arr.repeat(4, axis=1)
                 data = bytearray(arr.tobytes())
             else:
                 stride = cairo.ImageSurface.format_stride_for_width(cairo.Format.RGB24, width)
