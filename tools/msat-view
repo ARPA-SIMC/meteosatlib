@@ -88,12 +88,13 @@ def start_app(args):
             # Pending timer for an image rescale
             self.refresh_timeout = None
 
-            # Area of the current selection
+            # Area of the current selection, in image coordinates
             self.selection: Optional[cairo.RectangleInt] = None
-            # (x, y) coordinates of the initial point when drawing an area
+            # (x, y) of the initial point when drawing an area, in device coordinates
             self.selection_origin: Optional[Tuple[int, int]] = None
             # Aspect ratio of the current image
             self.aspect: float = 1.0
+            # Zoom area in image coordinates
             self.zoom: Optional[cairo.RectangleInt] = None
 
             # self.connect("draw", self.do_draw)
@@ -139,7 +140,11 @@ def start_app(args):
 
             # Draw selection rectangle
             if self.selection:
-                context.rectangle(self.selection.x, self.selection.y, self.selection.width, self.selection.height)
+                x, y = self.to_pixel_coords(self.selection.x, self.selection.y)
+                x1, y1 = self.to_pixel_coords(
+                        self.selection.x + self.selection.width,
+                        self.selection.y + self.selection.height)
+                context.rectangle(x, y, x1 - x, y1 - y)
                 context.set_line_width(1)
                 context.stroke_preserve()
                 context.set_source_rgba(1, 1, 1, 0.5)
@@ -259,12 +264,9 @@ def start_app(args):
             """
             When a button is pressed, start drawing an area
             """
-            x = event.x
-            y = event.y
-            # x = min(self.paintedsize[0]-1, max(0, event.x))
-            # y = min(self.paintedsize[0]-1, max(0, event.y))
+            self.selection_origin = event.x, event.y
+            x, y = self.to_image_coords(event.x, event.y)
             self.selection = cairo.RectangleInt(x=int(x), y=int(y), width=0, height=0)
-            self.selection_origin = (int(x), int(y))
             self.queue_draw()
             return False
 
@@ -278,10 +280,12 @@ def start_app(args):
         def update_rect(self, event):
             ex = max(0, event.x)
             ey = max(0, event.y)
-            rx = min(self.selection_origin[0], ex)
-            ry = min(self.selection_origin[1], ey)
-            rw = abs(self.selection_origin[0] - ex)
-            rh = abs(self.selection_origin[1] - ey)
+            imgx, imgy = self.to_image_coords(
+                    min(self.selection_origin[0], ex),
+                    min(self.selection_origin[1], ey))
+            imgx1, imgy1 = self.to_image_coords(
+                    max(self.selection_origin[0], ex),
+                    max(self.selection_origin[1], ey))
             # if rx < 0:
             #     rw += rx
             #     rx = 0
@@ -292,18 +296,16 @@ def start_app(args):
             #     rw = self.paintedsize[0] - rx - 1
             # if ry + rh >= self.paintedsize[1]:
             #     rh = self.paintedsize[1] - ry - 1
-            self.selection = cairo.RectangleInt(x=int(rx), y=int(ry), width=int(rw), height=int(rh))
+            self.selection = cairo.RectangleInt(x=imgx, y=imgy, width=imgx1 - imgx, height=imgy1 - imgy)
 
-            imgx, imgy = self.to_pixel_coords(rx, ry)
             lat, lon = self.georeference(imgx, imgy)
             p1 = ImagePosition(imgx, imgy, lat, lon)
-            imgx, imgy = self.to_pixel_coords(rx + rw, ry + rh)
-            lat, lon = self.georeference(imgx, imgy)
-            p2 = ImagePosition(imgx, imgy, lat, lon)
+            lat, lon = self.georeference(imgx1, imgy1)
+            p2 = ImagePosition(imgx1, imgy1, lat, lon)
 
             self.emit("area-changed", ImageArea(p1, p2))
 
-        def to_pixel_coords(self, x: int, y: int) -> Tuple[int, int]:
+        def to_image_coords(self, x: int, y: int) -> Tuple[int, int]:
             """
             Convert widget coordinates to image coordinates, keeping into
             account the current panning and zooming
@@ -322,6 +324,14 @@ def start_app(args):
                 imgy = self.raster_band.YSize
             return int(imgx), int(imgy)
 
+        def to_pixel_coords(self, x: int, y: int) -> Tuple[int, int]:
+            """
+            Convert image coordinates to widget coordinates, keeping into
+            account the current panning and zooming
+            """
+            # TODO: do it
+            return x, y
+
         def do_motion_notify_event(self, event):
             # Extend rectangle if we are dragging
             if event.state & Gdk.ModifierType.BUTTON1_MASK:
@@ -329,7 +339,7 @@ def start_app(args):
                 self.queue_draw()
 
             # Convert to image pixels
-            imgx, imgy = self.to_pixel_coords(event.x, event.y)
+            imgx, imgy = self.to_image_coords(event.x, event.y)
             lat, lon = self.georeference(imgx, imgy)
             # print "(%d, %d) -> lat %f lon %f" % (imgx, imgy, lat, lon)
             self.emit("position-changed", ImagePosition(imgx, imgy, lat, lon))
@@ -356,8 +366,8 @@ def start_app(args):
                 return
             print("ZOOMIN")
             # self.cached_img = None
-            # x1, y1 = self.to_pixel_coords(*self.rect[:2])
-            # x2, y2 = self.to_pixel_coords(self.rect[0] + self.rect[2], self.rect[1] + self.rect[3])
+            # x1, y1 = self.to_image_coords(*self.rect[:2])
+            # x2, y2 = self.to_image_coords(self.rect[0] + self.rect[2], self.rect[1] + self.rect[3])
             # self.zoom = (x1, y1, x2-x1, y2-y1)
             # self.queue_draw()
 
