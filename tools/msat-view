@@ -99,7 +99,10 @@ def start_app(args):
             # Zoom area in image coordinates
             self.zoom: Optional[cairo.RectangleInt] = None
 
-        def load(self, fname):
+        def load(self, fname: str):
+            """
+            Load and display an image
+            """
             self.dataset = gdal.Open(fname, gdal.GA_ReadOnly)
             self.raster_band = self.dataset.GetRasterBand(1)
             self.proj.SetFromUserInput(self.dataset.GetProjectionRef())
@@ -109,6 +112,7 @@ def start_app(args):
             self.cached_img = None
             self.aspect = self.raster_band.XSize / self.raster_band.YSize
             self.draw_area = None
+            self.queue_draw()
 
         def do_draw(self, context):
             """
@@ -317,13 +321,13 @@ def start_app(args):
                 ix, iy = 0, 0
                 iw = self.raster_band.XSize
                 ih = self.raster_band.YSize
-            imgx = ix + (x * iw / self.draw_area.width)
-            imgy = iy + (y * ih / self.draw_area.height)
+            imgx = round(ix + (x * iw / self.draw_area.width))
+            imgy = round(iy + (y * ih / self.draw_area.height))
             if imgx >= self.raster_band.XSize:
                 imgx = self.raster_band.XSize
             if imgy >= self.raster_band.YSize:
                 imgy = self.raster_band.YSize
-            return int(imgx), int(imgy)
+            return imgx, imgy
 
         def to_pixel_coords(self, x: int, y: int) -> Tuple[int, int]:
             """
@@ -339,9 +343,9 @@ def start_app(args):
                 ix, iy = 0, 0
                 iw = self.raster_band.XSize
                 ih = self.raster_band.YSize
-            x = (x - ix) * self.draw_area.width / iw
-            y = (y - iy) * self.draw_area.height / ih
-            return int(x), int(y)
+            x = round((x - ix) * self.draw_area.width / iw)
+            y = round((y - iy) * self.draw_area.height / ih)
+            return x, y
 
         def do_motion_notify_event(self, event):
             # Extend rectangle if we are dragging
@@ -352,7 +356,7 @@ def start_app(args):
             # Convert to image pixels
             imgx, imgy = self.to_image_coords(event.x, event.y)
             lat, lon = self.georeference(imgx, imgy)
-            # print "(%d, %d) -> lat %f lon %f" % (imgx, imgy, lat, lon)
+            # print(f"({imgx}, {imgy}) -> lat {lat} lon {lon}")
             self.emit("position-changed", ImagePosition(imgx, imgy, lat, lon))
 
             return False
