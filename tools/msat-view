@@ -17,6 +17,8 @@
 #
 # Author: Enrico Zini <enrico@enricozini.com>
 
+# Tip: run with GTK_DEBUG=interactive to debug widget layout
+
 from typing import Optional, Tuple
 import math
 
@@ -364,6 +366,7 @@ def start_app(args):
             field = Gtk.Label()
             field.set_xalign(0.0)
             field.set_selectable(True)
+            field.set_hexpand(True)
             self.attach(field, left + 1, top, 1, 1)
             return field
 
@@ -428,7 +431,7 @@ def start_app(args):
     infoframe = Gtk.Frame(label="Info")
     infoframe.add(info)
 
-    box = Gtk.VPaned()
+    box = Gtk.Paned(orientation=Gtk.Orientation.VERTICAL)
     box.pack1(imgframe, True, False)
     box.pack2(infoframe, True, False)
     box.set_position(300)
