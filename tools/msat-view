@@ -332,52 +332,41 @@ def start_app(args):
 #                self.zoom = None
 #                self.queue_draw()
 
-    class ImageInfo(Gtk.VBox):
+    class ImageInfo(Gtk.Grid):
         def __init__(self):
             super().__init__()
-#            table = Gtk.Table(n_rows=10, n_columns=2)
-#            table.attach(Gtk.Label(label="Position"), 0, 2, 0, 1)
-#            table.attach(Gtk.Label(label="Pixels: "), 0, 1, 1, 2)
-#            self.pos_pix = Gtk.Label()
-#            self.pos_pix.set_selectable(True)
-#            table.attach(self.pos_pix, 1, 2, 1, 2)
-#            table.attach(Gtk.Label(label="Coords: "), 0, 1, 2, 3)
-#            self.pos_coord = Gtk.Label()
-#            self.pos_coord.set_selectable(True)
-#            table.attach(self.pos_coord, 1, 2, 2, 3)
-#
-#            table.attach(Gtk.Label(label="Area"), 0, 2, 3, 4)
-#
-#            table.attach(Gtk.Label(label="Pixels: "), 0, 1, 4, 5)
-#            self.area_pix = Gtk.Label()
-#            self.area_pix.set_selectable(True)
-#            table.attach(self.area_pix, 1, 2, 4, 5)
-#            table.attach(Gtk.Label(label="Coords: "), 0, 1, 5, 6)
-#            self.area_coord = Gtk.Label()
-#            self.area_coord.set_selectable(True)
-#            table.attach(self.area_coord, 1, 2, 5, 6)
-#
-#            table.attach(Gtk.Label(label="msat pix: "), 0, 1, 6, 7)
-#            self.area_msat_pix = Gtk.Label()
-#            self.area_msat_pix.set_selectable(True)
-#            table.attach(self.area_msat_pix, 1, 2, 6, 7)
-#            table.attach(Gtk.Label(label="msat coord: "), 0, 1, 7, 8)
-#            self.area_msat_coord = Gtk.Label()
-#            self.area_msat_coord.set_selectable(True)
-#            table.attach(self.area_msat_coord, 1, 2, 7, 8)
-#
-#            self.pack_start(table, False, True, 0)
-#            table.attach(Gtk.Label(label="GDAL pix: "), 0, 1, 8, 9)
-#            self.area_gdal_pix = Gtk.Label()
-#            self.area_gdal_pix.set_selectable(True)
-#            table.attach(self.area_gdal_pix, 1, 2, 8, 9)
-#            table.attach(Gtk.Label(label="GDAL coord: "), 0, 1, 10, 11)
-#            self.area_gdal_coord = Gtk.Label()
-#            self.area_gdal_coord.set_selectable(True)
-#            table.attach(self.area_gdal_coord, 1, 2, 10, 11)
-#
-#            self.pack_start(table, False, True, 0)
-#
+            # n_rows=10, n_columns=2)
+            self.attach(Gtk.Label(label="Position"), 0, 0, 2, 1)
+
+            self.pos_pix = self.add_field("Pixels: ", 0, 1)
+            self.pos_coord = self.add_field("Coords: ", 0, 2)
+
+            self.attach(Gtk.Label(label="Area"), 0, 3, 2, 1)
+
+            self.area_pix = self.add_field("Pixels: ", 0, 4)
+            self.area_coord = self.add_field("Coords: ", 0, 5)
+            self.area_msat_pix = self.add_field("msat pix: ", 0, 6)
+            self.area_msat_coord = self.add_field("msat coord: ", 0, 7)
+
+            self.area_gdal_pix = self.add_field("GDAL pix: ", 0, 8)
+            self.area_gdal_coord = self.add_field("GDAL coord: ", 0, 9)
+
+        def add_field(self, label: str, left: int, top: int):
+            """
+            Add a labeled field to the grid.
+
+            Returns the label for the field
+            """
+            lbl = Gtk.Label(label=label)
+            # lbl.set_justify(Gtk.Justification.RIGHT)
+            lbl.set_xalign(1.0)
+            self.attach(lbl, left, top, 1, 1)
+            field = Gtk.Label()
+            field.set_xalign(0.0)
+            field.set_selectable(True)
+            self.attach(field, left + 1, top, 1, 1)
+            return field
+
 #        def fmtll(self, lat, lon):
 #            if abs(lat) > 90:
 #                slat = "--"
