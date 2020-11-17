@@ -39,13 +39,17 @@ def start_app(args):
     import cairo
     import numpy
 
-#    class ImagePosition:
-#        def __init__(self, px, py, lat, lon):
-#            self.px = px
-#            self.py = py
-#            self.lat = lat
-#            self.lon = lon
-#
+    class ImagePosition:
+        """
+        Represent a position on the image, both in pixel and in georeferenced
+        coordinates
+        """
+        def __init__(self, x: int, y: int, lat: float, lon: float):
+            self.x = x
+            self.y = y
+            self.lat = lat
+            self.lon = lon
+
 #    class ImageArea:
 #        def __init__(self, pos1, pos2):
 #            self.pos1 = pos1
@@ -263,48 +267,52 @@ def start_app(args):
 #            p2 = ImagePosition(imgx, imgy, lat, lon)
 #
 #            self.emit("area-changed", ImageArea(p1, p2))
-#
-#        def to_pixel_coords(self, x, y):
-#            if self.zoom:
-#                ix, iy, iw, ih = self.zoom
-#            else:
-#                ix, iy = 0, 0
-#                iw = self.raster_band.XSize
-#                ih = self.raster_band.YSize
-#            imgx = ix + (x * iw / self.paintedsize[0])
-#            imgy = iy + (y * ih / self.paintedsize[1])
-#            if imgx >= self.raster_band.XSize:
-#                imgx = self.raster_band.XSize
-#            if imgy >= self.raster_band.YSize:
-#                imgy = self.raster_band.YSize
-#            return imgx, imgy
-#
-#        def do_motion_notify_event(self, event):
-#            # x, y, w, h = self.allocation
-#
-#            # Extend rectangle if we are dragging
-#            if event.state & Gdk.ModifierType.BUTTON1_MASK:
-#                self.update_rect(event)
-#                self.queue_draw()
-#
-#            # Convert to image pixels
-#            imgx, imgy = self.to_pixel_coords(event.x, event.y)
-#            lat, lon = self.georeference(imgx, imgy)
-#            # print "(%d, %d) -> lat %f lon %f" % (imgx, imgy, lat, lon)
-#            self.emit("position-changed", ImagePosition(imgx, imgy, lat, lon))
-#
-#            # TODO: Georeferentiate
-#            return False
-#
-#        def georeference(self, x, y):
-#            # Pixel coordinates to spaceview projected coordinates
-#            px = self.geotrans[0] + self.geotrans[1] * x + self.geotrans[2] * y
-#            py = self.geotrans[3] + self.geotrans[4] * x + self.geotrans[5] * y
-#
-#            # Projected coordinates to latlon
-#            lon, lat = self.to_latlon.TransformPoint(px, py)[:2]
-#            return lat, lon
-#
+
+        def to_pixel_coords(self, x: int, y: int) -> Tuple[int, int]:
+            """
+            Convert widget coordinates to image coordinates, keeping into
+            account the current panning and zooming
+            """
+            if self.zoom:
+                ix, iy, iw, ih = self.zoom
+            else:
+                ix, iy = 0, 0
+                iw = self.raster_band.XSize
+                ih = self.raster_band.YSize
+            imgx = ix + x  # (x * iw / self.paintedsize[0])
+            imgy = iy + y  # (y * ih / self.paintedsize[1])
+            if imgx >= self.raster_band.XSize:
+                imgx = self.raster_band.XSize
+            if imgy >= self.raster_band.YSize:
+                imgy = self.raster_band.YSize
+            return imgx, imgy
+
+        def do_motion_notify_event(self, event):
+            # # Extend rectangle if we are dragging
+            # if event.state & Gdk.ModifierType.BUTTON1_MASK:
+            #     self.update_rect(event)
+            #     self.queue_draw()
+
+            # Convert to image pixels
+            imgx, imgy = self.to_pixel_coords(event.x, event.y)
+            lat, lon = self.georeference(imgx, imgy)
+            # print "(%d, %d) -> lat %f lon %f" % (imgx, imgy, lat, lon)
+            self.emit("position-changed", ImagePosition(imgx, imgy, lat, lon))
+
+            return False
+
+        def georeference(self, x: int, y: int) -> Tuple[float, float]:
+            """
+            Georeference a point in image (not widget) coordinates
+            """
+            # Pixel coordinates to spaceview projected coordinates
+            px = self.geotrans[0] + self.geotrans[1] * x + self.geotrans[2] * y
+            py = self.geotrans[3] + self.geotrans[4] * x + self.geotrans[5] * y
+
+            # Projected coordinates to latlon
+            lon, lat = self.to_latlon.TransformPoint(px, py)[:2]
+            return lat, lon
+
 #        def do_button_press_event(self, event):
 #            x = min(self.paintedsize[0]-1, max(0, event.x))
 #            y = min(self.paintedsize[0]-1, max(0, event.y))
@@ -370,21 +378,24 @@ def start_app(args):
             self.attach(field, left + 1, top, 1, 1)
             return field
 
-#        def fmtll(self, lat, lon):
-#            if abs(lat) > 90:
-#                slat = "--"
-#            else:
-#                slat = "%.4f" % lat
-#            if abs(lon) > 180:
-#                slon = "--"
-#            else:
-#                slon = "%.4f" % lon
-#            return "%s %s" % (slat, slon)
-#
-#        def on_position_changed(self, mapview, pos):
-#            self.pos_pix.set_text("%d, %d" % (pos.px, pos.py))
-#            self.pos_coord.set_text(self.fmtll(pos.lat, pos.lon))
-#
+        def fmtll(self, lat: float, lon: float):
+            """
+            Format a latitude, longitude pair
+            """
+            if abs(lat) > 90:
+                slat = "--"
+            else:
+                slat = f"{lat:.4f}"
+            if abs(lon) > 180:
+                slon = "--"
+            else:
+                slon = f"{lon:.4f}"
+            return f"{slat} {slon}"
+
+        def on_position_changed(self, mapview: MapWidget, pos: ImagePosition):
+            self.pos_pix.set_text("%d, %d" % (pos.x, pos.y))
+            self.pos_coord.set_text(self.fmtll(pos.lat, pos.lon))
+
 #        def on_area_changed(self, mapview, a):
 #            self.area_pix.set_text("%d, %d to %d, %d" % (a.pos1.px, a.pos1.py, a.pos2.px, a.pos2.py))
 #            self.area_coord.set_text(
@@ -405,7 +416,7 @@ def start_app(args):
     w.load(args.file)
 
     info = ImageInfo()
-#    w.connect("position-changed", info.on_position_changed)
+    w.connect("position-changed", info.on_position_changed)
 #    w.connect("area-changed", info.on_area_changed)
 
     win = Gtk.Window(title=args.file)
