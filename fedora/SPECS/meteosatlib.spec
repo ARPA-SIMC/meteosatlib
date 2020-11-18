@@ -2,7 +2,7 @@
 %{!?srcarchivename: %global srcarchivename %{name}-%{version}-%{release}}
 
 Name:           meteosatlib
-Version:        1.13
+Version:        1.14
 Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
@@ -169,6 +169,10 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Wed Nov 18 2020 Daniele Branchini <dbranchini@arpae.it> - 1.14-1
+- reimplemented msat-view using modern Gtk (#27)
+- simplified manpage generation (#28)
+
 * Tue Nov 10 2020 Daniele Branchini <dbranchini@arpae.it> - 1.13-1
 - multiple image rescale options in products script (#26)
 

@@ -1,5 +1,9 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.14
+
+* reimplemented msat-view using modern Gtk (#27)
+
 ## New in version 1.13
 
 * multiple image rescale options in products script (#26)
