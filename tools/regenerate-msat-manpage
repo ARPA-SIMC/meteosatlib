@@ -1,8 +1,0 @@
-#!/bin/sh
-
-help2man -n "Manipulate satellite images" --no-info -i $0 -o msat.1 ./msat
-help2man -n "Interactively display satellite images" --no-info -i $0 -o msat-view.1 ./msat-view
-
-exit 0
-
-[SEE ALSO]

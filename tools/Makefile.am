@@ -16,12 +16,12 @@ endif
 man_MANS = msat.1 msat-view.1
 
 msat.1: msat
-	./regenerate-msat-manpage
+	help2man -n "Manipulate satellite images" --no-info -o $@ --version-string=@PACKAGE_VERSION@ ./msat
 
 msat-view.1: msat-view
-	./regenerate-msat-manpage
+	help2man -n "Interactively display satellite images" --no-info -o $@ --version-string=@PACKAGE_VERSION@ ./msat-view
 
-EXTRA_DIST = regenerate-msat-manpage image.h msat2gdal
+EXTRA_DIST = image.h msat2gdal
 
 # HRI
 if HRI
