@@ -191,7 +191,7 @@ class Satellite(object):
                         "ERROR 1: Reprojection failed, err = -20,"
                         " further errors will be supressed on the transform object.",
                     ])
-                    for line in stderr.split("\n"):
+                    for line in stderr.decode().split("\n"):
                         if not line or line in ignore_errors:
                             continue
                         print("E:{}".format(line))
