@@ -4,6 +4,7 @@
 #include "base.h"
 #include <memory>
 #include <set>
+#include <array>
 
 namespace msat {
 namespace utils {
