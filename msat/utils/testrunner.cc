@@ -42,7 +42,7 @@ void TestMethodResult::print_failure_details(FILE* out) const
 unsigned long long TestCaseResult::elapsed_ns() const
 {
     unsigned long long res = 0;
-    for (const auto tmr: methods)
+    for (const auto& tmr: methods)
         res += tmr.elapsed_ns;
     return res;
 }
@@ -234,7 +234,7 @@ std::vector<TestCaseResult> TestRegistry::run_tests(TestController& controller)
     {
         e->register_tests_once();
         // TODO: filter on e.name
-        res.emplace_back(std::move(e->run_tests(controller)));
+        res.emplace_back(e->run_tests(controller));
     }
     return res;
 }

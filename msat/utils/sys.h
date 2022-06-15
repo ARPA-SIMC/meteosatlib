@@ -126,7 +126,7 @@ public:
     operator const T*() const { return reinterpret_cast<const T*>(addr); }
 
     template<typename T>
-    operator T*() const { return reinterpret_cast<T*>(addr); };
+    operator T*() const { return reinterpret_cast<T*>(addr); }
 };
 
 /**
@@ -280,14 +280,6 @@ public:
      * Returns true if the lock would have been obtainable, false if not.
      */
     bool ofd_getlk(struct ::flock&);
-
-    /**
-     * Call sendfile with this file as in_fd, falling back on write if it is
-     * not available.
-     *
-     * Perform retry if data was partially written.
-     */
-    void sendfile(FileDescriptor& out_fd, off_t offset, size_t count);
 
     /// Get open flags for the file
     int getfl();
