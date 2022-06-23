@@ -6,21 +6,6 @@ export GDAL_DRIVER_PATH="`pwd`/../gdal/.libs"
 
 CMD=`pwd`/"$1"
 
-# $TEST_ONLY can list, space separated, the tests to run
-if [ ! -z "$TEST_ONLY" ]
-then
-	can_run=
-	for name in $TEST_ONLY
-	do
-		if [ "$name" = "`basename $CMD`" ]
-		then
-			can_run=true
-		fi
-	done
-	test "$can_run" != true && exit 0
-fi
-
-
 ## Set up the test environment
 
 TESTDIR="`mktemp -d \`pwd\`/testdir.XXXXXXXXXX`"
