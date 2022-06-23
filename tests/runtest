@@ -1,18 +1,44 @@
 #!/bin/sh -e
 
-TOP_SRCDIR=`pwd`/`dirname $0`/..
-export TOOLSDIR="`pwd`/tools"
-export GDAL_DRIVER_PATH="`pwd`/../gdal/.libs"
+TOP_SRCDIR=$(readlink -f $(dirname $0)/..)
+PYTHON=${PYTHON:-$(which python3)}
 
-CMD=`pwd`/"$1"
+if [ "$1" = "PYTHON" ]
+then
+    CMD="$PYTHON -m unittest discover --verbose -s ${TOP_SRCDIR}/python"
+    DEBUG_CMD="$CMD"
+else
+    CMD=$(readlink -f "$1")
+    DEBUG_CMD="$CMD"
+fi
+
+## Run under eatmydata if available
+
+libeatmydata="/usr/lib/x86_64-linux-gnu/libeatmydata.so"
+if [ -e $libeatmydata ]
+then
+    if [ -n "$LD_PRELOAD" ]; then
+        export LD_PRELOAD="$libeatmydata $LD_PRELOAD"
+    else
+        export LD_PRELOAD="$libeatmydata"
+    fi
+fi
+
 
 ## Set up the test environment
 
-TESTDIR="`mktemp -d \`pwd\`/testdir.XXXXXXXXXX`"
+ORIGDIR=$(pwd)
+TESTDIR=$(mktemp -d "$ORIGDIR"/testdir.XXXXXXXXXX)
+
+echo "Moving to test directory $TESTDIR"
 cd "$TESTDIR"
 
+
+export TOOLSDIR=$(readlink -f "$ORIGDIR"/tools)
+export GDAL_DRIVER_PATH=$(readlink -f "$ORIGDIR"/../gdal/.libs)
+
 # Put data in test inbound area
-cp -a "$TOP_SRCDIR/tests/data/"* .
+cp -a --reflink=auto "$TOP_SRCDIR/tests/data/"* .
 
 ## Clean up the test environment at exit unless asked otherwise
 cleanup() {
@@ -33,18 +59,30 @@ trap cleanup EXIT
 #$DEBUGGER $BIN $ARGS 2>&1 | tee `pwd`/testrun-$id
 #echo Output saved in `pwd`/testrun-$id
 
-# Try to debug the libtool executable, if present
-DIR=`dirname $CMD`
-BASE=`basename $CMD`
-if [ ! -z "$DEBUGGER" ] && [ -x $DIR/.libs/lt-$BASE ]
+if [ ! -z "$DEBUGGER" ]
 then
-	echo "Running $DEBUGGER $DIR/.libs/lt-$BASE $ARGS"
-	$DEBUGGER $DIR/.libs/lt-$BASE $ARGS
-	RES=$?
+    if [ "$DEBUGGER" = "valgrind" ]
+    then
+        # See https://stackoverflow.com/questions/20112989/how-to-use-valgrind-with-python
+        export PYTHONMALLOC=malloc
+    fi
+
+    echo "Running $DEBUGGER $DEBUG_CMD $ARGS"
+    RES=0
+    if ! libtool --mode=execute $DEBUGGER $DEBUG_CMD $ARGS
+    then
+        RES=$?
+        echo "Failed with result $RES"
+    fi
 else
-	echo "Running $DEBUGGER $CMD $ARGS"
-	$DEBUGGER $CMD $ARGS
-	RES=$?
+    echo "Running $CMD $ARGS"
+    if $CMD $ARGS
+    then
+        RES=0
+    else
+        RES=$?
+        echo "Failed with result $RES"
+    fi
 fi
 
 exit $RES
