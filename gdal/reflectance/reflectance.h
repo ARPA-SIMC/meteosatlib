@@ -113,12 +113,6 @@ public:
     CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
 
-
-CPLErr msat_reflectance_ir039(
-        void **papoSources, int nSources, void *pData, int nXSize, int nYSize,
-        GDALDataType eSrcType, GDALDataType eBufType,
-        int nPixelSpace, int nLineSpace);
-
 }
 }
 #endif
