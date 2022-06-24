@@ -198,19 +198,6 @@ add_method("new_ir039_missing", []{
     }
 });
 
-// Test opening channel 4 (IR 0.39, with all accessory channels yet)
-add_method("new_ir039_vrt_reflectance", []{
-    only_on_gdal2();
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("reflectance_ir039.vrt");
-    wassert(actual(dataset.get() != 0).istrue());
-    wassert(actual(string(GDALGetDriverShortName(dataset->GetDriver()))) == "VRT");
-    wassert(actual(dataset->GetRasterCount()) == 1);
-    GDALRasterBand* rb = dataset->GetRasterBand(1);
-    double valr;
-    wassert(actual(rb->RasterIO(GF_Read, 2000, 350, 1, 1, &valr, 1, 1, GDT_Float64, 0, 0)) == CE_None);
-    wassert(actual((double)valr).almost_equal(22.3242, 3));
-});
-
 // Test opening channel 12 (HRV, with reflectance)
 add_method("new_hrv", []{
     only_on_gdal2();

@@ -33,6 +33,5 @@ void GDALRegister_Meteosatlib(void)
     GDALRegister_MsatNetCDF();
     GDALRegister_MsatNetCDF24();
     GDALRegister_MsatGRIB();
-    GDALAddDerivedBandPixelFunc("msat_reflectance_ir039", msat::utils::msat_reflectance_ir039);
 }
 }

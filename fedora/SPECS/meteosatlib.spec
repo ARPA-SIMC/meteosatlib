@@ -163,7 +163,6 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 %defattr(-,root,root,-)
 %{_bindir}/msat
 %{_bindir}/msat-view
-%{_bindir}/msat-reflectance-ir39
 %{_mandir}/man1/msat-view.1.gz
 %{_mandir}/man1/msat.1.gz
 
