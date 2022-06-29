@@ -150,7 +150,6 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 %files devel
 %{_includedir}/msat
 %{_libdir}/libmsat.a
-%{_libdir}/libmsat.la
 %{_libdir}/pkgconfig/libmsat.pc
 
 %files gdal
