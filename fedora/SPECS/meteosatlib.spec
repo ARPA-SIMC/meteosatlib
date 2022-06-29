@@ -2,8 +2,8 @@
 %{!?srcarchivename: %global srcarchivename %{name}-%{version}-%{release}}
 
 Name:           meteosatlib
-Version:        1.14
-Release:        3
+Version:        1.15
+Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
 Group:          Applications/Meteo
@@ -111,6 +111,11 @@ make check
 rm -rf $RPM_BUILD_ROOT
 %make_install
 
+%if 0%{?fedora} <36
+# see: https://fedoraproject.org/wiki/Changes/RemoveLaFiles
+find $RPM_BUILD_ROOT -name "*.la" -delete
+%endif
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -151,7 +156,6 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 %files gdal
 %defattr(-,root,root,-)
 %{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.a
-%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.la
 %{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so
 %{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so.0
 %{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so.0.0.0
@@ -168,6 +172,10 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Wed Jun 29 2022 Daniele Branchini <dbranchini@arpae.it> - 1.15-1
+- Removed currently unused implementation of reflectance calculation for non-HRIT sources via vrt datasets (#29)
+- Removed .la files
+
 * Tue May 24 2022 Daniele Branchini <dbranchini@arpae.it> - 1.14-3
 - Bogus release to rebuild against new ImageMagick-c++ lib
 
