@@ -18,7 +18,9 @@ PixelToLatlon::PixelToLatlon(GDALDataset* ds)
     proj = new OGRSpatialReference(projname);
     latlon = proj->CloneGeogCS();
     toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
+#if GDAL_VERSION_MAJOR >= 3
     toLatLon->SetEmitErrors(false);
+#endif
 }
 
 PixelToLatlon::~PixelToLatlon()
