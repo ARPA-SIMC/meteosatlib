@@ -1,6 +1,8 @@
 [![Build Status](https://simc.arpae.it/moncic-ci/meteosatlib/centos7.png)](https://simc.arpae.it/moncic-ci/meteosatlib/)
-[![Build Status](https://simc.arpae.it/moncic-ci/meteosatlib/centos8.png)](https://simc.arpae.it/moncic-ci/meteosatlib/)
+[![Build Status](https://simc.arpae.it/moncic-ci/meteosatlib/rocky8.png)](https://simc.arpae.it/moncic-ci/meteosatlib/)
+[![Build Status](https://simc.arpae.it/moncic-ci/meteosatlib/rocky9.png)](https://simc.arpae.it/moncic-ci/meteosatlib/)
 [![Build Status](https://simc.arpae.it/moncic-ci/meteosatlib/fedora36.png)](https://simc.arpae.it/moncic-ci/meteosatlib/)
+[![Build Status](https://simc.arpae.it/moncic-ci/meteosatlib/fedora38.png)](https://simc.arpae.it/moncic-ci/meteosatlib/)
 [![Build Status](https://copr.fedorainfracloud.org/coprs/simc/stable/package/meteosatlib/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/simc/stable/package/meteosatlib/)
 
 Meteosatlib
