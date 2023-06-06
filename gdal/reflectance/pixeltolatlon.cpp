@@ -11,11 +11,11 @@ PixelToLatlon::PixelToLatlon(GDALDataset* ds)
     if (ds->GetGeoTransform(geoTransform) != CE_None)
         throw std::runtime_error("no geotransform found in input dataset");
 
-    const char* projname = ds->GetProjectionRef();
-    if (!projname || !projname[0])
+    const OGRSpatialReference* osr = ds->GetSpatialRef();
+    if (!osr)
         throw std::runtime_error("no projection name found in input dataset");
 
-    proj = new OGRSpatialReference(projname);
+    proj = osr->Clone();
     latlon = proj->CloneGeogCS();
     toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
 #if GDAL_VERSION_MAJOR >= 3

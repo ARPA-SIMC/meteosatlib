@@ -23,15 +23,18 @@ namespace netcdf {
 
 class NetCDFDataset : public GDALDataset
 {
+private:
+        string projWKT;
 public:
         NcFile* nc;
-        string projWKT;
         int spacecraft_id;
+        OGRSpatialReference* osr = nullptr;
 
         NetCDFDataset(NcFile* nc) : nc(nc) {}
         ~NetCDFDataset()
         {
                 if (nc != NULL) delete nc;
+                delete osr;
         }
         virtual bool init();
 
@@ -41,12 +44,8 @@ public:
                 return projWKT.c_str();
         }
 #else
-        const char* _GetProjectionRef() override {
-            return projWKT.c_str();
-        }
-
         const OGRSpatialReference* GetSpatialRef() const override {
-            return GetSpatialRefFromOldGetProjectionRef();
+            return osr;
         }
 #endif
 
@@ -183,7 +182,7 @@ bool NetCDFDataset::init()
         /// Projection
         ftmp = getAttr<float>(ncf, "Longitude", 0);
         projWKT = dataset::spaceviewWKT(ftmp);
-
+        osr = new OGRSpatialReference(projWKT.c_str());
 
 #if 0
         /// History
@@ -302,7 +301,7 @@ GDALDataset* NetCDFCreateCopy(const char* pszFilename, GDALDataset* src,
         }
 
         // Projection
-        OGRSpatialReference osr(src->GetProjectionRef());
+        OGRSpatialReference osr(*src->GetSpatialRef());
 	string projection;
 	if (const char* proj = osr.GetAttrValue("PROJECTION"))
 		projection = proj;

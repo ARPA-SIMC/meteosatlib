@@ -8,11 +8,19 @@ using namespace std;
 namespace msat {
 namespace utils {
 
+ProxyDataset::~ProxyDataset() {
+    delete osr;
+}
+
 void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
 {
-    const char* proj = ds->GetProjectionRef();
-    if (!proj)
+    const OGRSpatialReference* osr_tmp = ds->GetSpatialRef();
+    if (!osr_tmp)
         throw std::runtime_error(dsname + ": trying to add source without a projection definition");
+    char* p;
+    osr_tmp->exportToWkt(&p);
+    const std::string proj(p);
+    CPLFree(p);
 
     double gt[6];
     if (ds->GetGeoTransform(gt) == CE_Failure)
@@ -21,10 +29,12 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     const char* mdtime = ds->GetMetadataItem(MD_MSAT_DATETIME, MD_DOMAIN_MSAT);
     if (mdtime == nullptr)
         throw std::runtime_error(dsname + ": trying to add source without " MD_DOMAIN_MSAT "/" MD_MSAT_DATETIME " metadata");
-
     if (!has_sources)
     {
         projection_ref = proj;
+        if (osr)
+            delete osr;
+        osr = osr_tmp->Clone();
         memcpy(geotransform, gt, 6 * sizeof(double));
         char** metadata = ds->GetMetadata(MD_DOMAIN_MSAT);
         if (metadata == nullptr)
@@ -57,11 +67,8 @@ const char* ProxyDataset::GetProjectionRef()
     return projection_ref.c_str();
 }
 #else
-const char* ProxyDataset::_GetProjectionRef() {
-    return projection_ref.c_str();
-}
 const OGRSpatialReference* ProxyDataset::GetSpatialRef() const {
-    return GetSpatialRefFromOldGetProjectionRef();
+    return osr;
 }
 #endif
 

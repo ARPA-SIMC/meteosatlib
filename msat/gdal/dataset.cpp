@@ -196,16 +196,14 @@ CPLErr GeoReferencer::init(GDALDataset* ds)
 	CPLErr res = invertGeoTransform(geoTransform, invGeoTransform);
 	if (res != CE_None) return res;
 
-	const char* projname = ds->GetProjectionRef();
-	if (!projname || !projname[0])
+    const OGRSpatialReference* osr = ds->GetSpatialRef();
+	if (!osr)
 	{
 		CPLError(CE_Failure, CPLE_AppDefined, "no projection name found in input dataset");
 		return CE_Failure;
 	}
 
-	projection = projname;
-
-	proj = new OGRSpatialReference(projection.c_str());
+	proj = osr->Clone();
 	latlon = proj->CloneGeogCS();
 	toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
 	fromLatLon = OGRCreateCoordinateTransformation(latlon, proj);
@@ -270,13 +268,12 @@ const char* ProxyDataset::GetMetadataItem(const char *pszName, const char *pszDo
 }
 
 #if GDAL_VERSION_MAJOR < 3
-const char* ProxyDataset::GetProjectionRef(void) { return ds.GetProjectionRef(); }
-#else
-const char* ProxyDataset::_GetProjectionRef() {
+const char* ProxyDataset::GetProjectionRef(void) {
     return ds.GetProjectionRef();
 }
+#else
 const OGRSpatialReference* ProxyDataset::GetSpatialRef() const {
-    return GetSpatialRefFromOldGetProjectionRef();
+    return ds.GetSpatialRef();
 }
 #endif
 CPLErr ProxyDataset::GetGeoTransform(double* d) { return ds.GetGeoTransform(d); }

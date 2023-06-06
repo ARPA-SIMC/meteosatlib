@@ -133,13 +133,11 @@ GeoReferencer::GeoReferencer(GDALDataset* ds)
 
     dataset::invertGeoTransform(geoTransform, invGeoTransform);
 
-    const char* projname = ds->GetProjectionRef();
-    if (!projname || !projname[0])
+    const OGRSpatialReference* osr = ds->GetSpatialRef();
+    if (!osr)
         throw std::runtime_error("no projection name found in input dataset");
 
-    projection = projname;
-
-    proj = new OGRSpatialReference(projection.c_str());
+    proj = osr->Clone();
     latlon = proj->CloneGeogCS();
     toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
     fromLatLon = OGRCreateCoordinateTransformation(latlon, proj);

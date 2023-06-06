@@ -12,6 +12,7 @@ class ProxyDataset : public GDALDataset
 {
 protected:
     std::string projection_ref;
+    OGRSpatialReference* osr = nullptr;
 
 public:
     /// True when at least one source has been added
@@ -23,6 +24,8 @@ public:
     /// Datetime metadata string
     std::string datetime;
 
+    ~ProxyDataset();
+
     /**
      * Add information from the given dataset, raising an exception if they are
      * inconsistent with previously added ones.
@@ -32,7 +35,6 @@ public:
 #if GDAL_VERSION_MAJOR < 3
     const char* GetProjectionRef() override;
 #else
-    const char* _GetProjectionRef() override;
     const OGRSpatialReference* GetSpatialRef() const override;
 #endif
     CPLErr GetGeoTransform(double* tr) override;
