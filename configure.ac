@@ -109,12 +109,12 @@ else
     have_pdwt=bundled
 fi
 
-dnl ImageMagick++
-PKG_CHECK_EXISTS(ImageMagick++,[
+dnl Magick++
+PKG_CHECK_EXISTS(Magick++,[
     have_libmagick=yes
     AC_DEFINE([HAVE_MAGICKPP], 1, [Magick++ functions are available])
     AC_DEFINE([MSAT_HAVE_MAGICKPP], 1, [Magick++ functions are available])
-    PKG_CHECK_MODULES(MAGICKPP,ImageMagick++)
+    PKG_CHECK_MODULES(MAGICKPP,Magick++)
     AC_SUBST(MAGICKPP_CFLAGS)
     AC_SUBST(MAGICKPP_LIBS)
 ], [
@@ -267,7 +267,7 @@ if test x"$have_libnetcdf" = x"yes"; then
 fi
 
 if test x"$have_libmagick" = x"yes"; then
-	PC_MSAT_REQS="$PC_MSAT_REQS ImageMagick++"
+	PC_MSAT_REQS="$PC_MSAT_REQS Magick++"
 fi
 
 AC_SUBST(PC_MSAT_REQS)
