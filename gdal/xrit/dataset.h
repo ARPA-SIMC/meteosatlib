@@ -11,21 +11,23 @@ namespace xrit {
 
 class XRITDataset : public GDALDataset
 {
+protected:
+    std::string projWKT;
 public:
     xrit::FileAccess fa;
     xrit::DataAccess da;
     int spacecraft_id;
-    std::string projWKT;
     double geotransform[6];
+    OGRSpatialReference* osr = nullptr;
 
     XRITDataset(const xrit::FileAccess& fa);
+    ~XRITDataset();
 
     virtual bool init();
 
 #if GDAL_VERSION_MAJOR < 3
     virtual const char* GetProjectionRef() override;
 #else
-    const char* _GetProjectionRef() override;
     const OGRSpatialReference* GetSpatialRef() const override;
 #endif
     virtual CPLErr GetGeoTransform(double* tr);

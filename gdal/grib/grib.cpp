@@ -76,12 +76,18 @@ public:
 
 class GRIBDataset : public GDALDataset
 {
+private:
+	string projWKT;
+
 public:
 	Grib grib;
 	int spacecraft_id;
-	string projWKT;
+    OGRSpatialReference* osr = nullptr;
 
     GRIBDataset(Grib&& grib) : grib(move(grib)) {}
+    ~GRIBDataset() {
+        delete osr;
+    }
 
 	bool init()
 	{
@@ -110,6 +116,7 @@ public:
 			// Projection
 			double lop = grib.get_double_oneof("longitudeOfSubSatellitePointInDegrees", "geography.lop", NULL);
 			projWKT = dataset::spaceviewWKT(lop);
+            osr = new OGRSpatialReference(projWKT.c_str());
 
 			// long bpp = grib.get_long("numberOfBitsContainingEachPackedValue");
 			// if (bpp <= 32)
@@ -153,12 +160,8 @@ public:
 		return projWKT.c_str();
 	}
 #else
-        const char* _GetProjectionRef() override {
-            return projWKT.c_str();
-        }
-
         const OGRSpatialReference* GetSpatialRef() const override {
-            return GetSpatialRefFromOldGetProjectionRef();
+            return osr;
         }
 #endif
 
@@ -318,7 +321,7 @@ struct CreateGRIB
     double grib_missing = 0;
 
     CreateGRIB(Grib& grib, GDALDataset* src)
-        : grib(grib), src(src), rb(src->GetRasterBand(1)), osr(src->GetProjectionRef())
+        : grib(grib), src(src), rb(src->GetRasterBand(1)), osr(*src->GetSpatialRef())
     {
     }
 

@@ -66,7 +66,6 @@ class GeoReferencer
 {
 protected:
     GDALDataset* ds;
-    std::string projection;
     double geoTransform[6];
     double invGeoTransform[6];
     OGRSpatialReference* proj;

@@ -65,7 +65,6 @@ class GeoReferencer
 {
 protected:
 	GDALDataset* ds;
-	std::string projection;
 	double geoTransform[6];
 	double invGeoTransform[6];
 	OGRSpatialReference* proj;
@@ -126,7 +125,6 @@ public:
 #if GDAL_VERSION_MAJOR < 3
     virtual const char* GetProjectionRef(void) override;
 #else
-    const char* _GetProjectionRef() override;
     const OGRSpatialReference* GetSpatialRef() const override;
 #endif
     virtual CPLErr GetGeoTransform(double*);
