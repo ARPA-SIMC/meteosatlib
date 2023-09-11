@@ -2,7 +2,7 @@
 %{!?srcarchivename: %global srcarchivename %{name}-%{version}-%{release}}
 
 Name:           meteosatlib
-Version:        1.15
+Version:        1.16
 Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
@@ -171,6 +171,9 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Mon Sep 11 2023 Daniele Branchini <dbranchini@arpae.it> - 1.16-1
+- Added support for gdal v3.6
+
 * Wed Jun 29 2022 Daniele Branchini <dbranchini@arpae.it> - 1.15-1
 - Removed currently unused implementation of reflectance calculation for non-HRIT sources via vrt datasets (#29)
 - Removed .la files

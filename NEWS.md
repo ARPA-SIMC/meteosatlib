@@ -1,5 +1,10 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.16
+
+* Support for GDAL v3.6
+* Support for gcc 13
+
 ## New in version 1.15
 
 * Removed currently unused implementation of reflectance calculation for non-HRIT sources via vrt datasets (#29)
