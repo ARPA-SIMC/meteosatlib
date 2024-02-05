@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 //
 //  Copyright (C) 2004--2006  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
-//  Copyright (C) 2006--2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+//  Copyright (C) 2006--2012  ARPAE-SIMC <urpsim@arpae.it>
 //
 //  File        : thornsds_db1.cpp
 //  Description : ThornSDS DB1 file for MSG interface - implementation

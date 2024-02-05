@@ -9,7 +9,7 @@ Summary:        Shared libraries to read Meteosat satellite images
 Group:          Applications/Meteo
 License:        GPL
 URL:            https://github.com/ARPA-SIMC/meteosatlib
-Source0:        https://github.com/arpa-simc/%{name}/archive/v%{version}-%{release}.tar.gz#/%{srcarchivename}.tar.gz
+Source0:        https://github.com/ARPA-SIMC/%{name}/archive/v%{version}-%{release}.tar.gz#/%{srcarchivename}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %if 0%{?rhel} == 7

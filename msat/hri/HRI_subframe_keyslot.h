@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 //
 //  Copyright (C) 2004--2006  Graziano Giuliani <giuliani@lamma.rete.toscana.it>
-//  Copyright (C) 2006--2012  ARPA-SIM <urpsim@smr.arpa.emr.it>
+//  Copyright (C) 2006--2012  ARPAE-SIMC <urpsim@arpae.it>
 //
 //  File        : HRI_subframe_keyslot.h
 //  Description : Meteosat HRI format interface
