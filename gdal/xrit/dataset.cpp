@@ -17,20 +17,9 @@ XRITDataset::XRITDataset(const xrit::FileAccess& fa)
 {
 }
 
-XRITDataset::~XRITDataset() {
-    delete osr;
-}
-
-#if GDAL_VERSION_MAJOR < 3
-const char* XRITDataset::GetProjectionRef()
-{
-    return projWKT.c_str();
-}
-#else
 const OGRSpatialReference* XRITDataset::GetSpatialRef() const {
-    return osr;
+    return &osr;
 }
-#endif
 
 CPLErr XRITDataset::GetGeoTransform(double* tr)
 {
@@ -75,8 +64,7 @@ bool XRITDataset::init()
 
 
     /// Projection
-    projWKT = dataset::spaceviewWKT(header.image_navigation->subsatellite_longitude);
-    osr = new OGRSpatialReference(projWKT.c_str());
+    dataset::set_spaceview(osr, header.image_navigation->subsatellite_longitude);
 
     /// Geotransform matrix
     double pixelSizeX, pixelSizeY;

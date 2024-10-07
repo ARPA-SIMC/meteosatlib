@@ -17,6 +17,7 @@ PixelToLatlon::PixelToLatlon(GDALDataset* ds)
 
     proj = osr->Clone();
     latlon = proj->CloneGeogCS();
+    latlon->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
     toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
 #if GDAL_VERSION_MAJOR >= 3
     toLatLon->SetEmitErrors(false);

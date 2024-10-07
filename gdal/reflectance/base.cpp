@@ -14,13 +14,13 @@ ProxyDataset::~ProxyDataset() {
 
 void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
 {
-    const OGRSpatialReference* osr_tmp = ds->GetSpatialRef();
-    if (!osr_tmp)
-        throw std::runtime_error(dsname + ": trying to add source without a projection definition");
-    char* p;
-    osr_tmp->exportToWkt(&p);
-    const std::string proj(p);
-    CPLFree(p);
+    if (!osr)
+    {
+        const OGRSpatialReference* source_spatial_ref = ds->GetSpatialRef();
+        if (!source_spatial_ref)
+            throw std::runtime_error(dsname + ": trying to add source without a spatial definition");
+        osr = source_spatial_ref->Clone();
+    }
 
     double gt[6];
     if (ds->GetGeoTransform(gt) == CE_Failure)
@@ -29,12 +29,9 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     const char* mdtime = ds->GetMetadataItem(MD_MSAT_DATETIME, MD_DOMAIN_MSAT);
     if (mdtime == nullptr)
         throw std::runtime_error(dsname + ": trying to add source without " MD_DOMAIN_MSAT "/" MD_MSAT_DATETIME " metadata");
+
     if (!has_sources)
     {
-        projection_ref = proj;
-        if (osr)
-            delete osr;
-        osr = osr_tmp->Clone();
         memcpy(geotransform, gt, 6 * sizeof(double));
         char** metadata = ds->GetMetadata(MD_DOMAIN_MSAT);
         if (metadata == nullptr)
@@ -46,7 +43,7 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
         nRasterXSize = ds->GetRasterXSize();
         nRasterYSize = ds->GetRasterYSize();
     } else {
-        if (projection_ref != proj)
+        if (!osr->IsSame(ds->GetSpatialRef()))
             throw std::runtime_error(dsname + ": inconsistent projection definitions in source datasets");
         if (memcmp(geotransform, gt, 6 * sizeof(double)) != 0)
             throw std::runtime_error(dsname + ": inconsistent affine geotransform coefficients in source datasets");
@@ -61,16 +58,9 @@ void ProxyDataset::add_info(GDALDataset* ds, const std::string& dsname)
     has_sources = true;
 }
 
-#if GDAL_VERSION_MAJOR < 3
-const char* ProxyDataset::GetProjectionRef()
-{
-    return projection_ref.c_str();
-}
-#else
 const OGRSpatialReference* ProxyDataset::GetSpatialRef() const {
     return osr;
 }
-#endif
 
 CPLErr ProxyDataset::GetGeoTransform(double* tr)
 {

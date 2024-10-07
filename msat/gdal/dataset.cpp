@@ -29,40 +29,46 @@ using namespace std;
 namespace msat {
 namespace dataset {
 
+void set_spaceview(OGRSpatialReference& osr, double sublon)
+{
+    // Set GDAL projection. Taken from GDAL's msgdataset
+    osr.SetGEOS(sublon, ORBIT_RADIUS_FOR_GDAL, 0, 0);
+    //osr.SetWellKnownGeogCS("WGS84"); // Temporary line to satisfy ERDAS (otherwise the ellips is "unnamed"). Eventually this should become the custom a and b ellips (CGMS).
+
+    // The following are 3 different try-outs for also setting the ellips a and b parameters.
+    // We leave them out for now however because this does not work. In gdalwarp, when choosing some
+    // specific target SRS, the result is an error message:
+    //
+    // ERROR 1: geocentric transformation missing z or ellps
+    // ERROR 1: GDALWarperOperation::ComputeSourceWindow() failed because
+    // the pfnTransformer failed.
+    //
+    // I can't explain the reason for the message at this time (could be a problem in the way the SRS is set here,
+    // but also a bug in Proj.4 or GDAL.
+    osr.SetGeogCS( NULL, NULL, NULL, 6378169, 295.488065897, NULL, 0, NULL, 0 );
+
+    /*
+       oSRS.SetGeogCS( "unnamed ellipse", "unknown", "unnamed", 6378169, 295.488065897, "Greenwich", 0.0);
+
+       if( oSRS.importFromProj4("+proj=geos +h=35785831 +a=6378169 +b=6356583.8") == OGRERR_NONE )
+       {
+       oSRS.exportToWkt( &(poDS->pszProjection) );
+       }
+       */
+}
+
 std::string spaceviewWKT(double sublon)
 {
-        // Also add GDAL projection (see the msg driver they have)
-        // Taken from GDAL's msgdataset
-        OGRSpatialReference osr;
-        osr.SetGEOS(sublon, ORBIT_RADIUS_FOR_GDAL, 0, 0);
-        //osr.SetWellKnownGeogCS("WGS84"); // Temporary line to satisfy ERDAS (otherwise the ellips is "unnamed"). Eventually this should become the custom a and b ellips (CGMS).
+    // Also add GDAL projection (see the msg driver they have)
+    // Taken from GDAL's msgdataset
+    OGRSpatialReference osr;
+    set_spaceview(osr, sublon);
 
-        // The following are 3 different try-outs for also setting the ellips a and b parameters.
-        // We leave them out for now however because this does not work. In gdalwarp, when choosing some
-        // specific target SRS, the result is an error message:
-        // 
-        // ERROR 1: geocentric transformation missing z or ellps
-        // ERROR 1: GDALWarperOperation::ComputeSourceWindow() failed because
-        // the pfnTransformer failed.
-        // 
-        // I can't explain the reason for the message at this time (could be a problem in the way the SRS is set here,
-        // but also a bug in Proj.4 or GDAL.
-        osr.SetGeogCS( NULL, NULL, NULL, 6378169, 295.488065897, NULL, 0, NULL, 0 );
-
-        /*
-           oSRS.SetGeogCS( "unnamed ellipse", "unknown", "unnamed", 6378169, 295.488065897, "Greenwich", 0.0);
-
-           if( oSRS.importFromProj4("+proj=geos +h=35785831 +a=6378169 +b=6356583.8") == OGRERR_NONE )
-           {
-           oSRS.exportToWkt( &(poDS->pszProjection) );
-           }
-           */
-
-        char* projstring;
-        osr.exportToWkt(&projstring);
-        string res = projstring;
-        OGRFree(projstring);
-        return res;
+    char* projstring;
+    osr.exportToWkt(&projstring);
+    string res = projstring;
+    OGRFree(projstring);
+    return res;
 }
 
 void decodeGeotransform(GDALDataset* ds, int& xs, int& ys, double& psx, double& psy)
@@ -203,10 +209,12 @@ CPLErr GeoReferencer::init(GDALDataset* ds)
 		return CE_Failure;
 	}
 
-	proj = osr->Clone();
-	latlon = proj->CloneGeogCS();
-	toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
-	fromLatLon = OGRCreateCoordinateTransformation(latlon, proj);
+    proj = osr->Clone();
+    proj->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    latlon = proj->CloneGeogCS();
+    latlon->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
+    fromLatLon = OGRCreateCoordinateTransformation(latlon, proj);
 
 	delete proj; proj = 0;
 	delete latlon; latlon = 0;

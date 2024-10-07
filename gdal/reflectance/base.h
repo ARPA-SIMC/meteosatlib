@@ -11,7 +11,6 @@ namespace utils {
 class ProxyDataset : public GDALDataset
 {
 protected:
-    std::string projection_ref;
     OGRSpatialReference* osr = nullptr;
 
 public:
@@ -32,11 +31,7 @@ public:
      */
     void add_info(GDALDataset* ds, const std::string& dsname);
 
-#if GDAL_VERSION_MAJOR < 3
-    const char* GetProjectionRef() override;
-#else
     const OGRSpatialReference* GetSpatialRef() const override;
-#endif
     CPLErr GetGeoTransform(double* tr) override;
 };
 

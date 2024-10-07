@@ -23,31 +23,21 @@ namespace netcdf {
 
 class NetCDFDataset : public GDALDataset
 {
-private:
-        string projWKT;
 public:
         NcFile* nc;
         int spacecraft_id;
-        OGRSpatialReference* osr = nullptr;
+        OGRSpatialReference osr;
 
         NetCDFDataset(NcFile* nc) : nc(nc) {}
         ~NetCDFDataset()
         {
-                if (nc != NULL) delete nc;
-                delete osr;
+                delete nc;
         }
         virtual bool init();
 
-#if GDAL_VERSION_MAJOR < 3
-        virtual const char* GetProjectionRef() override
-        {
-                return projWKT.c_str();
-        }
-#else
         const OGRSpatialReference* GetSpatialRef() const override {
-            return osr;
+            return &osr;
         }
-#endif
 
         virtual CPLErr GetGeoTransform(double* tr)
         {
@@ -181,8 +171,7 @@ bool NetCDFDataset::init()
 
         /// Projection
         ftmp = getAttr<float>(ncf, "Longitude", 0);
-        projWKT = dataset::spaceviewWKT(ftmp);
-        osr = new OGRSpatialReference(projWKT.c_str());
+        dataset::set_spaceview(osr, ftmp);
 
 #if 0
         /// History
@@ -301,9 +290,9 @@ GDALDataset* NetCDFCreateCopy(const char* pszFilename, GDALDataset* src,
         }
 
         // Projection
-        OGRSpatialReference osr(*src->GetSpatialRef());
+        const OGRSpatialReference* osr(src->GetSpatialRef());
 	string projection;
-	if (const char* proj = osr.GetAttrValue("PROJECTION"))
+	if (const char* proj = osr->GetAttrValue("PROJECTION"))
 		projection = proj;
         if (projection.empty())
         {
@@ -359,13 +348,13 @@ GDALDataset* NetCDFCreateCopy(const char* pszFilename, GDALDataset* src,
         else if (projection == SRS_PT_GEOSTATIONARY_SATELLITE)
         {
                 // Sanity checks, and computation of target values
-                if (osr.GetProjParm(SRS_PP_SATELLITE_HEIGHT) != ORBIT_RADIUS_FOR_GDAL)
+                if (osr->GetProjParm(SRS_PP_SATELLITE_HEIGHT) != ORBIT_RADIUS_FOR_GDAL)
                 {
                         CPLError(CE_Failure, CPLE_AppDefined, "Satellite height is '%f' but only '%d' is supported",
-                                        osr.GetProjParm(SRS_PP_SATELLITE_HEIGHT), ORBIT_RADIUS_FOR_GDAL);
+                                        osr->GetProjParm(SRS_PP_SATELLITE_HEIGHT), ORBIT_RADIUS_FOR_GDAL);
                         return NULL;
                 }
-                float sublon = (float)osr.GetProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0);
+                float sublon = (float)osr->GetProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0);
 
                 double geotransform[6];
                 if (src->GetGeoTransform(geotransform) != CE_None)

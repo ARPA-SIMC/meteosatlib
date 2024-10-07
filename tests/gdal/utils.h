@@ -68,8 +68,6 @@ protected:
     GDALDataset* ds;
     double geoTransform[6];
     double invGeoTransform[6];
-    OGRSpatialReference* proj;
-    OGRSpatialReference* latlon;
     OGRCoordinateTransformation* toLatLon;
     OGRCoordinateTransformation* fromLatLon;
 

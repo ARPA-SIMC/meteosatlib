@@ -42,13 +42,11 @@ namespace netcdf {
 
 class NetCDF24Dataset : public GDALDataset
 {
-protected:
-        string projWKT;
 public:
         NcFile* nc;
         double geotransform[6];
         int spacecraft_id;
-        OGRSpatialReference* osr = nullptr;
+        OGRSpatialReference osr;
 
         NetCDF24Dataset(NcFile* nc) : nc(nc) {}
         ~NetCDF24Dataset()
@@ -57,20 +55,13 @@ public:
         }
         virtual bool init();
 
-#if GDAL_VERSION_MAJOR < 3
-        virtual const char* GetProjectionRef() override
-        {
-                return projWKT.c_str();
-        }
-#else
         const OGRSpatialReference* GetSpatialRef() const override {
-            return osr;
+            return &osr;
         }
-#endif
 
         virtual CPLErr GetGeoTransform(double* tr)
         {
-                if (projWKT.empty()) return CE_Failure;
+                if (osr.IsEmpty()) return CE_Failure;
                 memcpy(tr, geotransform, 6 * sizeof(double));
                 return CE_None;
         }
@@ -149,8 +140,7 @@ bool NetCDF24Dataset::init()
         NcVar* proj = nc->get_var("Projection");
         if (NcAtt* a = proj->get_att("Lop"))
         {
-                projWKT = dataset::spaceviewWKT(getAttr<float>(*a));
-                osr = new OGRSpatialReference(projWKT.c_str());
+                dataset::set_spaceview(osr, getAttr<float>(*a));
 
                 // Compute geotransform matrix
 #if 0

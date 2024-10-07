@@ -126,7 +126,7 @@ TempTestFile::TempTestFile(bool leave) : leave(leave)
 
 
 GeoReferencer::GeoReferencer(GDALDataset* ds)
-    : ds(ds), proj(0), latlon(0), toLatLon(0), fromLatLon(0)
+    : ds(ds), toLatLon(0), fromLatLon(0)
 {
     if (ds->GetGeoTransform(geoTransform) != CE_None)
         throw std::runtime_error("no geotransform found in input dataset");
@@ -137,21 +137,18 @@ GeoReferencer::GeoReferencer(GDALDataset* ds)
     if (!osr)
         throw std::runtime_error("no projection name found in input dataset");
 
-    proj = osr->Clone();
-    latlon = proj->CloneGeogCS();
-    toLatLon = OGRCreateCoordinateTransformation(proj, latlon);
-    fromLatLon = OGRCreateCoordinateTransformation(latlon, proj);
-
-    delete proj; proj = 0;
-    delete latlon; latlon = 0;
+    OGRSpatialReference* latlon = osr->CloneGeogCS();
+    // See https://gdal.org/en/latest/tutorials/osr_api_tut.html#crs-and-axis-order
+    latlon->SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+    toLatLon = OGRCreateCoordinateTransformation(osr, latlon);
+    fromLatLon = OGRCreateCoordinateTransformation(latlon, osr);
+    delete latlon;
 }
 
 GeoReferencer::~GeoReferencer()
 {
-    if (proj) delete proj;
-    if (latlon) delete latlon;
-    if (toLatLon) delete toLatLon;
-    if (fromLatLon) delete fromLatLon;
+    delete toLatLon;
+    delete fromLatLon;
 }
 
 void GeoReferencer::pixelToProjected(int x, int y, double& px, double& py) const

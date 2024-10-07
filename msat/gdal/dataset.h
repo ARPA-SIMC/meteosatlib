@@ -32,6 +32,9 @@ namespace dataset {
 /// Get the WKT description for the Spaceview projection
 std::string spaceviewWKT(double sublon = 0.0);
 
+/// Set the given spatial reference to Spaceview
+void set_spaceview(OGRSpatialReference& osr, double sublon=0.0);
+
 /// Decode a geotransformation matrix to the image offset and scale 
 void decodeGeotransform(GDALDataset* ds, int& xs, int& ys, double& psx, double& psy);
 
