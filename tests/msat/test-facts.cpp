@@ -89,7 +89,7 @@ add_method("cos_sol_za", []() {
     wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 20, 0)).almost_equal(0.94, 2));
     wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 30, 0)).almost_equal(0.86, 2));
     wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 40, 0)).almost_equal(0.76, 2));
-    wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 45, 0)).almost_equal(0.71, 2));
+    wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 45, 0)).almost_equal(0.705, 3));
     wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 50, 0)).almost_equal(0.64, 2));
     wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 60, 0)).almost_equal(0.50, 2));
     wassert(actual(facts::cos_sol_za(2013, 3, 21, 12, 0, 70, 0)).almost_equal(0.34, 2));
