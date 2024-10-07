@@ -66,10 +66,10 @@ public:
      * Do not close these file descriptors in the child process
      * (implies close_fds = true)
      */
-    std::vector<int> pass_fds;
+    std::vector<int> pass_fds = std::vector<int>();
 
     /// Change to this directory in the child process
-    std::string cwd;
+    std::string cwd = std::string();
 
     /// If true, call setsid() in the child process
     bool start_new_session = false;
@@ -135,6 +135,16 @@ public:
 
     /// Wait for the child process to terminate and return its return code
     int wait();
+
+    /**
+     * Wait for the child process to terminate.
+     *
+     * Time out after the given number of milliseconds, and return false if the
+     * timeout elapsed, true if the child exited before the timeout.
+     *
+     * The child return code can be read with the returncode() function
+     */
+    bool wait(int msecs);
 
     /// Send the given signal to the process
     void send_signal(int sig);

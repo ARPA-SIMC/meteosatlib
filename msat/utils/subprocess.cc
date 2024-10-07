@@ -284,7 +284,7 @@ void Child::post_fork_child()
         long max = sysconf(_SC_OPEN_MAX);
         if (errno == 0)
         {
-            for (long i = 3; i < max; ++i)
+            for (int i = 3; i < max; ++i)
             {
                 if (std::find(pass_fds.begin(), pass_fds.end(), i) != pass_fds.end())
                     continue;
@@ -303,7 +303,7 @@ void Child::post_fork_child()
 
     // Honor start_new_session
     if (start_new_session)
-        if (setsid() == (pid_t)-1)
+        if (setsid() == -1)
             throw std::system_error(errno, std::system_category(), "cannot call setsid()");
 }
 
@@ -377,6 +377,84 @@ int Child::wait()
     return returncode();
 }
 
+namespace {
+
+struct enable_sigchld
+{
+    sighandler_t prev_handler;
+
+    enable_sigchld()
+        : prev_handler(signal(SIGCHLD, empty_handler))
+    {
+        if (prev_handler == SIG_ERR)
+            throw std::system_error(
+                    errno, std::system_category(),
+                    "failed set signal handler for SIGCHLD");
+    }
+
+    ~enable_sigchld()
+    {
+        signal(SIGCHLD, prev_handler);
+    }
+
+    static void empty_handler(int)
+    {
+    }
+};
+
+}
+
+bool Child::wait(int msecs)
+{
+    if (m_pid == 0)
+        throw std::runtime_error("wait called before Child process was started");
+
+    if (m_terminated)
+        return returncode();
+
+    // this is the old complex logic needed to support old kernels without
+    // pidfd_open
+
+    ::timespec timeout = { msecs / 1000, (msecs % 1000) * 1000000 };
+
+    while (true)
+    {
+        pid_t res = waitpid(m_pid, &m_returncode, WNOHANG);
+        if (res < 0)
+            throw std::system_error(
+                    errno, std::system_category(),
+                    "failed to waitpid(" + std::to_string(m_pid) + ")");
+        if (res > 0)
+        {
+            m_terminated = true;
+            return true;
+        }
+
+        if (timeout.tv_sec == 0 and timeout.tv_nsec == 0)
+            // Timeout expired and child has not quit yet
+            return false;
+
+        // res == 0: child is still running. Wait for completion
+
+        ::timespec remaining;
+
+        enable_sigchld es;
+        int sres = nanosleep(&timeout, &remaining);
+        if (sres == 0) {
+            //Timeout expired
+            timeout = {0, 0};
+            continue;
+        } else if (errno == EINTR) {
+            // Signal received (possibly SIGCHLD?)
+            timeout = remaining;
+            continue;
+        } else
+            throw std::system_error(
+                errno, std::system_category(),
+                "failed to nanosleep waiting for child process to quit");
+    }
+}
+
 void Child::send_signal(int sig)
 {
     if (::kill(m_pid, sig) == -1)
@@ -414,8 +492,8 @@ std::string Child::format_raw_returncode(int raw_returncode)
 }
 
 
-Popen::Popen(std::initializer_list<std::string> args)
-    : args(args)
+Popen::Popen(std::initializer_list<std::string> args_)
+    : args(args_), executable(), env()
 {
 }
 
@@ -468,12 +546,12 @@ int Popen::main() noexcept
                 // We can just store a pointer to the internal strings, since later
                 // we're calling exec and no destructors will be called
                 exec_env[i] = env[i].c_str();
-            exec_env[env.size()] = 0;
+            exec_env[env.size()] = nullptr;
         }
 
         if (exec_env)
         {
-            if (execvpe(path, (char* const*)exec_args, (char* const*)exec_env) == -1)
+            if (execvpe(path, const_cast<char* const*>(exec_args), const_cast<char* const*>(exec_env)) == -1)
             {
                 delete[] exec_args;
                 delete[] exec_env;
@@ -482,7 +560,7 @@ int Popen::main() noexcept
                         "execvpe failed");
             }
         } else {
-            if (execvp(path, (char* const*)exec_args) == -1)
+            if (execvp(path, const_cast<char* const*>(exec_args)) == -1)
             {
                 delete[] exec_args;
                 throw std::system_error(
