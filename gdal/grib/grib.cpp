@@ -483,8 +483,8 @@ struct CreateGRIB2 : public CreateGRIB
         grib.set_long("numberOfPointsAlongYAxis", src->GetRasterYSize());
 
         double sublon = (double)osr.GetProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0);
-        grib.set_long("latitudeOfSubSatellitePointInDegrees", 0);
-        grib.set_long("longitudeOfSubSatellitePointInDegrees", (long)nearbyint(sublon * 1000));
+        grib.set_double("latitudeOfSubSatellitePointInDegrees", 0.0);
+        grib.set_double("longitudeOfSubSatellitePointInDegrees", sublon);
 
         int dx = facts::seviriDXFromPixelHSize(gt[1]);
         int dy = facts::seviriDYFromPixelVSize(-gt[5]);
@@ -734,8 +734,8 @@ struct CreateGRIB1 : public CreateGRIB
         grib.set_long("numberOfPointsAlongYAxis", src->GetRasterYSize());
 
         double sublon = (double)osr.GetProjParm(SRS_PP_CENTRAL_MERIDIAN, 0.0);
-        grib.set_long("latitudeOfSubSatellitePointInDegrees", 0);
-        grib.set_long("longitudeOfSubSatellitePointInDegrees", (long)nearbyint(sublon * 1000));
+        grib.set_double("latitudeOfSubSatellitePointInDegrees", 0.0);
+        grib.set_double("longitudeOfSubSatellitePointInDegrees", sublon);
 
         /* 64 = 01000000
            (1=0)  Direction increments not given
