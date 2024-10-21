@@ -1,0 +1,8 @@
+option('hri', type: 'boolean', value: false, description: 'enable HRI support')
+option('hrit', type: 'boolean', value: true, description: 'enable HRIT support')
+option('thornsds_db1', type: 'boolean', value: false, description: 'enable thornsds_db1 support')
+option('msg_native', type: 'boolean', value: false, description: 'enable msg_native support')
+option('omtp_ids', type: 'boolean', value: false, description: 'enable omtp_ids support')
+option('openmtp', type: 'boolean', value: false, description: 'enable openmtp support')
+option('institution', type: 'string', value: 'ARPA-SIM', description: 'default institution value used to generate NetCDF files')
+# option('system_pdwt', type: 'boolean', value; false, description: 'use PublicDecomptWt installed in the system instead of bundled one')

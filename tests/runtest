@@ -35,7 +35,7 @@ cd "$TESTDIR"
 
 
 export TOOLSDIR=$(readlink -f "$ORIGDIR"/tools)
-export GDAL_DRIVER_PATH=$(readlink -f "$ORIGDIR"/../gdal/.libs)
+export GDAL_DRIVER_PATH=$(readlink -f "$ORIGDIR"/gdal/)
 
 # Put data in test inbound area
 cp -a --reflink=auto "$TOP_SRCDIR/tests/data/"* .
