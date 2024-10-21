@@ -24,7 +24,7 @@
 
 using namespace std;
 
-void do_help(const char* argv0, ostream& out)
+static void do_help(const char* argv0, ostream& out)
 {
         out << "Usage: " << "msat" << " [options] file(s)..." << endl
             << "msat can read and write various formats of satellite images or other" << endl
@@ -58,10 +58,9 @@ void do_help(const char* argv0, ostream& out)
             << " $ msat --jpg file.grb" << endl
             << " $ msat --conv=MsatGRIB dir/H:MSG1:HRV:200611130800" << endl
             << endl
-            << "Report bugs to " << PACKAGE_BUGREPORT << endl;
         ;
 }
-void usage(char *pname)
+static void usage(char *pname)
 {
         cout << pname << ": Convert meteosat image files from and to various formats."
              << endl;
@@ -74,7 +73,7 @@ void usage(char *pname)
         return;
 }
 
-vector<string> split(const std::string& str, char sep)
+static std::vector<std::string> split(const std::string& str, char sep)
 {
         vector<string> res;
 
@@ -120,7 +119,7 @@ static bool dumpMetadata(GDALMajorObject* o, const char* prefix = "")
         return true;
 }
 
-const char* gdalTypeName(GDALDataType dt)
+static const char* gdalTypeName(GDALDataType dt)
 {
         switch (dt)
         {
@@ -282,7 +281,7 @@ static std::string output_file_name(GDALDataset* ds, GDALRasterBand* rb = NULL)
         return res;
 }
 
-void parseBands(GDALTranslate& translate, const std::string& arg)
+static void parseBands(GDALTranslate& translate, const std::string& arg)
 {
 
 }

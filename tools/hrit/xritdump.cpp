@@ -40,7 +40,7 @@
 using namespace std;
 using namespace msat::xrit;
 
-void do_help(const char* argv0, ostream& out)
+static void do_help(const char* argv0, ostream& out)
 {
         out << "Usage: " << argv0 << " [options] file(s)..." << endl << endl
             << "Dump contents and structure of an xRIT dataset." << endl << endl
@@ -48,7 +48,7 @@ void do_help(const char* argv0, ostream& out)
             << "  --help           Print this help message" << endl;
 }
 
-void do_dump(const char* name)
+static void do_dump(const char* name)
 {
         FileAccess fa(name);
         DataAccess da;
