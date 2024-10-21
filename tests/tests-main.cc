@@ -7,7 +7,7 @@
 #include <cstring>
 #include <exception>
 
-void signal_to_exception(int)
+static void signal_to_exception(int)
 {
     throw std::runtime_error("killing signal catched");
 }

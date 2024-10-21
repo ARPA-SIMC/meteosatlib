@@ -27,6 +27,8 @@
 #include "reflectance/reflectance.h"
 
 extern "C" {
+void GDALRegister_Meteosatlib(void);
+
 void GDALRegister_Meteosatlib(void)
 {
     GDALRegister_MsatXRIT();

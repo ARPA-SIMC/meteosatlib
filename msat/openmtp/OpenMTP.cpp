@@ -102,7 +102,7 @@ char * OpenMTP::get_timestr( )
   tmp = binary_header.date( );
   tmp = tmp-((tmp/10000)*10000);
 
-  sprintf(timestr, "%04d%04d_%04d", binary_header.year( ),
+  snprintf(timestr, 14, "%04d%04d_%04d", binary_header.year( ),
      tmp, binary_header.time( ));
   return timestr;
 }

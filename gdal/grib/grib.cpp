@@ -25,6 +25,10 @@ namespace msat {
 namespace grib {
 
 struct GRIBDataset;
+GDALDataset* GRIBOpen(GDALOpenInfo* info);
+GDALDataset* GRIBCreateCopy(const char* pszFilename, GDALDataset* src,
+                              int bStrict, char** papszOptions,
+                              GDALProgressFunc pfnProgress, void* pProgressData);
 
 class GRIBRasterBand : public GDALRasterBand
 {
@@ -35,28 +39,28 @@ class GRIBRasterBand : public GDALRasterBand
 public:
 	GRIBRasterBand(GRIBDataset* ds, int idx /*, GDALDataType dt */);
 
-	virtual const char* GetUnitType()
-	{
-		return unit.c_str();
-	}
+    const char* GetUnitType() override
+    {
+        return unit.c_str();
+    }
 
-        virtual double GetOffset(int* pbSuccess=NULL)
-	{
-		if (pbSuccess) *pbSuccess = TRUE;
-		return 0;
-	}
-        virtual double GetScale(int* pbSuccess=NULL)
-	{
-		if (pbSuccess) *pbSuccess = TRUE;
-		return 1;
-	}
-        virtual double GetNoDataValue(int* pbSuccess=NULL)
-	{
-		if (pbSuccess) *pbSuccess = TRUE;
-		return missing;
-	}
+    double GetOffset(int* pbSuccess=NULL) override
+    {
+        if (pbSuccess) *pbSuccess = TRUE;
+        return 0;
+    }
+    double GetScale(int* pbSuccess=NULL) override
+    {
+        if (pbSuccess) *pbSuccess = TRUE;
+        return 1;
+    }
+    double GetNoDataValue(int* pbSuccess=NULL) override
+    {
+        if (pbSuccess) *pbSuccess = TRUE;
+        return missing;
+    }
 
-	virtual CPLErr IReadBlock(int xblock, int yblock, void *buf)
+    CPLErr IReadBlock(int xblock, int yblock, void *buf) override
 	{
 		if (xblock != 0 || yblock != 0)
 		{
@@ -122,8 +126,8 @@ public:
 		}
 	}
 
-    virtual CPLErr GetGeoTransform(double* tr)
-	{
+    CPLErr GetGeoTransform(double* tr) override
+    {
 		try {
 			// Compute geotransform matrix
 			long column_offset = grib.get_long_oneof("xCoordinateOfSubSatellitePoint", "XpInGridLengths", NULL);
@@ -145,7 +149,7 @@ public:
 		} catch (griberror& e) {
 			return CE_Failure;
 		}
-	}
+    }
 
     const OGRSpatialReference* GetSpatialRef() const override {
         return &osr;

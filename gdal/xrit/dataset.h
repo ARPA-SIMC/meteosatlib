@@ -18,12 +18,12 @@ public:
     double geotransform[6];
     OGRSpatialReference osr;
 
-    XRITDataset(const xrit::FileAccess& fa);
+    explicit XRITDataset(const xrit::FileAccess& fa);
 
     virtual bool init();
 
     const OGRSpatialReference* GetSpatialRef() const override;
-    virtual CPLErr GetGeoTransform(double* tr);
+    CPLErr GetGeoTransform(double* tr) override;
 
 };
 

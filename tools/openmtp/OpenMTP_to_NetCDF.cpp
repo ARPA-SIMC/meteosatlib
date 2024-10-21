@@ -41,7 +41,7 @@
 //
 // Creates NetCDF product
 //
-bool NetCDFProduct( char *inpath )
+static bool NetCDFProduct( char *inpath )
 {
   OpenMTP omtp;
   struct tm tmtime;

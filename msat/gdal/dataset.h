@@ -120,9 +120,9 @@ public:
     ProxyDataset(GDALDataset& ds);
 
     // GDALMajorObject
-    virtual const char* GetDescription() const;
-    virtual char** GetMetadata(const char *pszDomain="");
-    virtual const char* GetMetadataItem(const char *pszName, const char *pszDomain="");
+    const char* GetDescription() const override;
+    char** GetMetadata(const char *pszDomain="") override;
+    const char* GetMetadataItem(const char *pszName, const char *pszDomain="") override;
 
     // GDALDataset
 #if GDAL_VERSION_MAJOR < 3
@@ -130,12 +130,12 @@ public:
 #else
     const OGRSpatialReference* GetSpatialRef() const override;
 #endif
-    virtual CPLErr GetGeoTransform(double*);
-    virtual GDALDriver* GetDriver(void);
-    virtual char** GetFileList(void);
-    virtual int GetGCPCount();
+    CPLErr GetGeoTransform(double*) override;
+    GDALDriver* GetDriver(void) override;
+    char** GetFileList(void) override;
+    int GetGCPCount() override;
     virtual const char* GetGCPProjection();
-    virtual const GDAL_GCP* GetGCPs();
+    const GDAL_GCP* GetGCPs() override;
 };
 
 class ProxyRasterBand : public GDALRasterBand
@@ -147,21 +147,21 @@ public:
     ProxyRasterBand(GDALDataset& ds, GDALRasterBand& rb, int idx);
 
     // GDALMajorObject
-    virtual const char* GetDescription() const;
-    virtual char** GetMetadata(const char *pszDomain="");
-    virtual const char* GetMetadataItem(const char *pszName, const char *pszDomain="");
+    const char* GetDescription() const override;
+    char** GetMetadata(const char *pszDomain="") override;
+    const char* GetMetadataItem(const char *pszName, const char *pszDomain="") override;
 
     // GDALRasterBand
-    virtual char** GetCategoryNames();
-    virtual double GetNoDataValue(int *pbSuccess=NULL);
-    virtual double GetMinimum(int *pbSuccess=NULL);
-    virtual double GetMaximum(int *pbSuccess=NULL);
-    virtual double GetOffset(int *pbSuccess=NULL);
-    virtual double GetScale(int *pbSuccess=NULL);
-    virtual const char* GetUnitType();
-    virtual GDALColorInterp GetColorInterpretation();
-    virtual GDALColorTable* GetColorTable();
-    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
+    char** GetCategoryNames() override;
+    double GetNoDataValue(int *pbSuccess=NULL) override;
+    double GetMinimum(int *pbSuccess=NULL) override;
+    double GetMaximum(int *pbSuccess=NULL) override;
+    double GetOffset(int *pbSuccess=NULL) override;
+    double GetScale(int *pbSuccess=NULL) override;
+    const char* GetUnitType() override;
+    GDALColorInterp GetColorInterpretation() override;
+    GDALColorTable* GetColorTable() override;
+    CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
 
 struct CalibratedDataset : public ProxyDataset
@@ -176,13 +176,13 @@ struct CalibratedRasterBand : public ProxyRasterBand
 
     CalibratedRasterBand(GDALDataset& ds, GDALRasterBand& rb, int idx);
 
-    double GetMinimum(int *pbSuccess=NULL);
-    double GetMaximum(int *pbSuccess=NULL);
-    double GetOffset(int *pbSuccess=NULL);
-    double GetScale(int *pbSuccess=NULL);
-    double GetNoDataValue(int *pbSuccess=NULL);
+    double GetMinimum(int *pbSuccess=NULL) override;
+    double GetMaximum(int *pbSuccess=NULL) override;
+    double GetOffset(int *pbSuccess=NULL) override;
+    double GetScale(int *pbSuccess=NULL) override;
+    double GetNoDataValue(int *pbSuccess=NULL) override;
 
-    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
+    CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
 
 #if 0

@@ -33,7 +33,7 @@
 #include <msat/openmtp/OpenMTP.h>
 #include <libgen.h>
 
-bool
+static bool
 OpenMTP_info( char *inpath )
 {
   OpenMTP omtp;

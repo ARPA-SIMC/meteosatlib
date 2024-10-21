@@ -24,13 +24,13 @@ public:
 
     bool init(MSG_data& PRO_data, MSG_data& EPI_data, MSG_header& header);
 
-    virtual const char* GetUnitType();
+    const char* GetUnitType() override;
 
-    virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
+    CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 
-    virtual double GetOffset(int* pbSuccess=NULL);
-    virtual double GetScale(int* pbSuccess=NULL);
-    virtual double GetNoDataValue(int* pbSuccess=NULL);
+    double GetOffset(int* pbSuccess=NULL) override;
+    double GetScale(int* pbSuccess=NULL) override;
+    double GetNoDataValue(int* pbSuccess=NULL) override;
 };
 
 }

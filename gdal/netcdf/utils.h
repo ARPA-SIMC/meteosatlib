@@ -70,11 +70,11 @@ public:
 
         NetCDFRasterBand(GDALDataset* ds, int idx, NcVar* var);
 
-        virtual const char* GetUnitType();
-        virtual double GetOffset(int* pbSuccess=NULL);
-        virtual double GetScale(int* pbSuccess=NULL);
-        virtual double GetNoDataValue(int* pbSuccess=NULL);
-        virtual CPLErr IReadBlock(int xblock, int yblock, void *buf);
+        const char* GetUnitType() override;
+        double GetOffset(int* pbSuccess=NULL) override;
+        double GetScale(int* pbSuccess=NULL) override;
+        double GetNoDataValue(int* pbSuccess=NULL) override;
+        CPLErr IReadBlock(int xblock, int yblock, void *buf) override;
 };
 
 NcVar* rasterBandToNcVar(GDALRasterBand* rb, NcFile& ncf, NcDim* tdim, NcDim* ldim, NcDim* cdim);

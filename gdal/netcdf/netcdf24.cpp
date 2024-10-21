@@ -18,6 +18,7 @@
  */
 
 #include "netcdf.h"
+#include "netcdf24.h"
 #include <msat/gdal/const.h>
 #include <msat/gdal/dataset.h>
 #include "utils.h"
@@ -40,52 +41,57 @@ using namespace std;
 namespace msat {
 namespace netcdf {
 
+GDALDataset* NetCDF24Open(GDALOpenInfo* info);
+GDALDataset* NetCDF24CreateCopy(const char* pszFilename, GDALDataset* src, 
+                              int bStrict, char** papszOptions, 
+                              GDALProgressFunc pfnProgress, void* pProgressData);
+
 class NetCDF24Dataset : public GDALDataset
 {
 public:
-        NcFile* nc;
-        double geotransform[6];
-        int spacecraft_id;
-        OGRSpatialReference osr;
+    NcFile* nc;
+    double geotransform[6];
+    int spacecraft_id;
+    OGRSpatialReference osr;
 
-        NetCDF24Dataset(NcFile* nc) : nc(nc) {}
-        ~NetCDF24Dataset()
-        {
-                if (nc != NULL) delete nc;
-        }
-        virtual bool init();
+    NetCDF24Dataset(NcFile* nc) : nc(nc) {}
+    ~NetCDF24Dataset()
+    {
+        if (nc != NULL) delete nc;
+    }
+    virtual bool init();
 
-        const OGRSpatialReference* GetSpatialRef() const override {
-            return &osr;
-        }
+    const OGRSpatialReference* GetSpatialRef() const override {
+        return &osr;
+    }
 
-        virtual CPLErr GetGeoTransform(double* tr)
-        {
-                if (osr.IsEmpty()) return CE_Failure;
-                memcpy(tr, geotransform, 6 * sizeof(double));
-                return CE_None;
-        }
+    CPLErr GetGeoTransform(double* tr) override
+    {
+        if (osr.IsEmpty()) return CE_Failure;
+        memcpy(tr, geotransform, 6 * sizeof(double));
+        return CE_None;
+    }
 };
 
 class NetCDF24RasterBand : public NetCDFRasterBand
 {
 public:
-        NetCDF24RasterBand(NetCDF24Dataset* ds, int idx, NcVar* var) : NetCDFRasterBand(ds, idx, var)
+    NetCDF24RasterBand(NetCDF24Dataset* ds, int idx, NcVar* var) : NetCDFRasterBand(ds, idx, var)
+    {
+        /// Channel
+        if (NcAtt* a = var->get_att("L1"))
         {
-                /// Channel
-                if (NcAtt* a = var->get_att("L1"))
-                {
-                        channel_id = getAttr<int>(*a);
+            channel_id = getAttr<int>(*a);
 
-                        // Channel
-                        char buf[25];
-                        snprintf(buf, 25, "%d", channel_id);
-                        SetMetadataItem(MD_MSAT_CHANNEL_ID, buf, MD_DOMAIN_MSAT);
-                        SetMetadataItem(MD_MSAT_CHANNEL,
-                                        facts::channelName(ds->spacecraft_id, channel_id),
-                                        MD_DOMAIN_MSAT);
-                }
+            // Channel
+            char buf[25];
+            snprintf(buf, 25, "%d", channel_id);
+            SetMetadataItem(MD_MSAT_CHANNEL_ID, buf, MD_DOMAIN_MSAT);
+            SetMetadataItem(MD_MSAT_CHANNEL,
+                    facts::channelName(ds->spacecraft_id, channel_id),
+                    MD_DOMAIN_MSAT);
         }
+    }
 };
 
 bool NetCDF24Dataset::init()

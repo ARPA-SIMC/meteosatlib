@@ -21,92 +21,97 @@ using namespace std;
 namespace msat {
 namespace netcdf {
 
+GDALDataset* NetCDFOpen(GDALOpenInfo* info);
+GDALDataset* NetCDFCreateCopy(const char* pszFilename, GDALDataset* src, 
+                              int bStrict, char** papszOptions, 
+                              GDALProgressFunc pfnProgress, void* pProgressData);
+
 class NetCDFDataset : public GDALDataset
 {
 public:
-        NcFile* nc;
-        int spacecraft_id;
-        OGRSpatialReference osr;
+    NcFile* nc;
+    int spacecraft_id;
+    OGRSpatialReference osr;
 
-        NetCDFDataset(NcFile* nc) : nc(nc) {}
-        ~NetCDFDataset()
+    NetCDFDataset(NcFile* nc) : nc(nc) {}
+    ~NetCDFDataset()
+    {
+        delete nc;
+    }
+    virtual bool init();
+
+    const OGRSpatialReference* GetSpatialRef() const override {
+        return &osr;
+    }
+
+    CPLErr GetGeoTransform(double* tr) override
+    {
+        NcError nce(NcError::silent_nonfatal);
+        NcFile& ncf = *nc;
+
+        // Compute geotransform matrix
+        NcAtt* asp = ncf.get_att("AreaStartPix");
+        NcAtt* asl = ncf.get_att("AreaStartLin");
+        if (asp && asl)
         {
-                delete nc;
+            const int column_offset = getAttr<int>(ncf, "Column_Offset", 1856);
+            const int line_offset = getAttr<int>(ncf, "Line_Offset", 1856);
+            const int x0 = getAttr<int>(*asp) - 1;
+            const int y0 = getAttr<int>(*asl) - 1;
+            const double psx = facts::pixelHSizeFromCFAC(abs(getAttr<int>(ncf, "Column_Scale_Factor", -13642337)) * exp2(-16));
+            const double psy = facts::pixelVSizeFromLFAC(abs(getAttr<int>(ncf, "Line_Scale_Factor", -13642337)) * exp2(-16));
+
+            // Only valid for non-HRV
+            tr[0] = -(column_offset - x0) * psx;
+            tr[3] = (line_offset   - y0) * psy;
+            tr[1] = psx;
+            tr[5] = -psy;
+            tr[2] = 0.0;
+            tr[4] = 0.0;
+            return CE_None;
+        } else {
+            CPLError(CE_Failure, CPLE_AppDefined, "Cannot find AreaStartPix and AreaStartLin in NetCDF file");
+            return CE_Failure;
         }
-        virtual bool init();
-
-        const OGRSpatialReference* GetSpatialRef() const override {
-            return &osr;
-        }
-
-        virtual CPLErr GetGeoTransform(double* tr)
-        {
-                NcError nce(NcError::silent_nonfatal);
-                NcFile& ncf = *nc;
-
-                // Compute geotransform matrix
-                NcAtt* asp = ncf.get_att("AreaStartPix");
-                NcAtt* asl = ncf.get_att("AreaStartLin");
-                if (asp && asl)
-                {
-                        const int column_offset = getAttr<int>(ncf, "Column_Offset", 1856);
-                        const int line_offset = getAttr<int>(ncf, "Line_Offset", 1856);
-                        const int x0 = getAttr<int>(*asp) - 1;
-                        const int y0 = getAttr<int>(*asl) - 1;
-                        const double psx = facts::pixelHSizeFromCFAC(abs(getAttr<int>(ncf, "Column_Scale_Factor", -13642337)) * exp2(-16));
-                        const double psy = facts::pixelVSizeFromLFAC(abs(getAttr<int>(ncf, "Line_Scale_Factor", -13642337)) * exp2(-16));
-
-                        // Only valid for non-HRV
-                        tr[0] = -(column_offset - x0) * psx;
-                        tr[3] = (line_offset   - y0) * psy;
-                        tr[1] = psx;
-                        tr[5] = -psy;
-                        tr[2] = 0.0;
-                        tr[4] = 0.0;
-                        return CE_None;
-                } else {
-                        CPLError(CE_Failure, CPLE_AppDefined, "Cannot find AreaStartPix and AreaStartLin in NetCDF file");
-                        return CE_Failure;
-                }
-        }
+    }
 };
 
 class MsatNetCDFRasterBand : public NetCDFRasterBand
 {
 public:
-        bool offset1bug;
+    bool offset1bug;
 
-        MsatNetCDFRasterBand(NetCDFDataset* ds, int idx, NcVar* var) : NetCDFRasterBand(ds, idx, var), offset1bug(false)
+    MsatNetCDFRasterBand(NetCDFDataset* ds, int idx, NcVar* var) : NetCDFRasterBand(ds, idx, var), offset1bug(false)
+    {
+        /// Channel
+        NcAtt* a = var->get_att("chnum");
+        if (a != NULL)
         {
-                /// Channel
-                NcAtt* a = var->get_att("chnum");
-                if (a != NULL)
-                {
-                        channel_id = getAttr<int>(*a);
+            channel_id = getAttr<int>(*a);
 
-                        // Channel
-                        char buf[25];
-                        snprintf(buf, 25, "%d", channel_id);
-                        SetMetadataItem(MD_MSAT_CHANNEL_ID, buf, MD_DOMAIN_MSAT);
-                        SetMetadataItem(MD_MSAT_CHANNEL,
-                                        facts::channelName(ds->spacecraft_id, channel_id),
-                                        MD_DOMAIN_MSAT);
-                } else
-                        channel_id = 0;
+            // Channel
+            char buf[25];
+            snprintf(buf, 25, "%d", channel_id);
+            SetMetadataItem(MD_MSAT_CHANNEL_ID, buf, MD_DOMAIN_MSAT);
+            SetMetadataItem(MD_MSAT_CHANNEL,
+                    facts::channelName(ds->spacecraft_id, channel_id),
+                    MD_DOMAIN_MSAT);
+        } else
+            channel_id = 0;
 
-                // Detect the old encoding bug that set offset to 1 instead of 0
-                string version = getAttr<const char*>(*ds->nc, "Version", "0");
-                offset1bug = (version == "0");
-        }
+        // Detect the old encoding bug that set offset to 1 instead of 0
+        string version = getAttr<const char*>(*ds->nc, "Version", "0");
+        offset1bug = (version == "0");
+    }
 
-        virtual double GetOffset(int* pbSuccess=NULL)
-        {
-                double res = NetCDFRasterBand::GetOffset(pbSuccess);
-                if (offset1bug && res == 1.0)
-                        return 0.0;
-                else
-                        return res;
-        }
+    double GetOffset(int* pbSuccess=NULL) override
+    {
+        double res = NetCDFRasterBand::GetOffset(pbSuccess);
+        if (offset1bug && res == 1.0)
+            return 0.0;
+        else
+            return res;
+    }
 };
 
 bool NetCDFDataset::init()

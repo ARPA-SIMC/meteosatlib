@@ -47,7 +47,7 @@ struct Grib
 #ifdef TRACE_GRIBAPI
     FILE* trace = nullptr;
     #define trace(...) do {\
-            fprintf(trace, "GH %p: ", gh); \
+            fprintf(trace, "GH %p: ", static_cast<const void*>(gh)); \
             fprintf(trace, __VA_ARGS__); \
             fprintf(trace, "\n"); \
             fflush(trace); \
@@ -120,7 +120,7 @@ struct Grib
     CPLErr new_from_samples(grib_context* c, const char* name)
     {
         gh = grib_handle_new_from_samples(c, name);
-        trace("h = grib_handle_new_from_samples(%p, \"%s\"); /* %p */", c, name, gh);
+        trace("h = grib_handle_new_from_samples(%p, \"%s\"); /* %p */", static_cast<const void*>(c), name, static_cast<const void*>(gh));
         if (gh == NULL)
         {
             CPLError(CE_Failure, CPLE_AppDefined, "Cannot create handle from samples %s", name);
@@ -153,7 +153,7 @@ struct Grib
         }
         int err;
         gh = grib_handle_new_from_file(0, fp, &err);
-        trace("h = grib_handle_new_from_file(%p, f, &err); /* %p, %d (%s), f = %p open to %s */", c, gh, err, grib_get_error_message(err), fp, name);
+        trace("h = grib_handle_new_from_file(%p, f, &err); /* %p, %d (%s), f = %p open to %s */", static_cast<const void*>(c), static_cast<const void*>(gh), err, grib_get_error_message(err), static_cast<const void*>(fp), name);
         if (gh == NULL)
         {
             CPLError(CE_Failure, CPLE_AppDefined, "%s looks like a GRIB, but grib_api says %s",

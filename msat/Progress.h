@@ -53,10 +53,10 @@ class StreamProgressHandler : public ProgressHandler
 	void outputIndent();
 
 public:
-	StreamProgressHandler(std::ostream& out) : out(out), indent(0) {}
-	void activity(const std::string& str, int perc = -1, int tot = -1);
-	void pushTask(const std::string& desc);
-	void popTask();
+    explicit StreamProgressHandler(std::ostream& out) : out(out), indent(0) {}
+    void activity(const std::string& str, int perc = -1, int tot = -1) override;
+    void pushTask(const std::string& desc) override;
+    void popTask() override;
 };
 
 }
