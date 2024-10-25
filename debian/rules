@@ -1,9 +1,4 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@
-
-# Store build information
-override_dh_fixperms:
-	dh_fixperms
-	test -e /usr/bin/dh_buildinfo && dh_buildinfo
+	dh $@ --without autoreconf -Smeson

@@ -3,11 +3,11 @@ Section: science
 Priority: optional
 Maintainer: Enrico Zini <enrico@debian.org>
 Build-Depends:
- debhelper (>= 7.0.50~), dh-buildinfo,
+ debhelper-compat (= 13),
+ pkg-config, meson,
  libnetcdf-cxx-legacy-dev,
  libeccodes-dev,
  libgdal1-dev (>= 1.6.0),
- libmsat-dev (>= 0.6),
  libmagick++-dev
 Standards-Version: 3.7.3.0
 Homepage: https://github.com/ARPA-SIMC/meteosatlib
@@ -58,7 +58,7 @@ Description: Read, write, convert and display raster satellite images
   - msat-view: an interactive tool to zoom into satellite images and
     georeference points and areas
 
-Package: libgdal1-1.9.0-meteosatlib
+Package: libgdal32-3.6-meteosatlib
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: GDAL drivers based on Meteosatlib
