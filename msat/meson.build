@@ -198,7 +198,7 @@ if enable_hrit
     'msat-hrit', msat_hrit_sources,
     include_directories: toplevel_inc,
     pic: true,
-    dependencies: [libpublicdecompwt_dep],
+    dependencies: [publicdecompwt_dep],
     cpp_args: cpp.get_supported_arguments(msat_hrit_warning_control),
     link_with: [msat_base],
   )

@@ -71,13 +71,6 @@ enable_msg_native = get_option('msg_native')
 enable_omtp_ids = get_option('omtp_ids')
 enable_openmtp = get_option('openmtp')
 
-# TODO
-# AC_ARG_WITH([system-pdwt],
-#     [AS_HELP_STRING([--with-system-pdwt],
-# 	[use PublicDecomptWt installed in the system instead of bundled one])],
-#     [],
-#     [with_system_pdwt="no"])
-
 # Dependencies
 
 compiler = meson.get_compiler('cpp')
@@ -86,25 +79,21 @@ conf_data.set_quoted('MSAT_DEFAULT_INSTITUTION', default_institution)
 conf_data.set('HAVE_STDINT_H', compiler.has_header('stdint.h'))
 
 # PublicDecompWT
-#libpublicdecompwt_proj = subproject('decompress')
-#libpublicdecompwt_dep = libpublicdecompwt_proj.get_variable('libpublicdecompwt__dep')
-# TODO
-# if test $with_system_pdwt != no; then
-#     PKG_CHECK_MODULES(PDWT, [libpublicdecompwt], [
-#         AC_SUBST(PDWT_CFLAGS)
-#         AC_SUBST(PDWT_LIBS)
-# 	have_pdwt=yes
-#     ], [
-#         have_pdwt=no
-#         enable_hrit=no
-#         AC_MSG_WARN("*** system version of PublicDecompWT not found. You can build without --with-system-pdwt")
-#     ])
-# 
-#     AM_CONDITIONAL([BUNDLED_PDWT], [false])
-# else
-#     AM_CONDITIONAL([BUNDLED_PDWT], [true])
-#     have_pdwt=bundled
-# fi
+if enable_hrit
+  if get_option('system_pdwt')
+    publicdecompwt_dep = dependency('libpublicdecompwt', required: false)
+  else
+    publicdecompwt_dep = dependency('', required: false)
+  endif
+  if not publicdecompwt_dep.found()
+    subdir('decompress')
+    publicdecompwt_type = 'bundled'
+  else
+    publicdecompwt_type = 'system'
+  endif
+else
+  publicdecompwt_type = 'none'
+endif
 
 magickpp_dep = dependency('Magick++', required: false)
 conf_data.set('HAVE_MAGICKPP', magickpp_dep.found())
@@ -156,12 +145,6 @@ endif
 conf_data.set('HAVE_GRIBAPI', eccodes_dep.found())
 
 
-if enable_hrit
-# if BUNDLED_PDWT
-subdir('decompress')
-# endif
-endif
-
 conf_data.set('HAVE_HRIT', enable_hrit)
 conf_data.set('MSAT_HAVE_HRIT', enable_hrit)
 
@@ -170,13 +153,13 @@ help2man = find_program('help2man', required: false)
 # $PACKAGE_NAME-$PACKAGE_VERSION configuration:
 message('Optional feature list:')
 message('default institution:', default_institution)
+message('publicdecompwt library:', publicdecompwt_type)
 message('hri:', enable_hri)
 message('hrit:', enable_hrit)
 message('msg-native:', enable_msg_native)
 message('omtp-ids:', enable_omtp_ids)
 message('openmtp:', enable_openmtp)
 message('thornsds_db1:', enable_thornsds_db1)
-# AS_HELP_STRING([publicdecompwt:], [$have_pdwt])
 # AS_HELP_STRING([magick++:], [$have_libmagick])
 # AS_HELP_STRING([GDAL:], [$have_gdal])
 # AS_HELP_STRING([grib_api:], [$have_gribapi])

@@ -5,4 +5,4 @@ option('msg_native', type: 'boolean', value: false, description: 'enable msg_nat
 option('omtp_ids', type: 'boolean', value: false, description: 'enable omtp_ids support')
 option('openmtp', type: 'boolean', value: false, description: 'enable openmtp support')
 option('institution', type: 'string', value: 'ARPA-SIM', description: 'default institution value used to generate NetCDF files')
-# option('system_pdwt', type: 'boolean', value; false, description: 'use PublicDecomptWt installed in the system instead of bundled one')
+option('system_pdwt', type: 'boolean', value: false, description: 'use PublicDecomptWt installed in the system instead of bundled one')

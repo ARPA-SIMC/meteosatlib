@@ -72,7 +72,7 @@ libpublicdecompwt = static_library(
   cpp_args: cpp.get_supported_arguments(pdwt_warning_control),
 )
 
-libpublicdecompwt_dep = declare_dependency(
+publicdecompwt_dep = declare_dependency(
   include_directories: pdwt_includes,
   link_whole: libpublicdecompwt)
 
