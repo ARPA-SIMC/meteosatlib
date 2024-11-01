@@ -81,15 +81,11 @@ conf_data.set('HAVE_STDINT_H', compiler.has_header('stdint.h'))
 # PublicDecompWT
 if enable_hrit
   if get_option('system_pdwt')
-    publicdecompwt_dep = dependency('libpublicdecompwt', required: false)
+    publicdecompwt_dep = dependency('libpublicdecompwt')
+    publicdecompwt_type = 'system'
   else
-    publicdecompwt_dep = dependency('', required: false)
-  endif
-  if not publicdecompwt_dep.found()
     subdir('decompress')
     publicdecompwt_type = 'bundled'
-  else
-    publicdecompwt_type = 'system'
   endif
 else
   publicdecompwt_type = 'none'
