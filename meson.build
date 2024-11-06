@@ -74,6 +74,11 @@ enable_openmtp = get_option('openmtp')
 # Dependencies
 
 compiler = meson.get_compiler('cpp')
+# std::filesystem library needs to be explicitly linked with g++ < 9.0
+if cpp.find_library('stdc++fs').found()
+  # without this, std::filesystem is not present for some compilers
+  add_project_link_arguments(['-lstdc++fs'], language : 'cpp')
+endif
 
 conf_data.set_quoted('MSAT_DEFAULT_INSTITUTION', default_institution)
 conf_data.set('HAVE_STDINT_H', compiler.has_header('stdint.h'))
