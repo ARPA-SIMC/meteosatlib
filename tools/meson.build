@@ -37,7 +37,8 @@ if enable_hrit
   # bin_PROGRAMS += hrit/xritdump
   xritdump = executable('xritdump', [config, 'hrit/xritdump.cpp'],
     include_directories: toplevel_inc,
-    link_with: [msat_base, libmsat, msat_hrit])
+    link_with: [msat_base, libmsat, msat_hrit],
+    install: true)
 
   if netcdf_dep.found() and libnetcdfpp.found() 
     # bin_PROGRAMS += hrit/XRIT2NetCDF
@@ -64,7 +65,8 @@ if enable_msg_native
     # bin_PROGRAMS += msg-native/nativedump
     nativedump = executable('nativedump', [config, 'msg-native/nativedump.cpp'],
       include_directories: toplevel_inc,
-      link_with: [msat_base, libmsat])
+      link_with: [msat_base, libmsat],
+      install: true)
 
     if magickpp_dep.found()
       # bin_PROGRAMS += msg-native/native2Image
