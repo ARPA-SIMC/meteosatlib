@@ -6,7 +6,7 @@ libmsat_link_with = []
 
 # Common code
 install_headers([
-  'config.h',
+  config,
   'iniparser.h',
   'Progress.h',
   'auto_arr_ptr.h',
