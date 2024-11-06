@@ -85,7 +85,7 @@ Summary:  	Read, write, convert and display raster satellite images
 %setup -q -n %{srcarchivename}
 
 %build
-%meson
+%meson -D system_pdwt=true
 %meson_build
 
 %define gdal_pl_version %(gv=$(gdal-config --version); echo ${gv%.*})
