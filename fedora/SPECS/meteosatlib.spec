@@ -146,10 +146,7 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 %files gdal
 %defattr(-,root,root,-)
-%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.a
 %{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so
-%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so.0
-%{_libdir}/gdalplugins/%{gdal_pl_version}/gdal_Meteosatlib.so.0.0.0
 %doc examples/products examples/add_palette
 %doc examples/contrast-stretch examples/make-composite
 %doc examples/bluered-palette.txt examples/ndvi
