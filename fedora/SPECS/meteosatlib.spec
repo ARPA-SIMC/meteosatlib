@@ -2,7 +2,7 @@
 %{!?srcarchivename: %global srcarchivename %{name}-%{version}-%{release}}
 
 Name:           meteosatlib
-Version:        1.16
+Version:        1.17
 Release:        1
 Summary:        Shared libraries to read Meteosat satellite images
 
@@ -20,7 +20,7 @@ BuildRequires: python3-rpm-macros >= 3-23
 %define python3_vers python3
 %endif
 
-BuildRequires:  libtool
+BuildRequires:  meson
 BuildRequires:  gcc-c++
 BuildRequires:  netcdf-cxx-devel
 BuildRequires:  ImageMagick-c++-devel
@@ -85,6 +85,8 @@ Summary:  	Read, write, convert and display raster satellite images
 %setup -q -n %{srcarchivename}
 
 %build
+%meson
+%meson_build
 
 %define gdal_pl_version %(gv=$(gdal-config --version); echo ${gv%.*})
 
@@ -100,21 +102,11 @@ Summary:  	Read, write, convert and display raster satellite images
 #mv $RPM_BUILD_ROOT/usr/lib64/gdalplugins/1.7 $RPM_BUILD_ROOT/usr/lib/gdalplugins
 ## ...and REMBEMBER to change "%files gdal" accordingly
 
-autoreconf -ifv
-%configure --with-system-pdwt
-%make_build
-
 %check
-make check
+%meson_test
 
 %install
-rm -rf $RPM_BUILD_ROOT
-%make_install
-
-%if 0%{?fedora} <36
-# see: https://fedoraproject.org/wiki/Changes/RemoveLaFiles
-find $RPM_BUILD_ROOT -name "*.la" -delete
-%endif
+%meson_install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -171,6 +163,9 @@ ln -s %{_libdir}/gdalplugins/%{gdal_pl_version}/ /usr/lib/gdalplugins/%{gdal_pl_
 
 
 %changelog
+* Mon Oct 28 2024 Emanuele Di Giacomo <edigiacomo@arpae.it> - 1.17-1
+- Build with meson
+
 * Mon Sep 11 2023 Daniele Branchini <dbranchini@arpae.it> - 1.16-1
 - Added support for gdal v3.6
 
