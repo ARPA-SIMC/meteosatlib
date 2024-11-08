@@ -39,7 +39,7 @@
 
 // *********************************************************************
 
-const char*
+static const char*
 filename(unsigned id)
 {
 	omtp_ids::Channel_Id cid =
@@ -65,7 +65,7 @@ filename(unsigned id)
 // write an image to a pgm file
 //
 // returns true on success and false on failure
-bool
+static bool
 write_pgm(const char* filename,
 	  const char* comment,
 	  const std::vector<std::vector<unsigned char> > image)
@@ -111,7 +111,7 @@ write_pgm(const char* filename,
 //
 // returns true if the channel was written to file successfully and
 // false on failure
-bool
+static bool
 write_channel_pgm(unsigned channel_id, const OpenMTP_IDS& omtp_ids)
 {
 	if (channel_id == omtp_ids::NO_DATA) {
@@ -143,7 +143,7 @@ write_channel_pgm(unsigned channel_id, const OpenMTP_IDS& omtp_ids)
 //
 // returns true if any of the channels was written successfully, and
 // false of all three writes failed
-bool
+static bool
 openmtp_ids_to_pgm(const OpenMTP_IDS& omtp_ids)
 {
 	const FileHeader& fh = omtp_ids.fileheader();

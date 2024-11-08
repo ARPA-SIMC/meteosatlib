@@ -13,6 +13,8 @@ using namespace std;
 namespace msat {
 namespace xrit {
 
+GDALDataset* XRITOpen(GDALOpenInfo* info);
+
 GDALDataset* XRITOpen(GDALOpenInfo* info)
 {
     // Se if it looks like a XRIT filename

@@ -42,7 +42,7 @@
 //
 // Creates NetCDF product
 //
-bool NetCDFProduct(char *inname)
+static bool NetCDFProduct(char *inname)
 {
   struct tm *tmtime;
   char NcName[1024];

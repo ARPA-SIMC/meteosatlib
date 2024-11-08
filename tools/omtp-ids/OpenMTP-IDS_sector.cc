@@ -51,7 +51,7 @@ static const unsigned LINE_1  = 3 * (2110 / 2);
 static const unsigned PIXEL_0 = (1092 / 2);
 static const unsigned PIXEL_1 = (1604 / 2);
 
-int
+static int
 record_lines(const int lines, const int pixels)
 {
 	return static_cast<int>
@@ -59,7 +59,7 @@ record_lines(const int lines, const int pixels)
 			   / static_cast<double>(pixels))));
 }
 
-int
+static int
 no_records(const int scanlines, const int lines_per_record)
 {
 	return static_cast<int>
@@ -67,7 +67,7 @@ no_records(const int scanlines, const int lines_per_record)
 		      / static_cast<double>(lines_per_record)));
 }
 
-std::vector<Record>
+static std::vector<Record>
 repack(std::vector<ScanLine> scanline)
 {
 	const int pixels = scanline[0].linepixel().size();
@@ -102,7 +102,7 @@ repack(std::vector<ScanLine> scanline)
 	return record;
 }
 
-void
+static void
 sector_line(ScanLine& line)
 {
 	std::vector<unsigned char>::iterator begin = line.linepixel().begin();
@@ -121,7 +121,7 @@ sector_line(ScanLine& line)
 	line.linepixel(pixels);
 }
 
-std::vector<Record>
+static std::vector<Record>
 sector(const OpenMTP_IDS& omtp_ids)
 {
 	std::vector<ScanLine> lines = omtp_ids.scanline(LINE_0, LINE_1);
@@ -130,7 +130,7 @@ sector(const OpenMTP_IDS& omtp_ids)
 	return repack(lines);
 }
 
-bool
+static bool
 openmtp_ids_sector(const OpenMTP_IDS& omtp_ids)
 {
 	OpenMTP_IDS ids;

@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export LD_LIBRARY_PATH="@top_builddir@/msat/:$LD_LIBRARY_PATH"
+export GDAL_DRIVER_PATH="@top_builddir@/gdal/"
+export PATH="@top_builddir@/tools:$PATH"
+
+exec "$@"
