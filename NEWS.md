@@ -1,5 +1,9 @@
 # User-visible news in Meteosatlib releases
 
+## New in version 1.17
+
+* Build with meson (#41)
+
 ## New in version 1.16
 
 * Support for GDAL v3.6
