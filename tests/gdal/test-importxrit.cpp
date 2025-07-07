@@ -3,6 +3,8 @@
 
 using namespace std;
 using namespace msat::tests;
+using msat::tests::gdal::read_float32;
+using msat::tests::gdal::read_int32;
 
 namespace {
 
@@ -98,15 +100,15 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         double missing = b->GetNoDataValue(&valid);
         wassert(actual(valid) == TRUE);
         wassert(actual(missing).almost_equal(-1.02691, 4));
-        wassert(actual((double)gdal::read_float32(b,    0,    0)).almost_equal(missing, 4));
-        wassert(actual((double)gdal::read_float32(b,   10,   10)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b,    0,    0)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b,   10,   10)).almost_equal(missing, 4));
 
-        wassert(actual((double)gdal::read_float32(b, 1800, 3100)).almost_equal(missing, 4));  // Missing segment
-        wassert(actual((double)gdal::read_float32(b,  500, 3500)).almost_equal(missing, 4));  // Missing value on existing segment
+        wassert(actual((double)read_float32(b, 1800, 3100)).almost_equal(missing, 4));  // Missing segment
+        wassert(actual((double)read_float32(b,  500, 3500)).almost_equal(missing, 4));  // Missing value on existing segment
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b,  900, 3300)).almost_equal(SC(51), 3));       // Dark surface
-        wassert(actual((double)gdal::read_float32(b, 2050, 3345)).almost_equal(SC(79), 3));       // Dark spot
-        wassert(actual((double)gdal::read_float32(b, 2500, 3350)).almost_equal(SC(237), 3));      // Bright spot
+        wassert(actual((double)read_float32(b,  900, 3300)).almost_equal(SC(51), 3));       // Dark surface
+        wassert(actual((double)read_float32(b, 2050, 3345)).almost_equal(SC(79), 3));       // Dark spot
+        wassert(actual((double)read_float32(b, 2500, 3350)).almost_equal(SC(237), 3));      // Bright spot
 #undef SC
     } else {
         // Packed
@@ -114,14 +116,14 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         int32_t missing = b->GetNoDataValue(&valid);
         wassert(actual(valid) == TRUE);
         wassert(actual(missing) == 0);
-        wassert(actual(gdal::read_int32(b, 0, 0)) == missing);
-        wassert(actual(gdal::read_int32(b, 10, 10)) == missing);
+        wassert(actual(read_int32(b, 0, 0)) == missing);
+        wassert(actual(read_int32(b, 10, 10)) == missing);
 
-        wassert(actual(gdal::read_int32(b, 1800, 3100)) == missing);  // Missing segment
-        wassert(actual(gdal::read_int32(b,  500, 3500)) == missing);  // Missing value on existing segment
-        wassert(actual(gdal::read_int32(b,  900, 3300)) == 51);       // Dark surface
-        wassert(actual(gdal::read_int32(b, 2050, 3345)) == 79);       // Dark spot
-        wassert(actual(gdal::read_int32(b, 2500, 3350)) == 237);      // Bright spot
+        wassert(actual(read_int32(b, 1800, 3100)) == missing);  // Missing segment
+        wassert(actual(read_int32(b,  500, 3500)) == missing);  // Missing value on existing segment
+        wassert(actual(read_int32(b,  900, 3300)) == 51);       // Dark surface
+        wassert(actual(read_int32(b, 2050, 3345)) == 79);       // Dark spot
+        wassert(actual(read_int32(b, 2500, 3350)) == 237);      // Bright spot
     }
 
     /*
@@ -165,17 +167,17 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(missing).almost_equal(-1.02691, 4));
 
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b,   0,   0)).almost_equal(missing, 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  10,  20)).almost_equal(missing, 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  20,  40)).almost_equal(missing, 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  30,  60)).almost_equal(SC(217), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  40,  80)).almost_equal(SC(196), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  50, 100)).almost_equal(SC(127), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  60, 120)).almost_equal(SC(171), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  70, 140)).almost_equal(SC(209), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  80, 160)).almost_equal(SC(223), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b,  90, 180)).almost_equal(SC(206), 3)); // unverified
-        wassert(actual((double)gdal::read_float32(b, 100, 200)).almost_equal(missing, 3)); // unverified
+        wassert(actual((double)read_float32(b,   0,   0)).almost_equal(missing, 3)); // unverified
+        wassert(actual((double)read_float32(b,  10,  20)).almost_equal(missing, 3)); // unverified
+        wassert(actual((double)read_float32(b,  20,  40)).almost_equal(missing, 3)); // unverified
+        wassert(actual((double)read_float32(b,  30,  60)).almost_equal(SC(217), 3)); // unverified
+        wassert(actual((double)read_float32(b,  40,  80)).almost_equal(SC(196), 3)); // unverified
+        wassert(actual((double)read_float32(b,  50, 100)).almost_equal(SC(127), 3)); // unverified
+        wassert(actual((double)read_float32(b,  60, 120)).almost_equal(SC(171), 3)); // unverified
+        wassert(actual((double)read_float32(b,  70, 140)).almost_equal(SC(209), 3)); // unverified
+        wassert(actual((double)read_float32(b,  80, 160)).almost_equal(SC(223), 3)); // unverified
+        wassert(actual((double)read_float32(b,  90, 180)).almost_equal(SC(206), 3)); // unverified
+        wassert(actual((double)read_float32(b, 100, 200)).almost_equal(missing, 3)); // unverified
 #undef SC
     } else {
         // Packed
@@ -184,17 +186,17 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(missing) == 0);
         wassert(actual(valid) == TRUE);
 
-        wassert(actual(gdal::read_int32(b,   0,   0)) == missing); // unverified
-        wassert(actual(gdal::read_int32(b,  10,  20)) == missing); // unverified
-        wassert(actual(gdal::read_int32(b,  20,  40)) == missing); // unverified
-        wassert(actual(gdal::read_int32(b,  30,  60)) == 217); // unverified
-        wassert(actual(gdal::read_int32(b,  40,  80)) == 196); // unverified
-        wassert(actual(gdal::read_int32(b,  50, 100)) == 127); // unverified
-        wassert(actual(gdal::read_int32(b,  60, 120)) == 171); // unverified
-        wassert(actual(gdal::read_int32(b,  70, 140)) == 209); // unverified
-        wassert(actual(gdal::read_int32(b,  80, 160)) == 223); // unverified
-        wassert(actual(gdal::read_int32(b,  90, 180)) == 206); // unverified
-        wassert(actual(gdal::read_int32(b, 100, 200)) == missing); // unverified
+        wassert(actual(read_int32(b,   0,   0)) == missing); // unverified
+        wassert(actual(read_int32(b,  10,  20)) == missing); // unverified
+        wassert(actual(read_int32(b,  20,  40)) == missing); // unverified
+        wassert(actual(read_int32(b,  30,  60)) == 217); // unverified
+        wassert(actual(read_int32(b,  40,  80)) == 196); // unverified
+        wassert(actual(read_int32(b,  50, 100)) == 127); // unverified
+        wassert(actual(read_int32(b,  60, 120)) == 171); // unverified
+        wassert(actual(read_int32(b,  70, 140)) == 209); // unverified
+        wassert(actual(read_int32(b,  80, 160)) == 223); // unverified
+        wassert(actual(read_int32(b,  90, 180)) == 206); // unverified
+        wassert(actual(read_int32(b, 100, 200)) == missing); // unverified
     }
     /*
    gen_ensure_similar(b->scaled(  0,   0), 6.07987, 0.001); // unverified

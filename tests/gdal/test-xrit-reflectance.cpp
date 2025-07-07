@@ -10,6 +10,7 @@
 
 using namespace std;
 using namespace msat::tests;
+using msat::tests::gdal::open_ro;
 
 namespace {
 
@@ -25,7 +26,7 @@ void Tests::register_tests()
 
 // Test opening channel 1 (VIS 0.6, with reflectance)
 add_method("vis06", []{
-    std::unique_ptr<GDALDataset> dataset = wcallchecked(gdal::open_ro("H:MSG2:VIS006:200807150900"));
+    std::unique_ptr<GDALDataset> dataset = wcallchecked(open_ro("H:MSG2:VIS006:200807150900"));
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
 
@@ -38,7 +39,7 @@ add_method("vis06", []{
     wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 96);
 
-    std::unique_ptr<GDALDataset> datasetr = wcallchecked(gdal::open_ro("H:MSG2:VIS006r:200807150900"));
+    std::unique_ptr<GDALDataset> datasetr = wcallchecked(open_ro("H:MSG2:VIS006r:200807150900"));
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(datasetr->GetDriver()))) == "MsatXRIT");
 
@@ -54,7 +55,7 @@ add_method("vis06", []{
 // Test opening channel 4 (IR 0.39, with missing accessory channels)
 add_method("ir039_missing", []{
     try {
-        unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039r:200611130800");
+        unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:IR_039r:200611130800");
         wassert(actual(false).istrue());
     } catch (...) {
     }
@@ -62,7 +63,7 @@ add_method("ir039_missing", []{
 
 // Test opening channel 4 (IR 0.39, with all accessory channels yet)
 add_method("ir039", []{
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG2:IR_039:201001191200");
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG2:IR_039:201001191200");
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(dataset->GetDriver()))) == "MsatXRIT");
 
@@ -75,7 +76,7 @@ add_method("ir039", []{
     wassert(actual(rb->RasterIO(GF_Read, 2000, 350, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 287);
 
-    unique_ptr<GDALDataset> datasetr = gdal::open_ro("H:MSG2:IR_039r:201001191200");
+    unique_ptr<GDALDataset> datasetr = open_ro("H:MSG2:IR_039r:201001191200");
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(datasetr->GetDriver()))) == "MsatXRIT");
 
@@ -90,7 +91,7 @@ add_method("ir039", []{
 
 // Test opening channel 12 (HRV, with reflectance)
 add_method("hrv", []{
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:HRVr:200611141200");
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:HRVr:200611141200");
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(dataset->GetDriver()))) == "MsatXRIT");
 
@@ -103,7 +104,7 @@ add_method("hrv", []{
 // Test opening channel 1 (VIS 0.6, with reflectance)
 add_method("new_vis06", []{
     only_on_gdal2();
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG2:VIS006:200807150900");
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG2:VIS006:200807150900");
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
 
@@ -118,7 +119,7 @@ add_method("new_vis06", []{
 
     CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "reflectance");
-    unique_ptr<GDALDataset> datasetr = gdal::open_ro("H:MSG2:VIS006:200807150900", opts);
+    unique_ptr<GDALDataset> datasetr = open_ro("H:MSG2:VIS006:200807150900", opts);
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(datasetr->GetDriver()))) == "MsatXRIT");
 
@@ -137,7 +138,7 @@ add_method("new_ir039_jday", []{
     only_on_gdal2();
     CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "jday");
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
 
@@ -155,7 +156,7 @@ add_method("new_ir039_sat_za", []{
     only_on_gdal2();
     CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "sat_za");
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
 
@@ -173,7 +174,7 @@ add_method("new_ir039_cos_sol_za", []{
     only_on_gdal2();
     CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "cos_sol_za");
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:IR_039:200611130800", opts);
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(GDALGetDriverShortName(dataset->GetDriver())) == "MsatXRIT");
 
@@ -192,7 +193,7 @@ add_method("new_ir039_missing", []{
     try {
         CPLStringList opts((char**)nullptr);
         opts.SetNameValue("MSAT_COMPUTE", "reflectance");
-        unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:IR_039:200611130800", opts);
+        unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:IR_039:200611130800", opts);
         wassert(actual(false).istrue());
     } catch (...) {
     }
@@ -203,7 +204,7 @@ add_method("new_hrv", []{
     only_on_gdal2();
     CPLStringList opts((char**)nullptr);
     opts.SetNameValue("MSAT_COMPUTE", "reflectance");
-    unique_ptr<GDALDataset> dataset = gdal::open_ro("H:MSG1:HRV:200611141200", opts);
+    unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:HRV:200611141200", opts);
     wassert(actual(dataset.get() != 0).istrue());
     wassert(actual(string(GDALGetDriverShortName(dataset->GetDriver()))) == "MsatXRIT");
 

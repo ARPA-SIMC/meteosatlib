@@ -3,6 +3,8 @@
 
 using namespace std;
 using namespace msat::tests;
+using msat::tests::gdal::read_float32;
+using msat::tests::gdal::read_int32;
 
 namespace {
 
@@ -92,15 +94,15 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
         wassert(actual(missing) == -1.63196);
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b,     0,    0)).almost_equal(missing, 4));
-        wassert(actual((double)gdal::read_float32(b,    10,   10)).almost_equal(missing, 4));
-        wassert(actual((double)gdal::read_float32(b,  4200,  200)).almost_equal(missing, 4)); // Missing segment before RSS part
-        wassert(actual((double)gdal::read_float32(b,  4200,  300)).almost_equal(missing, 4)); // Missing data left RSS part
-        wassert(actual((double)gdal::read_float32(b,  4160,  420)).almost_equal(SC(144), 4)); // Dark spot in RSS part
-        wassert(actual((double)gdal::read_float32(b,  4160,  390)).almost_equal(SC(216), 4)); // Gray spot in RSS part
-        wassert(actual((double)gdal::read_float32(b,  4246,  442)).almost_equal(SC(500), 4)); // Bright spot in RSS part
-        wassert(actual((double)gdal::read_float32(b,  4200, 1200)).almost_equal(missing, 4)); // Missing segment after RSS part
-        wassert(actual((double)gdal::read_float32(b,  6000, 9000)).almost_equal(missing, 4)); // Missing data after RSS part
+        wassert(actual((double)read_float32(b,     0,    0)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b,    10,   10)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b,  4200,  200)).almost_equal(missing, 4)); // Missing segment before RSS part
+        wassert(actual((double)read_float32(b,  4200,  300)).almost_equal(missing, 4)); // Missing data left RSS part
+        wassert(actual((double)read_float32(b,  4160,  420)).almost_equal(SC(144), 4)); // Dark spot in RSS part
+        wassert(actual((double)read_float32(b,  4160,  390)).almost_equal(SC(216), 4)); // Gray spot in RSS part
+        wassert(actual((double)read_float32(b,  4246,  442)).almost_equal(SC(500), 4)); // Bright spot in RSS part
+        wassert(actual((double)read_float32(b,  4200, 1200)).almost_equal(missing, 4)); // Missing segment after RSS part
+        wassert(actual((double)read_float32(b,  6000, 9000)).almost_equal(missing, 4)); // Missing data after RSS part
 #undef SC
     } else {
         int valid;
@@ -108,15 +110,15 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
         wassert(actual(missing) == 0);
 
-        wassert(actual(gdal::read_int32(b,     0,    0)) == missing);
-        wassert(actual(gdal::read_int32(b,    10,   10)) == missing);
-        wassert(actual(gdal::read_int32(b,  4200,  200)) == missing); // Missing segment before RSS part
-        wassert(actual(gdal::read_int32(b,  4200,  300)) == missing); // Missing data left RSS part
-        wassert(actual(gdal::read_int32(b,  4160,  420)) == 144);     // Dark spot in RSS part
-        wassert(actual(gdal::read_int32(b,  4160,  390)) == 216);     // Gray spot in RSS part
-        wassert(actual(gdal::read_int32(b,  4246,  442)) == 500);     // Bright spot in RSS part
-        wassert(actual(gdal::read_int32(b,  4200, 1200)) == missing); // Missing segment after RSS part
-        wassert(actual(gdal::read_int32(b,  6000, 9000)) == missing); // Missing data after RSS part
+        wassert(actual(read_int32(b,     0,    0)) == missing);
+        wassert(actual(read_int32(b,    10,   10)) == missing);
+        wassert(actual(read_int32(b,  4200,  200)) == missing); // Missing segment before RSS part
+        wassert(actual(read_int32(b,  4200,  300)) == missing); // Missing data left RSS part
+        wassert(actual(read_int32(b,  4160,  420)) == 144);     // Dark spot in RSS part
+        wassert(actual(read_int32(b,  4160,  390)) == 216);     // Gray spot in RSS part
+        wassert(actual(read_int32(b,  4246,  442)) == 500);     // Bright spot in RSS part
+        wassert(actual(read_int32(b,  4200, 1200)) == missing); // Missing segment after RSS part
+        wassert(actual(read_int32(b,  6000, 9000)) == missing); // Missing data after RSS part
     }
 }
 
@@ -145,10 +147,10 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
 
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b,  25,  10)).almost_equal(missing, 3)); // Missing data left of the planet
-        wassert(actual((double)gdal::read_float32(b, 100,  90)).almost_equal(SC(149), 3));     // Dark spot
-        wassert(actual((double)gdal::read_float32(b,  34,  87)).almost_equal(SC(212), 3));     // Gray spot
-        wassert(actual((double)gdal::read_float32(b,  46, 142)).almost_equal(SC(500), 3));     // Bright spot
+        wassert(actual((double)read_float32(b,  25,  10)).almost_equal(missing, 3)); // Missing data left of the planet
+        wassert(actual((double)read_float32(b, 100,  90)).almost_equal(SC(149), 3));     // Dark spot
+        wassert(actual((double)read_float32(b,  34,  87)).almost_equal(SC(212), 3));     // Gray spot
+        wassert(actual((double)read_float32(b,  46, 142)).almost_equal(SC(500), 3));     // Bright spot
 #undef SC
     } else {
         int valid;
@@ -156,10 +158,10 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(missing) == 0);
         wassert(actual(valid) == TRUE);
 
-        wassert(actual(gdal::read_int32(b,  25,  10)) == missing); // Missing data left of the planet
-        wassert(actual(gdal::read_int32(b, 100,  90)) == 149);     // Dark spot
-        wassert(actual(gdal::read_int32(b,  34,  87)) == 212);     // Gray spot
-        wassert(actual(gdal::read_int32(b,  46, 142)) == 500);     // Bright spot
+        wassert(actual(read_int32(b,  25,  10)) == missing); // Missing data left of the planet
+        wassert(actual(read_int32(b, 100,  90)) == 149);     // Dark spot
+        wassert(actual(read_int32(b,  34,  87)) == 212);     // Gray spot
+        wassert(actual(read_int32(b,  46, 142)) == 500);     // Bright spot
     }
 }
 

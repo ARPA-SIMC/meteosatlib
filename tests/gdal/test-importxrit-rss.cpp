@@ -3,6 +3,8 @@
 
 using namespace std;
 using namespace msat::tests;
+using msat::tests::gdal::read_float32;
+using msat::tests::gdal::read_int32;
 
 namespace {
 
@@ -98,15 +100,15 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         double missing = b->GetNoDataValue(&valid);
         wassert(actual(valid) == TRUE);
         wassert(actual(missing).almost_equal(-1.02691, 4));
-        wassert(actual((double)gdal::read_float32(b,    0,    0)).almost_equal(missing, 4));
-        wassert(actual((double)gdal::read_float32(b,   10,   10)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b,    0,    0)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b,   10,   10)).almost_equal(missing, 4));
 
-        wassert(actual((double)gdal::read_float32(b, 2000, 2000)).almost_equal(missing, 4));  // Missing segment
-        wassert(actual((double)gdal::read_float32(b, 1000,  100)).almost_equal(missing, 4));  // Missing value on existing segment
+        wassert(actual((double)read_float32(b, 2000, 2000)).almost_equal(missing, 4));  // Missing segment
+        wassert(actual((double)read_float32(b, 1000,  100)).almost_equal(missing, 4));  // Missing value on existing segment
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b, 1550,  420)).almost_equal(SC( 92), 3));  // Dark point
-        wassert(actual((double)gdal::read_float32(b, 2000,  120)).almost_equal(SC(177), 3));  // Grey point
-        wassert(actual((double)gdal::read_float32(b, 1920,  350)).almost_equal(SC(671), 3));  // Bright point
+        wassert(actual((double)read_float32(b, 1550,  420)).almost_equal(SC( 92), 3));  // Dark point
+        wassert(actual((double)read_float32(b, 2000,  120)).almost_equal(SC(177), 3));  // Grey point
+        wassert(actual((double)read_float32(b, 1920,  350)).almost_equal(SC(671), 3));  // Bright point
 #undef SC
     } else {
         // Packed
@@ -114,14 +116,14 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         int32_t missing = b->GetNoDataValue(&valid);
         wassert(actual(valid) == TRUE);
         wassert(actual(missing) == 0);
-        wassert(actual(gdal::read_int32(b,    0,    0)) == missing);
-        wassert(actual(gdal::read_int32(b,   10,   10)) == missing);
+        wassert(actual(read_int32(b,    0,    0)) == missing);
+        wassert(actual(read_int32(b,   10,   10)) == missing);
 
-        wassert(actual(gdal::read_int32(b, 2000, 2000)) == missing);  // Missing segment
-        wassert(actual(gdal::read_int32(b, 1000,  100)) == missing);  // Missing value on existing segment
-        wassert(actual(gdal::read_int32(b, 1550,  420)) ==  92);      // Dark point
-        wassert(actual(gdal::read_int32(b, 2000,  120)) == 177);      // Grey point
-        wassert(actual(gdal::read_int32(b, 1920,  350)) == 671);      // Bright point
+        wassert(actual(read_int32(b, 2000, 2000)) == missing);  // Missing segment
+        wassert(actual(read_int32(b, 1000,  100)) == missing);  // Missing value on existing segment
+        wassert(actual(read_int32(b, 1550,  420)) ==  92);      // Dark point
+        wassert(actual(read_int32(b, 2000,  120)) == 177);      // Grey point
+        wassert(actual(read_int32(b, 1920,  350)) == 671);      // Bright point
     }
 }
 
@@ -150,11 +152,11 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
         wassert(actual(missing).almost_equal(-1.02691, 4));
 
-        wassert(actual((double)gdal::read_float32(b,  0,   0)).almost_equal(missing, 4));  // Missing value on existing segment
+        wassert(actual((double)read_float32(b,  0,   0)).almost_equal(missing, 4));  // Missing value on existing segment
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b,  5,  70)).almost_equal(SC(119), 3));  // Dark point
-        wassert(actual((double)gdal::read_float32(b, 15, 135)).almost_equal(SC(153), 3));  // Grey point
-        wassert(actual((double)gdal::read_float32(b, 62, 102)).almost_equal(SC(670), 3));  // Bright point
+        wassert(actual((double)read_float32(b,  5,  70)).almost_equal(SC(119), 3));  // Dark point
+        wassert(actual((double)read_float32(b, 15, 135)).almost_equal(SC(153), 3));  // Grey point
+        wassert(actual((double)read_float32(b, 62, 102)).almost_equal(SC(670), 3));  // Bright point
 #undef SC
     } else {
         // Packed
@@ -163,10 +165,10 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(missing) == 0);
         wassert(actual(valid) == TRUE);
 
-        wassert(actual(gdal::read_int32(b,  0,   0)) == missing);  // Missing value on existing segment
-        wassert(actual(gdal::read_int32(b,  5,  70)) == 119);      // Dark point
-        wassert(actual(gdal::read_int32(b, 15, 135)) == 153);      // Grey point
-        wassert(actual(gdal::read_int32(b, 62, 102)) == 670);      // Bright point
+        wassert(actual(read_int32(b,  0,   0)) == missing);  // Missing value on existing segment
+        wassert(actual(read_int32(b,  5,  70)) == 119);      // Dark point
+        wassert(actual(read_int32(b, 15, 135)) == 153);      // Grey point
+        wassert(actual(read_int32(b, 62, 102)) == 670);      // Bright point
     }
 }
 

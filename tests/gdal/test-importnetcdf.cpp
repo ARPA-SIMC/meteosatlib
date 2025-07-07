@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace msat::tests;
+using msat::tests::gdal::read_float32;
 
 namespace {
 
@@ -103,9 +104,9 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
     wassert(actual(missing) == 0);
     wassert(actual(valid) == TRUE);
 
-    wassert(actual((double)gdal::read_float32(b, 0, 0)).almost_equal(230.3, 2));
-    wassert(actual((double)gdal::read_float32(b, 10, 10)).almost_equal(240.6, 2));
-    wassert(actual((double)gdal::read_float32(b, 1299, 0)).almost_equal(missing, 5));
+    wassert(actual((double)read_float32(b, 0, 0)).almost_equal(230.3, 2));
+    wassert(actual((double)read_float32(b, 10, 10)).almost_equal(240.6, 2));
+    wassert(actual((double)read_float32(b, 1299, 0)).almost_equal(missing, 5));
 }
 
 void Fixture::check_cropped_image_data(GDALDataset* dataset)
@@ -134,8 +135,8 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
     wassert(actual(missing) == 0);
     wassert(actual(valid) == TRUE);
 
-    wassert(actual((double)gdal::read_float32(b, 0, 0)).almost_equal(251.4, 2));
-    wassert(actual((double)gdal::read_float32(b, 10, 10)).almost_equal(266.5, 2));
+    wassert(actual((double)read_float32(b, 0, 0)).almost_equal(251.4, 2));
+    wassert(actual((double)read_float32(b, 10, 10)).almost_equal(266.5, 2));
 }
 
 void Tests::register_tests()

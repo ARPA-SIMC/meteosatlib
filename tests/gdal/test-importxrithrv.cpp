@@ -3,6 +3,8 @@
 
 using namespace std;
 using namespace msat::tests;
+using msat::tests::gdal::read_float32;
+using msat::tests::gdal::read_int32;
 
 namespace {
 
@@ -92,22 +94,22 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
         wassert(actual(missing) == -1.63196);
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b, 0, 0)).almost_equal(missing, 4));
-        wassert(actual((double)gdal::read_float32(b, 10, 10)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b, 0, 0)).almost_equal(missing, 4));
+        wassert(actual((double)read_float32(b, 10, 10)).almost_equal(missing, 4));
 
-        wassert(actual((double)gdal::read_float32(b,  5000, 2000)).almost_equal(missing, 4)); // Missing segment before Europe part
-        wassert(actual((double)gdal::read_float32(b,  2500, 2900)).almost_equal(missing, 4)); // Missing data left of Europe part
-        wassert(actual((double)gdal::read_float32(b,  4000, 2900)).almost_equal(SC( 90), 4)); // Dark spot in Europe part
-        wassert(actual((double)gdal::read_float32(b,  4800, 2900)).almost_equal(SC(286), 4)); // Bright spot in Europe part
-        wassert(actual((double)gdal::read_float32(b,  9200, 2900)).almost_equal(missing, 4)); // Missing data right of Europe part
-        wassert(actual((double)gdal::read_float32(b,  7000, 3030)).almost_equal(missing, 4)); // Missing data between the two parts
-        wassert(actual((double)gdal::read_float32(b,  5300, 3150)).almost_equal(missing, 4)); // Missing data left of Africa part
-        wassert(actual((double)gdal::read_float32(b,  8600, 3111)).almost_equal(SC(90), 4)); // Dark spot in Africa part
+        wassert(actual((double)read_float32(b,  5000, 2000)).almost_equal(missing, 4)); // Missing segment before Europe part
+        wassert(actual((double)read_float32(b,  2500, 2900)).almost_equal(missing, 4)); // Missing data left of Europe part
+        wassert(actual((double)read_float32(b,  4000, 2900)).almost_equal(SC( 90), 4)); // Dark spot in Europe part
+        wassert(actual((double)read_float32(b,  4800, 2900)).almost_equal(SC(286), 4)); // Bright spot in Europe part
+        wassert(actual((double)read_float32(b,  9200, 2900)).almost_equal(missing, 4)); // Missing data right of Europe part
+        wassert(actual((double)read_float32(b,  7000, 3030)).almost_equal(missing, 4)); // Missing data between the two parts
+        wassert(actual((double)read_float32(b,  5300, 3150)).almost_equal(missing, 4)); // Missing data left of Africa part
+        wassert(actual((double)read_float32(b,  8600, 3111)).almost_equal(SC(90), 4)); // Dark spot in Africa part
         // 90 in stabilised area
-        wassert(actual((double)gdal::read_float32(b,  8300, 3150)).almost_equal(SC(252), 4)); // Bright spot in Africa part
+        wassert(actual((double)read_float32(b,  8300, 3150)).almost_equal(SC(252), 4)); // Bright spot in Africa part
         // 252 in stabilised area
-        wassert(actual((double)gdal::read_float32(b, 10410, 3100)).almost_equal(missing, 4)); // Missing data right of Africa part
-        wassert(actual((double)gdal::read_float32(b,  6400, 3500)).almost_equal(missing, 4)); // Missing segment after Africa part
+        wassert(actual((double)read_float32(b, 10410, 3100)).almost_equal(missing, 4)); // Missing data right of Africa part
+        wassert(actual((double)read_float32(b,  6400, 3500)).almost_equal(missing, 4)); // Missing segment after Africa part
 #undef SC
     } else {
         int valid;
@@ -115,20 +117,20 @@ void Fixture::check_full_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
         wassert(actual(missing) == 0);
 
-        wassert(actual(gdal::read_int32(b, 0, 0)) == missing);
-        wassert(actual(gdal::read_int32(b, 10, 10)) == missing);
+        wassert(actual(read_int32(b, 0, 0)) == missing);
+        wassert(actual(read_int32(b, 10, 10)) == missing);
 
-        wassert(actual(gdal::read_int32(b,  5000, 2000)) == missing); // Missing segment before Europe part
-        wassert(actual(gdal::read_int32(b,  2500, 2900)) == missing); // Missing data left of Europe part
-        wassert(actual(gdal::read_int32(b,  4000, 2900)) == 90); // Dark spot in Europe part
-        wassert(actual(gdal::read_int32(b,  4800, 2900)) == 286); // Bright spot in Europe part
-        wassert(actual(gdal::read_int32(b,  9200, 2900)) == missing); // Missing data right of Europe part
-        wassert(actual(gdal::read_int32(b,  7000, 3030)) == missing); // Missing data between the two parts
-        wassert(actual(gdal::read_int32(b,  5300, 3150)) == missing); // Missing data left of Africa part
-        wassert(actual(gdal::read_int32(b,  8600, 3111)) ==  90); // Dark spot in Africa part
-        wassert(actual(gdal::read_int32(b,  8300, 3150)) == 252); // Bright spot in Africa part
-        wassert(actual(gdal::read_int32(b, 10410, 3100)) == missing); // Missing data right of Africa part
-        wassert(actual(gdal::read_int32(b,  6400, 3500)) == missing); // Missing segment after Africa part
+        wassert(actual(read_int32(b,  5000, 2000)) == missing); // Missing segment before Europe part
+        wassert(actual(read_int32(b,  2500, 2900)) == missing); // Missing data left of Europe part
+        wassert(actual(read_int32(b,  4000, 2900)) == 90); // Dark spot in Europe part
+        wassert(actual(read_int32(b,  4800, 2900)) == 286); // Bright spot in Europe part
+        wassert(actual(read_int32(b,  9200, 2900)) == missing); // Missing data right of Europe part
+        wassert(actual(read_int32(b,  7000, 3030)) == missing); // Missing data between the two parts
+        wassert(actual(read_int32(b,  5300, 3150)) == missing); // Missing data left of Africa part
+        wassert(actual(read_int32(b,  8600, 3111)) ==  90); // Dark spot in Africa part
+        wassert(actual(read_int32(b,  8300, 3150)) == 252); // Bright spot in Africa part
+        wassert(actual(read_int32(b, 10410, 3100)) == missing); // Missing data right of Africa part
+        wassert(actual(read_int32(b,  6400, 3500)) == missing); // Missing segment after Africa part
     }
 }
 
@@ -157,12 +159,12 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(valid) == TRUE);
 
 #define SC(x) ((x)*native_scale + native_offset)
-        wassert(actual((double)gdal::read_float32(b,  31,  19)).almost_equal(SC(116), 3)); // Dark spot in Europe part
-        wassert(actual((double)gdal::read_float32(b,  31,  27)).almost_equal(SC(210), 3)); // Bright spot in Europe part
-        wassert(actual((double)gdal::read_float32(b, 100,  60)).almost_equal(missing, 3)); // Missing data right of Europe part
-        wassert(actual((double)gdal::read_float32(b,  20, 125)).almost_equal(missing, 3)); // Missing data between the two parts
-        wassert(actual((double)gdal::read_float32(b,  84, 148)).almost_equal(SC(138), 3)); // Dark spot in Africa part
-        wassert(actual((double)gdal::read_float32(b,  72, 143)).almost_equal(SC(219), 3)); // Bright spot in Africa part
+        wassert(actual((double)read_float32(b,  31,  19)).almost_equal(SC(116), 3)); // Dark spot in Europe part
+        wassert(actual((double)read_float32(b,  31,  27)).almost_equal(SC(210), 3)); // Bright spot in Europe part
+        wassert(actual((double)read_float32(b, 100,  60)).almost_equal(missing, 3)); // Missing data right of Europe part
+        wassert(actual((double)read_float32(b,  20, 125)).almost_equal(missing, 3)); // Missing data between the two parts
+        wassert(actual((double)read_float32(b,  84, 148)).almost_equal(SC(138), 3)); // Dark spot in Africa part
+        wassert(actual((double)read_float32(b,  72, 143)).almost_equal(SC(219), 3)); // Bright spot in Africa part
 #undef SC
     } else {
         int valid;
@@ -170,12 +172,12 @@ void Fixture::check_cropped_image_data(GDALDataset* dataset)
         wassert(actual(missing) == 0);
         wassert(actual(valid) == TRUE);
 
-        wassert(actual(gdal::read_int32(b,  31,  19)) == 116); // Dark spot in Europe part
-        wassert(actual(gdal::read_int32(b,  31,  27)) == 210); // Bright spot in Europe part
-        wassert(actual(gdal::read_int32(b, 100,  60)) == missing); // Missing data right of Europe part
-        wassert(actual(gdal::read_int32(b,  20, 125)) == missing); // Missing data between the two parts
-        wassert(actual(gdal::read_int32(b,  84, 148)) == 138); // Dark spot in Africa part
-        wassert(actual(gdal::read_int32(b,  72, 143)) == 219); // Bright spot in Africa part
+        wassert(actual(read_int32(b,  31,  19)) == 116); // Dark spot in Europe part
+        wassert(actual(read_int32(b,  31,  27)) == 210); // Bright spot in Europe part
+        wassert(actual(read_int32(b, 100,  60)) == missing); // Missing data right of Europe part
+        wassert(actual(read_int32(b,  20, 125)) == missing); // Missing data between the two parts
+        wassert(actual(read_int32(b,  84, 148)) == 138); // Dark spot in Africa part
+        wassert(actual(read_int32(b,  72, 143)) == 219); // Bright spot in Africa part
     }
 }
 
