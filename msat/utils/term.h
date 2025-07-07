@@ -11,8 +11,7 @@
 #include <cstdio>
 #include <string>
 
-namespace msat {
-namespace term {
+namespace msat::term {
 
 struct Terminal
 {
@@ -50,7 +49,6 @@ struct Terminal
     operator FILE*() { return out; }
 };
 
-}
-}
+} // namespace msat::term
 
 #endif
