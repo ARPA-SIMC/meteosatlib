@@ -29,7 +29,7 @@ add_method("vis06", []{
     // x:2000,y:3400
     GDALRasterBand* rb = dataset->GetRasterBand(1);
     uint16_t val;
-    rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0);
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 96);
 
     unique_ptr<GDALDataset> datasetr = open_ro("H:MSG2:VIS006a:200807150900");
@@ -41,14 +41,14 @@ add_method("vis06", []{
 
     rb = datasetr->GetRasterBand(1);
     float valr;
-    rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0);
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 3400, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0)) == CE_None);
     wassert(actual((double)valr).almost_equal(0.156248, 3));
 });
 
 // Test opening channel 4 (IR 0.39, with missing accessory channels)
 add_method("ir039_missing", []{
     try {
-        unique_ptr<GDALDataset> dataset = open_ro("H:MSG1:IR_039a:200611130800");
+        open_ro("H:MSG1:IR_039a:200611130800");
         wassert(actual(false).istrue());
     } catch (...) {
     }
@@ -66,7 +66,7 @@ add_method("ir039", []{
     // x:2000,y:350
     GDALRasterBand* rb = dataset->GetRasterBand(1);
     uint16_t val;
-    rb->RasterIO(GF_Read, 2000, 350, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0);
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 350, 1, 1, &val, 1, 1, GDT_UInt16, 0, 0)) == CE_None);
     wassert(actual(val) == 287);
 
     unique_ptr<GDALDataset> datasetr = open_ro("H:MSG2:IR_039a:201001191200");
@@ -78,7 +78,7 @@ add_method("ir039", []{
 
     rb = datasetr->GetRasterBand(1);
     float valr;
-    rb->RasterIO(GF_Read, 2000, 350, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0);
+    wassert(actual(rb->RasterIO(GF_Read, 2000, 350, 1, 1, &valr, 1, 1, GDT_Float32, 0, 0)) == CE_None);
     wassert(actual((double)valr).almost_equal(0.33964, 3));
 });
 

@@ -60,34 +60,6 @@ static void do_help(const char* argv0, ostream& out)
             << endl
         ;
 }
-static void usage(char *pname)
-{
-        cout << pname << ": Convert meteosat image files from and to various formats."
-             << endl;
-        cout << endl << "Usage:" << endl << "\t"
-             << pname << "<output option> file(s)..."
-             << endl << endl
-             << "Examples: " << endl << "\t" << pname
-             << "  " << pname << " --grib Data0.nc hritdir/H:MSG1:HRV:200605031200"
-             << endl;
-        return;
-}
-
-static std::vector<std::string> split(const std::string& str, char sep)
-{
-        vector<string> res;
-
-        string::const_iterator s = str.begin();
-        for (string::const_iterator i = str.begin(); i != str.end(); ++i)
-        {
-                if (*i != sep) continue;
-                res.push_back(string(s, i));
-                s = i + 1;
-        }
-        if (s != str.end())
-                res.push_back(string(s, str.end()));
-        return res;
-}
 
 static const char* known_md_domains[] = {
         "SUBDATASETS",
@@ -279,11 +251,6 @@ static std::string output_file_name(GDALDataset* ds, GDALRasterBand* rb = NULL)
         }
         res += time;
         return res;
-}
-
-static void parseBands(GDALTranslate& translate, const std::string& arg)
-{
-
 }
 
 enum Action { VIEW, VIEWMORE, CONVERT, JPG, PNG, DISPLAY };

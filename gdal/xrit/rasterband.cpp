@@ -84,8 +84,8 @@ CPLErr XRITRasterBand::IReadBlock(int xblock, int yblock, void *buf)
         xds->da.line_read(yblock, (MSG_SAMPLE*)buf + linestart);
     } else {
         float* fbuf = (float*)buf;
-        MSG_SAMPLE rawbuf[xds->da.columns];
-        xds->da.line_read(yblock, rawbuf);
+        std::vector<MSG_SAMPLE> rawbuf(xds->da.columns);
+        xds->da.line_read(yblock, rawbuf.data());
         for (size_t i = 0; i < linestart; ++i)
             fbuf[i] = 0.0;
         for (size_t i = 0; i < xds->da.columns; ++i)

@@ -55,7 +55,7 @@ extern "C" {
  */
 /*--------------------------------------------------------------------------*/
 
-static char * strlwc(char * s)
+static char * strlwc(const char * s)
 {
     static char l[ASCIILINESZ+1];
     int i ;
@@ -65,37 +65,6 @@ static char * strlwc(char * s)
     i=0 ;
     while (s[i] && i<ASCIILINESZ) {
         l[i] = (char)tolower((int)s[i]);
-        i++ ;
-    }
-    l[ASCIILINESZ]=(char)0;
-    return l ;
-}
-
-
-
-/*-------------------------------------------------------------------------*/
-/**
-  @brief    Convert a string to uppercase.
-  @param    s   String to convert.
-  @return   ptr to statically allocated string.
-
-  This function returns a pointer to a statically allocated string
-  containing an uppercased version of the input string. Do not free
-  or modify the returned string! Since the returned string is statically
-  allocated, it will be modified at each function call (not re-entrant).
- */
-/*--------------------------------------------------------------------------*/
-
-static char * strupc(char * s)
-{
-    static char l[ASCIILINESZ+1];
-    int i ;
-
-    if (s==NULL) return NULL ;
-    memset(l, 0, ASCIILINESZ+1);
-    i=0 ;
-    while (s[i] && i<ASCIILINESZ) {
-        l[i] = (char)toupper((int)s[i]);
         i++ ;
     }
     l[ASCIILINESZ]=(char)0;
@@ -158,43 +127,6 @@ static char * strcrop(char * s)
     return l ;
 }
 
-
-
-/*-------------------------------------------------------------------------*/
-/**
-  @brief    Remove blanks at the beginning and the end of a string.
-  @param    s   String to parse.
-  @return   ptr to statically allocated string.
-
-  This function returns a pointer to a statically allocated string,
-  which is identical to the input string, except that all blank
-  characters at the end and the beg. of the string have been removed.
-  Do not free or modify the returned string! Since the returned string
-  is statically allocated, it will be modified at each function call
-  (not re-entrant).
- */
-/*--------------------------------------------------------------------------*/
-static char * strstrip(char * s)
-{
-    static char l[ASCIILINESZ+1];
-    char * last ;
-
-    if (s==NULL) return NULL ;
-
-    while (isspace((int)*s) && *s) s++;
-
-    memset(l, 0, ASCIILINESZ+1);
-    strcpy(l, s);
-    last = l + strlen(l);
-    while (last > l) {
-        if (!isspace((int)*(last-1)))
-            break ;
-        last -- ;
-    }
-    *last = (char)0;
-
-    return (char*)l ;
-}
 
 
 /* dictionary.c.c following */

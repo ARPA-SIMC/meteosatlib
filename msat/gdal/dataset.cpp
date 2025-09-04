@@ -67,7 +67,7 @@ std::string spaceviewWKT(double sublon)
     char* projstring;
     osr.exportToWkt(&projstring);
     string res = projstring;
-    OGRFree(projstring);
+    CPLFree(projstring);
     return res;
 }
 
@@ -386,8 +386,8 @@ double CalibratedRasterBand::GetNoDataValue(int *pbSuccess)
 CPLErr CalibratedRasterBand::IReadBlock(int xblock, int yblock, void *buf)
 {
     // Read the raw data
-    uint16_t raw[nBlockXSize * nBlockYSize];
-    if (ProxyRasterBand::IReadBlock(xblock, yblock, raw) == CE_Failure)
+    std::vector<uint16_t> raw(nBlockXSize * nBlockYSize);
+    if (ProxyRasterBand::IReadBlock(xblock, yblock, raw.data()) == CE_Failure)
         return CE_Failure;
 
     // Compute reflectances

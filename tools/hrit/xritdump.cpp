@@ -134,9 +134,9 @@ static void do_dump(const char* name)
         for (size_t y = 0; y < chary; ++y)
         {
                 size_t py = y * comp_sy / chary;
-                MSG_SAMPLE buf[comp_sx];
-                bzero(buf, comp_sx * sizeof(MSG_SAMPLE));
-                da.line_read(py, buf);
+                std::vector<MSG_SAMPLE> buf(comp_sx);
+                bzero(buf.data(), comp_sx * sizeof(MSG_SAMPLE));
+                da.line_read(py, buf.data());
                 for (size_t x = 0; x < charx; ++x)
                 {
                         size_t px = x * comp_sx / charx;

@@ -59,12 +59,12 @@ bool isValid(const std::string& filename)
     if (filename.substr(filename.size() - 3) == "-C_")
         return true;
 
-	// check that it contains at least 3 ':' signs
-	size_t pos = 0;
-	for (int i = 0; i < 3; ++i, ++pos)
-		if ((pos = filename.find(':', pos)) == string::npos)
-			return false;
-	return true;
+    // check that it contains at least 3 ':' signs
+    size_t pos = 0;
+    for (int i = 0; i < 3; ++i, ++pos)
+        if ((pos = filename.find(':', pos)) == string::npos)
+            return false;
+    return true;
 }
 
 // dir/res:prodid1:prodid2:time
