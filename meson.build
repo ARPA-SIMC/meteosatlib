@@ -112,6 +112,7 @@ endif
 # Legacy NetCDF C++ library
 netcdfpp_h = cpp.check_header('netcdfcpp.h', required: false)
 libnetcdfpp = cpp.find_library('netcdf_c++', required: false)
+conf_data.set('HAVE_NETCDFCPP', libnetcdfpp.found())
 
 gdal_dep = dependency('', required: false)
 gdal_config = find_program('gdal-config', required: false)

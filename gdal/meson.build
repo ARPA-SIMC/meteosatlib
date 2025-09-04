@@ -1,3 +1,4 @@
+config = configure_file(output: 'config.h', configuration: conf_data)
 msatdrv_sources = [
   'utils.cpp',
   'reflectance/pixeltolatlon.cpp',

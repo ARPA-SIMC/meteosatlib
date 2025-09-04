@@ -25,6 +25,7 @@
 #include "netcdf/netcdf24.h"
 #include "grib/grib.h"
 #include "reflectance/reflectance.h"
+#include "config.h"
 
 extern "C" {
 void GDALRegister_Meteosatlib(void);
@@ -32,8 +33,10 @@ void GDALRegister_Meteosatlib(void);
 void GDALRegister_Meteosatlib(void)
 {
     GDALRegister_MsatXRIT();
+#ifdef HAVE_NETCDFCPP
     GDALRegister_MsatNetCDF();
     GDALRegister_MsatNetCDF24();
+#endif
     GDALRegister_MsatGRIB();
 }
 }
